@@ -3,6 +3,7 @@ const router=express.Router()
 const adminController=require("../controllers/admin/adminController")
 const customerController=require("../controllers/admin/customerController")
 const categoryController=require("../controllers/admin/categoryController")
+const productsController=require("../controllers/admin/productController")
 const {userAuth,adminAuth}=require("../middlewares/auth")
 // const productController=require("../controllers/admin/productController")
 
@@ -20,7 +21,7 @@ router.get("/blockCustomer",adminAuth,customerController.customerBlocked)
 router.get("/unblockCustomer",adminAuth,customerController.customerunBlocked)
 
 // products management
-router.get("/products",adminAuth,adminController.productsPage)
+router.get("/products",adminAuth,productsController.productsPage)
 
 // category management
 router.get("/category",adminAuth,categoryController.categoryPage)

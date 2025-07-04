@@ -3,7 +3,6 @@ const Category = require("../../models/categorySchema");
 const categoryPage = async (req, res) => {
     try {
        const searchRaw = req.query.search
-
        const search = typeof(searchRaw) === "string" ? searchRaw.trim() : "";
         function escapeRegex(string) {
             return string.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");   

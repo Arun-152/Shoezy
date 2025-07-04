@@ -30,8 +30,7 @@
                     <div class="page-header">
                         <h1>Customer Management</h1>
                     </div>
-
-                    <div class="search-section">
+                    <div class="search-sections">
                         <form id="searchForm" class="search-section">
                             <div class="search-container">
                                 <i class="fas fa-search search-icon"></i>
@@ -93,12 +92,11 @@
                             Page <%= currentPage %> of <%= totalPages %> Pages
                         </div>
                         <div class="pagination-controls">
-                           <button 
-    class="pagination-btn" 
-    onclick="window.location.href='/admin/customers?page=<%= currentPage - 1 %>&search=<%= encodeURIComponent(search) %>'"
-    <%= currentPage <= 1 ? "disabled" : "" %>>
-    <i class="fas fa-chevron-left"></i>
-</button>
+                            <button class="pagination-btn"
+                                onclick="window.location.href='/admin/customers?page=<%= currentPage - 1 %>&search=<%= encodeURIComponent(search) %>'"
+                                <%=currentPage <=1 ? "disabled" : "" %>>
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
 
 
                             <div class="page-numbers">
@@ -110,7 +108,7 @@
 
                                     <% } %>
                             </div>
-                            <button class="pagination-btn" <%= currentPage >= totalPages ? "disabled" : "" %>
+                            <button class="pagination-btn" <%=currentPage>= totalPages ? "disabled" : "" %>
                                 onclick="window.location.href='/admin/customers?page=<%= currentPage + 1 %>&search=<%=
                                         encodeURIComponent(search) %>'">
                                         <i class="fas fa-chevron-right"></i>
@@ -192,4 +190,5 @@
         }
     </script>
 </body>
+
 </html>

@@ -43,14 +43,7 @@ const dashboardPage=async(req,res)=>{
 
     }
 }
-const productsPage=(req,res)=>{
-    try {
-        res.render("productsPage")
-    } catch (error) {
-        res.status(500).send("server error")
-        
-    }
-}
+
 const addproductPage=(req,res)=>{
     try {
         res.render("adminaddproductPage")
@@ -116,7 +109,6 @@ module.exports={
     adminloginpage,
     postLogin,
     dashboardPage,
-    productsPage,
     ordersPage,
     coupenPage,
     salesPage,

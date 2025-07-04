@@ -27,12 +27,10 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="page-content">
                     <div class="page-header">
                         <h1>Category Management</h1>
                     </div>
-
                     <!-- Search Section -->
                     <form id="searchForm" class="search-section">
                         <div class="search-container">
@@ -45,6 +43,13 @@
                             <button type="submit" name="search" class="search-btn">Search</button>
                             <button type="submit" name="clear" class="clear-btn" value="1">Clear</button>
                         </div>
+                       
+                            <div class="right-controls" >
+                                <button id="addproduct"  onclick="openAddCategoryModal()" class="btn-primary" type="button">
+                                    <i class="fas fa-plus"></i>Add New Category
+                                </button>
+                            </div>
+                      
                     </form>
 
                     <!-- Table Section -->

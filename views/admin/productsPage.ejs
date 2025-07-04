@@ -38,41 +38,29 @@
                 </div>
 
                 <!-- Controls Section -->
-                <div class="controls-section">
-                    <div class="left-controls">
-                        <div class="sort-control">
-                            <label>Sort:</label>
-                            <select class="sort-select">
-                                <option>Name</option>
-                                <option>Price</option>
-                                <option>Date</option>
-                            </select>
-                        </div>
-                        <div class="items-control">
-                            <label>by:</label>
-                            <select class="items-select">
-                                <option>10</option>
-                                <option>25</option>
-                                <option>50</option>
-                                <option>100</option>
-                            </select>
-                        </div>
-                        <div class="filter-control">
-                            <label>Filter:</label>
-                            <select class="filter-select">
-                                <option>All</option>
-                                <option>Active</option>
-                                <option>Inactive</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div  class="right-controls">
-                        <button id="addproduct" class="btn-primary" type="button">
-                        <i class="fas fa-plus"></i> Add Product
-                        </button>
+                 <form id="searchForm" class="search-section">
+                        <div class="search-sections">
+                        <form id="searchForm" class="search-section">
+                            <div class="search-container">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" id="searchInput" name="search" class="search-input"
+                                    placeholder="Search customers..." value="<%=search %>">
+                            </div>
 
+                            <div class="search-buttons">
+                                <button type="submit" name="search" class="search-btn">Search</button>
+                                <button type="submit" name="clear" class="clear-btn" value="1">Clear</button>
+                            </div>
+                        </form>
                     </div>
-                </div>
+                       
+                            <div class="right-controls" >
+                                <button id="addproduct"  onclick="openAddCategoryModal()" class="btn-primary" type="button">
+                                    <i class="fas fa-plus"></i>Add Product
+                                </button>
+                            </div>
+                      
+                    </form>
 
                 <!-- Table Section -->
                 <div class="table-section">
@@ -140,6 +128,30 @@
                                 </tr>
                             </tbody>
                         </table>
+                        <!-- pagination -->
+                        <div class="pagination-section">
+                        <div class="pagination-info">
+                            Page <%= currentPage %> of <%= totalPages %> Pages
+                        </div>
+                        <div class="pagination-controls">
+                            <button class="pagination-btn" <%=currentPage <=1 ? "disabled" : "" %>
+                                onclick="window.location.href='/admin/category?page=<%= currentPage - 1 %>'">
+                                    <i class="fas fa-chevron-left"></i>
+                            </button>
+
+                            <div class="page-numbers">
+                                <% for(let i=1; i <=totalPages; i++) { %>
+                                    <button class="page-btn <%= i === currentPage ? 'active' : '' %>"
+                                        onclick="window.location.href='/admin/category?page=<%= i %>'">
+                                        <%= i %>
+                                    </button>
+                                    <% } %>
+                            </div>
+                            <button class="pagination-btn" <%=currentPage>= totalPages ? "disabled" : "" %>
+                                onclick="window.location.href='/admin/category?page=<%= currentPage + 1 %>'">
+                                    <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -174,12 +186,6 @@
         document.getElementById('addproduct').addEventListener('click', () => {
     window.location.href = '/admin/addproduct'; // your GET route
   });
-       
-  
-
-
-
-
     </script>
 </body>
 </html>
