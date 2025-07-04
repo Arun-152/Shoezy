@@ -46,30 +46,6 @@
                             <button type="submit" name="clear" class="clear-btn" value="1">Clear</button>
                         </div>
                     </form>
-                    <!-- Controls Section -->
-                    <div class="controls-section">
-                        <div class="left-controls">
-                            <div class="sort-control">
-                                <label for="sort">Sort by:</label>
-                                <select id="sort" class="sort-select">
-                                    <option value="name">Name</option>
-                                    <option value="status">Status</option>
-                                </select>
-                            </div>
-                            <div class="items-control">
-                                <label for="items">Show:</label>
-                                <select id="items" class="items-select">
-                                    <option value="10">10</option>
-                                    <option value="25">25</option>
-                                    <option value="50">50</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="right-controls">
-                            <button class="action-btn add-category-btn" onclick="openAddCategoryModal()">+ Add
-                                Category</button>
-                        </div>
-                    </div>
 
                     <!-- Table Section -->
                     <div class="table-section">
@@ -128,13 +104,27 @@
 
                     <!-- Pagination Section -->
                     <div class="pagination-section">
-                        <div class="pagination-info">1 of 1 Pages</div>
+                        <div class="pagination-info">
+                            Page <%= currentPage %> of <%= totalPages %> Pages
+                        </div>
                         <div class="pagination-controls">
-                            <button class="pagination-btn" disabled><i class="fas fa-chevron-left"></i></button>
+                            <button class="pagination-btn" <%=currentPage <=1 ? "disabled" : "" %>
+                                onclick="window.location.href='/admin/category?page=<%= currentPage - 1 %>'">
+                                    <i class="fas fa-chevron-left"></i>
+                            </button>
+
                             <div class="page-numbers">
-                                <button class="page-btn active">1</button>
+                                <% for(let i=1; i <=totalPages; i++) { %>
+                                    <button class="page-btn <%= i === currentPage ? 'active' : '' %>"
+                                        onclick="window.location.href='/admin/category?page=<%= i %>'">
+                                        <%= i %>
+                                    </button>
+                                    <% } %>
                             </div>
-                            <button class="pagination-btn" disabled><i class="fas fa-chevron-right"></i></button>
+                            <button class="pagination-btn" <%=currentPage>= totalPages ? "disabled" : "" %>
+                                onclick="window.location.href='/admin/category?page=<%= currentPage + 1 %>'">
+                                    <i class="fas fa-chevron-right"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -157,13 +147,6 @@
                             <label for="description">Description *</label>
                             <textarea id="description" placeholder="Enter description" required></textarea>
                             <div id="descriptionError" class="error-message" style="color: red; display: none;"></div>
-                        </div>
-                        <div class="form-group">
-                            <label for="status">Status</label>
-                            <select id="status">
-                                <option value="listed">Listed</option>
-                                <option value="unlisted">Unlisted</option>
-                            </select>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -227,7 +210,7 @@
                             }
                         }
                     });
-                });
+                })
 
                 // Toggle sidebar on mobile
                 document.querySelector('.menu-toggle').addEventListener('click', () => {
@@ -245,7 +228,6 @@
                     document.getElementById('addCategoryModal').style.display = 'none';
                     document.getElementById('categoryName').value = '';
                     document.getElementById('description').value = '';
-                    document.getElementById('status').value = 'listed';
                 }
 
                 // Edit Category Modal functions
@@ -291,24 +273,24 @@
                                 });
                             }
                             return response.json();
-                    })
+                        })
                         .then(data => {
-                              closeEditCategoryModal(); 
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success',
-                        text: 'Category updated successfully!'
-                    }).then(() => {
-                        location.reload();
-                    });
-                })
-                    .catch(error => {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: error.message
+                            closeEditCategoryModal();
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: 'Category updated successfully!'
+                            }).then(() => {
+                                location.reload();
+                            });
+                        })
+                        .catch(error => {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: error.message
+                            });
                         });
-                    });
                 }
                 // Toggle List/Unlist button state
                 document.querySelectorAll('.toggle-btn').forEach(button => {
@@ -336,14 +318,13 @@
                     }
                     const name = document.getElementById("categoryName").value
                     const description = document.getElementById("description").value
-                    const status = document.getElementById("status").value
 
                     fetch("/admin/addCategory", {
                         method: "POST",
                         headers: {
                             "content-type": "application/json"
                         },
-                        body: JSON.stringify({ name, description, status })
+                        body: JSON.stringify({ name, description })
                     })
                         .then(response => {
                             if (!response.ok) {

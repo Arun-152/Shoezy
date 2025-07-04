@@ -2,16 +2,16 @@ const Category = require("../../models/categorySchema");
 
 const categoryPage = async (req, res) => {
     try {
-       const searchRaw = req.query.search;
-       
+       const searchRaw = req.query.search
+
        const search = typeof(searchRaw) === "string" ? searchRaw.trim() : "";
         function escapeRegex(string) {
-         return string.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");   
+            return string.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");   
         }      
         const escapedSearch =escapeRegex(search);
         const page = parseInt(req.query.page) || 1;
         const limit = 5;
-        const skip = (page - 1) * limit;
+        const skip = (page-1) * limit;
 
         const searchFilter = escapedSearch ? {name:{$regex:escapedSearch,$options:"i"}} : {};
 
@@ -27,7 +27,7 @@ const categoryPage = async (req, res) => {
             currentPage: page,
             totalPages: totalPages,
             totalCategories: totalCategories,
-            search
+            search:""
         });
     } catch (error) {
         console.error(error);
@@ -36,8 +36,8 @@ const categoryPage = async (req, res) => {
 }
 const addCategory = async (req, res) => {
     try {
-        const { name, description,status } = req.body;
-        if (!name || !description || !status) {
+        const { name, description} = req.body;
+        if (!name || !description) {
             return res.status(400).json({ error: "Name and description are required" });
         }
         const existingCategory = await Category.findOne({ name });
@@ -46,8 +46,7 @@ const addCategory = async (req, res) => {
         }
         const category = new Category({
             name,
-            description,
-            status,
+            description
         });
         await category.save();
         res.status(201).json({ success: true, message: "Category added successfully", id: category._id });
@@ -64,7 +63,7 @@ const categoryDelete = async (req, res) => {
         if (!category) {
             return res.status(404).json({ success: false, message: "Category not found" });
         }
-        await Category.findByIdAndUpdate(id, { isDeleted: true });
+        await Category.findByIdAndDelete(id, { isDeleted: true });
         res.json({ success: true, message: "Category deleted successfully" });
     } catch (error) {
         console.error(error);
@@ -128,7 +127,6 @@ const categoryEdit= async(req,res)=>{
         
     }
 }
-
 module.exports = {
     categoryPage,
     addCategory,

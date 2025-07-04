@@ -4,10 +4,35 @@ const User=require("../../models/userSchema")
 const customerPage=async (req,res)=>{
     try {
 
-        const users= await User.find({isAdmin:false})
-        res.render("customerPage",{users})
+        const searchRaw=req.query.search
+        const search = typeof(searchRaw) === "string" ? searchRaw.trim():"";
+        function escapeRegex(string){
+            return string.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&")
+        }
+        const escapedSearch=escapeRegex(search)
+        const page=parseInt(req.query.page)|| 1
+        const limit=5
+        const skip=(page-1)*limit
+
+        const searchFilter = escapedSearch ? {fullname:{$regex:escapedSearch,$options:"i"}} : {};
+
+        const customerData = await User.find({...searchFilter})
+        .sort({createdAt:-1})
+        .skip(skip)
+        .limit(limit)
+
+        const totalCustomers= await User.countDocuments({...searchFilter})
+        const totalPages=Math.ceil(totalCustomers/limit)
+        res.render("customerPage",{
+            customers:customerData,
+            currentPage:page,
+            totalPages:totalPages,
+            totalCustomers:totalCustomers,
+            search,
+        })
     } catch (error) {
-        res.status(500).send("server error") 
+        console.error(error)
+        return res.redirect("/pageerror")
     }
 
 }
@@ -34,37 +59,9 @@ const customerunBlocked= async(req,res)=>{
     } catch (error) {
         res.send("errrorr")
     }
-   
 }
-
-const customerPagination= async(req,res)=>{
-    try {
-        const page=parseInt(req.query.page) || 1
-        const limit=parseInt(req.query.limit) || 10
-        const skip=(page-1)*limit
-
-        const users= await User.find()
-        .skip(skip)
-        .limit(limit)
-        .sort({createdAt:-1})
-
-        const total = await User.countDocuments()
-
-        res.json({
-            currentPage:page,
-            totalPages:Math.ceil(total/limit),
-            totalItems:total,
-            users
-        })
-    } catch (error) {
-        console.error('Pagination error:', err);
-        res.status(500).json({ message: 'Internal Server Error' });
-       }
-    }
-
 module.exports={
     customerPage,
     customerBlocked,
-    customerunBlocked,
-    customerPagination
+    customerunBlocked    
 }

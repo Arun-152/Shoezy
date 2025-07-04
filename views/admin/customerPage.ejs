@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,126 +9,117 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
+
 <body>
     <div class="dashboard-container">
         <%- include('../partials/admin/sidebar') %>
 
-        <div class="main-content">
-            <header class="header">
-                <button class="menu-toggle"><i class="fas fa-bars"></i></button>
-                <div class="header-right">
-                    <span class="notification"><i class="fas fa-bell"></i></span>
-                    <div class="admin-profile">
-                        <i class="fas fa-user-circle"></i>
-                        <span>ADMIN</span>
-                    </div>
-                </div>
-            </header>
-
-            <div class="page-content">
-                <div class="page-header">
-                    <h1>Customer Management</h1>
-                </div>
-
-                <div class="search-section">
-                    <div class="search-container">
-                        <i class="fas fa-search search-icon" onclick="searchCustomers()"></i>
-                        <input type="text" class="search-input" placeholder="Search by name or email..." oninput="searchCustomers()">
-                        <button class="clear-search"><i class="fas fa-times"></i></button>
-                    </div>
-                </div>
-
-                <div class="controls-section">
-                    <div class="left-controls">
-                        <div class="sort-control">
-                            <label for="sort">Sort</label>
-                            <select id="sort" class="sort-select" onchange="searchCustomers()">
-                                <option value="name">Name</option>
-                                <option value="email">Email</option>
-                                <option value="date">Date</option>
-                            </select>
-                        </div>
-                        <div class="items-control">
-                            <label for="items">by</label>
-                            <select id="items" class="items-select">
-                                <option value="10">10</option>
-                                <option value="25">25</option>
-                                <option value="50">50</option>
-                                <option value="100">100</option>
-                            </select>
+            <div class="main-content">
+                <header class="header">
+                    <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+                    <div class="header-right">
+                        <span class="notification"><i class="fas fa-bell"></i></span>
+                        <div class="admin-profile">
+                            <i class="fas fa-user-circle"></i>
+                            <span>ADMIN</span>
                         </div>
                     </div>
-                    <div class="right-controls">
-                        <div class="filter-control">
-                            <label for="filter">Filter</label>
-                            <select id="filter" class="filter-select" onchange="searchCustomers()">
-                                <option value="all">All</option>
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
+                </header>
 
-                <div class="table-section">
-                    <div class="table-container">
-                        <table class="customers-table">
-                            <thead>
-                                <tr>
-                                    <th class="table-header">Name</th>
-                                    <th class="table-header">Email</th>
-                                    <th class="table-header">Phone</th>
-                                    <th class="table-header">Update</th>
-                                </tr>
-                            </thead>
-                            <tbody id="customer-table-body">
-                                <% users.forEach((customer) => { %>
-                                    <tr class="table-row" data-customer-id="<%= customer.id %>">
-                                        <td><%= customer.fullname %></td>
-                                        <td><%= customer.email %></td>
-                                        <td><%= customer.phone %></td>
-                                        <td>
-                                            <%if(customer.isBlocked===false){%>
-                                           <a href="/admin/blockCustomer?id=<%=customer._id%>"> <button class="action-btn" >Block</button></a>
-                                                   
-                                           
-                                        </td>
-                                        <%}else{%>
-                                            <td>
-                                         
-                                           <a href="/admin/unblockCustomer?id=<%=customer._id%>"> <button class="action-btn" >unBlock</button></a>
-                                                   
-                                           
-                                        </td>
-                                        <%}%>
-                                        <td>
-                                           
-                                        </td>
+                <div class="page-content">
+                    <div class="page-header">
+                        <h1>Customer Management</h1>
+                    </div>
+
+                    <div class="search-section">
+                        <form id="searchForm" class="search-section">
+                            <div class="search-container">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" id="searchInput" name="search" class="search-input"
+                                    placeholder="Search customers..." value="<%=search %>">
+                            </div>
+
+                            <div class="search-buttons">
+                                <button type="submit" name="search" class="search-btn">Search</button>
+                                <button type="submit" name="clear" class="clear-btn" value="1">Clear</button>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- table -->
+
+                    <div class="table-section">
+                        <div class="table-container">
+                            <table class="customers-table">
+                                <thead>
+                                    <tr>
+                                        <th class="table-header">Name</th>
+                                        <th class="table-header">Email</th>
+                                        <th class="table-header">Phone</th>
+                                        <th class="table-header">Update</th>
                                     </tr>
-                                <% }) %>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="pagination-section">
-                    <div class="pagination-info">
-                        <span>1 of 10 Pages</span>
-                    </div>
-                    <div class="pagination-controls">
-                        <button class="pagination-btn" disabled><i class="fas fa-chevron-left"></i></button>
-                        <div class="page-numbers">
-                            <button class="page-btn active">1</button>
-                            <button class="page-btn">2</button>
-                            <button class="page-btn">3</button>
-                            <span class="page-dots">...</span>
-                            <button class="page-btn">10</button>
+                                </thead>
+                                <tbody id="customer-table-body">
+                                    <% customers.forEach((customer)=> { %>
+                                        <tr class="table-row" data-customer-id="<%= customer.id %>">
+                                            <td class="table-cell">
+                                                <%= customer.fullname %>
+                                            </td>
+                                            <td class="table-cell">
+                                                <%= customer.email %>
+                                            </td>
+                                            <td class="table-cell">
+                                                <%= customer.phone %>
+                                            </td>
+                                            <td class="table-cell action-cell">
+                                                <% if(customer.isBlocked===false) { %>
+                                                    <a href="/admin/blockCustomer?id=<%=customer._id%>">
+                                                        <button class="action-btn block-btn">Block</button>
+                                                    </a>
+                                                    <% } else { %>
+                                                        <a href="/admin/unblockCustomer?id=<%=customer._id%>">
+                                                            <button class="action-btn unblock-btn">Unblock</button>
+                                                        </a>
+                                                        <% } %>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                                </tbody>
+                            </table>
                         </div>
-                        <button class="pagination-btn"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+
+                    <div class="pagination-section">
+                        <div class="pagination-info">
+                            Page <%= currentPage %> of <%= totalPages %> Pages
+                        </div>
+                        <div class="pagination-controls">
+                           <button 
+    class="pagination-btn" 
+    onclick="window.location.href='/admin/customers?page=<%= currentPage - 1 %>&search=<%= encodeURIComponent(search) %>'"
+    <%= currentPage <= 1 ? "disabled" : "" %>>
+    <i class="fas fa-chevron-left"></i>
+</button>
+
+
+                            <div class="page-numbers">
+                                <% for(let i=1; i <=totalPages; i++) { %>
+                                    <button class="page-btn <%= i === currentPage ? 'active' : '' %>"
+                                        onclick="window.location.href='/admin/customers?page=<%= i %>&search=<%= encodeURIComponent(search) %>'">
+                                        <%= i %>
+                                    </button>
+
+                                    <% } %>
+                            </div>
+                            <button class="pagination-btn" <%= currentPage >= totalPages ? "disabled" : "" %>
+                                onclick="window.location.href='/admin/customers?page=<%= currentPage + 1 %>&search=<%=
+                                        encodeURIComponent(search) %>'">
+                                        <i class="fas fa-chevron-right"></i>
+                            </button>
+
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
     </div>
 
     <script>
@@ -139,40 +131,26 @@
         });
 
         // Search functionality
-        const searchInput = document.querySelector('.search-input');
-        const clearSearch = document.querySelector('.clear-search');
-        const filterSelect = document.querySelector('#filter');
-        const sortSelect = document.querySelector('#sort');
-        const tableBody = document.querySelector('#customer-table-body');
 
-        // Store original table rows
-        const originalRows = Array.from(tableBody.querySelectorAll('.table-row'));
+        document.addEventListener("DOMContentLoaded", () => {
+            const searchForm = document.getElementById("searchForm");
+            const searchInput = document.getElementById("searchInput");
 
-        function searchCustomers() {
-            const searchTerm = searchInput.value.toLowerCase();
-            const filter = filterSelect.value;
+            searchForm.addEventListener("submit", (e) => {
+                const isClear = e.submitter && e.submitter.name === "clear";
 
-            clearSearch.classList.toggle('visible', searchInput.value.length > 0);
-
-            originalRows.forEach(row => {
-                const name = row.children[0].textContent.toLowerCase();
-                const email = row.children[1].textContent.toLowerCase();
-                const status = row.querySelector('.action-btn').textContent.toLowerCase() === 'block' ? 'active' : 'inactive';
-
-                const matchesSearch = name.includes(searchTerm) || email.includes(searchTerm);
-                const matchesFilter = filter === 'all' || status === filter;
-
-                row.style.display = matchesSearch && matchesFilter ? '' : 'none';
+                if (isClear) {
+                    e.preventDefault();
+                    window.location.href = "/admin/customers?page=1";
+                } else {
+                    const keyword = searchInput.value.trim();
+                    if (keyword) {
+                        e.preventDefault();
+                        window.location.href = `/admin/customers?page=1&search=${encodeURIComponent(keyword)}`;
+                    }
+                }
             });
-        }
-
-        searchInput.addEventListener('input', searchCustomers);
-        clearSearch.addEventListener('click', () => {
-            searchInput.value = '';
-            clearSearch.classList.remove('visible');
-            searchCustomers();
-            searchInput.focus();
-        });
+        })
 
         // SweetAlert for block/unblock confirmation
         function confirmBlock(customerId, customerName, currentStatus) {
@@ -201,22 +179,10 @@
                         `${customerName} has been ${action}ed.`,
                         'success'
                     );
-
-                    // Update filter to reflect new status
                     searchCustomers();
-
-                    // Add your backend API call here
-                    // Example:
-                    // fetch(`/api/customers/${customerId}/${action}`, { method: 'POST' })
-                    //     .then(response => response.json())
-                    //     .then(data => {
-                    //         // Handle response
-                    //     });
                 }
             });
         }
-
-        // Edit customer function (placeholder)
         function editCustomer(customerId) {
             Swal.fire(
                 'Edit',
