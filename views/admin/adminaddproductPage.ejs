@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shoezy-Add New Product</title>
+    <link rel="stylesheet" href="/css/adminaddproductPage.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Add New Product</h1>
+        <form id="add-product-form">
+            <div class="form-group">
+                <label for="product-name">Product Name</label>
+                <input type="text" id="product-name" name="product-name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="product-description">Description</label>
+                <textarea id="product-description" name="product-description" rows="4" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="product-price">Price (USD)</label>
+                <input type="number" id="product-price" name="product-price" step="0.01" min="0" required>
+            </div>
+
+            <div class="form-group">
+                <label for="product-image">Product Image</label>
+                <input type="file" id="product-image" name="product-image" accept="image/*" multiple>
+            </div>
+
+            <div class="form-group">
+                <label>Colors</label>
+                <div id="color-options">
+                    <div class="color-option">
+                        <input type="text" name="color[]" placeholder="e.g., Black" required>
+                        <button type="button" class="remove-color">Remove</button>
+                    </div>
+                </div>
+                <button type="button" id="add-color">Add Another Color</button>
+            </div>
+
+            <div class="form-group">
+                <label>Sizes</label>
+                <div id="size-options">
+                    <div class="size-option">
+                        <input type="text" name="size[]" placeholder="e.g., US 9" required>
+                        <button type="button" class="remove-size">Remove</button>
+                    </div>
+                </div>
+                <button type="button" id="add-size">Add Another Size</button>
+            </div>
+
+            <div class="form-group">
+                <label for="stock-quantity">Stock Quantity</label>
+                <input type="number" id="stock-quantity" name="stock-quantity" min="0" required>
+            </div>
+
+            <div class="form-group">
+                <label for="category">Category</label>
+                <select id="category" name="category" required>
+                    <option value="">Select Category</option>
+                    <option value="sneakers">Sneakers</option>
+                    <option value="casual">Casual</option>
+                    <option value="formal">Formal</option>
+                    <option value="boots">Boots</option>
+                </select>
+            </div>
+
+            <button type="submit" class="submit-btn">Add Product</button>
+        </form>
+    </div>
+
+    <script>
+        // Add color variant
+        document.getElementById('add-color').addEventListener('click', () => {
+            const colorOptions = document.getElementById('color-options');
+            const newColor = document.createElement('div');
+            newColor.className = 'color-option';
+            newColor.innerHTML = `
+                <input type="text" name="color[]" placeholder="e.g., Black" required>
+                <button type="button" class="remove-color">Remove</button>
+            `;
+            colorOptions.appendChild(newColor);
+        });
+
+        // Remove color variant
+        document.getElementById('color-options').addEventListener('click', (e) => {
+            if (e.target.classList.contains('remove-color')) {
+                e.target.parentElement.remove();
+            }
+        });
+
+        // Add size variant
+        document.getElementById('add-size').addEventListener('click', () => {
+            const sizeOptions = document.getElementById('size-options');
+            const newSize = document.createElement('div');
+            newSize.className = 'size-option';
+            newSize.innerHTML = `
+                <input type="text" name="size[]" placeholder="e.g., US 9" required>
+                <button type="button" class="remove-size">Remove</button>
+            `;
+            sizeOptions.appendChild(newSize);
+        });
+
+        // Remove size variant
+        document.getElementById('size-options').addEventListener('click', (e) => {
+            if (e.target.classList.contains('remove-size')) {
+                e.target.parentElement.remove();
+            }
+        });
+
+        // Form submission (placeholder)
+        document.getElementById('add-product-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('Product added successfully! (This is a placeholder action)');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "name": "shoezy",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "dotenv": "^16.5.0",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "express-session": "^1.18.1",
+    "mongodb": "^6.16.0",
+    "mongoose": "^8.15.1",
+    "nodemailer": "^7.0.3",
+    "nodemon": "^3.1.10"
+  }
+}

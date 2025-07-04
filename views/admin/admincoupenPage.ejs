@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shoezy-Coupen</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/css/admincoupenPage.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+                <%- include('../partials/admin/sidebar') %>
+
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+                <div class="header-right">
+                    <div class="notification">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="admin-profile">
+                        <i class="fas fa-user-circle"></i>
+                        <span>ADMIN</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="page-content">
+                <div class="page-header">
+                    <h1>Coupon Management</h1>
+                </div>
+
+                <!-- Controls Section -->
+                <div class="controls-section">
+                    <div class="left-controls">
+                        <div class="sort-control">
+                            <label>Sort:</label>
+                            <select class="sort-select">
+                                <option>Coupon Code</option>
+                                <option>Expiry Date</option>
+                            </select>
+                        </div>
+                        <div class="items-control">
+                            <label>by:</label>
+                            <select class="items-select">
+                                <option>10</option>
+                                <option>25</option>
+                                <option>50</option>
+                                <option>100</option>
+                            </select>
+                        </div>
+                        <div class="filter-control">
+                            <label>Filter:</label>
+                            <select class="filter-select">
+                                <option>All</option>
+                                <option>Active</option>
+                                <option>Expired</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="right-controls">
+                        <button class="btn-primary" onclick="openModal()"><i class="fas fa-plus"></i> Add Coupon</button>
+                    </div>
+                </div>
+
+                <!-- Table Section -->
+                <div class="table-section">
+                    <div class="table-container">
+                        <table class="customers-table">
+                            <thead>
+                                <tr>
+                                    <th class="table-header">Code</th>
+                                    <th class="table-header">Min Amount</th>
+                                    <th class="table-header">Offer Price</th>
+                                    <th class="table-header">Usage Limit</th>
+                                    <th class="table-header">Expiry Date</th>
+                                    <th class="table-header">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="table-row">
+                                    <td>FIRSTBUYER</td>
+                                    <td>₹1000</td>
+                                    <td>₹100</td>
+                                    <td>1</td>
+                                    <td>15/05/2023</td>
+                                    <td>
+                                        <button class="update-btn"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr class="table-row">
+                                    <td>NEW15OFF</td>
+                                    <td>₹2000</td>
+                                    <td>₹200</td>
+                                    <td>5</td>
+                                    <td>20/10/2023</td>
+                                    <td>
+                                        <button class="update-btn"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr class="table-row">
+                                    <td>MAJORSOFF</td>
+                                    <td>₹3000</td>
+                                    <td>₹300</td>
+                                    <td>3</td>
+                                    <td>27/08/2023</td>
+                                    <td>
+                                        <button class="update-btn"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pagination Section -->
+                <div class="pagination-section">
+                    <div class="pagination-info">
+                        1 of 10 Pages
+                    </div>
+                    <div class="pagination-controls">
+                        <button class="pagination-btn"><i class="fas fa-chevron-left"></i></button>
+                        <div class="page-numbers">
+                            <button class="page-btn active">1</button>
+                            <button class="page-btn">2</button>
+                            <button class="page-btn">3</button>
+                            <span class="page-dots">...</span>
+                            <button class="page-btn">10</button>
+                        </div>
+                        <button class="pagination-btn"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal for Add Coupon -->
+    <div class="modal" id="couponModal" style="display: none;">
+        <div class="modal-content">
+            <h3>Add Coupon</h3>
+            <span class="close-btn" onclick="closeModal()">×</span>
+            <form>
+                <div class="form-group">
+                    <label>Code:</label>
+                    <input type="text" class="form-input" placeholder="Enter coupon code">
+                </div>
+                <div class="form-group">
+                    <label>Min Amount:</label>
+                    <input type="number" class="form-input" placeholder="Enter minimum amount">
+                </div>
+                <div class="form-group">
+                    <label>Offer Price:</label>
+                    <input type="number" class="form-input" placeholder="Enter offer price">
+                </div>
+                <div class="form-group">
+                    <label>Usage Limit:</label>
+                    <input type="number" class="form-input" placeholder="Enter usage limit">
+                </div>
+                <div class="form-group">
+                    <label>Expiry Date:</label>
+                    <input type="date" class="form-input">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="action-btn">Add Coupon</button>
+                    <button type="button" class="action-btn cancel" onclick="closeModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Toggle sidebar
+        const menuToggle = document.querySelector('.menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('sidebar-open');
+        });
+
+        // Modal functions
+        function openModal() {
+            document.getElementById('couponModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('couponModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

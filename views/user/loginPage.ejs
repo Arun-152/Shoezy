@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Shoezy - Login</title>
+  <link rel="stylesheet" href="/css/loginPage.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+</head>
+<body>
+  <div class="login-container">
+    <!-- Left Side - Login Form -->
+    <div class="login-form-section">
+      <div class="login-form-wrapper">
+        <div class="brand-logo">
+          <h1>Shoezy</h1>
+        </div>
+
+        <div class="login-header">
+          <h2>LOGIN</h2>
+          <p>Signup in to your account to continue</p>
+        </div>
+
+        <form class="login-form" id="loginForm" action="/login" method="POST">
+          <div class="input-group">
+            <div class="input-wrapper">
+              <i class="fas fa-envelope input-icon"></i>
+              <input type="email" id="email" name="email" placeholder="Email" required />
+            </div>
+          </div>
+
+          <div class="input-group">
+            <div class="input-wrapper">
+              <i class="fas fa-lock input-icon"></i>
+              <input type="password" id="password" name="password" placeholder="Password" required />
+              <i class="fas fa-eye-slash toggle-password" id="togglePassword"></i>
+            </div>
+          </div>
+          <%if(locals.message && message.length>0){%>
+          <div class="alert"><%=message%></div>
+          <%}%>
+
+          <div class="forgot-password">
+            <a href="/forgot-password" class="forgot-link">Forgot password?</a>
+          </div>
+
+          <div class="form-buttons">
+            <button type="submit" class="login-btn">Login Now</button>
+            <button type="button" class="signup-btn" onclick="window.location.href='/signup'">Sign Up</button>
+          </div>
+        </form>
+
+        <div class="divider">
+          <span class="divider-text">Login with Others</span>
+        </div>
+
+        <div class="social-login">
+          <form action="/auth/google" method="POST">
+            <button type="submit" class="social-btn google-btn">
+              <i class="fab fa-google"></i>
+              <span>Sign in with Google</span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Side - Sneaker Image -->
+    <div class="image-section">
+      <div class="image-wrapper">
+        <div class="sneaker-container">
+          <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?w=600&h=400&fit=crop&crop=center" alt="Nike Sneaker" class="sneaker-image" />
+        </div>
+        <div class="floating-elements">
+          <div class="floating-dot dot-1"></div>
+          <div class="floating-dot dot-2"></div>
+          <div class="floating-dot dot-3"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Toggle password visibility
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+
+    togglePassword.addEventListener('click', function () {
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      this.classList.toggle('fa-eye');
+      this.classList.toggle('fa-eye-slash');
+    });
+
+    // Form validation before submission
+    const loginForm = document.getElementById('loginForm');
+    loginForm.addEventListener('submit', function (e) {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      if (!email || !password) {
+        e.preventDefault();
+        alert('Please fill in all fields');
+        return false;
+      }
+
+      // Basic email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        e.preventDefault();
+        alert('Please enter a valid email address');
+        return false;
+      }
+
+      // Password length validation
+      if (password.length < 6) {
+        e.preventDefault();
+        alert('Password must be at least 6 characters long');
+        return false;
+      }
+
+      // If validation passes, form will submit normally
+      return true;
+    });
+
+    // Animations
+    const floatingDots = document.querySelectorAll('.floating-dot');
+    floatingDots.forEach((dot, index) => {
+      dot.style.animationDelay = `${index * 0.5}s`;
+    });
+
+    // Input focus effects
+    const inputs = document.querySelectorAll('input');
+    inputs.forEach((input) => {
+      input.addEventListener('focus', function () {
+        this.parentElement.classList.add('focused');
+      });
+      input.addEventListener('blur', function () {
+        if (!this.value) {
+          this.parentElement.classList.remove('focused');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Management</title>
+    <link rel="stylesheet" href="/css/admincategoryPage.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <%- include('../partials/admin/sidebar') %>
+            <!-- Main Content -->
+            <div class="main-content">
+                <div class="header">
+                    <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+                    <div class="header-right">
+                        <div class="notification"><i class="fas fa-bell"></i></div>
+                        <div class="admin-profile">
+                            <i class="fas fa-user-circle"></i>
+                            <span>ADMIN</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="page-content">
+                    <div class="page-header">
+                        <h1>Category Management</h1>
+                    </div>
+
+                    <!-- Search Section -->
+                    <form id="searchForm" class="search-section">
+                        <div class="search-container">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" id="searchInput" name="search" class="search-input"
+                                placeholder="Search categories..." value='<%= search %>'>
+                        </div>
+
+                        <div class="search-buttons">
+                            <button type="submit" name="search" class="search-btn">Search</button>
+                            <button type="submit" name="clear" class="clear-btn" value="1">Clear</button>
+                        </div>
+                    </form>
+                    <!-- Controls Section -->
+                    <div class="controls-section">
+                        <div class="left-controls">
+                            <div class="sort-control">
+                                <label for="sort">Sort by:</label>
+                                <select id="sort" class="sort-select">
+                                    <option value="name">Name</option>
+                                    <option value="status">Status</option>
+                                </select>
+                            </div>
+                            <div class="items-control">
+                                <label for="items">Show:</label>
+                                <select id="items" class="items-select">
+                                    <option value="10">10</option>
+                                    <option value="25">25</option>
+                                    <option value="50">50</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="right-controls">
+                            <button class="action-btn add-category-btn" onclick="openAddCategoryModal()">+ Add
+                                Category</button>
+                        </div>
+                    </div>
+
+                    <!-- Table Section -->
+                    <div class="table-section">
+                        <div class="table-container">
+                            <table class="customers-table">
+                                <thead>
+                                    <tr>
+                                        <th class="table-header">S No</th>
+                                        <th class="table-header">Category Name</th>
+                                        <th class="table-header">Description</th>
+                                        <th class="table-header">Status</th>
+                                        <th class="table-header">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% cat.forEach((category, index)=> { %>
+                                        <tr>
+                                            <td>
+                                                <%= index + 1 %>
+                                            </td>
+                                            <td class="text-start">
+                                                <%= category.name %>
+                                            </td>
+                                            <td class="text-start">
+                                                <%= category.description %>
+                                            </td>
+                                            <td class="text-start">
+                                                <%= category.isListed===true ? 'Listed' : 'Unlisted' %>
+                                            </td>
+                                            <td class="text-start actions-cell">
+                                                <button
+                                                    onclick="togglebtn(event,'<%=category._id%>','<%=category.isListed%>','<%=category.name%>')"
+                                                    class="action-btn toggle-btn <%= category.isListed===true ? 'unblock-btn' : 'block-btn' %>"
+                                                    data-status="<%= category.isListed %>">
+                                                    <%= category.isListed===true ? 'Unlist' : 'List' %>
+                                                </button>
+                                                <button class="action-btn edit-btn"
+                                                    onclick="openEditCategoryModal('<%= category._id %>', '<%= category.name %>', '<%= category.description %>', '<%= category.status %>')">
+                                                    Edit
+                                                </button>
+
+                                                <button class="action-btn delete-btn"
+                                                    onclick="deleteCategory('<%= category._id %>')">
+                                                    Delete
+                                                </button>
+                                            </td>
+
+                                        </tr>
+                                        <% }) %>
+
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Pagination Section -->
+                    <div class="pagination-section">
+                        <div class="pagination-info">1 of 1 Pages</div>
+                        <div class="pagination-controls">
+                            <button class="pagination-btn" disabled><i class="fas fa-chevron-left"></i></button>
+                            <div class="page-numbers">
+                                <button class="page-btn active">1</button>
+                            </div>
+                            <button class="pagination-btn" disabled><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Category Modal -->
+            <div class="modal" id="addCategoryModal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Add New Category</h2>
+                        <button class="close-modal" onclick="closeAddCategoryModal()">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="categoryName">Category Name *</label>
+                            <input type="text" id="categoryName" placeholder="Enter category name" required>
+                            <div id="nameError" class="error-message" style="color: red; display: none;"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="description">Description *</label>
+                            <textarea id="description" placeholder="Enter description" required></textarea>
+                            <div id="descriptionError" class="error-message" style="color: red; display: none;"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="status">Status</label>
+                            <select id="status">
+                                <option value="listed">Listed</option>
+                                <option value="unlisted">Unlisted</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="action-btn" onclick="closeAddCategoryModal()">Cancel</button>
+                        <button class="action-btn save-btn" onclick="handleFormSubmit(event)">Save Category</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal" id="editCategoryModal">
+                <div class="modal-content">
+
+                    <form id="editCategoryForm" onsubmit="saveEditCategory(event)">
+                        <div class="modal-header">
+                            <h2>Edit Category</h2>
+                            <button type="button" class="close-modal" onclick="closeEditCategoryModal()">×</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="editCategoryId">Category ID</label>
+                                <input type="text" id="editCategoryId" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="editCategoryName">Category Name </label>
+                                <input type="text" id="editCategoryName" placeholder="Enter category name" required>
+                                <div id="editNameError" class="error-message" style="color: red; display: none;"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="editDescription">Description *</label>
+                                <textarea id="editDescription" placeholder="Enter description" required></textarea>
+                                <div id="editDescriptionError" class="error-message" style="color: red; display: none;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="action-btn" onclick="closeEditCategoryModal()">Cancel</button>
+                            <button type="submit" class="action-btn save-btn">Save Changes</button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+
+            <script>
+                document.addEventListener("DOMContentLoaded", () => {
+                    const searchForm = document.getElementById("searchForm");
+                    const searchInput = document.getElementById("searchInput");
+
+                    searchForm.addEventListener("submit", (e) => {
+                        const isClear = e.submitter && e.submitter.name === "clear";
+
+                        if (isClear) {
+                            e.preventDefault();
+                            window.location.href = "/admin/category?page=1";
+                        } else {
+                            const keyword = searchInput.value.trim();
+                            if (keyword) {
+                                e.preventDefault();
+                                window.location.href = `/admin/category?page=1&search=${encodeURIComponent(keyword)}`;
+                            }
+                        }
+                    });
+                });
+
+                // Toggle sidebar on mobile
+                document.querySelector('.menu-toggle').addEventListener('click', () => {
+                    document.querySelector('.sidebar').classList.toggle('sidebar-open');
+                });
+
+
+
+                // Add Category Modal functions
+                function openAddCategoryModal() {
+                    document.getElementById('addCategoryModal').style.display = 'flex';
+                    document.getElementById('categoryName').focus();
+                }
+                function closeAddCategoryModal() {
+                    document.getElementById('addCategoryModal').style.display = 'none';
+                    document.getElementById('categoryName').value = '';
+                    document.getElementById('description').value = '';
+                    document.getElementById('status').value = 'listed';
+                }
+
+                // Edit Category Modal functions
+                function openEditCategoryModal(id, name, description, status) {
+                    document.getElementById('editCategoryId').value = id;
+                    document.getElementById('editCategoryName').value = name;
+                    document.getElementById('editDescription').value = description;
+                    document.getElementById('editCategoryModal').style.display = 'flex';
+                    document.getElementById('editCategoryName').focus();
+                }
+
+                function closeEditCategoryModal() {
+                    document.getElementById('editCategoryModal').style.display = 'none';
+                }
+                function saveEditCategory(event) {
+                    event.preventDefault();
+
+                    // Get form values
+                    const id = document.getElementById('editCategoryId').value;
+                    const name = document.getElementById('editCategoryName').value.trim();
+                    const description = document.getElementById('editDescription').value.trim();
+
+                    if (name === '' || description === '') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Missing Fields',
+                            text: 'Please fill in all required fields.'
+                        });
+                        return;
+                    }
+                    fetch(`/admin/editCategory/${id}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-type': 'application/json'
+                        },
+                        body: JSON.stringify({ name, description })
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.text().then(text => {
+                                    console.error("Server returned:", text);
+                                    throw new Error(`HTTP error! status: ${response.status}`);
+                                });
+                            }
+                            return response.json();
+                    })
+                        .then(data => {
+                              closeEditCategoryModal(); 
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'Category updated successfully!'
+                    }).then(() => {
+                        location.reload();
+                    });
+                })
+                    .catch(error => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: error.message
+                        });
+                    });
+                }
+                // Toggle List/Unlist button state
+                document.querySelectorAll('.toggle-btn').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const currentStatus = button.getAttribute('data-status');
+                        if (currentStatus === 'listed') {
+                            button.setAttribute('data-status', 'unlisted');
+                            button.textContent = 'List';
+                            button.classList.remove('block-btn');
+                            button.classList.add('unblock-btn');
+                        } else {
+                            button.setAttribute('data-status', 'listed');
+                            button.textContent = 'Unlist';
+                            button.classList.remove('unblock-btn');
+                            button.classList.add('block-btn');
+                        }
+                    });
+                });
+            </script>
+            <script>
+                function handleFormSubmit(event) {
+                    event.preventDefault()
+                    if (!validateForm()) {
+                        return
+                    }
+                    const name = document.getElementById("categoryName").value
+                    const description = document.getElementById("description").value
+                    const status = document.getElementById("status").value
+
+                    fetch("/admin/addCategory", {
+                        method: "POST",
+                        headers: {
+                            "content-type": "application/json"
+                        },
+                        body: JSON.stringify({ name, description, status })
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.json().then(err => {
+                                    throw new Error(err.message || "something went wrong")
+                                })
+                            }
+                            return response.json()
+                        })
+
+                        .then(data => {
+                            location.reload()
+                        })
+                        .catch(error => {
+                            if (error.message === "Category already exists") {
+                                Swal.fire({
+                                    icon: "error",
+                                    title: "Oops",
+                                    text: "Category already exists",
+                                })
+                            } else {
+                                Swal.fire({
+                                    icon: "error",
+                                    title: "Oops",
+                                    text: "An erreor occured while adding category",
+                                })
+                            }
+
+                        })
+                }
+
+                function validateForm() {
+                    clearErrorMessage()
+                    const name = document.getElementById("categoryName").value.trim()
+                    const description = document.getElementById("description").value.trim()
+                    let isvalid = true
+
+                    if (name === "") {
+                        displayErrorMessage("nameError", "please enter a name")
+                        isvalid = false
+                    } else if (!/^[A-Za-z\s]+$/.test(name)) {
+                        displayErrorMessage("nameError", "please enter alphabetic characters ")
+                        isvalid = false
+
+                    }
+                    if (description === "") {
+                        displayErrorMessage("descriptionError", "please enter a description")
+                        isvalid = false
+                    }
+                    return isvalid
+                }
+
+
+                function displayErrorMessage(elementId, message) {
+                    var errorElement = document.getElementById(elementId)
+                    errorElement.innerText = message
+                    errorElement.style.display = "block"
+
+                }
+
+                function clearErrorMessage() {
+                    const errorElements = document.getElementsByClassName("error-message")
+                    Array.from(errorElements).forEach((element) => {
+                        element.innerText = ""
+                        element.style.display = "none"
+                    })
+                }
+
+                function togglebtn(event, id, isListed, name) {
+                    event.preventDefault()
+                    Swal.fire({
+                        title: `Do you want to ${isListed ? "listed" : "Unlisted"} ${name}`,
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonText: "Yes",
+                        cancelButtonText: "No"
+
+                    }).then((response) => {
+                        if (response.isConfirmed) {
+                            fetch(`/admin/listCategory`, {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ id })
+                            })
+                                .then((response) => {
+                                    if (!response.ok) {
+                                        return respose.json().then((err) => {
+                                            throw new Error(err.error || "Unknown error")
+                                        })
+                                    }
+                                    return response.json()
+
+                                })
+                                .then((data) => {
+                                    Swal.fire({
+                                        icon: "success",
+                                        title: "success",
+                                        text: data.message,
+                                    })
+                                        .then(() => {
+                                            window.location.href = "/admin/category"
+                                        })
+                                })
+                                .catch((error) => {
+                                    Swal.fire({
+                                        icon: "error",
+                                        title: "Oops",
+                                        text: error.message || "An error occured while toggling the category",
+                                    })
+                                })
+
+                        }
+                    })
+
+
+                }
+                function deleteCategory(id) {
+                    Swal.fire({
+                        title: "Do you want to delete category ",
+                        icon: "warning",
+                        showCancelButton: true,
+                        cancelButtonText: "No",
+                        confirmButtonText: "Yes",
+                    })
+                        .then((result) => {
+                            if (result.isConfirmed) {
+                                fetch(`/admin/deleteCategory`, {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ id: id })
+                                })
+                                    .then((response) => {
+                                        if (!response.ok) {
+                                            return response.json().then((err) => {
+                                                throw new Error(err.error || "Unknown error")
+                                            })
+                                        }
+                                        return response.json()
+
+                                    })
+                                    .then((data) => {
+                                        Swal.fire({
+                                            icon: "success",
+                                            title: "Success",
+                                            text: data.message,
+                                        })
+                                            .then(() => {
+                                                location.reload()
+                                            })
+                                    })
+                                    .catch((error) => {
+                                        Swal.fire({
+                                            icon: "error",
+                                            title: "Error",
+                                            text: error.message || "An error occured while deleting the category",
+
+                                        })
+
+
+
+                                    })
+
+                            }
+                        })
+
+
+                }
+
+            </script>
+</body>
+
+</html>

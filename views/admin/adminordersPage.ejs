@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shoezy-Orders</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/css/adminordersPage.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+ <%- include('../partials/admin/sidebar') %>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+                <div class="header-right">
+                    <div class="notification">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="admin-profile">
+                        <i class="fas fa-user-circle"></i>
+                        <span>ADMIN</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="dashboard-content">
+                <!-- Orders Section -->
+                <div class="orders-section">
+                    <h3>Orders Management</h3>
+                    <div class="table-container">
+                        <table class="orders-table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Category</th>
+                                    <th>Brand</th>
+                                    <th>Offer</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                           
+                        </table>
+                    </div>
+                    <div class="pagination">
+                        <button class="page-btn">‹</button>
+                        <button class="page-btn active">1</button>
+                        <button class="page-btn">2</button>
+                        <button class="page-btn">3</button>
+                        <button class="page-btn">›</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="offerModal" style="display: none;">
+        <div class="modal-content">
+            <h3>Add/Edit Offer</h3>
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <form>
+                <div class="form-group">
+                    <label>Product Name:</label>
+                    <input type="text" placeholder="Enter product name">
+                </div>
+                <div class="form-group">
+                    <label>Category:</label>
+                    <select>
+                        <option>Select Category</option>
+                        <option>Formal</option>
+                        <option>Casual</option>
+                        <option>Boots</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Brand:</label>
+                    <input type="text" placeholder="Enter brand">
+                </div>
+                <div class="form-group">
+                    <label>Offer Percentage:</label>
+                    <input type="number" placeholder="Enter offer percentage">
+                </div>
+                <div class="form-group">
+                    <label>Status:</label>
+                    <select>
+                        <option>Listed</option>
+                        <option>Unlisted</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="action-btn">Save Offer</button>
+                    <button type="button" class="action-btn cancel" onclick="closeModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Toggle sidebar
+        const menuToggle = document.querySelector('.menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('sidebar-open');
+        });
+
+        // Modal functions
+        function openModal() {
+            document.getElementById('offerModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('offerModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

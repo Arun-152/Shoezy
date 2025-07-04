@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shoezy-products</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/css/adminproductsPage.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+    <%- include('../partials/admin/sidebar') %>
+
+
+        <!-- Main Content -->
+        <main class="main-content">
+           <header class="header">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+                <div class="header-right">
+                    <div class="notification">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="admin-profile">
+                        <i class="fas fa-user-circle"></i>
+                        <span>ADMIN</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="page-content">
+                <div class="page-header">
+                    <h1>Product Management</h1>
+                </div>
+
+                <!-- Controls Section -->
+                <div class="controls-section">
+                    <div class="left-controls">
+                        <div class="sort-control">
+                            <label>Sort:</label>
+                            <select class="sort-select">
+                                <option>Name</option>
+                                <option>Price</option>
+                                <option>Date</option>
+                            </select>
+                        </div>
+                        <div class="items-control">
+                            <label>by:</label>
+                            <select class="items-select">
+                                <option>10</option>
+                                <option>25</option>
+                                <option>50</option>
+                                <option>100</option>
+                            </select>
+                        </div>
+                        <div class="filter-control">
+                            <label>Filter:</label>
+                            <select class="filter-select">
+                                <option>All</option>
+                                <option>Active</option>
+                                <option>Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div  class="right-controls">
+                        <button id="addproduct" class="btn-primary" type="button">
+                        <i class="fas fa-plus"></i> Add Product
+                        </button>
+
+                    </div>
+                </div>
+
+                <!-- Table Section -->
+                <div class="table-section">
+                    <div class="table-container">
+                        <table class="customers-table">
+                            <thead>
+                                <tr>
+                                    <th class="table-header">S No</th>
+                                    <th class="table-header">Product Name</th>
+                                    <th class="table-header">Category</th>
+                                    <th class="table-header">Price</th>
+                                    <th class="table-header">Stock</th>
+                                    <th class="table-header">Status</th>
+                                    <th class="table-header">Update</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="table-row">
+                                    <td>1</td>
+                                    <td>Aditi Kol 1 Speed</td>
+                                    <td>Formal</td>
+                                    <td>₹1999</td>
+                                    <td>20</td>
+                                    <td>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" checked>
+                                            <span class="slider"></span>
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <button class="update-btn"><i class="fas fa-edit"></i></button>
+                                    </td>
+                                </tr>
+                                <tr class="table-row">
+                                    <td>2</td>
+                                    <td>Aditi Kol 2</td>
+                                    <td>Casual</td>
+                                    <td>₹999</td>
+                                    <td>20</td>
+                                    <td>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" checked>
+                                            <span class="slider"></span>
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <button class="update-btn"><i class="fas fa-edit"></i></button>
+                                    </td>
+                                </tr>
+                                <tr class="table-row">
+                                    <td>3</td>
+                                    <td>Nike Zoom PG III</td>
+                                    <td>Sports</td>
+                                    <td>₹2499</td>
+                                    <td>33</td>
+                                    <td>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <button class="update-btn"><i class="fas fa-edit"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pagination Section -->
+                <div class="pagination-section">
+                    <div class="pagination-info">
+                        1 of 3 Pages
+                    </div>
+                    <div class="pagination-controls">
+                        <button class="pagination-btn"><i class="fas fa-chevron-left"></i></button>
+                        <div class="page-numbers">
+                            <button class="page-btn active">1</button>
+                            <button class="page-btn">2</button>
+                            <button class="page-btn">3</button>
+                            <span class="page-dots">...</span>
+                            <button class="page-btn">10</button>
+                        </div>
+                        <button class="pagination-btn"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Toggle sidebar
+        const menuToggle = document.querySelector('.menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('sidebar-open');
+        }); 
+        document.getElementById('addproduct').addEventListener('click', () => {
+    window.location.href = '/admin/addproduct'; // your GET route
+  });
+       
+  
+
+
+
+
+    </script>
+</body>
+</html>

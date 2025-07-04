@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shoezy -Dashboard</title>
+    <link rel="stylesheet" href="/css/dashboardPage.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+  <%- include('../partials/admin/sidebar') %>
+
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+                <div class="header-right">
+                    <div class="notification">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="admin-profile">
+                        <i class="fas fa-user-circle"></i>
+                        <span>ADMIN</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <div class="dashboard-content">
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card total-sales">
+                        <div class="stat-info">
+                            <h3>Total Sales</h3>
+                            <h2>₹ 5,55,000</h2>
+                        </div>
+                    </div>
+                    <div class="stat-card visitors">
+                        <div class="stat-info">
+                            <h3>Visitors</h3>
+                            <h2>2,500</h2>
+                        </div>
+                    </div>
+                    <div class="stat-card total-orders">
+                        <div class="stat-info">
+                            <h3>Total Orders</h3>
+                            <h2>1,500</h2>
+                        </div>
+                    </div>
+                    <div class="stat-card users">
+                        <div class="stat-info">
+                            <h3>Users</h3>
+                            <h2>1,013</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Revenue Chart -->
+                <div class="chart-section">
+                    <div class="chart-header">
+                        <h3>Total Revenue</h3>
+                        <div class="chart-controls">
+                            <span class="revenue-amount">₹50,23700</span>
+                            <span class="revenue-change">↑ 5% increase</span>
+                            <div class="chart-period">
+                                <button class="period-btn active">WEEK</button>
+                                <button class="period-btn">YEAR</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart">
+                            <div class="bar" style="height: 80%"></div>
+                            <div class="bar" style="height: 90%"></div>
+                            <div class="bar" style="height: 85%"></div>
+                            <div class="bar" style="height: 70%"></div>
+                            <div class="bar" style="height: 88%"></div>
+                            <div class="bar" style="height: 45%"></div>
+                            <div class="bar" style="height: 75%"></div>
+                            <div class="bar" style="height: 92%"></div>
+                            <div class="bar" style="height: 78%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Latest Orders -->
+                <div class="orders-section">
+                    <h3>Latest Orders</h3>
+                    <div class="table-container">
+                        <table class="orders-table">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Product</th>
+                                    <th>Date</th>
+                                    <th>Customer</th>
+                                    <th>Total</th>
+                                    <th>Payment</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>#300012</td>
+                                    <td>
+                                        <div class="product-info">
+                                            <img src="https://via.placeholder.com/40x40/333/fff?text=Shoe" alt="Nike QTY">
+                                            <div>
+                                                <div class="product-name">Nike QTY</div>
+                                                <div class="product-desc">+3 Products</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>24 Dec 2022</td>
+                                    <td>Janyiberi</td>
+                                    <td>₹50000</td>
+                                    <td>24 Jun 2023</td>
+                                    <td><span class="status processing">Processing</span></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-edit"><i class="fas fa-edit"></i></button>
+                                            <button class="btn-view"><i class="fas fa-eye"></i></button>
+                                            <button class="btn-delete"><i class="fas fa-trash"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>#300013</td>
+                                    <td>
+                                        <div class="product-info">
+                                            <img src="https://via.placeholder.com/40x40/333/fff?text=Shoe" alt="Nike Zoom">
+                                            <div>
+                                                <div class="product-name">Nike Zoom</div>
+                                                <div class="product-desc">+3 Products</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>24 Dec 2022</td>
+                                    <td>Janyiberi</td>
+                                    <td>₹50000</td>
+                                    <td>24 Jun 2023</td>
+                                    <td><span class="status processing">Processing</span></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-edit"><i class="fas fa-edit"></i></button>
+                                            <button class="btn-view"><i class="fas fa-eye"></i></button>
+                                            <button class="btn-delete"><i class="fas fa-trash"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>#300014</td>
+                                    <td>
+                                        <div class="product-info">
+                                            <img src="https://via.placeholder.com/40x40/333/fff?text=Shoe" alt="Jordan Retro 3">
+                                            <div>
+                                                <div class="product-name">Jordan Retro 3</div>
+                                                <div class="product-desc">+3 Products</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>24 Dec 2022</td>
+                                    <td>Janyiberi</td>
+                                    <td>₹55000</td>
+                                    <td>24 Jun 2023</td>
+                                    <td><span class="status processing">Processing</span></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-edit"><i class="fas fa-edit"></i></button>
+                                            <button class="btn-view"><i class="fas fa-eye"></i></button>
+                                            <button class="btn-delete"><i class="fas fa-trash"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>#300015</td>
+                                    <td>
+                                        <div class="product-info">
+                                            <img src="https://via.placeholder.com/40x40/333/fff?text=Shoe" alt="Artical Shoe">
+                                            <div>
+                                                <div class="product-name">Artical Shoe</div>
+                                                <div class="product-desc">+3 Products</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>24 Dec 2022</td>
+                                    <td>Janyiberi</td>
+                                    <td>₹15000</td>
+                                    <td>24 Jun 2023</td>
+                                    <td><span class="status processing">Processing</span></td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-edit"><i class="fas fa-edit"></i></button>
+                                            <button class="btn-view"><i class="fas fa-eye"></i></button>
+                                            <button class="btn-delete"><i class="fas fa-trash"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Mobile menu toggle
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.querySelector('.sidebar');
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('sidebar-open');
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768 && !sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                sidebar.classList.remove('sidebar-open');
+            }
+        });
+
+        // Chart period toggle
+        const periodButtons = document.querySelectorAll('.period-btn');
+        periodButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                periodButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

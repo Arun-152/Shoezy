@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shoezy - Premium Footwear</title>
+    <link rel="stylesheet" href="/css/shopPage.css">
+</head>
+<body>
+    <!-- Header -->
+    
+    <%-include("../partials/user/navbar")%>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>Step Into <span class="highlight">Style</span></h1>
+                <p>Discover our premium collection of footwear designed for comfort, style, and performance.</p>
+                <button class="cta-button">Shop Now</button>
+            </div>
+            <div class="hero-image">
+                <div class="shoe-display">
+                    <div class="shoe-card featured">
+                        <div class="shoe-image">👟</div>
+                        <div class="shoe-info">
+                            <h3>Nike Air Max</h3>
+                            <p class="price">$129.99</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="floating-elements">
+                    <div class="float-element">⭐</div>
+                    <div class="float-element">✨</div>
+                    <div class="float-element">💫</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Product Grid -->
+    <section class="products" id="products">
+        <div class="container">
+            <h2>Featured Products</h2>
+            <div class="product-grid">
+                <div class="product-card">
+                    <div class="product-image">
+                        <div class="shoe-placeholder" style="background: linear-gradient(45deg, #00b894, #00a3ff);">👟</div>
+                        <div class="product-badges">
+                            <span class="badge new">New</span>
+                        </div>
+                    </div>
+                    <div class="product-info">
+                        <h3>Nike Air Max 270</h3>
+                        <div class="rating">
+                            <span class="stars">⭐⭐⭐⭐⭐</span>
+                            <span class="review-count">(124)</span>
+                        </div>
+                        <div class="price-section">
+                            <span class="price">$149.99</span>
+                            <span class="old-price">$179.99</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image">
+                        <div class="shoe-placeholder" style="background: linear-gradient(45deg, #ff6b35, #f7931e);">👟</div>
+                        <div class="product-badges">
+                            <span class="badge sale">Sale</span>
+                        </div>
+                    </div>
+                    <div class="product-info">
+                        <h3>Adidas Ultraboost</h3>
+                        <div class="rating">
+                            <span class="stars">⭐⭐⭐⭐⭐</span>
+                            <span class="review-count">(89)</span>
+                        </div>
+                        <div class="price-section">
+                            <span class="price">$179.99</span>
+                            <span class="old-price">$199.99</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image">
+                        <div class="shoe-placeholder" style="background: linear-gradient(45deg, #6c5ce7, #a29bfe);">👟</div>
+                    </div>
+                    <div class="product-info">
+                        <h3>Puma RS-X</h3>
+                        <div class="rating">
+                            <span class="stars">⭐⭐⭐⭐☆</span>
+                            <span class="review-count">(67)</span>
+                        </div>
+                        <div class="price-section">
+                            <span class="price">$119.99</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image">
+                        <div class="shoe-placeholder" style="background: linear-gradient(45deg, #e17055, #fdcb6e);">👟</div>
+                    </div>
+                    <div class="product-info">
+                        <h3>Jordan Retro 1</h3>
+                        <div class="rating">
+                            <span class="stars">⭐⭐⭐⭐⭐</span>
+                            <span class="review-count">(156)</span>
+                        </div>
+                        <div class="price-section">
+                            <span class="price">$189.99</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image">
+                        <div class="shoe-placeholder" style="background: linear-gradient(45deg, #fd79a8, #fdcb6e);">👟</div>
+                        <div class="product-badges">
+                            <span class="badge trending">Trending</span>
+                        </div>
+                    </div>
+                    <div class="product-info">
+                        <h3>Vans Old Skool</h3>
+                        <div class="rating">
+                            <span class="stars">⭐⭐⭐⭐☆</span>
+                            <span class="review-count">(92)</span>
+                        </div>
+                        <div class="price-section">
+                            <span class="price">$69.99</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image">
+                        <div class="shoe-placeholder" style="background: linear-gradient(45deg, #00b894, #55efc4);">👟</div>
+                    </div>
+                    <div class="product-info">
+                        <h3>Converse Chuck Taylor</h3>
+                        <div class="rating">
+                            <span class="stars">⭐⭐⭐⭐☆</span>
+                            <span class="review-count">(78)</span>
+                        </div>
+                        <div class="price-section">
+                            <span class="price">$59.99</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image">
+                        <div class="shoe-placeholder" style="background: linear-gradient(45deg, #74b9ff, #0984e3);">👟</div>
+                    </div>
+                    <div class="product-info">
+                        <h3>New Balance 990</h3>
+                        <div class="rating">
+                            <span class="stars">⭐⭐⭐⭐⭐</span>
+                            <span class="review-count">(134)</span>
+                        </div>
+                        <div class="price-section">
+                            <span class="price">$199.99</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image">
+                        <div class="shoe-placeholder" style="background: linear-gradient(45deg, #fd79a8, #e84393);">👟</div>
+                    </div>
+                    <div class="product-info">
+                        <h3>Reebok Classic</h3>
+                        <div class="rating">
+                            <span class="stars">⭐⭐⭐⭐☆</span>
+                            <span class="review-count">(45)</span>
+                        </div>
+                        <div class="price-section">
+                            <span class="price">$89.99</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="product-card">
+                    <div class="product-image">
+                        <div class="shoe-placeholder" style="background: linear-gradient(45deg, #00cec9, #55efc4);">👟</div>
+                    </div>
+                    <div class="product-info">
+                        <h3>Asics Gel-Kayano</h3>
+                        <div class="rating">
+                            <span class="stars">⭐⭐⭐⭐⭐</span>
+                            <span class="review-count">(98)</span>
+                        </div>
+                        <div class="price-section">
+                            <span class="price">$159.99</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+      <%-include("../partials/user/userfooter")%>
+
+
+    <script>
+        // Add some interactivity
+        document.querySelectorAll('.product-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Floating animation for hero elements
+        document.querySelectorAll('.float-element').forEach((element, index) => {
+            element.style.animationDelay = `${index * 0.5}s`;
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shoezy - Create Account</title>
+    <link rel="stylesheet" href="/css/signupPage.css">
+</head>
+<body>
+    <header>
+        <h1>Shoezy</h1>
+        <div class="language-selector">
+            <span>English (UK)</span>
+        </div>
+    </header>
+    <main>
+        <div class="signup-container">
+            <div class="shoe-image">
+                <img src="shoe-image.png" alt="Shoe">
+            </div>
+            <div class="signup-form">
+                <h2>Create Account</h2>
+                <button class="google-signup">
+                    <img src="https://www.google.com/favicon.ico" alt="Google Icon">
+                    Sign up with Google
+                </button>
+                <form id="signform" action="/signup" method="post"> 
+                    <input type="text" placeholder="fullname" name="fullname">
+                    <p id="error1" class="error-message"></p>
+                    <input type="email" placeholder="emailaddress" name="email">
+                    <p id="error2" class="error-message"></p>
+                    <input type="tel" placeholder="phone" name="phone">
+                    <p id="error3" class="error-message"></p>
+                    <input type="password" placeholder="password" name="password">
+                    <p id="error4" class="error-message"></p>
+                    <input type="password" placeholder="confirmpassword" name="confirmPassword">
+                    <p id="error5" class="error-message"></p>
+                    <input type="text" placeholder="Referral Code">
+                    <button type="submit" class="create-account-btn">Create Account</button>
+                </form>
+                <p class="login-link">Already have an account? <a href="#">Login</a></p>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

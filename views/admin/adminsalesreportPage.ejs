@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shoezy-Report</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/css/adminsalesreportPage.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+           <%- include('../partials/admin/sidebar') %>
+            <div class="sidebar-footer">
+                <a href="/admin/logout" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+                <div class="header-right">
+                    <div class="notification">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="admin-profile">
+                        <i class="fas fa-user-circle"></i>
+                        <span>ADMIN</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="page-content">
+                <div class="page-header">
+                    <h1>Sales Report</h1>
+                </div>
+
+                <!-- Controls Section -->
+                <div class="controls-section">
+                    <div class="left-controls">
+                        <div class="sort-control">
+                            <label>Sort:</label>
+                            <select class="sort-select">
+                                <option>Product Name</option>
+                                <option>Price</option>
+                                <option>Category</option>
+                            </select>
+                        </div>
+                        <div class="items-control">
+                            <label>by:</label>
+                            <select class="items-select">
+                                <option>10</option>
+                                <option>25</option>
+                                <option>50</option>
+                                <option>100</option>
+                            </select>
+                        </div>
+                        <div class="filter-control">
+                            <label>Date:</label>
+                            <input type="date" class="filter-date">
+                        </div>
+                    </div>
+                    <div class="right-controls">
+                        <button class="btn-primary"><i class="fas fa-file-export"></i> Export</button>
+                    </div>
+                </div>
+
+                <!-- Table Section -->
+                <div class="table-section">
+                    <div class="table-container">
+                        <table class="customers-table">
+                            <thead>
+                                <tr>
+                                    <th class="table-header">Buyer</th>
+                                    <th class="table-header">Product Name</th>
+                                    <th class="table-header">Product ID</th>
+                                    <th class="table-header">Qty</th>
+                                    <th class="table-header">Price</th>
+                                    <th class="table-header">GST</th>
+                                    <th class="table-header">Category</th>
+                                    <th class="table-header">Unit/Type</th>
+                                    <th class="table-header">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="table-row">
+                                    <td>Rahul</td>
+                                    <td>Nike Air Max</td>
+                                    <td>F20711290</td>
+                                    <td>1</td>
+                                    <td>₹9000</td>
+                                    <td>18%</td>
+                                    <td>Formal</td>
+                                    <td>Nos</td>
+                                    <td>₹10620</td>
+                                </tr>
+                                <tr class="table-row">
+                                    <td>Maria</td>
+                                    <td>PV2 Pants</td>
+                                    <td>F20711291</td>
+                                    <td>1</td>
+                                    <td>₹1000000</td>
+                                    <td>18%</td>
+                                    <td>Casual</td>
+                                    <td>Nos</td>
+                                    <td>₹118000</td>
+                                </tr>
+                                <tr class="table-row">
+                                    <td>Anu</td>
+                                    <td>Ofby Set</td>
+                                    <td>F20711292</td>
+                                    <td>1</td>
+                                    <td>₹5000</td>
+                                    <td>12%</td>
+                                    <td>Boots</td>
+                                    <td>Nos</td>
+                                    <td>₹5600</td>
+                                </tr>
+                                <tr class="table-row">
+                                    <td>Shijaa</td>
+                                    <td>Packet 21</td>
+                                    <td>F20711293</td>
+                                    <td>1</td>
+                                    <td>₹1000000</td>
+                                    <td>18%</td>
+                                    <td>Formal</td>
+                                    <td>Nos</td>
+                                    <td>₹118000</td>
+                                </tr>
+                                <tr class="table-row">
+                                    <td>Maria</td>
+                                    <td>Ofby Set</td>
+                                    <td>F20711292</td>
+                                    <td>1</td>
+                                    <td>₹5000</td>
+                                    <td>12%</td>
+                                    <td>Casual</td>
+                                    <td>Nos</td>
+                                    <td>₹5600</td>
+                                </tr>
+                                <tr class="table-row">
+                                    <td>Devid</td>
+                                    <td>Saleei</td>
+                                    <td>F20711291</td>
+                                    <td>1</td>
+                                    <td>₹1000000</td>
+                                    <td>18%</td>
+                                    <td>Casual</td>
+                                    <td>Nos</td>
+                                    <td>₹118000</td>
+                                </tr>
+                                <tr class="table-row">
+                                    <td>Maria</td>
+                                    <td>ANDRIOD 2.0</td>
+                                    <td>F20711292</td>
+                                    <td>1</td>
+                                    <td>₹5000</td>
+                                    <td>12%</td>
+                                    <td>Formal</td>
+                                    <td>Nos</td>
+                                    <td>₹5600</td>
+                                </tr>
+                                <tr class="table-row">
+                                    <td>Afitaa</td>
+                                    <td>MRC H</td>
+                                    <td>F20711293</td>
+                                    <td>1</td>
+                                    <td>₹1000000</td>
+                                    <td>18%</td>
+                                    <td>Boots</td>
+                                    <td>Nos</td>
+                                    <td>₹118000</td>
+                                </tr>
+                                <tr class="table-row">
+                                    <td>Maria</td>
+                                    <td>MME H</td>
+                                    <td>F20711292</td>
+                                    <td>1</td>
+                                    <td>₹5000</td>
+                                    <td>12%</td>
+                                    <td>Casual</td>
+                                    <td>Nos</td>
+                                    <td>₹5600</td>
+                                </tr>
+                                <tr class="table-row">
+                                    <td>David</td>
+                                    <td>Prime 22</td>
+                                    <td>F20711293</td>
+                                    <td>1</td>
+                                    <td>₹1000000</td>
+                                    <td>18%</td>
+                                    <td>Formal</td>
+                                    <td>Nos</td>
+                                    <td>₹118000</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pagination Section -->
+                <div class="pagination-section">
+                    <div class="pagination-info">
+                        1 of 3 Pages
+                    </div>
+                    <div class="pagination-controls">
+                        <button class="pagination-btn"><i class="fas fa-chevron-left"></i></button>
+                        <div class="page-numbers">
+                            <button class="page-btn active">1</button>
+                            <button class="page-btn">2</button>
+                            <button class="page-btn">3</button>
+                            <span class="page-dots">...</span>
+                            <button class="page-btn">10</button>
+                        </div>
+                        <button class="pagination-btn"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Toggle sidebar
+        const menuToggle = document.querySelector('.menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('sidebar-open');
+        });
+    </script>
+</body>
+</html>

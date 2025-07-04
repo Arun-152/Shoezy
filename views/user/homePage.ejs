@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shoezy - Premium Sneakers</title>
+    <link rel="stylesheet" href="css/homePage.css">
+</head>
+<body>
+    <!-- Header -->
+        <%-include("../partials/user/navbar")%>
+
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h2>Shoezy</h2>
+                <p>Premium collection of modern sneakers</p>
+            </div>
+            <div class="hero-image">
+                <div class="circle-bg"></div>
+                <div class="sneaker-display">
+                    <img src="https://via.placeholder.com/300x200/ffffff/cccccc?text=Sneaker" alt="Featured Sneaker" class="main-sneaker">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Color Options -->
+        <div class="color-options">
+            <div class="color-dot active" style="background-color: #333;"></div>
+            <div class="color-dot" style="background-color: #666;"></div>
+            <div class="color-dot" style="background-color: #999;"></div>
+            <div class="color-dot" style="background-color: #ccc;"></div>
+        </div>
+    </section>
+
+    <!-- Air Jordan Section -->
+    <section class="air-jordan">
+        <div class="jordan-content">
+            <div class="jordan-text">
+                <h2>AIR JORDAN</h2>
+                <p>Iconic basketball sneakers with legendary performance and style</p>
+                <button class="shop-btn">Shop Now</button>
+            </div>
+            <div class="jordan-image">
+                <img src="https://via.placeholder.com/400x300/dc2626/ffffff?text=Air+Jordan" alt="Air Jordan" class="jordan-sneaker">
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Grid -->
+    <section class="products">
+        <div class="container">
+            <div class="products-grid">
+                <!-- Product 1 -->
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="https://via.placeholder.com/250x200/ffffff/cccccc?text=Nike+Air" alt="Nike Air">
+                    </div>
+                    <div class="product-info">
+                        <h3>Nike Air Max</h3>
+                        <p class="price">$120.00</p>
+                        <div class="rating">★★★★★</div>
+                    </div>
+                </div>
+
+                <!-- Product 2 -->
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="https://via.placeholder.com/250x200/f3f4f6/666666?text=Adidas" alt="Adidas">
+                    </div>
+                    <div class="product-info">
+                        <h3>Adidas Ultraboost</h3>
+                        <p class="price">$180.00</p>
+                        <div class="rating">★★★★☆</div>
+                    </div>
+                </div>
+
+                <!-- Product 3 -->
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="https://via.placeholder.com/250x200/fbbf24/ffffff?text=New+Balance" alt="New Balance">
+                    </div>
+                    <div class="product-info">
+                        <h3>New Balance 990</h3>
+                        <p class="price">$175.00</p>
+                        <div class="rating">★★★★★</div>
+                    </div>
+                </div>
+
+                <!-- Product 4 -->
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="https://via.placeholder.com/250x200/e5e7eb/333333?text=Converse" alt="Converse">
+                    </div>
+                    <div class="product-info">
+                        <h3>Converse Chuck Taylor</h3>
+                        <p class="price">$65.00</p>
+                        <div class="rating">★★★★☆</div>
+                    </div>
+                </div>
+
+                <!-- Product 5 -->
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="https://via.placeholder.com/250x200/374151/ffffff?text=Vans" alt="Vans">
+                    </div>
+                    <div class="product-info">
+                        <h3>Vans Old Skool</h3>
+                        <p class="price">$60.00</p>
+                        <div class="rating">★★★★☆</div>
+                    </div>
+                </div>
+
+                <!-- Product 6 -->
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="https://via.placeholder.com/250x200/1f2937/ffffff?text=Puma" alt="Puma">
+                    </div>
+                    <div class="product-info">
+                        <h3>Puma Suede Classic</h3>
+                        <p class="price">$70.00</p>
+                        <div class="rating">★★★★★</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <%-include("../partials/user/userfooter")%>
+</body>
+</html>

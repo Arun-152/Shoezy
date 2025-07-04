@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Management</title>
+    <link rel="stylesheet" href="/css/admincustomerPage.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <%- include('../partials/admin/sidebar') %>
+
+        <div class="main-content">
+            <header class="header">
+                <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+                <div class="header-right">
+                    <span class="notification"><i class="fas fa-bell"></i></span>
+                    <div class="admin-profile">
+                        <i class="fas fa-user-circle"></i>
+                        <span>ADMIN</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <div class="page-header">
+                    <h1>Customer Management</h1>
+                </div>
+
+                <div class="search-section">
+                    <div class="search-container">
+                        <i class="fas fa-search search-icon" onclick="searchCustomers()"></i>
+                        <input type="text" class="search-input" placeholder="Search by name or email..." oninput="searchCustomers()">
+                        <button class="clear-search"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+
+                <div class="controls-section">
+                    <div class="left-controls">
+                        <div class="sort-control">
+                            <label for="sort">Sort</label>
+                            <select id="sort" class="sort-select" onchange="searchCustomers()">
+                                <option value="name">Name</option>
+                                <option value="email">Email</option>
+                                <option value="date">Date</option>
+                            </select>
+                        </div>
+                        <div class="items-control">
+                            <label for="items">by</label>
+                            <select id="items" class="items-select">
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="right-controls">
+                        <div class="filter-control">
+                            <label for="filter">Filter</label>
+                            <select id="filter" class="filter-select" onchange="searchCustomers()">
+                                <option value="all">All</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-section">
+                    <div class="table-container">
+                        <table class="customers-table">
+                            <thead>
+                                <tr>
+                                    <th class="table-header">Name</th>
+                                    <th class="table-header">Email</th>
+                                    <th class="table-header">Phone</th>
+                                    <th class="table-header">Update</th>
+                                </tr>
+                            </thead>
+                            <tbody id="customer-table-body">
+                                <% users.forEach((customer) => { %>
+                                    <tr class="table-row" data-customer-id="<%= customer.id %>">
+                                        <td><%= customer.fullname %></td>
+                                        <td><%= customer.email %></td>
+                                        <td><%= customer.phone %></td>
+                                        <td>
+                                            <%if(customer.isBlocked===false){%>
+                                           <a href="/admin/blockCustomer?id=<%=customer._id%>"> <button class="action-btn" >Block</button></a>
+                                                   
+                                           
+                                        </td>
+                                        <%}else{%>
+                                            <td>
+                                         
+                                           <a href="/admin/unblockCustomer?id=<%=customer._id%>"> <button class="action-btn" >unBlock</button></a>
+                                                   
+                                           
+                                        </td>
+                                        <%}%>
+                                        <td>
+                                           
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="pagination-section">
+                    <div class="pagination-info">
+                        <span>1 of 10 Pages</span>
+                    </div>
+                    <div class="pagination-controls">
+                        <button class="pagination-btn" disabled><i class="fas fa-chevron-left"></i></button>
+                        <div class="page-numbers">
+                            <button class="page-btn active">1</button>
+                            <button class="page-btn">2</button>
+                            <button class="page-btn">3</button>
+                            <span class="page-dots">...</span>
+                            <button class="page-btn">10</button>
+                        </div>
+                        <button class="pagination-btn"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle sidebar for mobile
+        const menuToggle = document.querySelector('.menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('sidebar-open');
+        });
+
+        // Search functionality
+        const searchInput = document.querySelector('.search-input');
+        const clearSearch = document.querySelector('.clear-search');
+        const filterSelect = document.querySelector('#filter');
+        const sortSelect = document.querySelector('#sort');
+        const tableBody = document.querySelector('#customer-table-body');
+
+        // Store original table rows
+        const originalRows = Array.from(tableBody.querySelectorAll('.table-row'));
+
+        function searchCustomers() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const filter = filterSelect.value;
+
+            clearSearch.classList.toggle('visible', searchInput.value.length > 0);
+
+            originalRows.forEach(row => {
+                const name = row.children[0].textContent.toLowerCase();
+                const email = row.children[1].textContent.toLowerCase();
+                const status = row.querySelector('.action-btn').textContent.toLowerCase() === 'block' ? 'active' : 'inactive';
+
+                const matchesSearch = name.includes(searchTerm) || email.includes(searchTerm);
+                const matchesFilter = filter === 'all' || status === filter;
+
+                row.style.display = matchesSearch && matchesFilter ? '' : 'none';
+            });
+        }
+
+        searchInput.addEventListener('input', searchCustomers);
+        clearSearch.addEventListener('click', () => {
+            searchInput.value = '';
+            clearSearch.classList.remove('visible');
+            searchCustomers();
+            searchInput.focus();
+        });
+
+        // SweetAlert for block/unblock confirmation
+        function confirmBlock(customerId, customerName, currentStatus) {
+            const action = currentStatus === 'Active' ? 'block' : 'unblock';
+            Swal.fire({
+                title: 'Are you sure?',
+                text: `Do you want to ${action} ${customerName}?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: action === 'block' ? '#dc3545' : '#28a745',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'No'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Update button client-side
+                    const row = document.querySelector(`tr[data-customer-id="${customerId}"]`);
+                    const button = row.querySelector('.action-btn');
+                    const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
+                    button.textContent = newStatus === 'Active' ? 'Block' : 'Unblock';
+                    button.className = `action-btn ${newStatus === 'Active' ? 'block-btn' : 'unblock-btn'}`;
+
+                    // Show success message
+                    Swal.fire(
+                        'Success!',
+                        `${customerName} has been ${action}ed.`,
+                        'success'
+                    );
+
+                    // Update filter to reflect new status
+                    searchCustomers();
+
+                    // Add your backend API call here
+                    // Example:
+                    // fetch(`/api/customers/${customerId}/${action}`, { method: 'POST' })
+                    //     .then(response => response.json())
+                    //     .then(data => {
+                    //         // Handle response
+                    //     });
+                }
+            });
+        }
+
+        // Edit customer function (placeholder)
+        function editCustomer(customerId) {
+            Swal.fire(
+                'Edit',
+                `Edit functionality for customer ID ${customerId} would be implemented here.`,
+                'info'
+            );
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shoezy-Offers</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/css/adminoffersPage.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+         <%- include('../partials/admin/sidebar') %>
+
+
+        <!-- Main Content -->
+        <main class="main-content">
+           <header class="header">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+                <div class="header-right">
+                    <div class="notification">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="admin-profile">
+                        <i class="fas fa-user-circle"></i>
+                        <span>ADMIN</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="page-content">
+                <div class="page-header">
+                    <h1>Offer Management</h1>
+                </div>
+
+                <!-- Controls Section -->
+                <div class="controls-section">
+                    <div class="left-controls">
+                        <div class="sort-control">
+                            <label>Sort:</label>
+                            <select class="sort-select">
+                                <option>Product Name</option>
+                                <option>Category</option>
+                                <option>Brand</option>
+                                <option>Offer Percentage</option>
+                            </select>
+                        </div>
+                        <div class="items-control">
+                            <label>by:</label>
+                            <select class="items-select">
+                                <option>10</option>
+                                <option>25</option>
+                                <option>50</option>
+                                <option>100</option>
+                            </select>
+                        </div>
+                        <div class="filter-control">
+                            <label>Filter:</label>
+                            <select class="filter-select">
+                                <option>All</option>
+                                <option>Listed</option>
+                                <option>Unlisted</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="right-controls">
+                        <button class="btn-primary" onclick="openModal('add')"><i class="fas fa-plus"></i> Add Offer</button>
+                    </div>
+                </div>
+
+                <!-- Table Section -->
+                <div class="table-section">
+                    <div class="table-container">
+                        <table class="customers-table">
+                            <thead>
+                                <tr>
+                                    <th class="table-header">S No</th>
+                                    <th class="table-header">Product Name</th>
+                                    <th class="table-header">Category</th>
+                                    <th class="table-header">Brand</th>
+                                    <th class="table-header">Offer Percentage</th>
+                                    <th class="table-header">Status</th>
+                                    <th class="table-header">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="table-row">
+                                    <td>1</td>
+                                    <td>Nike Air Max</td>
+                                    <td>Formal</td>
+                                    <td>Nike</td>
+                                    <td>20%</td>
+                                    <td>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" checked>
+                                            <span class="slider"></span>
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <button class="update-btn" onclick="openModal('edit', { id: 1, productName: 'Nike Air Max', category: 'Formal', brand: 'Nike', offerPercentage: '20', status: true })"><i class="fas fa-edit"></i></button>
+                                    </td>
+                                </tr>
+                                <tr class="table-row">
+                                    <td>2</td>
+                                    <td>PV2 Pants</td>
+                                    <td>Casual</td>
+                                    <td>Adidas</td>
+                                    <td>15%</td>
+                                    <td>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" checked>
+                                            <span class="slider"></span>
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <button class="update-btn" onclick="openModal('edit', { id: 2, productName: 'PV2 Pants', category: 'Casual', brand: 'Adidas', offerPercentage: '15', status: true })"><i class="fas fa-edit"></i></button>
+                                    </td>
+                                </tr>
+                                <tr class="table-row">
+                                    <td>3</td>
+                                    <td>Leather Boots</td>
+                                    <td>Boots</td>
+                                    <td>Puma</td>
+                                    <td>10%</td>
+                                    <td>
+                                        <label class="toggle-switch">
+                                            <input type="checkbox">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <button class="update-btn" onclick="openModal('edit', { id: 3, productName: 'Leather Boots', category: 'Boots', brand: 'Puma', offerPercentage: '10', status: false })"><i class="fas fa-edit"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pagination Section -->
+                <div class="pagination-section">
+                    <div class="pagination-info">
+                        1 of 10 Pages
+                    </div>
+                    <div class="pagination-controls">
+                        <button class="pagination-btn"><i class="fas fa-chevron-left"></i></button>
+                        <div class="page-numbers">
+                            <button class="page-btn active">1</button>
+                            <button class="page-btn">2</button>
+                            <button class="page-btn">3</button>
+                            <span class="page-dots">...</span>
+                            <button class="page-btn">10</button>
+                        </div>
+                        <button class="pagination-btn"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal for Add/Edit Offer -->
+    <div class="modal" id="offerModal" style="display: none;">
+        <div class="modal-content">
+            <h3 id="modalTitle">Add Offer</h3>
+            <span class="close-btn" onclick="closeModal()">×</span>
+            <form id="offerForm">
+                <div class="form-group">
+                    <label>Product Name:</label>
+                    <input type="text" id="productName" class="form-input" placeholder="Enter product name">
+                </div>
+                <div class="form-group">
+                    <label>Category:</label>
+                    <select id="category" class="form-input">
+                        <option value="">Select Category</option>
+                        <option value="Formal">Formal</option>
+                        <option value="Casual">Casual</option>
+                        <option value="Boots">Boots</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Brand:</label>
+                    <input type="text" id="brand" class="form-input" placeholder="Enter brand name">
+                </div>
+                <div class="form-group">
+                    <label>Offer Percentage:</label>
+                    <input type="number" id="offerPercentage" class="form-input" placeholder="Enter offer percentage" min="0" max="100">
+                </div>
+                <div class="form-group">
+                    <label>Status:</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="offerStatus">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="action-btn">Save Offer</button>
+                    <button type="button" class="action-btn cancel" onclick="closeModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Toggle sidebar
+        const menuToggle = document.querySelector('.menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('sidebar-open');
+        });
+
+        // Modal functions
+        function openModal(mode, offer = null) {
+            const modal = document.getElementById('offerModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const productName = document.getElementById('productName');
+            const category = document.getElementById('category');
+            const brand = document.getElementById('brand');
+            const offerPercentage = document.getElementById('offerPercentage');
+            const offerStatus = document.getElementById('offerStatus');
+            const form = document.getElementById('offerForm');
+
+            if (mode === 'edit' && offer) {
+                modalTitle.textContent = 'Edit Offer';
+                productName.value = offer.productName;
+                category.value = offer.category;
+                brand.value = offer.brand;
+                offerPercentage.value = offer.offerPercentage;
+                offerStatus.checked = offer.status;
+                form.dataset.mode = 'edit';
+                form.dataset.id = offer.id;
+            } else {
+                modalTitle.textContent = 'Add Offer';
+                productName.value = '';
+                category.value = '';
+                brand.value = '';
+                offerPercentage.value = '';
+                offerStatus.checked = true;
+                form.dataset.mode = 'add';
+                form.dataset.id = '';
+            }
+
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('offerModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

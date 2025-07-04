@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Shoezy - OTP Verification</title>
+  <link rel="stylesheet" href="/css/otpverification.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="left-section">
+      <div class="brand-logo">
+        <div class="gradient-circle"></div>
+        <div class="shoe-container">
+          <img src="shoe.svg" alt="Shoe" class="shoe-image" />
+        </div>
+      </div>
+      <h1 class="brand-name">Shoezy</h1>
+    </div>
+
+    <div class="right-section">
+      <form class="otp-form">
+        <h2>OTP Verification</h2>
+        <p class="otp-instruction">Enter OTP sent to your email</p>
+        <div class="timer">0:30</div>
+
+        <div class="otp-inputs">
+          <input type="text" maxlength="1" class="otp-input" required />
+          <input type="text" maxlength="1" class="otp-input" required />
+          <input type="text" maxlength="1" class="otp-input" required />
+          <input type="text" maxlength="1" class="otp-input" required />
+          <input type="text" maxlength="1" class="otp-input" required />
+          <input type="text" maxlength="1" class="otp-input" required />
+        </div>
+
+        <button type="submit" class="confirm-btn">Confirm</button>
+
+        <div class="resend-section">
+          <a href="/resendotp" class="resend-link">Resend OTP</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+<script>
+  const otpInputs = document.querySelectorAll('.otp-input');
+  const form = document.querySelector('.otp-form');
+  const timerElement = document.querySelector('.timer');
+  let timeLeft = 30;
+
+  // Auto-focus handling
+  otpInputs.forEach((input, index) => {
+    input.addEventListener('input', () => {
+      if (input.value.length === 1 && index < otpInputs.length - 1) {
+        otpInputs[index + 1].focus();
+      }
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && input.value === '' && index > 0) {
+        otpInputs[index - 1].focus();
+      }
+    });
+  });
+
+  // Timer function
+  function updateTimer() {
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    if (timeLeft > 0) {
+      timeLeft--;
+      setTimeout(updateTimer, 1000);
+    }
+  }
+  updateTimer();
+
+  // Submit OTP via fetch
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const otp = Array.from(otpInputs).map(input => input.value).join('');
+
+    if (otp.length !== 6) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Incomplete OTP',
+        text: 'Please enter all 6 digits of the OTP.'
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch('/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ otp })
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success!',
+          text: 'OTP verified successfully.'
+        }).then(() => {
+          window.location.href = '/home';
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Invalid OTP',
+          text: result.message || 'OTP verification failed.'
+        });
+      }
+    } catch (err) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error verifying OTP. Please try again.'
+      });
+    }
+  });
+  document.addEventListener("DOMContentLoaded", function () {
+    const timerDisplay = document.querySelector(".timer");
+    const resendLink = document.querySelector(".resend-link");
+
+    let timeLeft = 30; // 30 seconds
+
+    // Disable the resend link
+    resendLink.style.pointerEvents = "none";
+    resendLink.style.color = "gray";
+    resendLink.style.textDecoration = "none";
+
+    // Start countdown
+    const countdown = setInterval(() => {
+      let minutes = Math.floor(timeLeft / 60);
+      let seconds = timeLeft % 60;
+
+      timerDisplay.textContent = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+      timeLeft--;
+
+      if (timeLeft < 0) {
+        clearInterval(countdown);
+        resendLink.style.pointerEvents = "auto";
+        resendLink.style.color = "#007bff"; // original link color
+        resendLink.style.textDecoration = "underline";
+        timerDisplay.textContent = "You can resend now";
+      }
+    }, 1000);
+  });
+
+
+</script>
+
+</body>
+</html>
