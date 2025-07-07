@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,143 +8,167 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="/css/adminproductsPage.css">
 </head>
+
 <body>
     <div class="dashboard-container">
         <!-- Sidebar -->
-    <%- include('../partials/admin/sidebar') %>
+        <%- include('../partials/admin/sidebar') %>
 
 
-        <!-- Main Content -->
-        <main class="main-content">
-           <header class="header">
-                <div class="header-left">
-                    <button class="menu-toggle" id="menuToggle">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                </div>
-                <div class="header-right">
-                    <div class="notification">
-                        <i class="fas fa-bell"></i>
+            <!-- Main Content -->
+            <main class="main-content">
+                <header class="header">
+                    <div class="header-left">
+                        <button class="menu-toggle" id="menuToggle">
+                            <i class="fas fa-bars"></i>
+                        </button>
                     </div>
-                    <div class="admin-profile">
-                        <i class="fas fa-user-circle"></i>
-                        <span>ADMIN</span>
+                    <div class="header-right">
+                        <div class="notification">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <div class="admin-profile">
+                            <i class="fas fa-user-circle"></i>
+                            <span>ADMIN</span>
+                        </div>
                     </div>
-                </div>
-            </header>
+                </header>
 
-            <section class="page-content">
-                <div class="page-header">
-                    <h1>Product Management</h1>
-                </div>
+                <section class="page-content">
+                    <div class="page-header">
+                        <h1>Product Management</h1>
+                    </div>
 
-                <!-- Controls Section -->
-                 <form id="searchForm" class="search-section">
+                    <!-- Controls Section -->
+                    <form id="searchForm" class="search-section">
                         <div class="search-sections">
-                        <form id="searchForm" class="search-section">
-                            <div class="search-container">
-                                <i class="fas fa-search search-icon"></i>
-                                <input type="text" id="searchInput" name="search" class="search-input"
-                                    placeholder="Search customers..." value="<%=search %>">
-                            </div>
+                            <form id="searchForm" class="search-section">
+                                <div class="search-container">
+                                    <i class="fas fa-search search-icon"></i>
+                                    <input type="text" id="searchInput" name="search" class="search-input"
+                                        placeholder="Search customers..." value="<%=search %>">
+                                </div>
 
-                            <div class="search-buttons">
-                                <button type="submit" name="search" class="search-btn">Search</button>
-                                <button type="submit" name="clear" class="clear-btn" value="1">Clear</button>
-                            </div>
-                        </form>
-                    </div>
-                       
-                            <div class="right-controls" >
-                                <button id="addproduct"  onclick="openAddCategoryModal()" class="btn-primary" type="button">
-                                    <i class="fas fa-plus"></i>Add Product
-                                </button>
-                            </div>
-                      
+                                <div class="search-buttons">
+                                    <button type="submit" name="search" class="search-btn">Search</button>
+                                    <button type="submit" name="clear" class="clear-btn" value="1">Clear</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="right-controls">
+                            <button id="addproduct" onclick="openAddCategoryModal()" class="btn-primary" type="button">
+                                <i class="fas fa-plus"></i>Add Product
+                            </button>
+                        </div>
+
                     </form>
 
-                <!-- Table Section -->
-                <div class="table-section">
-                    <div class="table-container">
-                        <table class="customers-table">
-                            <thead>
-                                <tr>
-                                    <th class="table-header">S No</th>
-                                    <th class="table-header">Product Name</th>
-                                    <th class="table-header">Category</th>
-                                    <th class="table-header">Price</th>
-                                    <th class="table-header">Stock</th>
-                                    <th class="table-header">Status</th>
-                                    <th class="table-header">Update</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                               <% for(i=products.length-1;i>=0;i--){ %>
-                                <tr class="table-row">
-                                    <td></td>
-                                    <td><%=products[i].productName %></td>
-                                    <td><%=products[i].category? products[i].category.name : 'No category' %></td>
-                                    <td><%=products[i].variants[0].variantPrice %></td>
-                                    <td></td>
-                                    <td>
-                                        <label class="toggle-switch">
-                                            <input type="checkbox" checked>
-                                            <span class="slider"></span>
-                                        </label>
-                                    </td>
-                                    <td>
-                                        <button class="update-btn"><i class="fas fa-edit"></i></button>
-                                    </td>
-                                </tr>
-                                <%}%>
-                            </tbody>
-                        </table>
-                        <!-- pagination -->
-                        <div class="pagination-section">
-                        <div class="pagination-info">
-                            Page <%= currentPage %> of <%= totalPages %> Pages
-                        </div>
-                        <div class="pagination-controls">
-                            <button class="pagination-btn" <%=currentPage <=1 ? "disabled" : "" %>
-                                onclick="window.location.href='/admin/category?page=<%= currentPage - 1 %>'">
-                                    <i class="fas fa-chevron-left"></i>
-                            </button>
+                    <!-- Table Section -->
+                    <div class="table-section">
+                        <div class="table-container">
+                            <table class="customers-table">
+                                <thead>
+                                    <tr>
+                                        <th class="table-header">S No</th>
+                                        <th class="table-header">Product Name</th>
+                                        <th class="table-header">Category</th>
+                                        <th class="table-header">Price</th>
+                                        <th class="table-header">Stock</th>
+                                        <th class="table-header">Status</th>
+                                        <th class="table-header">Update</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% for(let i=0;i<products.length;i++){ %>
+                                        <tr class="table-row">
+                                            <td>
+                                                <%= i + 1 %>
+                                            </td>
+                                            <td>
+                                                <%= products[i].productName %>
+                                            </td>
+                                            <td>
+                                                <%= products[i].category ? products[i].category.name : 'No category' %>
+                                            </td>
+                                            <td>
+                                                <%= products[i].variants[0].variantPrice %>
+                                            </td>
+                                            <td>
+                                                <%= products[i].variants[0].variantQuantity %>
+                                            </td>
+                                            <td>
+                                                <%if(products[i].isBlocked){%>
+                                                    <span>InActive</span>
+                                                <%}else{%>
+                                                    <span>Active</span>
+                                                <%}%>
 
-                            <div class="page-numbers">
-                                <% for(let i=1; i <=totalPages; i++) { %>
-                                    <button class="page-btn <%= i === currentPage ? 'active' : '' %>"
-                                        onclick="window.location.href='/admin/category?page=<%= i %>'">
-                                        <%= i %>
+                                            </td>
+                                            <td>
+                                                <a href="/admin/editProducts?id=<%= products[i]._id %>"
+                                                    class="update-btn">EDIT</a>
+                                                    <%if(products[i].isBlocked){%>
+                                                     <a href="/admin/unblockedProduct?id=<%= products[i]._id %>"
+                                                    class="update-btn">UnBlock</a>
+                                                    <%}else{%>
+                                                     <a href="/admin/blockedProduct?id=<%= products[i]._id %>"
+                                                    class="update-btn">Block</a>
+                                                    <%}%>
+                                                    <a href="/admin/deleteProdut<%= products[i]._id %>"
+                                                    class="update-btn">DELETE</a>
+                                            </td>
+                                        </tr>
+
+                                        <%}%>
+                                </tbody>
+                            </table>
+                            <!-- pagination -->
+                            <div class="pagination-section">
+                                <div class="pagination-info">
+                                    Page <%= currentPage %> of <%= totalPages %> Pages
+                                </div>
+                                <div class="pagination-controls">
+                                    <button class="pagination-btn" <%=currentPage <=1 ? "disabled" : "" %>
+                                        onclick="window.location.href='/admin/category?page=<%= currentPage - 1 %>'">
+                                            <i class="fas fa-chevron-left"></i>
                                     </button>
-                                    <% } %>
-                            </div>
-                            <button class="pagination-btn" <%=currentPage>= totalPages ? "disabled" : "" %>
-                                onclick="window.location.href='/admin/category?page=<%= currentPage + 1 %>'">
-                                    <i class="fas fa-chevron-right"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Pagination Section -->
-                <div class="pagination-section">
-                    <div class="pagination-info">
-                        1 of 3 Pages
-                    </div>
-                    <div class="pagination-controls">
-                        <button class="pagination-btn"><i class="fas fa-chevron-left"></i></button>
-                        <div class="page-numbers">
-                            <button class="page-btn active">1</button>
-                            <button class="page-btn">2</button>
-                            <button class="page-btn">3</button>
-                            <span class="page-dots">...</span>
-                            <button class="page-btn">10</button>
+                                    <div class="page-numbers">
+                                        <% for(let i=1; i <=totalPages; i++) { %>
+                                            <button class="page-btn <%= i === currentPage ? 'active' : '' %>"
+                                                onclick="window.location.href='/admin/category?page=<%= i %>'">
+                                                <%= i %>
+                                            </button>
+                                            <% } %>
+                                    </div>
+                                    <button class="pagination-btn" <%=currentPage>= totalPages ? "disabled" : "" %>
+                                        onclick="window.location.href='/admin/category?page=<%= currentPage + 1 %>'">
+                                            <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        <button class="pagination-btn"><i class="fas fa-chevron-right"></i></button>
-                    </div>
-                </div>
-            </section>
-        </main>
+
+                        <!-- Pagination Section -->
+                        <div class="pagination-section">
+                            <div class="pagination-info">
+                                1 of 3 Pages
+                            </div>
+                            <div class="pagination-controls">
+                                <button class="pagination-btn"><i class="fas fa-chevron-left"></i></button>
+                                <div class="page-numbers">
+                                    <button class="page-btn active">1</button>
+                                    <button class="page-btn">2</button>
+                                    <button class="page-btn">3</button>
+                                    <span class="page-dots">...</span>
+                                    <button class="page-btn">10</button>
+                                </div>
+                                <button class="pagination-btn"><i class="fas fa-chevron-right"></i></button>
+                            </div>
+                        </div>
+                </section>
+            </main>
     </div>
 
     <script>
@@ -152,10 +177,11 @@
         const sidebar = document.querySelector('.sidebar');
         menuToggle.addEventListener('click', () => {
             sidebar.classList.toggle('sidebar-open');
-        }); 
+        });
         document.getElementById('addproduct').addEventListener('click', () => {
-    window.location.href = '/admin/addproduct'; // your GET route
-  });
+            window.location.href = '/admin/addproduct'; // your GET route
+        });
     </script>
 </body>
+
 </html>

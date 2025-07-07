@@ -35,6 +35,10 @@ router.patch("/editCategory/:id",adminAuth,categoryController.categoryEdit)
 // addproduct management
 router.get("/addproduct",adminAuth,productsController.loadAddProductPage)
 router.post("/addproduct",adminAuth,upload.array("images",3),productsController.addProduct)
+router.get("/unblockedProduct",adminAuth,productsController.unblockedProduct)
+router.get("/blockedProduct",adminAuth,productsController.blockedProduct)
+router.get("/editProducts",adminAuth,productsController.loadEditProduct)
+
 // orders management
 router.get("/orders",adminAuth,adminController.ordersPage)
 

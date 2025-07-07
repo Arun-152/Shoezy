@@ -1,0 +1,231 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f2f5;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    background: #fff;
+    border-radius: 16px;
+    padding: 30px;
+    width: 100%;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+}
+
+h1 {
+    background-color: #28a745;
+    color: #ffffff;
+    text-align: center;
+    padding: 15px;
+    margin-bottom: 10px;
+    font-size: 24px;
+    border-radius: 8px;
+}
+
+.subtitle {
+    color: #666;
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: #444;
+    font-weight: 500;
+}
+
+input[type="text"],
+input[type="number"],
+textarea,
+select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+input[type="number"] {
+    appearance: textfield;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.image-upload {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.image-slot {
+    text-align: center;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    padding: 20px;
+    background: #f9f9f9;
+}
+
+.image-slot input[type="file"] {
+    display: none;
+}
+
+.image-slot label {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #6b48ff;
+    color: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.image-slot label:hover {
+    background-color: #5a3ce8;
+}
+
+.image-slot img {
+    margin-top: 10px;
+    border-radius: 8px;
+}
+
+.image-note {
+    color: #666;
+    font-size: 12px;
+    margin-bottom: 10px;
+}
+
+.color-field {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.size-field-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.size-field-group select,
+.size-field-group input {
+    flex: 1;
+}
+
+#add-color,
+#add-size,
+.submit-btn {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#add-color:hover,
+#add-size:hover,
+.submit-btn:hover {
+    background-color: #218838;
+}
+
+.remove-color,
+.remove-size {
+    padding: 10px;
+    background-color: #ff4d4d;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 5s;
+}
+
+.remove-color:hover,
+.remove-size:hover {
+    background-color: #cc0000;
+}
+
+.error {
+    color: #ff4d4d;
+    font-size: 12px;
+    margin-top: 5px;
+    display: block;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 500px;
+    width: 100%;
+}
+
+.modal-content img {
+    max-width: 100%;
+    margin-bottom: 20px;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+#cropButton,
+#cancelCrop {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+#cropButton {
+    background-color: #28a745;
+    color: #fff;
+}
+
+#cropButton:hover {
+    background-color: #218838;
+}
+
+#cancelCrop {
+    background-color: #ff4d4d;
+    color: #fff;
+}
+
+#cancelCrop:hover {
+    background-color: #cc0000;
+}

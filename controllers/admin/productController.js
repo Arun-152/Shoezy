@@ -225,9 +225,7 @@ const addProduct = async (req, res) => {
             isDeleted: false,
             status: 'Available'
         });
-
         await newProduct.save();
-
         return res.status(200).json({
             success: true,
             message: "Product added successfully",
@@ -251,10 +249,66 @@ const addProduct = async (req, res) => {
     }
 };
 
+const blockedProduct= async(req,res)=>{
+    try {
+        let id= req.query.id
+
+        await Products.updateOne({_id:id},{$set:{isBlocked:true}})
+        console.log("Blocked")
+        res.redirect("/admin/products")
+    } catch (error) {
+        res.redirect("/admin/adminerrorPage")
+    }
+   
+}
+ 
+const unblockedProduct= async(req,res)=>{
+    try {
+        let id= req.query.id
+        await Products.updateOne({_id:id},{$set:{isBlocked:false}})
+        console.log("unblocked")
+    res.redirect("/admin/products")
+        
+    } catch (error) {
+        res.redirect("/admin/adminerrorPage")
+        
+    }
+   
+}
+const loadEditProduct= async(req,res)=>{
+    try {
+        const id=req.query.id
+        const product = await Products.findOne({_id:id})  
+        const category = await Category.find({isListed:true}) 
+        
+        res.render("editproduct",{
+            products:product,
+            cat:category
+        })
+        
+    } catch (error) {
+        res.redirect("/admin/adminerrorPage")
+        
+    }
+}
+
+const editProducts =async(req,res)=>{
+    try {
+
+        
+    } catch (error) {
+        
+    }
+}
+
 
 
 module.exports = {
     productsPage,
     loadAddProductPage,
     addProduct,
+    blockedProduct,
+    unblockedProduct,
+    loadEditProduct,
+   
 };
