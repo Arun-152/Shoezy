@@ -3,6 +3,15 @@ const bcrypt = require("bcrypt")
 const nodemailer = require("nodemailer")
 const env = require("dotenv").config()
 
+
+const usererrorPage = (req,res)=>{
+    try {
+        return res.render("usererrorPage")
+    } catch (error) {
+       res.status(500).json({message:"server errror"}) 
+    }
+}
+
 const signupPage = async (req, res) => {
     try {
         if (req.session.userId) {
@@ -12,7 +21,7 @@ const signupPage = async (req, res) => {
 
     } catch (error) {
         console.log("login page not found")
-        res.status(500).send("Server error")
+        res.redirect("/usererrorPage")
 
     }
 }
@@ -278,5 +287,6 @@ module.exports = {
     logout,
     shopPage,
     resendOTP,
-    showuser
+    showuser,
+    usererrorPage
 }

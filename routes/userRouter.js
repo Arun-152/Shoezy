@@ -4,7 +4,7 @@ const userController=require("../controllers/user/userController")
 const {userAuth,adminAuth}=require("../middlewares/auth")
 
 
-router.get("/",userController.landingPage)
+router.get("/",userController.landingPage) 
 router.get("/login",userController.loginPage)
 router.get("/signup",userController.signupPage)
 router.post("/signup",userController.postSignup)
@@ -16,6 +16,7 @@ router.get("/logout",userController.logout)
 router.get("/shop",userController.shopPage)
 router.get("/resendotp",userController.resendOTP)
 router.get("/profile",userController.showuser)
+router.get("/usererrorPage",userController.usererrorPage)
 
 
 module.exports = router

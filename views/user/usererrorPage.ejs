@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 Error</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(120deg, #1e3c72, #2a5298, #6b7280);
+            overflow: hidden;
+        }
+
+        .error-container {
+            text-align: center;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.8s ease-out;
+        }
+
+        h1 {
+            font-size: 130px;
+            color: #60a5fa;
+            text-shadow: 0 0 15px rgba(96, 165, 250, 0.7), 3px 3px 5px rgba(0, 0, 0, 0.2);
+            letter-spacing: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        p {
+            font-size: 24px;
+            color: #e5e7eb;
+            font-weight: 300;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .home-btn {
+            display: inline-block;
+            text-decoration: none;
+            color: #fff;
+            background: #3b82f6;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: 500;
+            transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+        }
+
+        .home-btn:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.5);
+        }
+
+        .background-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 50%;
+            animation: drift 25s infinite linear;
+        }
+
+        .particle:nth-child(1) {
+            width: 70px;
+            height: 70px;
+            top: 15%;
+            left: 20%;
+            animation-duration: 18s;
+        }
+
+        .particle:nth-child(2) {
+            width: 90px;
+            height: 90px;
+            top: 55%;
+            left: 75%;
+            animation-duration: 20s;
+        }
+
+        .particle:nth-child(3) {
+            width: 60px;
+            height: 60px;
+            top: 65%;
+            left: 35%;
+            animation-duration: 23s;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                text-shadow: 0 0 15px rgba(96, 165, 250, 0.7);
+            }
+            50% {
+                transform: scale(1.05);
+                text-shadow: 0 0 25px rgba(96, 165, 250, 1);
+            }
+        }
+
+        @keyframes drift {
+            0% {
+                transform: translate(0, 0);
+            }
+            50% {
+                transform: translate(25px, -25px);
+            }
+            100% {
+                transform: translate(0, 0);
+            }
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 80px;
+                letter-spacing: 4px;
+            }
+            p {
+                font-size: 18px;
+                margin-bottom: 15px;
+            }
+            .error-container {
+                padding: 20px;
+            }
+            .home-btn {
+                padding: 10px 25px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-effect">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+    <div class="error-container">
+        <h1>404</h1>
+        <p>Oops! The page you’re looking for doesn’t exist.</p>
+        <a href="/home" class="home-btn">Back to Homepage</a>
+    </div>
+</body>
+</html>

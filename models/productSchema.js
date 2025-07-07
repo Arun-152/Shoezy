@@ -19,21 +19,9 @@ const productSchema = new Schema({
     ref: "Category",
     required: true
   },
-  regularPrice: {
-    type: Number,
-    required: true
-  },
-  salePrice: {
-    type: Number,
-    required: true
-  },
   productOffer: {
     type: Number,
-    default: 0
-  },
-  quantity: {
-    type: Number,
-    default: 0
+    required:false
   },
   color: {
     type: String,
@@ -59,7 +47,7 @@ const productSchema = new Schema({
       }
     }
   ],
-  productImage: {
+  images: {
     type: [String],
     required: true
   },

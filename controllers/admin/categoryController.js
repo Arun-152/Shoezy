@@ -30,7 +30,7 @@ const categoryPage = async (req, res) => {
         });
     } catch (error) {
         console.error(error);
-        return res.redirect("/pageerror");
+        return res.redirect("/adminerrorPage");
     }
 }
 const addCategory = async (req, res) => {
@@ -57,12 +57,12 @@ const addCategory = async (req, res) => {
 
 const categoryDelete = async (req, res) => {
     try {
-        const { id } = req.body
+        const { id } = req.params
         const category = await Category.findById(id);
         if (!category) {
             return res.status(404).json({ success: false, message: "Category not found" });
         }
-        await Category.findByIdAndDelete(id, { isDeleted: true });
+        await Category.findByIdAndUpdate(id, { isDeleted: true });
         res.json({ success: true, message: "Category deleted successfully" });
     } catch (error) {
         console.error(error);

@@ -2,7 +2,15 @@ const User=require("../../models/userSchema")
 const bcrypt=require("bcrypt")
 const env = require("dotenv").config()
 
+const adminerrorPage = (req,res)=>{
+    try {
+        return res.render("adminerrorPage")
+    } catch (error) {
+        res.status(500).json({message:"server not found"})
+        
+    }
 
+}
 
 const adminloginpage=async(req,res)=>{
     try{
@@ -12,7 +20,7 @@ const adminloginpage=async(req,res)=>{
         res.render("adminloginPage")
 
     }catch(error){
-        res.status(500).send("server not found")
+        res.redirect("/adminerrorPage")
 
     }
    
@@ -39,15 +47,6 @@ const dashboardPage=async(req,res)=>{
     try{
         res.render("dashboardPage")
     }catch(error){
-        res.status(500).send("server error")
-
-    }
-}
-
-const addproductPage=(req,res)=>{
-    try {
-        res.render("adminaddproductPage")
-    } catch (error) {
         res.status(500).send("server error")
     }
 }
@@ -115,6 +114,6 @@ module.exports={
     categoryPage,
     offersPage,
     settingsPage,
-    addproductPage,
-    adminLogout
+    adminLogout,
+    adminerrorPage
 }
