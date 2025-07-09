@@ -1,5 +1,6 @@
 const Products = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
+const Product = require("../../models/productSchema");
 const MulterError = require('multer').MulterError;
 
 const productsPage = async (req, res) => {
@@ -26,7 +27,7 @@ const productsPage = async (req, res) => {
             currentPage: page,
             totalPages: totalPages,
             totalProducts: totalProducts,
-            search,
+            search:search
         });
     } catch (error) {
         console.error("Error in productsPage:", error);
@@ -53,10 +54,8 @@ const loadAddProductPage = async (req, res) => {
 
 const addProduct = async (req, res) => {
     try {
-        console.log('Form data:', req.body);
-        console.log('Files:', req.files);
-
-        const { productName, brand, description, productOffer, color, category, tags, variants } = req.body;
+       
+        const { productName, description, productOffer, color, category,variants } = req.body;
 
         // Validation
         if (!productName || productName.length < 2 || productName.length > 100) {
@@ -87,15 +86,6 @@ const addProduct = async (req, res) => {
             });
         }
 
-        if (brand && (brand.length < 2 || brand.length > 50)) {
-            return res.status(400).json({
-                success: false,
-                error: "Brand must be 2-50 characters if provided",
-                formData: req.body,
-                cat: await Category.find({ isListed: true, isDeleted: false }),
-            });
-        }
-
         if (productOffer && (isNaN(productOffer) || productOffer < 0 || productOffer > 100)) {
             return res.status(400).json({
                 success: false,
@@ -109,15 +99,6 @@ const addProduct = async (req, res) => {
             return res.status(400).json({
                 success: false,
                 error: "Color must be letters, spaces, or commas (max 50 characters)",
-                formData: req.body,
-                cat: await Category.find({ isListed: true, isDeleted: false }),
-            });
-        }
-
-        if (tags && !/^[A-Za-z, ]{1,100}$/.test(tags.trim())) {
-            return res.status(400).json({
-                success: false,
-                error: "Tags must be letters, spaces, or commas (max 100 characters) if provided",
                 formData: req.body,
                 cat: await Category.find({ isListed: true, isDeleted: false }),
             });
@@ -204,22 +185,17 @@ const addProduct = async (req, res) => {
             });
         }
 
-        const imagePaths = req.files.map(file => file.path); // Cloudinary URLs
-
-        // Process Tags
-        const tagArray = tags ? tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [];
+        const imagePaths = req.files.map(file => file.path); 
 
         // Save Product
         const newProduct = new Products({
             productName: productName.trim(),
-            brand: brand ? brand.trim() : undefined,
             description: description.trim(),
             productOffer: productOffer ? parseFloat(productOffer) : undefined,
             color: color.trim(),
             category: categoryDoc._id,
             variants: variantData,
             images: imagePaths,
-            tags: tagArray,
             isBlocked: false,
             ratings: { average: 0, count: 0 },
             isDeleted: false,
@@ -254,7 +230,6 @@ const blockedProduct= async(req,res)=>{
         let id= req.query.id
 
         await Products.updateOne({_id:id},{$set:{isBlocked:true}})
-        console.log("Blocked")
         res.redirect("/admin/products")
     } catch (error) {
         res.redirect("/admin/adminerrorPage")
@@ -266,7 +241,6 @@ const unblockedProduct= async(req,res)=>{
     try {
         let id= req.query.id
         await Products.updateOne({_id:id},{$set:{isBlocked:false}})
-        console.log("unblocked")
     res.redirect("/admin/products")
         
     } catch (error) {
@@ -283,7 +257,8 @@ const loadEditProduct= async(req,res)=>{
         
         res.render("editproduct",{
             products:product,
-            cat:category
+            cat:category,
+            
         })
         
     } catch (error) {
@@ -292,17 +267,138 @@ const loadEditProduct= async(req,res)=>{
     }
 }
 
-const editProducts =async(req,res)=>{
+const editProducts = async (req, res) => {
     try {
+        const id = req.params.id;
+        const data = req.body;
 
-        
+        if (!data) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
+
+        const existingProduct = await Products.findOne({
+            productName: data.productName,
+            _id: { $ne: id }
+        });
+
+        if (existingProduct) {
+            return res.status(400).json({ success: false, message: "Product already exists" });
+        }
+
+        // Product name validation
+        if (!data.productName || data.productName.length < 2 || data.productName.length > 100) {
+            return res.status(400).json({ success: false, error: "Product name must be 2-100 characters" });
+        }
+
+        const validNameRegex = /^[a-zA-Z0-9 _-]+$/;
+        if (!validNameRegex.test(data.productName)) {
+            return res.status(400).json({ success: false, error: "Product name contains invalid characters" });
+        }
+
+        // Description validation
+        if (!data.description || data.description.length < 10 || data.description.length > 500) {
+            return res.status(400).json({ success: false, error: "Description must be 10-500 characters" });
+        }
+        // Offer validation
+        if (data.productOffer && (isNaN(data.productOffer) || data.productOffer < 0 || data.productOffer > 100)) {
+            return res.status(400).json({ success: false, error: "Offer must be between 0 and 100" });
+        }
+
+        // Color validation
+        if (!data.color || !/^[A-Za-z, ]{1,50}$/.test(data.color.trim())) {
+            return res.status(400).json({ success: false, error: "Invalid color format" });
+        }
+        // Variant validation
+        const variants = data.variants;
+        if (!variants || !variants.size || !Array.isArray(variants.size) || variants.size.length === 0) {
+            return res.status(400).json({ success: false, error: "At least one variant required" });
+        }
+
+        const variantData = [];
+        const selectedSizes = new Set();
+
+        for (let i = 0; i < variants.size.length; i++) {
+            const size = variants.size[i];
+            const variantPrice = parseFloat(variants.variantPrice[i]);
+            const salePrice = parseFloat(variants.salePrice[i]);
+            const variantQuantity = parseInt(variants.variantQuantity[i]);
+
+            if (!size || !['6', '7', '8', '9', '10'].includes(size)) {
+                return res.status(400).json({ success: false, error: "Invalid size" });
+            }
+
+            if (isNaN(variantPrice) || variantPrice <= 0 ||
+                isNaN(salePrice) || salePrice < 0 ||
+                isNaN(variantQuantity) || variantQuantity < 0) {
+                return res.status(400).json({ success: false, error: "Invalid variant details" });
+            }
+
+            if (salePrice > variantPrice) {
+                return res.status(400).json({ success: false, error: "Sale price can't exceed variant price" });
+            }
+
+            if (selectedSizes.has(size)) {
+                return res.status(400).json({ success: false, error: "Duplicate sizes not allowed" });
+            }
+
+            selectedSizes.add(size);
+            variantData.push({ size, variantPrice, salePrice, variantQuantity });
+        }
+
+        // Validate category
+        const categoryDoc = await Category.findById(data.category);
+        if (!categoryDoc || categoryDoc.isDeleted || !categoryDoc.isListed) {
+            return res.status(400).json({ success: false, error: "Invalid category" });
+        }
+
+        // Images validation (if uploading new images)
+        let imagePaths = [];
+        if (req.files && req.files.length === 3) {
+            imagePaths = req.files.map(file => file.path);
+        } else {
+            imagePaths = req.body.existingImages || [];
+        }
+
+
+        // Update product
+        const updatedProduct = await Products.findByIdAndUpdate(
+            id,
+            {
+                productName: data.productName.trim(),
+                description: data.description.trim(),
+                productOffer: data.productOffer ? parseFloat(data.productOffer) : 0,
+                color: data.color.trim(),
+                category: categoryDoc._id,
+                variants: variantData,
+                images: imagePaths
+            },
+            { new: true }
+        );
+
+        return res.status(200).json({ success: true, message: "Product updated successfully" });
+
     } catch (error) {
-        
+        console.error(error);
+        res.status(500).json({ success: false, error: "Internal Server Error" });
+    }
+};
+
+const deleteProducts =async (req,res)=>{
+    try {
+        const id=req.params.id
+        const products = await Products.findOne({_id:id})
+
+        if(!products){
+            return res.status(400).json({success:false,message:"Products not found"})
+        }
+        await Products.findByIdAndUpdate(id,{isDeleted:true})
+        res.json({success:true,message:"Product deleted successfully"})
+
+    } catch (error) {
+        console.error(error.message)
+        res.status(500).json({success:false,message:" Internal server Error "})
     }
 }
-
-
-
 module.exports = {
     productsPage,
     loadAddProductPage,
@@ -310,5 +406,6 @@ module.exports = {
     blockedProduct,
     unblockedProduct,
     loadEditProduct,
-   
+    editProducts,
+    deleteProducts
 };

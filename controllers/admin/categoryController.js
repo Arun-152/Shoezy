@@ -26,7 +26,7 @@ const categoryPage = async (req, res) => {
             currentPage: page,
             totalPages: totalPages,
             totalCategories: totalCategories,
-            search:""
+            search:search
         });
     } catch (error) {
         console.error(error);

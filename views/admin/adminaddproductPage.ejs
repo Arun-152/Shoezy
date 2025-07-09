@@ -21,13 +21,6 @@
                 <span class="error" id="productNameError"></span>
             </div>
 
-            <!-- Brand -->
-            <div class="form-group">
-                <label for="brand">Brand</label>
-                <input type="text" id="brand" name="brand">
-                <span class="error" id="brandError"></span>
-            </div>
-
             <!-- Product Description -->
             <div class="form-group">
                 <label for="description">Product Description *</label>
@@ -108,17 +101,10 @@
                 <span class="error" id="variantsError"></span>
             </div>
 
-            <!-- Tags -->
-            <div class="form-group">
-                <label for="tags">Tags (comma-separated)</label>
-                <input type="text" id="tags" name="tags" placeholder="e.g., casual, trendy">
-                <span class="error" id="tagsError"></span>
-            </div>
-
             <!-- Category -->
             <div class="form-group">
                 <label for="category">Category *</label>
-                <select id="category" name="category" required>
+                <select id="category" name="category" >
                     <option value="" disabled selected>Select category</option>
                     <% if (cat && cat.length > 0) { %>
                         <% cat.forEach(category => { %>
@@ -258,13 +244,6 @@
             document.getElementById('productNameError').textContent = 'Product name must be 2-100 characters';
             isValid = false;
         }
-
-        const brand = document.getElementById('brand').value.trim();
-        if (brand && (brand.length < 2 || brand.length > 50)) {
-            document.getElementById('brandError').textContent = 'Brand must be 2-50 characters';
-            isValid = false;
-        }
-
         const description = document.getElementById('description').value.trim();
         if (!description || description.length < 10 || description.length > 500) {
             document.getElementById('descriptionError').textContent = 'Description must be 10-500 characters';
@@ -280,12 +259,6 @@
         const color = document.getElementById('color').value.trim();
         if (!/^[A-Za-z, ]{1,50}$/.test(color)) {
             document.getElementById('colorError').textContent = 'Color must be letters, spaces, or commas (max 50 characters)';
-            isValid = false;
-        }
-
-        const tags = document.getElementById('tags').value.trim();
-        if (tags && !/^[A-Za-z, ]{1,100}$/.test(tags)) {
-            document.getElementById('tagsError').textContent = 'Tags must be letters, spaces, or commas (max 100 characters)';
             isValid = false;
         }
 
@@ -364,7 +337,8 @@
                         icon: 'success',
                         confirmButtonText: 'Great!',
                         confirmButtonColor: '#10b981',
-                        timer: 1000
+                        timer:2000
+                      
                     });
 
                     window.location.href = '/admin/products';

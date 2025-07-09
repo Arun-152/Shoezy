@@ -7,7 +7,10 @@
     <title>Shoezy-products</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="/css/adminproductsPage.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
 </head>
+
 
 <body>
     <div class="dashboard-container">
@@ -40,20 +43,18 @@
                     </div>
 
                     <!-- Controls Section -->
-                    <form id="searchForm" class="search-section">
+                    <form id="searchForm" class="search-section" method="GET" action="/admin/products">
                         <div class="search-sections">
-                            <form id="searchForm" class="search-section">
-                                <div class="search-container">
-                                    <i class="fas fa-search search-icon"></i>
-                                    <input type="text" id="searchInput" name="search" class="search-input"
-                                        placeholder="Search customers..." value="<%=search %>">
-                                </div>
+                            <div class="search-container">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" id="searchInput" name="search" class="search-input"
+                                    placeholder="Search products..." value="<%= search %>">
+                            </div>
 
-                                <div class="search-buttons">
-                                    <button type="submit" name="search" class="search-btn">Search</button>
-                                    <button type="submit" name="clear" class="clear-btn" value="1">Clear</button>
-                                </div>
-                            </form>
+                            <div class="search-buttons">
+                                <button type="submit" class="search-btn">Search</button>
+                                <a href="/admin/products" class="clear-btn">Clear</a> <!-- Better as a link -->
+                            </div>
                         </div>
 
                         <div class="right-controls">
@@ -61,8 +62,8 @@
                                 <i class="fas fa-plus"></i>Add Product
                             </button>
                         </div>
-
                     </form>
+
 
                     <!-- Table Section -->
                     <div class="table-section">
@@ -100,23 +101,23 @@
                                             <td>
                                                 <%if(products[i].isBlocked){%>
                                                     <span>InActive</span>
-                                                <%}else{%>
-                                                    <span>Active</span>
-                                                <%}%>
+                                                    <%}else{%>
+                                                        <span>Active</span>
+                                                        <%}%>
 
                                             </td>
                                             <td>
                                                 <a href="/admin/editProducts?id=<%= products[i]._id %>"
                                                     class="update-btn">EDIT</a>
-                                                    <%if(products[i].isBlocked){%>
-                                                     <a href="/admin/unblockedProduct?id=<%= products[i]._id %>"
-                                                    class="update-btn">UnBlock</a>
+                                                <%if(products[i].isBlocked){%>
+                                                    <a href="/admin/unblockedProduct?id=<%= products[i]._id %>"
+                                                        class="update-btn">UnBlock</a>
                                                     <%}else{%>
-                                                     <a href="/admin/blockedProduct?id=<%= products[i]._id %>"
-                                                    class="update-btn">Block</a>
-                                                    <%}%>
-                                                    <a href="/admin/deleteProdut<%= products[i]._id %>"
-                                                    class="update-btn">DELETE</a>
+                                                        <a href="/admin/blockedProduct?id=<%= products[i]._id %>"
+                                                            class="update-btn">Block</a>
+                                                        <%}%>
+                                                            <button onclick="deleteproduct('<%=products[i]._id %>')"
+                                                                class="update-btn">DELETE</button>
                                             </td>
                                         </tr>
 
@@ -130,47 +131,29 @@
                                 </div>
                                 <div class="pagination-controls">
                                     <button class="pagination-btn" <%=currentPage <=1 ? "disabled" : "" %>
-                                        onclick="window.location.href='/admin/category?page=<%= currentPage - 1 %>'">
+                                        onclick="window.location.href='/admin/products?page=<%= currentPage - 1 %>'">
                                             <i class="fas fa-chevron-left"></i>
                                     </button>
 
                                     <div class="page-numbers">
                                         <% for(let i=1; i <=totalPages; i++) { %>
                                             <button class="page-btn <%= i === currentPage ? 'active' : '' %>"
-                                                onclick="window.location.href='/admin/category?page=<%= i %>'">
+                                                onclick="window.location.href='/admin/products?page=<%= i %>'">
                                                 <%= i %>
                                             </button>
                                             <% } %>
                                     </div>
                                     <button class="pagination-btn" <%=currentPage>= totalPages ? "disabled" : "" %>
-                                        onclick="window.location.href='/admin/category?page=<%= currentPage + 1 %>'">
+                                        onclick="window.location.href='/admin/products?page=<%= currentPage + 1 %>'">
                                             <i class="fas fa-chevron-right"></i>
                                     </button>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Pagination Section -->
-                        <div class="pagination-section">
-                            <div class="pagination-info">
-                                1 of 3 Pages
-                            </div>
-                            <div class="pagination-controls">
-                                <button class="pagination-btn"><i class="fas fa-chevron-left"></i></button>
-                                <div class="page-numbers">
-                                    <button class="page-btn active">1</button>
-                                    <button class="page-btn">2</button>
-                                    <button class="page-btn">3</button>
-                                    <span class="page-dots">...</span>
-                                    <button class="page-btn">10</button>
-                                </div>
-                                <button class="pagination-btn"><i class="fas fa-chevron-right"></i></button>
-                            </div>
-                        </div>
                 </section>
             </main>
     </div>
-
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // Toggle sidebar
         const menuToggle = document.querySelector('.menu-toggle');
@@ -179,8 +162,55 @@
             sidebar.classList.toggle('sidebar-open');
         });
         document.getElementById('addproduct').addEventListener('click', () => {
-            window.location.href = '/admin/addproduct'; // your GET route
+            window.location.href = '/admin/addproduct'; 
         });
+        function deleteproduct(productId) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you really want to delete this product? This action cannot be undone.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/admin/deleteProducts/${productId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire(
+                        'Deleted',
+                        'The product has been deleted.',
+                        'success'
+                    ).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire(
+                        'Failed!',
+                        'Failed to delete product: ' + data.message,
+                        'error'
+                    );
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire(
+                    'Error!',
+                    'An error occurred while deleting the product',
+                    'error'
+                );
+            });
+        }
+    });
+}
     </script>
 </body>
 

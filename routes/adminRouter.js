@@ -5,8 +5,7 @@ const customerController=require("../controllers/admin/customerController")
 const categoryController=require("../controllers/admin/categoryController")
 const productsController=require("../controllers/admin/productController")
 const multer = require("multer")
-const {storage} = require("../helpers/cloudinary")
-const upload  = multer({storage})
+const {upload} = require("../helpers/cloudinary")
 const {userAuth,adminAuth}=require("../middlewares/auth")
 
 // adminlogin management
@@ -22,8 +21,6 @@ router.get("/customers",adminAuth,customerController.customerPage)
 router.get("/blockCustomer",adminAuth,customerController.customerBlocked)
 router.get("/unblockCustomer",adminAuth,customerController.customerunBlocked)
 
-// products management
-router.get("/products",adminAuth,productsController.productsPage)
 
 // category management
 router.get("/category",adminAuth,categoryController.categoryPage)
@@ -33,11 +30,14 @@ router.post("/listCategory", adminAuth, categoryController.categoryToggle)
 router.patch("/editCategory/:id",adminAuth,categoryController.categoryEdit) 
 
 // addproduct management
+router.get("/products",adminAuth,productsController.productsPage)
 router.get("/addproduct",adminAuth,productsController.loadAddProductPage)
 router.post("/addproduct",adminAuth,upload.array("images",3),productsController.addProduct)
 router.get("/unblockedProduct",adminAuth,productsController.unblockedProduct)
 router.get("/blockedProduct",adminAuth,productsController.blockedProduct)
 router.get("/editProducts",adminAuth,productsController.loadEditProduct)
+router.post("/editProducts/:id",adminAuth,upload.array("images",3),productsController.editProducts)
+router.patch("/deleteProducts/:id",adminAuth,productsController.deleteProducts)
 
 // orders management
 router.get("/orders",adminAuth,adminController.ordersPage)
