@@ -7,7 +7,6 @@
   },
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.7.0",
@@ -23,5 +22,14 @@
     "nodemailer": "^7.0.3",
     "nodemon": "^3.1.10",
     "sharp": "^0.34.2"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Arun-152/Shoezy.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Arun-152/Shoezy/issues"
+  },
+  "homepage": "https://github.com/Arun-152/Shoezy#readme",
+  "description": ""
 }

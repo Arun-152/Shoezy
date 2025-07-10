@@ -345,6 +345,11 @@ body {
     color: #856404;
 }
 
+.status.blocked {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
 .action-buttons {
     display: flex;
     gap: 8px;

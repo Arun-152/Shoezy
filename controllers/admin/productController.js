@@ -185,7 +185,7 @@ const addProduct = async (req, res) => {
             });
         }
 
-        const imagePaths = req.files.map(file => file.path); 
+        const imagePaths = req.files.map(file => '/uploads/products/' + file.filename); 
 
         // Save Product
         const newProduct = new Products({
@@ -354,7 +354,7 @@ const editProducts = async (req, res) => {
         // Images validation (if uploading new images)
         let imagePaths = [];
         if (req.files && req.files.length === 3) {
-            imagePaths = req.files.map(file => file.path);
+            imagePaths = req.files.map(file => '/uploads/products/' + file.filename);
         } else {
             imagePaths = req.body.existingImages || [];
         }

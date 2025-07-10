@@ -1,62 +1,58 @@
-const express=require("express")
-const router=express.Router()
-const adminController=require("../controllers/admin/adminController")
-const customerController=require("../controllers/admin/customerController")
-const categoryController=require("../controllers/admin/categoryController")
-const productsController=require("../controllers/admin/productController")
-const multer = require("multer")
-const {upload} = require("../helpers/cloudinary")
-const {userAuth,adminAuth}=require("../middlewares/auth")
+const express = require("express");
+const router = express.Router();
+const adminController = require("../controllers/admin/adminController");
+const customerController = require("../controllers/admin/customerController");
+const categoryController = require("../controllers/admin/categoryController");
+const productsController = require("../controllers/admin/productController");
+const multer = require("multer");
+const { upload } = require("../helpers/cloudinary");
+const { userAuth, adminAuth } = require("../middlewares/auth");
 
-// adminlogin management
+// Admin Login Management
+router.get("/login", adminController.adminloginpage);
+router.post("/login", adminController.postLogin);
 
-router.get("/login",adminController.adminloginpage)
-router.post("/login",adminController.postLogin)
+// Dashboard Management
+router.get("/dashboard", adminAuth, adminController.dashboardPage);
 
-// dashboard management
-router.get("/dashboard",adminAuth,adminController.dashboardPage)
+// Customer Management
+router.get("/customers", adminAuth, customerController.customerPage);
+router.get("/blockCustomer", adminAuth, customerController.customerBlocked);
+router.get("/unblockCustomer", adminAuth, customerController.customerunBlocked);
 
-// customer management
-router.get("/customers",adminAuth,customerController.customerPage)
-router.get("/blockCustomer",adminAuth,customerController.customerBlocked)
-router.get("/unblockCustomer",adminAuth,customerController.customerunBlocked)
+// Category Management
+router.get("/category", adminAuth, categoryController.categoryPage);
+router.post("/addCategory", adminAuth, categoryController.addCategory);
+router.patch("/deleteCategory/:id", adminAuth, categoryController.categoryDelete);
+router.post("/listCategory", adminAuth, categoryController.categoryToggle);
+router.patch("/editCategory/:id", adminAuth, categoryController.categoryEdit);
 
+// Product Management
+router.get("/products", adminAuth, productsController.productsPage);
+router.get("/addproduct", adminAuth, productsController.loadAddProductPage);
+router.post("/addproduct", adminAuth, upload.array("images", 3), productsController.addProduct);
+router.get("/unblockedProduct", adminAuth, productsController.unblockedProduct);
+router.get("/blockedProduct", adminAuth, productsController.blockedProduct);
+router.get("/editProducts", adminAuth, productsController.loadEditProduct);
+router.post("/editProducts/:id", adminAuth, upload.array("images", 3), productsController.editProducts);
+router.patch("/deleteProducts/:id", adminAuth, productsController.deleteProducts);
 
-// category management
-router.get("/category",adminAuth,categoryController.categoryPage)
-router.post("/addCategory",adminAuth,categoryController.addCategory)
-router.patch("/deleteCategory/:id",adminAuth,categoryController.categoryDelete)
-router.post("/listCategory", adminAuth, categoryController.categoryToggle)
-router.patch("/editCategory/:id",adminAuth,categoryController.categoryEdit) 
+// Orders Management
+router.get("/orders", adminAuth, adminController.ordersPage);
 
-// addproduct management
-router.get("/products",adminAuth,productsController.productsPage)
-router.get("/addproduct",adminAuth,productsController.loadAddProductPage)
-router.post("/addproduct",adminAuth,upload.array("images",3),productsController.addProduct)
-router.get("/unblockedProduct",adminAuth,productsController.unblockedProduct)
-router.get("/blockedProduct",adminAuth,productsController.blockedProduct)
-router.get("/editProducts",adminAuth,productsController.loadEditProduct)
-router.post("/editProducts/:id",adminAuth,upload.array("images",3),productsController.editProducts)
-router.patch("/deleteProducts/:id",adminAuth,productsController.deleteProducts)
+// Coupon Management
+router.get("/coupons", adminAuth, adminController.coupenPage);
 
-// orders management
-router.get("/orders",adminAuth,adminController.ordersPage)
+// Sales Report Management
+router.get("/salesreport", adminAuth, adminController.salesPage);
 
-// coupen management   
-router.get("/coupons",adminAuth,adminController.coupenPage)
+// Offers Management
+router.get("/offers", adminAuth, adminController.offersPage);
 
-// salesreport management
-router.get("/salesreport",adminAuth,adminController.salesPage)
+// Admin Logout
+router.get("/logout", adminAuth, adminController.adminLogout);
 
-// offers management
-router.get("/offers",adminAuth,adminController.offersPage)
+// Admin Error Page
+router.get("/adminerrorPage", adminController.adminerrorPage);
 
-// adminlogout
-router.get("/logout",adminAuth,adminController.adminLogout)
-
-// adminerror page
-
-router.get("/adminerrorPage",adminController.adminerrorPage)
-
-
-module.exports=router
+module.exports = router;

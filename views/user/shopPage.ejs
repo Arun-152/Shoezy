@@ -81,6 +81,7 @@
         // Sample product data
         const products = [
             {
+                <%for(i=0;i<)%>
                 id: 1,
                 name: "Air Max Pro",
                 price: 129.99,
@@ -88,70 +89,7 @@
                 image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300&h=200&fit=crop",
                 rating: 4.5
             },
-            {
-                id: 2,
-                name: "Classic Leather",
-                price: 89.99,
-                category: "casual",
-                image: "https://images.unsplash.com/photo-1560072810-1cdd64cf3595?w=300&h=200&fit=crop",
-                rating: 4.2
-            },
-            {
-                id: 3,
-                name: "Oxford Business",
-                price: 159.99,
-                category: "formal",
-                image: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=300&h=200&fit=crop",
-                rating: 4.8
-            },
-            {
-                id: 4,
-                name: "Sport Runner",
-                price: 99.99,
-                category: "sports",
-                image: "https://images.unsplash.com/photo-1551107696-a4b537c892db?w=300&h=200&fit=crop",
-                rating: 4.3
-            },
-            {
-                id: 5,
-                name: "Winter Boots",
-                price: 189.99,
-                category: "boots",
-                image: "https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?w=300&h=200&fit=crop",
-                rating: 4.6
-            },
-            {
-                id: 6,
-                name: "Casual Sneakers",
-                price: 79.99,
-                category: "casual",
-                image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=300&h=200&fit=crop",
-                rating: 4.1
-            },
-            {
-                id: 7,
-                name: "Performance Pro",
-                price: 149.99,
-                category: "running",
-                image: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=300&h=200&fit=crop",
-                rating: 4.7
-            },
-            {
-                id: 8,
-                name: "Formal Dress",
-                price: 199.99,
-                category: "formal",
-                image: "https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=300&h=200&fit=crop",
-                rating: 4.4
-            },
-            {
-                id: 9,
-                name: "Urban Style",
-                price: 119.99,
-                category: "casual",
-                image: "https://images.unsplash.com/photo-1539185441755-769473a23570?w=300&h=200&fit=crop",
-                rating: 4.0
-            }
+               
         ];
 
         let filteredProducts = [...products];
