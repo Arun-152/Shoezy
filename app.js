@@ -1,3 +1,12 @@
+// Suppress specific deprecation warning for util.isArray
+process.removeAllListeners('warning');
+process.on('warning', (warning) => {
+    if (warning.name === 'DeprecationWarning' && warning.message.includes('util.isArray')) {
+        return; // Ignore this specific warning
+    }
+    console.warn(warning.name, warning.message);
+});
+
 const express = require("express")
 const app = express()
 const path = require("path")

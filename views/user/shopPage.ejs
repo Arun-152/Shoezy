@@ -35,11 +35,11 @@
                     <label for="category">Category:</label>
                     <select id="category" onchange="filterProducts()">
                         <option value="">All Categories</option>
-                        <option value="running">Running</option>
-                        <option value="casual">Casual</option>
-                        <option value="formal">Formal</option>
-                        <option value="sports">Sports</option>
-                        <option value="boots">Boots</option>
+                        <% if (categories && categories.length > 0) { %>
+                            <% categories.forEach(category => { %>
+                                <option value="<%= category._id %>"><%= category.name %></option>
+                            <% }); %>
+                        <% } %>
                     </select>
                 </div>
 
@@ -78,18 +78,43 @@
 
 
     <script>
-        // Sample product data
+        // Dynamic product data from database
         const products = [
-            {
-                <%for(i=0;i<)%>
-                id: 1,
-                name: "Air Max Pro",
-                price: 129.99,
-                category: "running",
-                image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300&h=200&fit=crop",
-                rating: 4.5
-            },
-               
+            <% if (products && products.length > 0) { %>
+                <% products.forEach((product, index) => { %>
+                    <% 
+                        // Calculate price from variants
+                        let minPrice = 0;
+                        let maxPrice = 0;
+                        let totalQuantity = 0;
+                        
+                        if (product.variants && product.variants.length > 0) {
+                            const prices = product.variants.map(v => v.salePrice);
+                            minPrice = Math.min(...prices);
+                            maxPrice = Math.max(...prices);
+                            totalQuantity = product.variants.reduce((sum, v) => sum + v.variantQuantity, 0);
+                        }
+                    %>
+                    {
+                        id: "<%= product._id %>",
+                        name: "<%= product.productName %>",
+                        price: <%= minPrice %>,
+                        originalPrice: <%= product.variants && product.variants.length > 0 ? Math.min(...product.variants.map(v => v.variantPrice)) : 0 %>,
+                        salePrice: <%= minPrice %>,
+                        category: "<%= product.category ? product.category._id : '' %>",
+                        categoryName: "<%= product.category ? product.category.name : 'Uncategorized' %>",
+                        image: "<%= product.images && product.images.length > 0 ? product.images[0] : 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300&h=200&fit=crop' %>",
+                        description: "<%= product.description || '' %>",
+                        quantity: <%= totalQuantity %>,
+                        status: "<%= product.status || 'Available' %>",
+                        brand: "<%= product.brand || '' %>",
+                        color: "<%= product.color || '' %>",
+                        productOffer: <%= product.productOffer || 0 %>,
+                        rating: <%= product.ratings && product.ratings.average ? product.ratings.average : 4.5 %>,
+                        ratingCount: <%= product.ratings && product.ratings.count ? product.ratings.count : 0 %>
+                    }<%= index < products.length - 1 ? ',' : '' %>
+                <% }); %>
+            <% } %>
         ];
 
         let filteredProducts = [...products];
@@ -100,24 +125,46 @@
             const grid = document.getElementById('productsGrid');
             grid.innerHTML = '';
 
+            if (productsToShow.length === 0) {
+                grid.innerHTML = '<div class="no-products"><h3>No products found</h3><p>Try adjusting your filters or check back later.</p></div>';
+                return;
+            }
+
             productsToShow.forEach(product => {
                 const productCard = document.createElement('div');
                 productCard.className = 'product-card';
+                
+                // Handle pricing display
+                let priceHTML = '';
+                if (product.salePrice && product.salePrice < product.originalPrice) {
+                    priceHTML = `
+                        <p class="price">
+                            <span class="sale-price">${product.salePrice}</span>
+                            <span class="original-price">${product.originalPrice}</span>
+                        </p>
+                    `;
+                } else {
+                    priceHTML = `<p class="price">${product.price}</p>`;
+                }
+
                 productCard.innerHTML = `
                     <div class="product-image">
-                        <img src="${product.image}" alt="${product.name}">
+                        <img src="${product.image}" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300&h=200&fit=crop'">
                         <div class="product-overlay">
-                            <button class="quick-view" onclick="quickView(${product.id})">Quick View</button>
+                            <button class="quick-view" onclick="quickView('${product.id}')">Quick View</button>
                         </div>
                     </div>
                     <div class="product-info">
                         <h3>${product.name}</h3>
+                        <p class="category">${product.categoryName}</p>
                         <div class="rating">
                             ${'★'.repeat(Math.floor(product.rating))}${'☆'.repeat(5 - Math.floor(product.rating))}
                             <span>(${product.rating})</span>
                         </div>
-                        <p class="price">$${product.price}</p>
-                        <button class="add-to-cart" onclick="addToCart(${product.id})">Add to Cart</button>
+                        ${priceHTML}
+                        <button class="add-to-cart" onclick="addToCart('${product.id}')" ${product.quantity <= 0 ? 'disabled' : ''}>
+                            ${product.quantity <= 0 ? 'Out of Stock' : 'Add to Cart'}
+                        </button>
                     </div>
                 `;
                 grid.appendChild(productCard);
