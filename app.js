@@ -4,6 +4,7 @@ const path = require("path")
 const userRouter = require("./routes/userRouter")
 const env = require("dotenv").config()
 const session = require("express-session")
+const flash = require("connect-flash")
 const adminRouter = require("./routes/adminRouter")
 const db = require("./config/db")
 db()
@@ -21,6 +22,18 @@ app.use(session({
         maxAge: 72 * 60 * 60 * 1000
     }
 }))
+
+// Flash middleware
+app.use(flash())
+
+// Make flash messages available to all views
+app.use((req, res, next) => {
+    res.locals.success_msg = req.flash('success_msg')
+    res.locals.error_msg = req.flash('error_msg')
+    res.locals.error = req.flash('error')
+    next()
+})
+
 app.use((req,res,next)=>{
     res.set('cache-control','no-store')
     next()

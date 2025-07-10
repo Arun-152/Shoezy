@@ -37,7 +37,10 @@
         <button type="submit" class="confirm-btn">Confirm</button>
 
         <div class="resend-section">
-          <a href="/resendotp" class="resend-link">Resend OTP</a>
+          <button type="button" id="resendOtpBtn" class="resend-btn">Resend OTP</button>
+          <div id="resendCooldown" style="display: none; color: #666; font-size: 14px; margin-top: 10px;">
+            Resend available in: <span id="cooldownTimer">30</span> seconds
+          </div>
         </div>
       </form>
     </div>
@@ -123,37 +126,138 @@
       });
     }
   });
-  document.addEventListener("DOMContentLoaded", function () {
-    const timerDisplay = document.querySelector(".timer");
-    const resendLink = document.querySelector(".resend-link");
 
-    let timeLeft = 30; // 30 seconds
+  // Resend OTP functionality
+  let resendCooldownActive = false;
+  let resendCooldownTime = 30; // 30 seconds cooldown
+  let resendCooldownInterval;
 
-    // Disable the resend link
-    resendLink.style.pointerEvents = "none";
-    resendLink.style.color = "gray";
-    resendLink.style.textDecoration = "none";
+  document.getElementById('resendOtpBtn').addEventListener('click', async function() {
+    if (resendCooldownActive) {
+      return; // Prevent multiple clicks during cooldown
+    }
 
-    // Start countdown
-    const countdown = setInterval(() => {
-      let minutes = Math.floor(timeLeft / 60);
-      let seconds = timeLeft % 60;
+    const resendBtn = document.getElementById('resendOtpBtn');
+    const resendCooldown = document.getElementById('resendCooldown');
+    const cooldownTimer = document.getElementById('cooldownTimer');
 
-      timerDisplay.textContent = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
-      timeLeft--;
+    // Disable button and show loading
+    resendBtn.disabled = true;
+    resendBtn.textContent = 'Sending...';
 
-      if (timeLeft < 0) {
-        clearInterval(countdown);
-        resendLink.style.pointerEvents = "auto";
-        resendLink.style.color = "#007bff"; // original link color
-        resendLink.style.textDecoration = "underline";
-        timerDisplay.textContent = "You can resend now";
+    try {
+      const response = await fetch('/resendotp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Show success message
+        Swal.fire({
+          icon: 'success',
+          title: 'OTP Resent!',
+          text: data.message,
+          timer: 2000,
+          showConfirmButton: false
+        });
+
+        // Clear the OTP input fields
+        otpInputs.forEach(input => input.value = '');
+        otpInputs[0].focus();
+
+        // Reset the main timer to 30 seconds
+        timeLeft = 30;
+        updateTimer();
+
+        // Start cooldown
+        startResendCooldown();
+
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Resend Failed',
+          text: data.message,
+          confirmButtonText: 'OK'
+        });
       }
-    }, 1000);
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Network Error',
+        text: 'Failed to resend OTP. Please try again.',
+        confirmButtonText: 'OK'
+      });
+    } finally {
+      // Re-enable button if no cooldown started
+      if (!resendCooldownActive) {
+        resendBtn.disabled = false;
+        resendBtn.textContent = 'Resend OTP';
+      }
+    }
   });
 
+  function startResendCooldown() {
+    resendCooldownActive = true;
+    resendCooldownTime = 30;
+    
+    const resendBtn = document.getElementById('resendOtpBtn');
+    const resendCooldown = document.getElementById('resendCooldown');
+    const cooldownTimer = document.getElementById('cooldownTimer');
 
+    // Hide button and show cooldown
+    resendBtn.style.display = 'none';
+    resendCooldown.style.display = 'block';
+
+    resendCooldownInterval = setInterval(() => {
+      cooldownTimer.textContent = resendCooldownTime;
+      resendCooldownTime--;
+
+      if (resendCooldownTime < 0) {
+        clearInterval(resendCooldownInterval);
+        resendCooldownActive = false;
+        
+        // Show button and hide cooldown
+        resendBtn.style.display = 'inline-block';
+        resendBtn.disabled = false;
+        resendBtn.textContent = 'Resend OTP';
+        resendCooldown.style.display = 'none';
+      }
+    }, 1000);
+  }
 </script>
+
+<style>
+  .resend-btn {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .resend-btn:hover:not(:disabled) {
+    background-color: #5a6268;
+  }
+  
+  .resend-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  #resendCooldown {
+    background-color: #f8f9fa;
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+  }
+</style>
 
 </body>
 </html>

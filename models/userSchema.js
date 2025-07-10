@@ -34,6 +34,14 @@ const UserSchema = new mongoose.Schema({
     isAdmin: {
     type: Boolean,
     default: false
+  },
+  resetToken: {
+    type: String,
+    default: null
+  },
+  resetTokenExpiry: {
+    type: Date,
+    default: null
   }
 
 },{timestamps:true});

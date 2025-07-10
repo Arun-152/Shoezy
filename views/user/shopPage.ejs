@@ -3,200 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shoezy - Premium Footwear</title>
+    <title>Shoezy - Premium Footwear Store</title>
     <link rel="stylesheet" href="/css/shopPage.css">
 </head>
 <body>
     <!-- Header -->
-    
-    <%-include("../partials/user/navbar")%>
+   <%-include("../partials/user/navbar")%>
 
     <!-- Hero Section -->
     <section class="hero">
         <div class="hero-content">
-            <div class="hero-text">
-                <h1>Step Into <span class="highlight">Style</span></h1>
-                <p>Discover our premium collection of footwear designed for comfort, style, and performance.</p>
-                <button class="cta-button">Shop Now</button>
-            </div>
-            <div class="hero-image">
-                <div class="shoe-display">
-                    <div class="shoe-card featured">
-                        <div class="shoe-image">👟</div>
-                        <div class="shoe-info">
-                            <h3>Nike Air Max</h3>
-                            <p class="price">$129.99</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="floating-elements">
-                    <div class="float-element">⭐</div>
-                    <div class="float-element">✨</div>
-                    <div class="float-element">💫</div>
-                </div>
+            <h2>Step Into Style</h2>
+            <p>Discover our premium collection of footwear</p>
+            <button class="cta-button">Shop Now</button>
+        </div>
+        <div class="hero-image">
+            <div class="featured-shoe">
+                <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=300&fit=crop" alt="Featured Shoe">
             </div>
         </div>
     </section>
 
-    <!-- Product Grid -->
-    <section class="products" id="products">
+    <!-- Shop Section -->
+    <section class="shop-section" id="shop">
         <div class="container">
-            <h2>Featured Products</h2>
-            <div class="product-grid">
-                <div class="product-card">
-                    <div class="product-image">
-                        <div class="shoe-placeholder" style="background: linear-gradient(45deg, #00b894, #00a3ff);">👟</div>
-                        <div class="product-badges">
-                            <span class="badge new">New</span>
-                        </div>
-                    </div>
-                    <div class="product-info">
-                        <h3>Nike Air Max 270</h3>
-                        <div class="rating">
-                            <span class="stars">⭐⭐⭐⭐⭐</span>
-                            <span class="review-count">(124)</span>
-                        </div>
-                        <div class="price-section">
-                            <span class="price">$149.99</span>
-                            <span class="old-price">$179.99</span>
-                        </div>
-                    </div>
+            <h2 class="section-title">Our Collection</h2>
+            
+            <!-- Filters -->
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="category">Category:</label>
+                    <select id="category" onchange="filterProducts()">
+                        <option value="">All Categories</option>
+                        <option value="running">Running</option>
+                        <option value="casual">Casual</option>
+                        <option value="formal">Formal</option>
+                        <option value="sports">Sports</option>
+                        <option value="boots">Boots</option>
+                    </select>
                 </div>
 
-                <div class="product-card">
-                    <div class="product-image">
-                        <div class="shoe-placeholder" style="background: linear-gradient(45deg, #ff6b35, #f7931e);">👟</div>
-                        <div class="product-badges">
-                            <span class="badge sale">Sale</span>
-                        </div>
-                    </div>
-                    <div class="product-info">
-                        <h3>Adidas Ultraboost</h3>
-                        <div class="rating">
-                            <span class="stars">⭐⭐⭐⭐⭐</span>
-                            <span class="review-count">(89)</span>
-                        </div>
-                        <div class="price-section">
-                            <span class="price">$179.99</span>
-                            <span class="old-price">$199.99</span>
-                        </div>
-                    </div>
+                <div class="filter-group">
+                    <label for="minPrice">Min Price:</label>
+                    <input type="number" id="minPrice" placeholder="0" onchange="filterProducts()">
                 </div>
 
-                <div class="product-card">
-                    <div class="product-image">
-                        <div class="shoe-placeholder" style="background: linear-gradient(45deg, #6c5ce7, #a29bfe);">👟</div>
-                    </div>
-                    <div class="product-info">
-                        <h3>Puma RS-X</h3>
-                        <div class="rating">
-                            <span class="stars">⭐⭐⭐⭐☆</span>
-                            <span class="review-count">(67)</span>
-                        </div>
-                        <div class="price-section">
-                            <span class="price">$119.99</span>
-                        </div>
-                    </div>
+                <div class="filter-group">
+                    <label for="maxPrice">Max Price:</label>
+                    <input type="number" id="maxPrice" placeholder="1000" onchange="filterProducts()">
                 </div>
 
-                <div class="product-card">
-                    <div class="product-image">
-                        <div class="shoe-placeholder" style="background: linear-gradient(45deg, #e17055, #fdcb6e);">👟</div>
-                    </div>
-                    <div class="product-info">
-                        <h3>Jordan Retro 1</h3>
-                        <div class="rating">
-                            <span class="stars">⭐⭐⭐⭐⭐</span>
-                            <span class="review-count">(156)</span>
-                        </div>
-                        <div class="price-section">
-                            <span class="price">$189.99</span>
-                        </div>
-                    </div>
+                <div class="filter-group">
+                    <label for="sortBy">Sort By:</label>
+                    <select id="sortBy" onchange="sortProducts()">
+                        <option value="name-asc">Name (A-Z)</option>
+                        <option value="name-desc">Name (Z-A)</option>
+                        <option value="price-asc">Price (Low to High)</option>
+                        <option value="price-desc">Price (High to Low)</option>
+                    </select>
                 </div>
 
-                <div class="product-card">
-                    <div class="product-image">
-                        <div class="shoe-placeholder" style="background: linear-gradient(45deg, #fd79a8, #fdcb6e);">👟</div>
-                        <div class="product-badges">
-                            <span class="badge trending">Trending</span>
-                        </div>
-                    </div>
-                    <div class="product-info">
-                        <h3>Vans Old Skool</h3>
-                        <div class="rating">
-                            <span class="stars">⭐⭐⭐⭐☆</span>
-                            <span class="review-count">(92)</span>
-                        </div>
-                        <div class="price-section">
-                            <span class="price">$69.99</span>
-                        </div>
-                    </div>
-                </div>
+                <button class="clear-filters" onclick="clearFilters()">Clear Filters</button>
+            </div>
 
-                <div class="product-card">
-                    <div class="product-image">
-                        <div class="shoe-placeholder" style="background: linear-gradient(45deg, #00b894, #55efc4);">👟</div>
-                    </div>
-                    <div class="product-info">
-                        <h3>Converse Chuck Taylor</h3>
-                        <div class="rating">
-                            <span class="stars">⭐⭐⭐⭐☆</span>
-                            <span class="review-count">(78)</span>
-                        </div>
-                        <div class="price-section">
-                            <span class="price">$59.99</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="product-card">
-                    <div class="product-image">
-                        <div class="shoe-placeholder" style="background: linear-gradient(45deg, #74b9ff, #0984e3);">👟</div>
-                    </div>
-                    <div class="product-info">
-                        <h3>New Balance 990</h3>
-                        <div class="rating">
-                            <span class="stars">⭐⭐⭐⭐⭐</span>
-                            <span class="review-count">(134)</span>
-                        </div>
-                        <div class="price-section">
-                            <span class="price">$199.99</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="product-card">
-                    <div class="product-image">
-                        <div class="shoe-placeholder" style="background: linear-gradient(45deg, #fd79a8, #e84393);">👟</div>
-                    </div>
-                    <div class="product-info">
-                        <h3>Reebok Classic</h3>
-                        <div class="rating">
-                            <span class="stars">⭐⭐⭐⭐☆</span>
-                            <span class="review-count">(45)</span>
-                        </div>
-                        <div class="price-section">
-                            <span class="price">$89.99</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="product-card">
-                    <div class="product-image">
-                        <div class="shoe-placeholder" style="background: linear-gradient(45deg, #00cec9, #55efc4);">👟</div>
-                    </div>
-                    <div class="product-info">
-                        <h3>Asics Gel-Kayano</h3>
-                        <div class="rating">
-                            <span class="stars">⭐⭐⭐⭐⭐</span>
-                            <span class="review-count">(98)</span>
-                        </div>
-                        <div class="price-section">
-                            <span class="price">$159.99</span>
-                        </div>
-                    </div>
-                </div>
+            <!-- Products Grid -->
+            <div class="products-grid" id="productsGrid">
+                <!-- Products will be generated by JavaScript -->
             </div>
         </div>
     </section>
@@ -206,20 +78,197 @@
 
 
     <script>
-        // Add some interactivity
-        document.querySelectorAll('.product-card').forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-10px)';
-            });
-            
-            card.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
-            });
-        });
+        // Sample product data
+        const products = [
+            {
+                id: 1,
+                name: "Air Max Pro",
+                price: 129.99,
+                category: "running",
+                image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300&h=200&fit=crop",
+                rating: 4.5
+            },
+            {
+                id: 2,
+                name: "Classic Leather",
+                price: 89.99,
+                category: "casual",
+                image: "https://images.unsplash.com/photo-1560072810-1cdd64cf3595?w=300&h=200&fit=crop",
+                rating: 4.2
+            },
+            {
+                id: 3,
+                name: "Oxford Business",
+                price: 159.99,
+                category: "formal",
+                image: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=300&h=200&fit=crop",
+                rating: 4.8
+            },
+            {
+                id: 4,
+                name: "Sport Runner",
+                price: 99.99,
+                category: "sports",
+                image: "https://images.unsplash.com/photo-1551107696-a4b537c892db?w=300&h=200&fit=crop",
+                rating: 4.3
+            },
+            {
+                id: 5,
+                name: "Winter Boots",
+                price: 189.99,
+                category: "boots",
+                image: "https://images.unsplash.com/photo-1544966503-7cc5ac882d5f?w=300&h=200&fit=crop",
+                rating: 4.6
+            },
+            {
+                id: 6,
+                name: "Casual Sneakers",
+                price: 79.99,
+                category: "casual",
+                image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=300&h=200&fit=crop",
+                rating: 4.1
+            },
+            {
+                id: 7,
+                name: "Performance Pro",
+                price: 149.99,
+                category: "running",
+                image: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=300&h=200&fit=crop",
+                rating: 4.7
+            },
+            {
+                id: 8,
+                name: "Formal Dress",
+                price: 199.99,
+                category: "formal",
+                image: "https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=300&h=200&fit=crop",
+                rating: 4.4
+            },
+            {
+                id: 9,
+                name: "Urban Style",
+                price: 119.99,
+                category: "casual",
+                image: "https://images.unsplash.com/photo-1539185441755-769473a23570?w=300&h=200&fit=crop",
+                rating: 4.0
+            }
+        ];
 
-        // Floating animation for hero elements
-        document.querySelectorAll('.float-element').forEach((element, index) => {
-            element.style.animationDelay = `${index * 0.5}s`;
+        let filteredProducts = [...products];
+        let cart = [];
+
+        // Display products
+        function displayProducts(productsToShow = filteredProducts) {
+            const grid = document.getElementById('productsGrid');
+            grid.innerHTML = '';
+
+            productsToShow.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card';
+                productCard.innerHTML = `
+                    <div class="product-image">
+                        <img src="${product.image}" alt="${product.name}">
+                        <div class="product-overlay">
+                            <button class="quick-view" onclick="quickView(${product.id})">Quick View</button>
+                        </div>
+                    </div>
+                    <div class="product-info">
+                        <h3>${product.name}</h3>
+                        <div class="rating">
+                            ${'★'.repeat(Math.floor(product.rating))}${'☆'.repeat(5 - Math.floor(product.rating))}
+                            <span>(${product.rating})</span>
+                        </div>
+                        <p class="price">$${product.price}</p>
+                        <button class="add-to-cart" onclick="addToCart(${product.id})">Add to Cart</button>
+                    </div>
+                `;
+                grid.appendChild(productCard);
+            });
+        }
+
+        // Filter products
+        function filterProducts() {
+            const category = document.getElementById('category').value;
+            const minPrice = parseFloat(document.getElementById('minPrice').value) || 0;
+            const maxPrice = parseFloat(document.getElementById('maxPrice').value) || Infinity;
+
+            filteredProducts = products.filter(product => {
+                const matchesCategory = !category || product.category === category;
+                const matchesPrice = product.price >= minPrice && product.price <= maxPrice;
+                return matchesCategory && matchesPrice;
+            });
+
+            displayProducts();
+        }
+
+        // Sort products
+        function sortProducts() {
+            const sortBy = document.getElementById('sortBy').value;
+
+            filteredProducts.sort((a, b) => {
+                switch(sortBy) {
+                    case 'name-asc':
+                        return a.name.localeCompare(b.name);
+                    case 'name-desc':
+                        return b.name.localeCompare(a.name);
+                    case 'price-asc':
+                        return a.price - b.price;
+                    case 'price-desc':
+                        return b.price - a.price;
+                    default:
+                        return 0;
+                }
+            });
+
+            displayProducts();
+        }
+
+        // Clear filters
+        function clearFilters() {
+            document.getElementById('category').value = '';
+            document.getElementById('minPrice').value = '';
+            document.getElementById('maxPrice').value = '';
+            document.getElementById('sortBy').value = 'name-asc';
+            filteredProducts = [...products];
+            displayProducts();
+        }
+
+        // Add to cart
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            cart.push(product);
+            updateCartCount();
+            
+            // Show notification
+            showNotification(`${product.name} added to cart!`);
+        }
+
+        // Update cart count
+        function updateCartCount() {
+            document.querySelector('.cart-count').textContent = cart.length;
+        }
+
+        // Quick view
+        function quickView(productId) {
+            const product = products.find(p => p.id === productId);
+            alert(`Quick View: ${product.name}\nPrice: $${product.price}\nCategory: ${product.category}\nRating: ${product.rating}/5`);
+        }
+
+        // Show notification
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            displayProducts();
         });
     </script>
 </body>

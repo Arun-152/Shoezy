@@ -5,6 +5,84 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shoezy - Create Account</title>
     <link rel="stylesheet" href="/css/signupPage.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* Flash Message Styles */
+        .alert {
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .alert-danger {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        
+        .alert-success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        
+        .alert p {
+            margin: 0;
+            padding: 2px 0;
+        }
+        
+        .alert p:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* Form validation styles */
+        .form-error {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+        
+        .error-message {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+            display: block;
+        }
+        
+        /* Frontend Flash Message Animation */
+        #frontendFlashMessage {
+            transition: all 0.3s ease-in-out;
+            transform: translateY(-10px);
+            opacity: 0;
+        }
+        
+        #frontendFlashMessage.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        /* Close button for flash message */
+        .alert-close {
+            float: right;
+            font-size: 18px;
+            font-weight: bold;
+            line-height: 1;
+            color: inherit;
+            text-shadow: none;
+            opacity: 0.5;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            margin-left: 10px;
+        }
+        
+        .alert-close:hover {
+            opacity: 0.8;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -20,27 +98,319 @@
             </div>
             <div class="signup-form">
                 <h2>Create Account</h2>
+                
+                <!-- Backend Flash Messages -->
+                <% if (error_msg && error_msg.length > 0) { %>
+                    <div class="alert alert-danger">
+                        <% error_msg.forEach(function(error) { %>
+                            <p><%= error %></p>
+                        <% }); %>
+                    </div>
+                <% } %>
+                
+                <% if (success_msg && success_msg.length > 0) { %>
+                    <div class="alert alert-success" id="backendSuccessMessage">
+                        <% success_msg.forEach(function(message) { %>
+                            <p><%= message %></p>
+                        <% }); %>
+                    </div>
+                <% } %>
+                
+                <% if (error && error.length > 0) { %>
+                    <div class="alert alert-danger">
+                        <% error.forEach(function(err) { %>
+                            <p><%= err %></p>
+                        <% }); %>
+                    </div>
+                <% } %>
+                
+                <!-- Frontend Flash Message (Above the form, hidden by default) -->
+                <div id="frontendFlashMessage" class="alert alert-danger" style="display: none;">
+                    <p id="frontendFlashText">All fields are required</p>
+                </div>
+                
                 <button class="google-signup">
                     <img src="https://www.google.com/favicon.ico" alt="Google Icon">
                     Sign up with Google
                 </button>
-                <form id="signform" action="/signup" method="post"> 
-                    <input type="text" placeholder="fullname" name="fullname">
+                <form id="signform" action="/signup" method="post" novalidate> 
+                    <input type="text" placeholder="Full Name" name="fullname">
                     <p id="error1" class="error-message"></p>
-                    <input type="email" placeholder="emailaddress" name="email">
+                    <input type="email" placeholder="Email Address" name="email">
                     <p id="error2" class="error-message"></p>
-                    <input type="tel" placeholder="phone" name="phone">
+                    <input type="tel" placeholder="Phone Number" name="phone">
                     <p id="error3" class="error-message"></p>
-                    <input type="password" placeholder="password" name="password">
+                    <input type="password" placeholder="Password" name="password">
                     <p id="error4" class="error-message"></p>
-                    <input type="password" placeholder="confirmpassword" name="confirmPassword">
+                    <input type="password" placeholder="Confirm Password" name="confirmPassword">
                     <p id="error5" class="error-message"></p>
-                    <input type="text" placeholder="Referral Code">
+                    <input type="text" placeholder="Referral Code (Optional)">
                     <button type="submit" class="create-account-btn">Create Account</button>
                 </form>
-                <p class="login-link">Already have an account? <a href="#">Login</a></p>
+                <p class="login-link">Already have an account? <a href="/login">Login</a></p>
             </div>
         </div>
     </main>
+
+    <script>
+        // Client-side validation
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('signform');
+            const fullnameInput = document.querySelector('input[name="fullname"]');
+            const emailInput = document.querySelector('input[name="email"]');
+            const phoneInput = document.querySelector('input[name="phone"]');
+            const passwordInput = document.querySelector('input[name="password"]');
+            const confirmPasswordInput = document.querySelector('input[name="confirmPassword"]');
+
+            // Check for backend success message and trigger SweetAlert
+            const backendSuccessMessage = document.getElementById('backendSuccessMessage');
+            if (backendSuccessMessage) {
+                const successText = backendSuccessMessage.textContent.trim();
+                
+                // Show SweetAlert popup
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'User created successfully',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#28a745'
+                });
+            }
+
+            // Real-time validation functions
+            function validateFullname() {
+                const fullname = fullnameInput.value.trim();
+                const errorElement = document.getElementById('error1');
+                
+                if (!fullname) {
+                    errorElement.textContent = 'Full name is required';
+                    fullnameInput.classList.add('form-error');
+                    return false;
+                } else if (fullname.length < 2) {
+                    errorElement.textContent = 'Full name must be at least 2 characters long';
+                    fullnameInput.classList.add('form-error');
+                    return false;
+                } else if (!/^[a-zA-Z\s]+$/.test(fullname)) {
+                    errorElement.textContent = 'Full name should only contain letters and spaces';
+                    fullnameInput.classList.add('form-error');
+                    return false;
+                } else {
+                    errorElement.textContent = '';
+                    fullnameInput.classList.remove('form-error');
+                    return true;
+                }
+            }
+
+            function validateEmail() {
+                const email = emailInput.value.trim();
+                const errorElement = document.getElementById('error2');
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                
+                if (!email) {
+                    errorElement.textContent = 'Email is required';
+                    emailInput.classList.add('form-error');
+                    return false;
+                } else if (!emailRegex.test(email)) {
+                    errorElement.textContent = 'Please enter a valid email address';
+                    emailInput.classList.add('form-error');
+                    return false;
+                } else {
+                    errorElement.textContent = '';
+                    emailInput.classList.remove('form-error');
+                    return true;
+                }
+            }
+
+            function validatePhone() {
+                const phone = phoneInput.value.trim();
+                const errorElement = document.getElementById('error3');
+                const phoneRegex = /^[6-9]\d{9}$/;
+                
+                if (!phone) {
+                    errorElement.textContent = 'Phone number is required';
+                    phoneInput.classList.add('form-error');
+                    return false;
+                } else if (!phoneRegex.test(phone)) {
+                    errorElement.textContent = 'Please enter a valid 10-digit phone number starting with 6, 7, 8, or 9';
+                    phoneInput.classList.add('form-error');
+                    return false;
+                } else {
+                    errorElement.textContent = '';
+                    phoneInput.classList.remove('form-error');
+                    return true;
+                }
+            }
+
+            function validatePassword() {
+                const password = passwordInput.value;
+                const errorElement = document.getElementById('error4');
+                
+                if (!password) {
+                    errorElement.textContent = 'Password is required';
+                    passwordInput.classList.add('form-error');
+                    return false;
+                } else if (password.length < 6) {
+                    errorElement.textContent = 'Password must be at least 6 characters long';
+                    passwordInput.classList.add('form-error');
+                    return false;
+                } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+                    errorElement.textContent = 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
+                    passwordInput.classList.add('form-error');
+                    return false;
+                } else {
+                    errorElement.textContent = '';
+                    passwordInput.classList.remove('form-error');
+                    return true;
+                }
+            }
+
+            function validateConfirmPassword() {
+                const password = passwordInput.value;
+                const confirmPassword = confirmPasswordInput.value;
+                const errorElement = document.getElementById('error5');
+                
+                if (!confirmPassword) {
+                    errorElement.textContent = 'Please confirm your password';
+                    confirmPasswordInput.classList.add('form-error');
+                    return false;
+                } else if (password !== confirmPassword) {
+                    errorElement.textContent = 'Passwords do not match';
+                    confirmPasswordInput.classList.add('form-error');
+                    return false;
+                } else {
+                    errorElement.textContent = '';
+                    confirmPasswordInput.classList.remove('form-error');
+                    return true;
+                }
+            }
+
+            // Add event listeners for real-time validation
+            fullnameInput.addEventListener('blur', validateFullname);
+            emailInput.addEventListener('blur', validateEmail);
+            phoneInput.addEventListener('blur', validatePhone);
+            passwordInput.addEventListener('blur', validatePassword);
+            confirmPasswordInput.addEventListener('blur', validateConfirmPassword);
+            
+            // Also validate confirm password when password changes
+            passwordInput.addEventListener('input', function() {
+                if (confirmPasswordInput.value) {
+                    validateConfirmPassword();
+                }
+            });
+
+            // Variable to track if frontend flash message is currently shown
+            let frontendFlashVisible = false;
+
+            // Function to show frontend flash message (IMPROVED - PERSISTENT)
+            function showFrontendFlash(message, type = 'danger') {
+                const flashDiv = document.getElementById('frontendFlashMessage');
+                const flashText = document.getElementById('frontendFlashText');
+                
+                // Update message and type
+                flashText.textContent = message;
+                flashDiv.className = `alert alert-${type}`;
+                
+                // Show the message with smooth animation
+                flashDiv.style.display = 'block';
+                setTimeout(() => {
+                    flashDiv.classList.add('show');
+                    frontendFlashVisible = true;
+                }, 10);
+                
+                // Scroll to top to ensure message is visible
+                flashDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                
+                // NO AUTO-HIDE - Message persists until user interaction
+            }
+
+            // Function to hide frontend flash message (IMPROVED)
+            function hideFrontendFlash() {
+                const flashDiv = document.getElementById('frontendFlashMessage');
+                if (frontendFlashVisible) {
+                    flashDiv.classList.remove('show');
+                    setTimeout(() => {
+                        flashDiv.style.display = 'none';
+                        frontendFlashVisible = false;
+                    }, 300);
+                }
+            }
+
+            // Function to check if any required field is empty
+            function checkEmptyFields() {
+                const emptyFields = [];
+                
+                if (!fullnameInput.value.trim()) emptyFields.push('Full Name');
+                if (!emailInput.value.trim()) emptyFields.push('Email');
+                if (!phoneInput.value.trim()) emptyFields.push('Phone Number');
+                if (!passwordInput.value) emptyFields.push('Password');
+                if (!confirmPasswordInput.value) emptyFields.push('Confirm Password');
+                
+                return emptyFields;
+            }
+
+            // Form submission validation
+            form.addEventListener('submit', function(e) {
+                // Hide any existing frontend flash message when new validation starts
+                hideFrontendFlash();
+                
+                // Check for empty fields
+                const emptyFields = checkEmptyFields();
+                
+                if (emptyFields.length === 5) {
+                    // All fields are empty - show persistent frontend message and prevent submission
+                    e.preventDefault();
+                    showFrontendFlash('All fields are required');
+                    
+                    // Add error styling to all required fields
+                    fullnameInput.classList.add('form-error');
+                    emailInput.classList.add('form-error');
+                    phoneInput.classList.add('form-error');
+                    passwordInput.classList.add('form-error');
+                    confirmPasswordInput.classList.add('form-error');
+                    
+                    return false;
+                } else if (emptyFields.length > 0) {
+                    // Some fields are empty - show specific persistent message and prevent submission
+                    e.preventDefault();
+                    const fieldText = emptyFields.length === 1 ? 'field is' : 'fields are';
+                    showFrontendFlash(`The following ${fieldText} required: ${emptyFields.join(', ')}`);
+                    return false;
+                }
+
+                // All fields have content - run detailed validation
+                const isFullnameValid = validateFullname();
+                const isEmailValid = validateEmail();
+                const isPhoneValid = validatePhone();
+                const isPasswordValid = validatePassword();
+                const isConfirmPasswordValid = validateConfirmPassword();
+
+                if (!isFullnameValid || !isEmailValid || !isPhoneValid || !isPasswordValid || !isConfirmPasswordValid) {
+                    e.preventDefault();
+                    showFrontendFlash('Please fix the errors below before submitting');
+                    return false;
+                }
+
+                // All validation passed - hide any frontend flash message and allow form submission
+                hideFrontendFlash();
+                return true;
+            });
+
+            // IMPROVED: Clear frontend flash message when user starts typing in any field
+            [fullnameInput, emailInput, phoneInput, passwordInput, confirmPasswordInput].forEach(input => {
+                input.addEventListener('input', function() {
+                    // Hide frontend flash message when user starts typing
+                    hideFrontendFlash();
+                    // Remove error styling when user starts typing
+                    this.classList.remove('form-error');
+                });
+            });
+
+            // Hide frontend flash message when backend flash messages are shown
+            const backendFlashMessages = document.querySelectorAll('.alert:not(#frontendFlashMessage)');
+            if (backendFlashMessages.length > 0) {
+                hideFrontendFlash();
+            }
+        });
+    </script>
 </body>
 </html>
