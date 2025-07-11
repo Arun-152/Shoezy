@@ -3,6 +3,7 @@ const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
+const { validateEmailConfig, createEmailTransporter, sendEmail } = require("../../config/emailConfig");
 require("dotenv").config();
 
 const usererrorPage = (req, res) => {
@@ -31,12 +32,25 @@ const signupPage = async (req, res) => {
 
 const landingPage = async (req, res) => {
     try {
+        // Fetch featured products for landing page (same logic as home page)
+        const featuredProducts = await Product.find({ isDeleted: false, isBlocked: false })
+            .populate("category")
+            .sort({ createdAt: -1 })
+            .limit(6);
+
+        // Check if user is logged in for navbar display
+        let userData = null;
         if (req.session.userId) {
-            return res.redirect("/home");
+            userData = await User.findById(req.session.userId);
         }
-        return res.render("landingPage");
+
+        return res.render("landingPage", {
+            products: featuredProducts,
+            user: userData,
+            isLandingPage: true,
+        });
     } catch (error) {
-        console.log("Landing page not found");
+        console.log("Landing page error:", error);
         res.status(500).send("Server error");
     }
 };
@@ -69,18 +83,20 @@ function generateOtp() {
 
 async function sendVerificationEmail(email, otp) {
     try {
-        const transporter = nodemailer.createTransport({
-            service: "gmail",
-            port: 587,
-            secure: false,
-            requireTLS: true,
-            auth: {
-                user: process.env.NODEMAILER_EMAIL,
-                pass: process.env.NODEMAILER_PASSWORD,
-            },
-        });
+        // Validate email configuration first
+        const validation = validateEmailConfig();
+        if (!validation.isValid) {
+            console.log("❌ Email configuration error:", validation.message);
+            return false;
+        }
 
-        const info = await transporter.sendMail({
+        const transporter = createEmailTransporter();
+        if (!transporter) {
+            console.log("❌ Failed to create email transporter");
+            return false;
+        }
+
+        const mailOptions = {
             from: process.env.NODEMAILER_EMAIL,
             to: email,
             subject: "Verify Your Shoezy Account - OTP Verification",
@@ -98,10 +114,12 @@ async function sendVerificationEmail(email, otp) {
                     <p style="font-size: 12px; color: #999; text-align: center;">Shoezy - Your trusted shoe store</p>
                 </div>
             `,
-        });
-        return info.accepted.length > 0;
+        };
+
+        const result = await sendEmail(transporter, mailOptions);
+        return result.success;
     } catch (error) {
-        console.error("Error sending email", error);
+        console.error("Error sending verification email:", error.message);
         return false;
     }
 }
@@ -347,6 +365,7 @@ const homePage = async (req, res) => {
         return res.render("homePage", {
             products: featuredProducts,
             user: userData,
+            isLandingPage: false,
         });
     } catch (error) {
         console.error(error);
@@ -365,10 +384,69 @@ const shopPage = async (req, res) => {
         return res.render("shopPage", {
             products: products,
             categories: categories,
+            isLandingPage: false,
         });
     } catch (error) {
         console.error("Shop page error:", error);
         res.status(500).send("Server error");
+    }
+};
+
+const productDetailPage = async (req, res) => {
+    try {
+        const productId = req.params.id;
+        
+        // Validate product ID
+        if (!productId || !productId.match(/^[0-9a-fA-F]{24}$/)) {
+            return res.status(404).render("usererrorPage");
+        }
+
+        // Find the product with populated category
+        const product = await Product.findOne({ 
+            _id: productId, 
+            isDeleted: false, 
+            isBlocked: false 
+        }).populate("category");
+
+        if (!product) {
+            return res.status(404).render("usererrorPage");
+        }
+
+        // Find related products from the same category
+        let relatedProducts = [];
+        if (product.category) {
+            relatedProducts = await Product.find({
+                _id: { $ne: productId }, // Exclude current product
+                category: product.category._id,
+                isDeleted: false,
+                isBlocked: false
+            })
+            .populate("category")
+            .limit(4); // Limit to 4 related products
+        }
+
+        // If not enough related products from same category, get random products
+        if (relatedProducts.length < 4) {
+            const additionalProducts = await Product.find({
+                _id: { $ne: productId },
+                isDeleted: false,
+                isBlocked: false
+            })
+            .populate("category")
+            .limit(4 - relatedProducts.length);
+            
+            relatedProducts = [...relatedProducts, ...additionalProducts];
+        }
+
+        return res.render("productDetailPage", {
+            product: product,
+            relatedProducts: relatedProducts,
+            isLandingPage: false,
+        });
+
+    } catch (error) {
+        console.error("Product detail page error:", error);
+        res.status(500).render("usererrorPage");
     }
 };
 
@@ -382,23 +460,65 @@ const showuser = async (req, res) => {
     }
     res.render("myaccount", {
         user: userData,
+        isLandingPage: false,
     });
+};
+
+const contactPage = async (req, res) => {
+    try {
+        // Check if user is logged in for navbar display
+        let userData = null;
+        if (req.session.userId) {
+            userData = await User.findById(req.session.userId);
+        }
+
+        return res.render("contactPage", {
+            user: userData,
+            isLandingPage: false,
+        });
+    } catch (error) {
+        console.log("Contact page error:", error);
+        res.status(500).send("Server error");
+    }
+};
+
+const orderPage = async (req, res) => {
+    try {
+        const user = req.session.userId;
+        const userData = await User.findById(user);
+        if (!userData) {
+            return res.redirect("/login");
+        }
+
+        // Here you can fetch user's orders from database
+        // const orders = await Order.find({ userId: user }).populate('products');
+
+        return res.render("orderPage", {
+            user: userData,
+            isLandingPage: false,
+            // orders: orders || []
+        });
+    } catch (error) {
+        console.log("Order page error:", error);
+        res.status(500).send("Server error");
+    }
 };
 
 async function sendPasswordResetOTP(email, otp) {
     try {
-        const transporter = nodemailer.createTransport({
-            service: "gmail",
-            port: 587,
-            secure: false,
-            requireTLS: true,
-            auth: {
-                user: process.env.NODEMAILER_EMAIL,
-                pass: process.env.NODEMAILER_PASSWORD,
-            },
-        });
+        // Validate email configuration first
+        const validation = validateEmailConfig();
+        if (!validation.isValid) {
+            console.log("❌ Email configuration error:", validation.message);
+            throw new Error(validation.message);
+        }
 
-        const info = await transporter.sendMail({
+        const transporter = createEmailTransporter();
+        if (!transporter) {
+            throw new Error("Failed to create email transporter");
+        }
+
+        const mailOptions = {
             from: process.env.NODEMAILER_EMAIL,
             to: email,
             subject: "Password Reset OTP - Shoezy",
@@ -416,12 +536,13 @@ async function sendPasswordResetOTP(email, otp) {
                     <p style="font-size: 12px; color: #999; text-align: center;">Shoezy - Your trusted shoe store</p>
                 </div>
             `,
-        });
+        };
 
-        return info.accepted.length > 0;
+        const result = await sendEmail(transporter, mailOptions);
+        return result.success;
     } catch (error) {
-        console.error("Error sending password reset OTP:", error);
-        return false;
+        console.error("Error sending password reset OTP:", error.message);
+        throw error;
     }
 }
 
@@ -455,21 +576,58 @@ const postForgotPassword = async (req, res) => {
             return res.status(400).json({ success: false, message: "No account found with this email address" });
         }
 
+        if (user.isBlocked) {
+            return res.status(400).json({ success: false, message: "Your account has been blocked. Please contact support." });
+        }
+
         const otp = generateOtp();
 
+        // Store OTP in session first
         req.session.passwordResetOTP = {
             code: otp,
             email: email.toLowerCase(),
-            expiresAt: Date.now() + 5 * 60 * 1000,
+            expiresAt: Date.now() + 30 * 1000,
         };
 
-        const emailSent = await sendPasswordResetOTP(email, otp);
-        if (!emailSent) {
-            return res.status(500).json({ success: false, message: "Failed to send OTP email. Please try again." });
+        // Check if email configuration is properly set for production
+        const isEmailConfigured = process.env.NODEMAILER_EMAIL && 
+                                  process.env.NODEMAILER_PASSWORD &&
+                                  process.env.NODEMAILER_EMAIL !== 'your-email@gmail.com' && 
+                                  process.env.NODEMAILER_EMAIL !== 'your-actual-email@gmail.com' &&
+                                  process.env.NODEMAILER_PASSWORD !== 'your-app-password' &&
+                                  process.env.NODEMAILER_PASSWORD !== 'your-actual-app-password' &&
+                                  process.env.NODEMAILER_EMAIL.trim() !== '' &&
+                                  process.env.NODEMAILER_PASSWORD.trim() !== '';
+
+        if (!isEmailConfigured) { 
+            res.json({ 
+                success: true, 
+                message: "OTP generated successfully. Check console for OTP (Testing Mode)", 
+                redirect: "/verify-reset-otp" 
+            });
+            return;
         }
 
-        console.log("Password Reset OTP:", otp);
-        res.json({ success: true, message: "OTP has been sent to your email address", redirect: "/verify-reset-otp" });
+        try {
+            const emailSent = await sendPasswordResetOTP(email, otp);
+            if (!emailSent) {
+                console.log("Email sending failed. OTP for testing:", otp);
+                return res.status(500).json({ 
+                    success: false, 
+                    message: "Failed to send OTP email. Please try again later. (For testing, check console for OTP)" 
+                });
+            }
+
+            console.log("Password Reset OTP:", otp);
+            res.json({ success: true, message: "OTP has been sent to your email address", redirect: "/verify-reset-otp" });
+        } catch (emailError) {
+            console.error("Email sending error:", emailError);
+            console.log("OTP for testing:", otp);
+            return res.status(500).json({ 
+                success: false, 
+                message: "Failed to send OTP email due to email service error. Please try again later. (For testing, check console for OTP)" 
+            });
+        }
     } catch (error) {
         console.error("Forgot password error:", error);
         res.status(500).json({ success: false, message: "Server error. Please try again." });
@@ -547,17 +705,48 @@ const resendResetOTP = async (req, res) => {
         req.session.passwordResetOTP = {
             code: newOtp,
             email: sessionOTP.email,
-            expiresAt: Date.now() + 5 * 60 * 1000,
+            expiresAt: Date.now() + 30 * 1000,
             verified: false,
         };
 
-        const emailSent = await sendPasswordResetOTP(sessionOTP.email, newOtp);
-        if (!emailSent) {
-            return res.status(500).json({ success: false, message: "Failed to send OTP email. Please try again." });
+        // Check if email configuration is properly set for production
+        const isEmailConfigured = process.env.NODEMAILER_EMAIL && 
+                                  process.env.NODEMAILER_PASSWORD &&
+                                  process.env.NODEMAILER_EMAIL !== 'your-email@gmail.com' && 
+                                  process.env.NODEMAILER_EMAIL !== 'your-actual-email@gmail.com' &&
+                                  process.env.NODEMAILER_PASSWORD !== 'your-app-password' &&
+                                  process.env.NODEMAILER_PASSWORD !== 'your-actual-app-password' &&
+                                  process.env.NODEMAILER_EMAIL.trim() !== '' &&
+                                  process.env.NODEMAILER_PASSWORD.trim() !== '';
+
+        if (!isEmailConfigured) {
+            res.json({ 
+                success: true, 
+                message: "New OTP generated successfully. Check console for OTP (Testing Mode)" 
+            });
+            return;
         }
 
-        console.log("Resent Password Reset OTP:", newOtp);
-        res.json({ success: true, message: "New OTP has been sent to your email address" });
+        try {
+            const emailSent = await sendPasswordResetOTP(sessionOTP.email, newOtp);
+            if (!emailSent) {
+                console.log("Email sending failed. Resent OTP for testing:", newOtp);
+                return res.status(500).json({ 
+                    success: false, 
+                    message: "Failed to send OTP email. Please try again later. (For testing, check console for OTP)" 
+                });
+            }
+
+            console.log("Resent Password Reset OTP:", newOtp);
+            res.json({ success: true, message: "New OTP has been sent to your email address" });
+        } catch (emailError) {
+            console.error("Email sending error:", emailError);
+            console.log("Resent OTP for testing:", newOtp);
+            return res.status(500).json({ 
+                success: false, 
+                message: "Failed to send OTP email due to email service error. Please try again later. (For testing, check console for OTP)" 
+            });
+        }
     } catch (error) {
         console.error("Resend OTP error:", error);
         res.status(500).json({ success: false, message: "Server error. Please try again." });
@@ -642,8 +831,11 @@ module.exports = {
     homePage,
     logout,
     shopPage,
+    productDetailPage,
     resendOTP,
     showuser,
+    contactPage,
+    orderPage,
     usererrorPage,
     forgotPasswordPage,
     postForgotPassword,

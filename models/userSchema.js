@@ -16,16 +16,30 @@ const UserSchema = new mongoose.Schema(
         },
         phone: {
             type: String,
-            required: true,
+            required: function() {
+                // Phone is not required for Google OAuth users
+                return !this.googleId;
+            },
             trim: true,
         },
         password: {
             type: String,
-            required: true,
+            required: function() {
+                // Password is not required for Google OAuth users
+                return !this.googleId;
+            },
         },
         googleId: {
             type: String,
             default: null,
+        },
+        profilePicture: {
+            type: String,
+            default: '',
+        },
+        isVerified: {
+            type: Boolean,
+            default: false,
         },
         isBlocked: {
             type: Boolean,

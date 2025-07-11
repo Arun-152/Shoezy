@@ -13,8 +13,11 @@ router.post("/login", userController.postlogin);
 router.get("/home", userAuth, userController.homePage);
 router.get("/logout", userController.logout);
 router.get("/shop", userController.shopPage);
+router.get("/product/:id", userController.productDetailPage);
 router.post("/resendotp", userController.resendOTP);
 router.get("/profile", userAuth, userController.showuser);
+router.get("/contact", userController.contactPage);
+router.get("/order", userAuth, userController.orderPage);
 router.get("/usererrorPage", userController.usererrorPage);
 
 // Forgot Password Routes

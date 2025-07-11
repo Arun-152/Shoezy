@@ -16,14 +16,29 @@
             <ul class="nav-links">
                 <li><a href="/home">Home</a></li>
                 <li><a href="/shop">Shop</a></li>
-                <li><a href="/oredr">Order</a></li>
+                <li><a href="/order">Orders</a></li>
                 <li><a href="/contact">Contact</a></li>
+
+                <!-- Show Login/Register only on Landing Page -->
+                <% if (typeof isLandingPage !== 'undefined' && isLandingPage) { %>
+                    <% if (typeof user !== 'undefined' && user) { %>
+                        <!-- User is logged in on landing page -->
+                        <li><a href="/profile">Welcome, <%= user.fullname %></a></li>
+                        <li><a href="/logout" style="color: #dc3545;">Logout</a></li>
+                    <% } else { %>
+                        <!-- User is not logged in on landing page -->
+                        <li><a href="/login">Login</a></li>
+                        <li><a href="/signup">Register</a></li>
+                    <% } %>
+                <% } %>
             </ul>
             <div class="nav-icons">
                 <span class="nav-icon wishlist-icon"><i class="fas fa-heart"></i></span>
                 <span class="nav-icon cart-icon"><i class="fas fa-shopping-cart"></i></span>
-
-  <span class="nav-icon profile-icon"><a href="/profile"><i class="fas fa-user"></i></a></span>
+                <!-- Show profile icon on all pages if user is logged in -->
+                <% if (typeof user !== 'undefined' && user) { %>
+                    <span class="nav-icon profile-icon"><a href="/profile"><i class="fas fa-user"></i></a></span>
+                <% } %>
             </div>
         </nav>
     </header>

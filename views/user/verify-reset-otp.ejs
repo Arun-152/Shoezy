@@ -12,7 +12,7 @@
     <div class="left">
       <h1 class="brand">Shoezy</h1>
       <div class="circle"></div>
-      <img src="96fbe648-d624-4762-82d2-6a815cece7ae.png" alt="Shoe" class="shoe-img" />
+      <img src="/images/fashion-shoes-sneakers_1203-7529.avif" alt="Shoe" class="shoe-img" />
     </div>
     <div class="right">
       <h2>Verify OTP</h2>
@@ -48,7 +48,7 @@
 
   <script>
     // Timer functionality
-    let timeLeft = 5 * 60; // 5 minutes in seconds
+    let timeLeft = 1 * 60; // 5 minutes in seconds
     const countdownElement = document.getElementById('countdown');
     
     function updateTimer() {
@@ -160,9 +160,42 @@
     document.getElementById('otp').focus();
 
     // Resend OTP functionality
-    let resendCooldownActive = false;
+    let resendCooldownActive = true; // Start with cooldown active
     let resendCooldownTime = 30; // 30 seconds cooldown
     let resendCooldownInterval;
+
+    // Function to start resend cooldown
+    function startResendCooldown() {
+      resendCooldownActive = true;
+      resendCooldownTime = 30;
+
+      const resendBtn = document.getElementById('resendBtn');
+      const resendCooldown = document.getElementById('resendCooldown');
+      const cooldownTimer = document.getElementById('cooldownTimer');
+
+      // Hide button and show cooldown
+      resendBtn.style.display = 'none';
+      resendCooldown.style.display = 'block';
+
+      resendCooldownInterval = setInterval(() => {
+        cooldownTimer.textContent = resendCooldownTime;
+        resendCooldownTime--;
+
+        if (resendCooldownTime < 0) {
+          clearInterval(resendCooldownInterval);
+          resendCooldownActive = false;
+
+          // Show button and hide cooldown
+          resendBtn.style.display = 'inline-block';
+          resendBtn.disabled = false;
+          resendBtn.textContent = 'Resend OTP';
+          resendCooldown.style.display = 'none';
+        }
+      }, 1000);
+    }
+
+    // Start initial cooldown when page loads
+    startResendCooldown();
 
     document.getElementById('resendBtn').addEventListener('click', async function() {
       if (resendCooldownActive) {
@@ -232,34 +265,7 @@
       }
     });
 
-    function startResendCooldown() {
-      resendCooldownActive = true;
-      resendCooldownTime = 30;
-      
-      const resendBtn = document.getElementById('resendBtn');
-      const resendCooldown = document.getElementById('resendCooldown');
-      const cooldownTimer = document.getElementById('cooldownTimer');
 
-      // Hide button and show cooldown
-      resendBtn.style.display = 'none';
-      resendCooldown.style.display = 'block';
-
-      resendCooldownInterval = setInterval(() => {
-        cooldownTimer.textContent = resendCooldownTime;
-        resendCooldownTime--;
-
-        if (resendCooldownTime < 0) {
-          clearInterval(resendCooldownInterval);
-          resendCooldownActive = false;
-          
-          // Show button and hide cooldown
-          resendBtn.style.display = 'inline-block';
-          resendBtn.disabled = false;
-          resendBtn.textContent = 'Resend OTP';
-          resendCooldown.style.display = 'none';
-        }
-      }, 1000);
-    }
   </script>
 
   <style>

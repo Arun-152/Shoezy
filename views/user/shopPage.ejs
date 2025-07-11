@@ -8,7 +8,7 @@
 </head>
 <body>
     <!-- Header -->
-   <%-include("../partials/user/navbar")%>
+   <%-include("../partials/user/header")%>
 
     <!-- Hero Section -->
     <section class="hero">
@@ -134,27 +134,17 @@
                 const productCard = document.createElement('div');
                 productCard.className = 'product-card';
                 
-                // Handle pricing display
-                let priceHTML = '';
-                if (product.salePrice && product.salePrice < product.originalPrice) {
-                    priceHTML = `
-                        <p class="price">
-                            <span class="sale-price">${product.salePrice}</span>
-                            <span class="original-price">${product.originalPrice}</span>
-                        </p>
-                    `;
-                } else {
-                    priceHTML = `<p class="price">${product.price}</p>`;
-                }
+                // Handle pricing display - show only one price
+                let priceHTML = `<p class="price">₹${product.salePrice || product.price}</p>`;
 
                 productCard.innerHTML = `
-                    <div class="product-image">
+                    <div class="product-image" onclick="window.location.href='/product/${product.id}'" style="cursor: pointer;">
                         <img src="${product.image}" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300&h=200&fit=crop'">
                         <div class="product-overlay">
-                            <button class="quick-view" onclick="quickView('${product.id}')">Quick View</button>
+                            <button class="quick-view" onclick="event.stopPropagation(); quickView('${product.id}')">View Details</button>
                         </div>
                     </div>
-                    <div class="product-info">
+                    <div class="product-info" onclick="window.location.href='/product/${product.id}'" style="cursor: pointer;">
                         <h3>${product.name}</h3>
                         <p class="category">${product.categoryName}</p>
                         <div class="rating">
@@ -162,9 +152,11 @@
                             <span>(${product.rating})</span>
                         </div>
                         ${priceHTML}
-                        <button class="add-to-cart" onclick="addToCart('${product.id}')" ${product.quantity <= 0 ? 'disabled' : ''}>
-                            ${product.quantity <= 0 ? 'Out of Stock' : 'Add to Cart'}
-                        </button>
+                        <div class="product-actions">
+                            <button class="add-to-cart" onclick="event.stopPropagation(); addToCart('${product.id}')" ${product.quantity <= 0 ? 'disabled' : ''}>
+                                ${product.quantity <= 0 ? 'Out of Stock' : 'Add to Cart'}
+                            </button>
+                        </div>
                     </div>
                 `;
                 grid.appendChild(productCard);
@@ -233,10 +225,9 @@
             document.querySelector('.cart-count').textContent = cart.length;
         }
 
-        // Quick view
+        // Quick view - Navigate to product detail page
         function quickView(productId) {
-            const product = products.find(p => p.id === productId);
-            alert(`Quick View: ${product.name}\nPrice: $${product.price}\nCategory: ${product.category}\nRating: ${product.rating}/5`);
+            window.location.href = `/product/${productId}`;
         }
 
         // Show notification

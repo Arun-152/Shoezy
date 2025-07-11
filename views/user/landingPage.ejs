@@ -8,24 +8,7 @@
 </head>
 <body>
     <!-- Header -->
-    <header class="header">
-        <nav class="navbar">
-            <div class="logo">
-                <h1>Shoezy</h1>
-            </div>
-            <ul class="nav-links">
-                <li><a href="/home">Home</a></li>
-                <li><a href="/shop">Shop</a></li>
-                <li><a href="/Order">Order</a></li>
-                <li><a href="/contact">Contact</a></li>
-                <li><a href="/Login">Login</a></li>
-            </ul>
-            <div class="nav-icons">
-                <span class="search-icon">🔍</span>
-                <span class="cart-icon">🛒</span>
-            </div>
-        </nav>
-    </header>
+    <%-include("../partials/user/navbar")%>
 
     <!-- Hero Section -->
     <section class="hero">
@@ -37,7 +20,7 @@
             <div class="hero-image">
                 <div class="circle-bg"></div>
                 <div class="sneaker-display">
-                    <img src="https://via.placeholder.com/300x200/ffffff/cccccc?text=Sneaker" alt="Featured Sneaker" class="main-sneaker">
+                    <img src="/images/aijo1rehiogpabr_photo1.png" alt="Featured Sneaker" class="main-sneaker">
                 </div>
             </div>
         </div>
@@ -57,10 +40,10 @@
             <div class="jordan-text">
                 <h2>AIR JORDAN</h2>
                 <p>Iconic basketball sneakers with legendary performance and style</p>
-                <button class="shop-btn">Shop Now</button>
+                <button class="shop-btn" onclick="window.location.href='/shop'">Shop Now</button>
             </div>
             <div class="jordan-image">
-                <img src="https://via.placeholder.com/400x300/dc2626/ffffff?text=Air+Jordan" alt="Air Jordan" class="jordan-sneaker">
+                <img src="/images/AIR+JORDAN+1+RETRO+HIGH+OG.avif" alt="Air Jordan" class="jordan-sneaker">
             </div>
         </div>
     </section>
@@ -68,126 +51,173 @@
     <!-- Products Grid -->
     <section class="products">
         <div class="container">
+            <h2 style="text-align: center; margin-bottom: 30px; color: #333;">Featured Products</h2>
             <div class="products-grid">
-                <!-- Product 1 -->
-                <div class="product-card">
-                    <div class="product-image">
-                        <img src="https://via.placeholder.com/250x200/ffffff/cccccc?text=Nike+Air" alt="Nike Air">
+                <% if (products && products.length > 0) { %>
+                    <% products.forEach(product => { %>
+                        <div class="product-card" onclick="window.location.href='/product/<%= product._id %>'" style="cursor: pointer;">
+                            <div class="product-image">
+                                <% if (product.images && product.images.length > 0) { %>
+                                    <img src="<%= product.images[0] %>" alt="<%= product.productName %>">
+                                <% } else { %>
+                                    <img src="https://via.placeholder.com/250x200/ffffff/cccccc?text=Shoe" alt="<%= product.productName %>">
+                                <% } %>
+                                <div class="product-overlay">
+                                    <button class="view-details-btn" onclick="event.stopPropagation(); window.location.href='/product/<%= product._id %>'">
+                                        View Details
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="product-info">
+                                <h3><%= product.productName %></h3>
+                                <p class="category"><%= product.category ? product.category.name : 'Uncategorized' %></p>
+                                <% if (product.variants && product.variants.length > 0) { %>
+                                    <%
+                                        const prices = product.variants.map(v => v.salePrice);
+                                        const originalPrices = product.variants.map(v => v.variantPrice);
+                                        const minSalePrice = Math.min(...prices);
+                                        const maxSalePrice = Math.max(...prices);
+                                        const minOriginalPrice = Math.min(...originalPrices);
+                                        const maxOriginalPrice = Math.max(...originalPrices);
+                                        const hasDiscount = minSalePrice < minOriginalPrice;
+                                    %>
+                                    <p class="price">₹<%= minSalePrice %></p>
+                                <% } else { %>
+                                    <p class="price">Price not available</p>
+                                <% } %>
+                                <div class="rating">
+                                    <% if (product.ratings && product.ratings.average > 0) { %>
+                                        <% const rating = product.ratings.average; %>
+                                        <%= '★'.repeat(Math.floor(rating)) %><%= '☆'.repeat(5 - Math.floor(rating)) %>
+                                        <span>(<%= product.ratings.count || 0 %>)</span>
+                                    <% } else { %>
+                                        ★★★★☆ <span>(0)</span>
+                                    <% } %>
+                                </div>
+                                <% if (product.productOffer && product.productOffer > 0) { %>
+                                    <div class="offer-badge"><%= product.productOffer %>% OFF</div>
+                                <% } %>
+                                <% if (product.brand) { %>
+                                    <p class="brand"><%= product.brand %></p>
+                                <% } %>
+                                <div class="product-actions">
+                                    <button class="quick-add-btn" onclick="event.stopPropagation(); quickAddToCart('<%= product._id %>')">
+                                        Quick Add
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <div style="text-align: center; grid-column: 1 / -1; padding: 40px;">
+                        <h3>No products available at the moment</h3>
+                        <p>Please check back later for new arrivals!</p>
                     </div>
-                    <div class="product-info">
-                        <h3>Nike Air Max</h3>
-                        <p class="price">$120.00</p>
-                        <div class="rating">★★★★★</div>
-                    </div>
-                </div>
-
-                <!-- Product 2 -->
-                <div class="product-card">
-                    <div class="product-image">
-                        <img src="https://via.placeholder.com/250x200/f3f4f6/666666?text=Adidas" alt="Adidas">
-                    </div>
-                    <div class="product-info">
-                        <h3>Adidas Ultraboost</h3>
-                        <p class="price">$180.00</p>
-                        <div class="rating">★★★★☆</div>
-                    </div>
-                </div>
-
-                <!-- Product 3 -->
-                <div class="product-card">
-                    <div class="product-image">
-                        <img src="https://via.placeholder.com/250x200/fbbf24/ffffff?text=New+Balance" alt="New Balance">
-                    </div>
-                    <div class="product-info">
-                        <h3>New Balance 990</h3>
-                        <p class="price">$175.00</p>
-                        <div class="rating">★★★★★</div>
-                    </div>
-                </div>
-
-                <!-- Product 4 -->
-                <div class="product-card">
-                    <div class="product-image">
-                        <img src="https://via.placeholder.com/250x200/e5e7eb/333333?text=Converse" alt="Converse">
-                    </div>
-                    <div class="product-info">
-                        <h3>Converse Chuck Taylor</h3>
-                        <p class="price">$65.00</p>
-                        <div class="rating">★★★★☆</div>
-                    </div>
-                </div>
-
-                <!-- Product 5 -->
-                <div class="product-card">
-                    <div class="product-image">
-                        <img src="https://via.placeholder.com/250x200/374151/ffffff?text=Vans" alt="Vans">
-                    </div>
-                    <div class="product-info">
-                        <h3>Vans Old Skool</h3>
-                        <p class="price">$60.00</p>
-                        <div class="rating">★★★★☆</div>
-                    </div>
-                </div>
-
-                <!-- Product 6 -->
-                <div class="product-card">
-                    <div class="product-image">
-                        <img src="https://via.placeholder.com/250x200/1f2937/ffffff?text=Puma" alt="Puma">
-                    </div>
-                    <div class="product-info">
-                        <h3>Puma Suede Classic</h3>
-                        <p class="price">$70.00</p>
-                        <div class="rating">★★★★★</div>
-                    </div>
-                </div>
+                <% } %>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>Shoezy</h3>
-                    <p>Premium sneakers for the modern lifestyle</p>
-                    <div class="social-icons">
-                        <span>📘</span>
-                        <span>📷</span>
-                        <span>🐦</span>
-                    </div>
-                </div>
-                <div class="footer-section">
-                    <h4>Quick Links</h4>
-                    <ul>
-                        <li><a href="#home">Home</a></li>
-                        <li><a href="#shop">Shop</a></li>
-                        <li><a href="#about">About</a></li>
-                        <li><a href="#contact">Contact</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4>Customer Service</h4>
-                    <ul>
-                        <li><a href="#shipping">Shipping Info</a></li>
-                        <li><a href="#returns">Returns</a></li>
-                        <li><a href="#sizing">Size Guide</a></li>
-                        <li><a href="#support">Support</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4>Newsletter</h4>
-                    <p>Subscribe for updates and exclusive offers</p>
-                    <div class="newsletter">
-                        <input type="email" placeholder="Enter your email">
-                        <button>Subscribe</button>
-                    </div>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2024 Shoezy. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
+    <%-include("../partials/user/userfooter")%>
+
+    <style>
+        /* Product Card Enhancements */
+        .product-card {
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .product-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .product-card:hover .product-overlay {
+            opacity: 1;
+        }
+
+        .view-details-btn {
+            background: #fff;
+            color: #333;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .view-details-btn:hover {
+            background: #007bff;
+            color: white;
+        }
+
+        .quick-add-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 8px;
+            transition: background-color 0.3s ease;
+        }
+
+        .quick-add-btn:hover {
+            background: #218838;
+        }
+
+        .offer-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #dc3545;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .category {
+            color: #666;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+
+        .brand {
+            color: #888;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .product-actions {
+            margin-top: 10px;
+        }
+    </style>
+
+    <script>
+        function quickAddToCart(productId) {
+            // Quick add to cart functionality - redirect to product page for size selection
+            console.log('Quick add to cart:', productId);
+            window.location.href = '/product/' + productId;
+        }
+    </script>
 </body>
 </html>

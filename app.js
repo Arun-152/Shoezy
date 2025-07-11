@@ -1,20 +1,14 @@
-// Suppress specific deprecation warning for util.isArray
-process.removeAllListeners('warning');
-process.on('warning', (warning) => {
-    if (warning.name === 'DeprecationWarning' && warning.message.includes('util.isArray')) {
-        return; // Ignore this specific warning
-    }
-    console.warn(warning.name, warning.message);
-});
 
 const express = require("express")
 const app = express()
 const path = require("path")
 const userRouter = require("./routes/userRouter")
+const authRouter = require("./routes/authRouter")
 const env = require("dotenv").config()
 const session = require("express-session")
 const flash = require("connect-flash")
 const adminRouter = require("./routes/adminRouter")
+const passport = require("./config/passport")
 const db = require("./config/db")
 db()
 
@@ -35,6 +29,10 @@ app.use(session({
 // Flash middleware
 app.use(flash())
 
+// Passport middleware
+app.use(passport.initialize())
+app.use(passport.session())
+
 // Make flash messages available to all views
 app.use((req, res, next) => {
     res.locals.success_msg = req.flash('success_msg')
@@ -54,6 +52,7 @@ app.set("views", [path.join(__dirname, "views/user"), path.join(__dirname, "view
 app.use(express.static(path.join(__dirname, "public")))
 
 app.use("/", userRouter)
+app.use("/auth", authRouter)
 app.use("/admin", adminRouter);
 
 app.listen(process.env.PORT, () => {

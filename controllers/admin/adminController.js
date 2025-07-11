@@ -32,16 +32,13 @@ const postLogin = async (req, res) => {
     const { email, password } = req.body;
     const admin = await User.findOne({ email, isAdmin: true });
     if (!admin) {
-      console.log("Admin not found for email:", email);
       return res.redirect("/admin/login");
     }
     const matchpass = await bcrypt.compare(password, admin.password);
     if (!matchpass) {
-      console.log("Incorrect password for admin:", email);
       return res.redirect("/admin/login");
     }
     req.session.adminId = admin._id;
-    console.log("Admin logged in, session adminId:", req.session.adminId);
     return res.redirect("/admin/dashboard");
   } catch (error) {
     console.error("Error during admin login:", error.message);
@@ -51,7 +48,7 @@ const postLogin = async (req, res) => {
 
 const dashboardPage = async (req, res) => {
   try {
-    console.log("Session adminId:", req.session.adminId); // Debug session
+  
     
     // Fetch dynamic data for dashboard
     const totalUsers = await User.countDocuments({ isAdmin: false, isBlocked: false });
@@ -81,7 +78,6 @@ const dashboardPage = async (req, res) => {
       totalCategories: totalCategories,
       blockedUsers: blockedUsers,
       recentProducts: recentProducts,
-      // Mock data for orders since we don't have order schema yet
       totalOrders: 0,
       visitors: totalUsers + blockedUsers
     };

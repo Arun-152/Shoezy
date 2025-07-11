@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - Shoezy</title>
+    <link rel="stylesheet" href="/css/orderPage.css">
+</head>
+<body>
+    <!-- Header -->
+    <%-include("../partials/user/header")%>
+
+    <!-- Orders Section -->
+    <section class="orders-section">
+        <div class="container">
+            <div class="orders-header">
+                <h1>My Orders</h1>
+                <p>Track and manage your orders</p>
+            </div>
+
+            <div class="orders-content">
+                <!-- Order Filters -->
+                <div class="order-filters">
+                    <button class="filter-btn active" data-filter="all">All Orders</button>
+                    <button class="filter-btn" data-filter="pending">Pending</button>
+                    <button class="filter-btn" data-filter="shipped">Shipped</button>
+                    <button class="filter-btn" data-filter="delivered">Delivered</button>
+                    <button class="filter-btn" data-filter="cancelled">Cancelled</button>
+                </div>
+
+                <!-- Orders List -->
+                <div class="orders-list">
+                    <!-- Sample Order 1 -->
+                    <div class="order-card" data-status="delivered">
+                        <div class="order-header">
+                            <div class="order-info">
+                                <h3>Order #ORD-2024-001</h3>
+                                <p class="order-date">Placed on January 15, 2024</p>
+                            </div>
+                            <div class="order-status delivered">
+                                <span class="status-badge">Delivered</span>
+                            </div>
+                        </div>
+                        <div class="order-items">
+                            <div class="order-item">
+                                <img src="https://via.placeholder.com/80x80/ffffff/cccccc?text=Shoe" alt="Product">
+                                <div class="item-details">
+                                    <h4>Nike Air Max 270</h4>
+                                    <p>Size: 9 | Color: Black</p>
+                                    <p class="item-price">₹2,999</p>
+                                </div>
+                                <div class="item-quantity">Qty: 1</div>
+                            </div>
+                        </div>
+                        <div class="order-footer">
+                            <div class="order-total">
+                                <strong>Total: ₹2,999</strong>
+                            </div>
+                            <div class="order-actions">
+                                <button class="btn-secondary">View Details</button>
+                                <button class="btn-primary">Buy Again</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sample Order 2 -->
+                    <div class="order-card" data-status="shipped">
+                        <div class="order-header">
+                            <div class="order-info">
+                                <h3>Order #ORD-2024-002</h3>
+                                <p class="order-date">Placed on January 20, 2024</p>
+                            </div>
+                            <div class="order-status shipped">
+                                <span class="status-badge">Shipped</span>
+                            </div>
+                        </div>
+                        <div class="order-items">
+                            <div class="order-item">
+                                <img src="https://via.placeholder.com/80x80/ffffff/cccccc?text=Shoe" alt="Product">
+                                <div class="item-details">
+                                    <h4>Adidas Ultraboost 22</h4>
+                                    <p>Size: 8.5 | Color: White</p>
+                                    <p class="item-price">₹3,499</p>
+                                </div>
+                                <div class="item-quantity">Qty: 1</div>
+                            </div>
+                        </div>
+                        <div class="order-footer">
+                            <div class="order-total">
+                                <strong>Total: ₹3,499</strong>
+                            </div>
+                            <div class="order-actions">
+                                <button class="btn-secondary">Track Order</button>
+                                <button class="btn-secondary">Cancel Order</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sample Order 3 -->
+                    <div class="order-card" data-status="pending">
+                        <div class="order-header">
+                            <div class="order-info">
+                                <h3>Order #ORD-2024-003</h3>
+                                <p class="order-date">Placed on January 22, 2024</p>
+                            </div>
+                            <div class="order-status pending">
+                                <span class="status-badge">Processing</span>
+                            </div>
+                        </div>
+                        <div class="order-items">
+                            <div class="order-item">
+                                <img src="https://via.placeholder.com/80x80/ffffff/cccccc?text=Shoe" alt="Product">
+                                <div class="item-details">
+                                    <h4>Puma RS-X</h4>
+                                    <p>Size: 10 | Color: Blue</p>
+                                    <p class="item-price">₹2,499</p>
+                                </div>
+                                <div class="item-quantity">Qty: 2</div>
+                            </div>
+                        </div>
+                        <div class="order-footer">
+                            <div class="order-total">
+                                <strong>Total: ₹4,998</strong>
+                            </div>
+                            <div class="order-actions">
+                                <button class="btn-secondary">View Details</button>
+                                <button class="btn-danger">Cancel Order</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div class="empty-orders" style="display: none;">
+                        <div class="empty-icon">
+                            <i class="fas fa-shopping-bag"></i>
+                        </div>
+                        <h3>No orders found</h3>
+                        <p>You haven't placed any orders yet. Start shopping to see your orders here!</p>
+                        <a href="/shop" class="btn-primary">Start Shopping</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <%-include("../partials/user/userfooter")%>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .orders-section {
+            padding: 120px 0 80px;
+            min-height: 80vh;
+        }
+
+        .orders-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .orders-header h1 {
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .orders-header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .order-filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid #e5e7eb;
+            background: white;
+            color: #666;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .filter-btn.active,
+        .filter-btn:hover {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        .orders-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .order-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .order-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .order-info h3 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .order-date {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .status-badge {
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .delivered .status-badge {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .shipped .status-badge {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .pending .status-badge {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .cancelled .status-badge {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .order-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .order-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        .item-details h4 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .item-details p {
+            color: #666;
+            font-size: 14px;
+            margin: 2px 0;
+        }
+
+        .item-price {
+            color: #2563eb;
+            font-weight: 600;
+        }
+
+        .item-quantity {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .order-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .order-total {
+            font-size: 1.2rem;
+            color: #333;
+        }
+
+        .order-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-primary, .btn-secondary, .btn-danger {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .empty-orders {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            color: #d1d5db;
+            margin-bottom: 20px;
+        }
+
+        .empty-orders h3 {
+            color: #374151;
+            margin-bottom: 10px;
+        }
+
+        .empty-orders p {
+            color: #6b7280;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .order-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .order-footer {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .order-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .filter-btn {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+        }
+    </style>
+
+    <script>
+        // Filter functionality
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove active class from all buttons
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                // Get filter value
+                const filter = this.dataset.filter;
+                
+                // Show/hide orders based on filter
+                document.querySelectorAll('.order-card').forEach(card => {
+                    if (filter === 'all' || card.dataset.status === filter) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+                
+                // Check if any orders are visible
+                const visibleOrders = document.querySelectorAll('.order-card[style="display: block;"], .order-card:not([style])').length;
+                const emptyState = document.querySelector('.empty-orders');
+                
+                if (visibleOrders === 0 && filter !== 'all') {
+                    emptyState.style.display = 'block';
+                } else {
+                    emptyState.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

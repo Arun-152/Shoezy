@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= product.productName %> - Shoezy</title>
+    <link rel="stylesheet" href="/css/productDetailPage.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        .header {
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #007bff;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #007bff;
+        }
+
+        .nav-icons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-icon {
+            font-size: 1.2rem;
+            color: #333;
+            cursor: pointer;
+            transition: color 0.3s;
+            text-decoration: none;
+        }
+
+        .nav-icon:hover {
+            color: #007bff;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            padding: 1rem 0;
+            background: #fff;
+            border-bottom: 1px solid #eee;
+        }
+
+        .breadcrumb-list {
+            display: flex;
+            list-style: none;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .breadcrumb-list a {
+            color: #666;
+            text-decoration: none;
+        }
+
+        .breadcrumb-list a:hover {
+            color: #007bff;
+        }
+
+        .breadcrumb-separator {
+            color: #999;
+        }
+
+        /* Product Detail */
+        .product-detail {
+            padding: 2rem 0;
+        }
+
+        .product-main {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .product-images {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        /* Image Zoom Container */
+        .image-zoom-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            cursor: crosshair;
+        }
+
+        .main-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        /* Zoom Lens */
+        .zoom-lens {
+            position: absolute;
+            border: 2px solid #007bff;
+            border-radius: 50%;
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(1px);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+        }
+
+        /* Zoom Result Box */
+        .zoom-result {
+            position: absolute;
+            top: 0;
+            right: -320px;
+            width: 300px;
+            height: 300px;
+            border: 2px solid #007bff;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .zoom-result img {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            object-fit: cover;
+            transform-origin: top left;
+        }
+
+        /* Show zoom elements on hover - removed as we'll handle this with JavaScript */
+        .image-zoom-container.zoom-active .zoom-lens,
+        .image-zoom-container.zoom-active .zoom-result {
+            opacity: 1;
+        }
+
+        /* Fallback zoom effect */
+        .image-zoom-container:hover .main-image {
+            transform: scale(1.05);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .zoom-result {
+                display: none;
+            }
+
+            .image-zoom-container {
+                cursor: default;
+            }
+
+            .main-image:hover {
+                transform: scale(1.1);
+            }
+        }
+
+
+
+        .thumbnail-images {
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+        }
+
+        .thumbnail {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 5px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.3s;
+        }
+
+        .thumbnail:hover,
+        .thumbnail.active {
+            border-color: #007bff;
+        }
+
+        .product-info {
+            padding: 1rem 0;
+        }
+
+        .product-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .product-category {
+            color: #666;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .product-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stars {
+            color: #ffc107;
+        }
+
+        .rating-text {
+            color: #666;
+        }
+
+        .product-price {
+            margin-bottom: 1.5rem;
+        }
+
+        .current-price {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #007bff;
+        }
+
+        .original-price {
+            font-size: 1.2rem;
+            color: #999;
+            text-decoration: line-through;
+            margin-left: 0.5rem;
+        }
+
+        .discount-badge {
+            background: #dc3545;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+        }
+
+        .product-description {
+            margin-bottom: 2rem;
+        }
+
+        .description-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .description-text {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .product-options {
+            margin-bottom: 2rem;
+        }
+
+        .option-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .option-label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .size-options {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .size-option {
+            padding: 0.5rem 1rem;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .size-option:hover,
+        .size-option.selected {
+            border-color: #007bff;
+            background: #007bff;
+            color: white;
+        }
+
+        .size-option.disabled {
+            background: #f8f9fa;
+            color: #999;
+            cursor: not-allowed;
+            border-color: #ddd;
+        }
+
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .quantity-btn {
+            background: #f8f9fa;
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: background 0.3s;
+        }
+
+        .quantity-btn:hover {
+            background: #e9ecef;
+        }
+
+        .quantity-input {
+            border: none;
+            padding: 0.5rem;
+            width: 60px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            text-align: center;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #007bff;
+            border: 2px solid #007bff;
+        }
+
+        .btn-secondary:hover {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        /* Related Products */
+        .related-products {
+            margin-top: 3rem;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .product-card-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .product-card-info {
+            padding: 1rem;
+        }
+
+        .product-card-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-card-price {
+            color: #007bff;
+            font-weight: 700;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .product-main {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .product-actions {
+                flex-direction: column;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+      <%-include("../partials/user/header")%>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <div class="container">
+            <ul class="breadcrumb-list">
+                <li><a href="/home">Home</a></li>
+                <li class="breadcrumb-separator">/</li>
+                <li><a href="/shop">Shop</a></li>
+                <li class="breadcrumb-separator">/</li>
+                <li><%= product.category ? product.category.name : 'Products' %></li>
+                <li class="breadcrumb-separator">/</li>
+                <li><%= product.productName %></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Product Detail -->
+    <main class="product-detail">
+        <div class="container">
+            <div class="product-main">
+                <!-- Product Images -->
+                <div class="product-images">
+                    <% if (product.images && product.images.length > 0) { %>
+                        <!-- Image Zoom Container -->
+                        <div class="image-zoom-container" id="imageZoomContainer">
+                            <img src="<%= product.images[0] %>" alt="<%= product.productName %>" class="main-image" id="mainImage">
+                            <!-- Zoom Lens -->
+                            <div class="zoom-lens" id="zoomLens"></div>
+                            <!-- Zoom Result Box -->
+                            <div class="zoom-result" id="zoomResult">
+                                <img src="<%= product.images[0] %>" alt="<%= product.productName %>" id="zoomImage">
+                            </div>
+                        </div>
+                        <% if (product.images.length > 1) { %>
+                            <div class="thumbnail-images">
+                                <% product.images.forEach((image, index) => { %>
+                                    <img src="<%= image %>" alt="<%= product.productName %>"
+                                         class="thumbnail <%= index === 0 ? 'active' : '' %>"
+                                         onclick="changeMainImage('<%= image %>', this)">
+                                <% }); %>
+                            </div>
+                        <% } %>
+                    <% } else { %>
+                        <div class="image-zoom-container" id="imageZoomContainer">
+                            <img src="https://via.placeholder.com/500x500/ffffff/cccccc?text=No+Image" alt="<%= product.productName %>" class="main-image" id="mainImage">
+                            <div class="zoom-lens" id="zoomLens"></div>
+                            <div class="zoom-result" id="zoomResult">
+                                <img src="https://via.placeholder.com/500x500/ffffff/cccccc?text=No+Image" alt="<%= product.productName %>" id="zoomImage">
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+
+                <!-- Product Info -->
+                <div class="product-info">
+                    <h1 class="product-title"><%= product.productName %></h1>
+                    <p class="product-category"><%= product.category ? product.category.name : 'Uncategorized' %></p>
+                    
+                    <div class="product-rating">
+                        <div class="stars">
+                            <% const rating = product.ratings && product.ratings.average ? product.ratings.average : 4.5; %>
+                            <% for (let i = 1; i <= 5; i++) { %>
+                                <% if (i <= Math.floor(rating)) { %>
+                                    <i class="fas fa-star"></i>
+                                <% } else if (i - 0.5 <= rating) { %>
+                                    <i class="fas fa-star-half-alt"></i>
+                                <% } else { %>
+                                    <i class="far fa-star"></i>
+                                <% } %>
+                            <% } %>
+                        </div>
+                        <span class="rating-text">(<%= product.ratings && product.ratings.count ? product.ratings.count : 0 %> reviews)</span>
+                    </div>
+
+                    <div class="product-price">
+                        <% if (product.variants && product.variants.length > 0) { %>
+                            <% 
+                                const prices = product.variants.map(v => v.salePrice);
+                                const originalPrices = product.variants.map(v => v.variantPrice);
+                                const minSalePrice = Math.min(...prices);
+                                const maxSalePrice = Math.max(...prices);
+                                const minOriginalPrice = Math.min(...originalPrices);
+                                const hasDiscount = minSalePrice < minOriginalPrice;
+                            %>
+                            <div class="price-display">
+                                <span class="unit-price-label" style="font-size: 1rem; color: #666; display: block; margin-bottom: 0.5rem;">Unit Price:</span>
+                                <span class="current-price" id="unitPrice">
+                                    ₹<%= minSalePrice %>
+                                </span>
+                            </div>
+                           
+                            
+                        <% } else { %>
+                            <span class="current-price">Price not available</span>
+                        <% } %>
+                    </div>
+
+                   
+
+                    <div class="product-description">
+                        <h3 class="description-title">Description</h3>
+                        <p class="description-text"><%= product.description %></p>
+                        <% if (product.brand) { %>
+                            <p class="description-text"><strong>Brand:</strong> <%= product.brand %></p>
+                        <% } %>
+                        <% if (product.color) { %>
+                            <p class="description-text"><strong>Color:</strong> <%= product.color %></p>
+                        <% } %>
+                    </div>
+
+                    <div class="product-options">
+                        <% if (product.variants && product.variants.length > 0) { %>
+                            <div class="option-group">
+                                <label class="option-label">Size:</label>
+                                <div class="size-options">
+                                    <% product.variants.forEach(variant => { %>
+                                        <div class="size-option <%= variant.variantQuantity <= 0 ? 'disabled' : '' %>" 
+                                             data-size="<%= variant.size %>" 
+                                             data-price="<%= variant.salePrice %>" 
+                                             data-original-price="<%= variant.variantPrice %>"
+                                             data-quantity="<%= variant.variantQuantity %>"
+                                             onclick="selectSize(this)">
+                                            <%= variant.size %>
+                                            <% if (variant.variantQuantity <= 0) { %>
+                                                <small>(Out of Stock)</small>
+                                            <% } %>
+                                        </div>
+                                    <% }); %>
+                                </div>
+                            </div>
+                        <% } %>
+
+                        <div class="option-group">
+                            <label class="option-label">Quantity:</label>
+                            <div class="quantity-selector">
+                                <div class="quantity-controls">
+                                    <button class="quantity-btn" onclick="changeQuantity(-1)">-</button>
+                                    <input type="number" class="quantity-input" value="1" min="1" max="10" id="quantityInput">
+                                    <button class="quantity-btn" onclick="changeQuantity(1)">+</button>
+                                </div>
+                                <span id="stockInfo" class="stock-info"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="product-actions">
+                        <button class="btn btn-primary" id="addToCartBtn" onclick="addToCart()">
+                            <i class="fas fa-shopping-cart"></i>
+                            Add to Cart
+                        </button>
+                        <button class="btn btn-secondary" onclick="addToWishlist()">
+                            <i class="fas fa-heart"></i>
+                            Wishlist
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Related Products -->
+            <% if (relatedProducts && relatedProducts.length > 0) { %>
+                <div class="related-products">
+                    <h2 class="section-title">Related Products</h2>
+                    <div class="products-grid">
+                        <% relatedProducts.forEach(relatedProduct => { %>
+                            <div class="product-card" onclick="window.location.href='/product/<%= relatedProduct._id %>'">
+                                <% if (relatedProduct.images && relatedProduct.images.length > 0) { %>
+                                    <img src="<%= relatedProduct.images[0] %>" alt="<%= relatedProduct.productName %>" class="product-card-image">
+                                <% } else { %>
+                                    <img src="https://via.placeholder.com/250x200/ffffff/cccccc?text=Shoe" alt="<%= relatedProduct.productName %>" class="product-card-image">
+                                <% } %>
+                                <div class="product-card-info">
+                                    <h3 class="product-card-title"><%= relatedProduct.productName %></h3>
+                                    <% if (relatedProduct.variants && relatedProduct.variants.length > 0) { %>
+                                        <% const minPrice = Math.min(...relatedProduct.variants.map(v => v.salePrice)); %>
+                                        <p class="product-card-price">$<%= minPrice %></p>
+                                    <% } %>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+    </main>
+    <%-include("../partials/user/userfooter")%>
+    <script>
+        let selectedSize = null;
+        let selectedPrice = 0;
+        let selectedOriginalPrice = 0;
+        let availableStock = 0;
+
+        function changeMainImage(imageSrc, thumbnail) {
+            document.getElementById('mainImage').src = imageSrc;
+
+            // Update zoom image as well
+            const zoomImage = document.getElementById('zoomImage');
+            if (zoomImage) {
+                zoomImage.src = imageSrc;
+            }
+
+            // Update active thumbnail
+            document.querySelectorAll('.thumbnail').forEach(thumb => thumb.classList.remove('active'));
+            thumbnail.classList.add('active');
+        }
+
+        function selectSize(sizeElement) {
+            if (sizeElement.classList.contains('disabled')) return;
+            
+            // Remove previous selection
+            document.querySelectorAll('.size-option').forEach(option => option.classList.remove('selected'));
+            
+            // Select current size
+            sizeElement.classList.add('selected');
+            
+            // Update selected size data
+            selectedSize = sizeElement.dataset.size;
+            selectedPrice = parseFloat(sizeElement.dataset.price);
+            selectedOriginalPrice = parseFloat(sizeElement.dataset.originalPrice);
+            availableStock = parseInt(sizeElement.dataset.quantity);
+            
+            // Update price display
+            updatePriceDisplay();
+            
+            // Update stock info
+            updateStockInfo();
+            
+            // Update quantity input max
+            const quantityInput = document.getElementById('quantityInput');
+            quantityInput.max = availableStock;
+            if (parseInt(quantityInput.value) > availableStock) {
+                quantityInput.value = availableStock;
+            }
+        }
+
+        function updatePriceDisplay() {
+            const unitPriceElement = document.getElementById('unitPrice');
+
+            if (selectedSize) {
+                // Update unit price with rupees sign - show only one price
+                unitPriceElement.textContent = `₹${selectedPrice}`;
+
+                // Update total price based on quantity
+                updateTotalPrice();
+            }
+        }
+
+        function updateTotalPrice() {
+            const quantity = parseInt(document.getElementById('quantityInput').value) || 1;
+            const unitPriceElement = document.getElementById('unitPrice');
+
+            if (selectedSize && selectedPrice > 0) {
+                const totalPrice = selectedPrice * quantity;
+
+                // Update total price display with rupees sign - show only one price
+                unitPriceElement.textContent = `₹${totalPrice.toFixed(0)}`;
+            }
+        }
+
+        function autoSelectDefaultSize() {
+            const sizeOptions = document.querySelectorAll('.size-option:not(.disabled)');
+            if (sizeOptions.length > 0) {
+                // Find the smallest available size (assuming sizes are in order)
+                let smallestSize = null;
+                let smallestSizeValue = Infinity;
+                
+                sizeOptions.forEach(option => {
+                    const sizeText = option.dataset.size;
+                    // Try to parse as number, if not possible use string comparison
+                    const sizeValue = parseFloat(sizeText) || sizeText;
+                    
+                    if (typeof sizeValue === 'number' && sizeValue < smallestSizeValue) {
+                        smallestSizeValue = sizeValue;
+                        smallestSize = option;
+                    } else if (typeof sizeValue === 'string' && !smallestSize) {
+                        smallestSize = option; // Fallback to first available size
+                    }
+                });
+                
+                // If no numeric size found, select the first available size
+                if (!smallestSize) {
+                    smallestSize = sizeOptions[0];
+                }
+                
+                // Auto-select the smallest/default size
+                if (smallestSize) {
+                    selectSize(smallestSize);
+                }
+            }
+        }
+
+        function updateStockInfo() {
+            const stockInfo = document.getElementById('stockInfo');
+            if (selectedSize) {
+                if (availableStock > 0) {
+                    stockInfo.textContent = `${availableStock} in stock`;
+                    stockInfo.style.color = '#28a745';
+                } else {
+                    stockInfo.textContent = 'Out of stock';
+                    stockInfo.style.color = '#dc3545';
+                }
+            } else {
+                stockInfo.textContent = 'Please select a size';
+                stockInfo.style.color = '#6c757d';
+            }
+        }
+
+        function changeQuantity(change) {
+            const quantityInput = document.getElementById('quantityInput');
+            let newValue = parseInt(quantityInput.value) + change;
+            
+            if (newValue < 1) newValue = 1;
+            if (selectedSize && newValue > availableStock) newValue = availableStock;
+            if (!selectedSize && newValue > 10) newValue = 10;
+            
+            quantityInput.value = newValue;
+            
+            // Update total price when quantity changes
+            if (selectedSize) {
+                updateTotalPrice();
+            }
+        }
+
+        function addToCart() {
+            if (!selectedSize) {
+                alert('Please select a size first');
+                return;
+            }
+            
+            if (availableStock <= 0) {
+                alert('This size is out of stock');
+                return;
+            }
+            
+            const quantity = parseInt(document.getElementById('quantityInput').value);
+            
+            // Here you would typically send this data to your backend
+            const cartItem = {
+                productId: '<%= product._id %>',
+                productName: '<%= product.productName %>',
+                size: selectedSize,
+                price: selectedPrice,
+                quantity: quantity,
+                image: '<%= product.images && product.images.length > 0 ? product.images[0] : "" %>'
+            };
+            
+            console.log('Adding to cart:', cartItem);
+            alert(`Added ${quantity} x <%= product.productName %> (Size: ${selectedSize}) to cart!`);
+        }
+
+        function addToWishlist() {
+            // Wishlist functionality
+            alert('Added to wishlist!');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-select the smallest/default size when page loads
+            autoSelectDefaultSize();
+            
+            // Update stock info
+            updateStockInfo();
+            
+            // Add event listener for manual quantity input changes
+            const quantityInput = document.getElementById('quantityInput');
+            quantityInput.addEventListener('input', function() {
+                let value = parseInt(this.value);
+                
+                // Validate input
+                if (isNaN(value) || value < 1) {
+                    value = 1;
+                    this.value = 1;
+                }
+                
+                if (selectedSize && value > availableStock) {
+                    value = availableStock;
+                    this.value = availableStock;
+                }
+                
+                if (!selectedSize && value > 10) {
+                    value = 10;
+                    this.value = 10;
+                }
+                
+                // Update total price when quantity changes manually
+                if (selectedSize) {
+                    updateTotalPrice();
+                }
+            });
+
+            // Initialize image zoom functionality
+            console.log('About to initialize zoom...');
+            initializeImageZoom();
+            console.log('Zoom initialization complete');
+        });
+
+        // Image Zoom Functionality
+        function initializeImageZoom() {
+            const zoomContainer = document.getElementById('imageZoomContainer');
+            const mainImage = document.getElementById('mainImage');
+            const zoomLens = document.getElementById('zoomLens');
+            const zoomResult = document.getElementById('zoomResult');
+            const zoomImage = document.getElementById('zoomImage');
+
+            console.log('Zoom elements check:', {
+                zoomContainer: !!zoomContainer,
+                mainImage: !!mainImage,
+                zoomLens: !!zoomLens,
+                zoomResult: !!zoomResult,
+                zoomImage: !!zoomImage
+            });
+
+            if (!zoomContainer || !mainImage || !zoomLens || !zoomResult || !zoomImage) {
+                console.log('Some zoom elements not found, implementing simple zoom');
+                // Fallback to simple zoom
+                if (zoomContainer && mainImage) {
+                    zoomContainer.addEventListener('mouseenter', function() {
+                        mainImage.style.transform = 'scale(1.2)';
+                        mainImage.style.transition = 'transform 0.3s ease';
+                    });
+                    zoomContainer.addEventListener('mouseleave', function() {
+                        mainImage.style.transform = 'scale(1)';
+                    });
+                }
+                return;
+            }
+
+            console.log('Initializing full zoom functionality');
+
+            let isZooming = false;
+
+            function showZoom() {
+                isZooming = true;
+                zoomLens.style.display = 'block';
+                zoomResult.style.display = 'block';
+                zoomLens.style.opacity = '1';
+                zoomResult.style.opacity = '1';
+                console.log('Showing zoom');
+            }
+
+            function hideZoom() {
+                isZooming = false;
+                zoomLens.style.opacity = '0';
+                zoomResult.style.opacity = '0';
+                setTimeout(() => {
+                    if (!isZooming) {
+                        zoomLens.style.display = 'none';
+                        zoomResult.style.display = 'none';
+                    }
+                }, 300);
+                console.log('Hiding zoom');
+            }
+
+            function updateZoom(e) {
+                if (!isZooming) return;
+
+                const rect = zoomContainer.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                // Calculate lens position
+                const lensWidth = 150; // Fixed lens size
+                const lensHeight = 150;
+                const lensX = x - (lensWidth / 2);
+                const lensY = y - (lensHeight / 2);
+
+                // Constrain lens within image bounds
+                const maxLensX = rect.width - lensWidth;
+                const maxLensY = rect.height - lensHeight;
+
+                const constrainedLensX = Math.max(0, Math.min(lensX, maxLensX));
+                const constrainedLensY = Math.max(0, Math.min(lensY, maxLensY));
+
+                // Position the lens
+                zoomLens.style.left = constrainedLensX + 'px';
+                zoomLens.style.top = constrainedLensY + 'px';
+
+                // Calculate zoom image position (2x zoom)
+                const zoomRatio = 2;
+                const zoomX = -(constrainedLensX * zoomRatio);
+                const zoomY = -(constrainedLensY * zoomRatio);
+
+                // Position the zoomed image
+                zoomImage.style.left = zoomX + 'px';
+                zoomImage.style.top = zoomY + 'px';
+            }
+
+            // Event listeners
+            zoomContainer.addEventListener('mouseenter', function(e) {
+                console.log('Mouse entered zoom container');
+                showZoom();
+            });
+
+            zoomContainer.addEventListener('mouseleave', function(e) {
+                console.log('Mouse left zoom container');
+                hideZoom();
+            });
+
+            zoomContainer.addEventListener('mousemove', function(e) {
+                updateZoom(e);
+            });
+
+            // Initial setup
+            zoomLens.style.display = 'none';
+            zoomResult.style.display = 'none';
+
+            console.log('Zoom event listeners attached');
+        }
+    </script>
+</body>
+</html>

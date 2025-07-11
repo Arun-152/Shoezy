@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Edit Product</title>
   <link rel="stylesheet" href="/css/editproduct.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
@@ -20,13 +21,42 @@
       color: red;
       cursor: pointer;
     }
+
     .preview-wrapper {
       position: relative;
       display: inline-block;
       margin-top: 10px;
     }
+
+    /* Crop Modal Styles */
+    #cropButton:hover {
+      background: #218838 !important;
+    }
+
+    #cancelCrop:hover {
+      background: #5a6268 !important;
+    }
+
+    /* Responsive crop modal */
+    @media (max-width: 768px) {
+      #cropModal>div {
+        max-width: 95% !important;
+        max-height: 95% !important;
+        padding: 15px !important;
+      }
+
+      #cropModal h3 {
+        font-size: 18px !important;
+      }
+
+      #cropModal button {
+        padding: 10px 16px !important;
+        font-size: 14px !important;
+      }
+    }
   </style>
 </head>
+
 <body>
   <div class="container">
     <h1>Edit Product</h1>
@@ -47,72 +77,82 @@
 
       <div class="form-group">
         <label for="productOffer">Product Offer (%)</label>
-        <input type="number" id="productOffer" name="productOffer" value="<%= products.productOffer %>" min="0" max="100">
+        <input type="number" id="productOffer" name="productOffer" value="<%= products.productOffer %>" min="0"
+          max="100">
       </div>
 
       <div class="form-group">
         <label>Product Images * (Upload exactly 3 images)</label>
         <p class="image-note">Upload high-quality images of your product</p>
         <div class="image-upload">
-          <% ['1', '2', '3'].forEach((num) => { %>
+          <% ['1', '2' , '3' ].forEach((num)=> { %>
             <div class="image-slot" style="position: relative;">
-              <input type="file" id="image<%= num %>"  name="images" accept="image/*">
+              <input type="file" id="image<%= num %>" name="images" accept="image/*">
               <label for="image<%= num %>">Choose Image <%= num %></label>
 
               <div class="preview-wrapper" id="wrapper<%= num %>" style="display: none;">
                 <img id="preview<%= num %>" style="max-width: 100%; height: auto;" />
-                <span class="remove-image" data-input="image<%= num %>" data-preview="preview<%= num %>" data-wrapper="wrapper<%= num %>">&times;</span>
+                <span class="remove-image" data-input="image<%= num %>" data-preview="preview<%= num %>"
+                  data-wrapper="wrapper<%= num %>">&times;</span>
               </div>
             </div>
-          <% }) %>
+            <% }) %>
 
-         <% if (products.images && products.images.length > 0) { %>
-  <% products.images.forEach((img, i) => { %>
-    <div class="existing-image" data-image-id="<%= img %>" style="display: inline-block; margin-right: 10px; position: relative;">
-      <input type="hidden" value="<%= img %>" name="existingImages[]">
-      <img class="rounded" style="width: 60px; height: 60px;" src="<%= img %>" alt="Product Image <%= i + 1 %>">
-      <span class="remove-existing" style="position: absolute; top: -5px; right: -5px; background: white; color: red; border-radius: 50%; padding: 0 6px; font-size: 18px; font-weight: bold; cursor: pointer;">&times;</span>
-    </div>
-  <% }); %>
-<% } %>
+              <% if (products.images && products.images.length> 0) { %>
+                <% products.images.forEach((img, i)=> { %>
+                  <div class="existing-image" data-image-id="<%= img %>"
+                    style="display: inline-block; margin-right: 10px; position: relative;">
+                    <input type="hidden" value="<%= img %>" name="existingImages[]">
+                    <img class="rounded" style="width: 60px; height: 60px;" src="<%= img %>"
+                      alt="Product Image <%= i + 1 %>">
+                    <span class="remove-existing"
+                      style="position: absolute; top: -5px; right: -5px; background: white; color: red; border-radius: 50%; padding: 0 6px; font-size: 18px; font-weight: bold; cursor: pointer;">&times;</span>
+                  </div>
+                  <% }); %>
+                    <% } %>
 
-          <div id="cropModal" class="modal" style="display: none;">
-            <div class="modal-content">
-              <h3>Crop Image</h3>
-              <img id="imageToCrop">
-              <div class="modal-buttons">
-                <button type="button" id="cropButton">Crop</button>
-                <button type="button" id="cancelCrop">Cancel</button>
-              </div>
-            </div>
-          </div>
+                      <div id="cropModal" class="modal" style="display: none;">
+                        <div class="modal-content">
+                          <h3>Crop Image</h3>
+                          <img id="imageToCrop">
+                          <div class="modal-buttons">
+                            <button type="button" id="cropButton">Crop</button>
+                            <button type="button" id="cancelCrop">Cancel</button>
+                          </div>
+                        </div>
+                      </div>
         </div>
         <span class="error" id="imagesError"></span>
       </div>
 
       <div class="form-group">
         <label for="color">Color *</label>
-        <input type="text" id="color" name="color" value="<%= products.color %>" placeholder="Enter colors (e.g., Red, Blue)">
+        <input type="text" id="color" name="color" value="<%= products.color %>"
+          placeholder="Enter colors (e.g., Red, Blue)">
       </div>
 
       <div class="form-group">
         <label>Variants *</label>
         <div id="variantContainer">
           <% if (products.variants && products.variants.length) { %>
-            <% products.variants.forEach(variant => { %>
+            <% products.variants.forEach(variant=> { %>
               <div class="variant-field-group">
                 <select name="variants[size][]" required>
                   <option value="">Select size</option>
-                  <% ['6', '7', '8', '9', '10'].forEach(size => { %>
-                    <option value="<%= size %>" <%= variant.size == size ? 'selected' : '' %>><%= size %></option>
-                  <% }) %>
+                  <% ['6', '7' , '8' , '9' , '10' ].forEach(size=> { %>
+                    <option value="<%= size %>" <%=variant.size==size ? 'selected' : '' %>><%= size %>
+                    </option>
+                    <% }) %>
                 </select>
-                <input type="number" name="variants[variantPrice][]" value="<%= variant.variantPrice %>" placeholder="Variant Price" required>
-                <input type="number" name="variants[salePrice][]" value="<%= variant.salePrice %>" placeholder="Sale Price" required>
-                <input type="number" name="variants[variantQuantity][]" value="<%= variant.variantQuantity %>" placeholder="Quantity" required>
+                <input type="number" name="variants[variantPrice][]" value="<%= variant.variantPrice %>"
+                  placeholder="Variant Price" required>
+                <input type="number" name="variants[salePrice][]" value="<%= variant.salePrice %>"
+                  placeholder="Sale Price" required>
+                <input type="number" name="variants[variantQuantity][]" value="<%= variant.variantQuantity %>"
+                  placeholder="Quantity" required>
               </div>
-            <% }); %>
-          <% } %>
+              <% }); %>
+                <% } %>
         </div>
         <button type="button" id="add-variant">Add Another Variant</button>
       </div>
@@ -120,17 +160,46 @@
       <div class="form-group">
         <label for="category">Category *</label>
         <select id="category" name="category" required>
-          <option value="" disabled>Select category</option>
-          <% cat.forEach(category => { %>
-            <option value="<%= category._id %>" <%= products.category == category._id ? 'selected' : '' %>><%= category.name %></option>
-          <% }); %>
+          <option value="" disabled <%=!products.category ? 'selected' : '' %>>Select category</option>
+          <% cat.forEach(category=> { %>
+            <option value="<%= category._id %>" <%=(products.category._id ? products.category._id.toString() :
+              products.category.toString())===category._id.toString() ? 'selected' : '' %>>
+              <%= category.name %>
+            </option>
+            <% }); %>
         </select>
       </div>
-      
+
+
       <button type="submit" class="submit-btn">Save Changes</button>
     </form>
   </div>
 
+  <!-- Crop Modal -->
+  <div id="cropModal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; overflow: auto;">
+    <div
+      style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; max-width: 90%; max-height: 90%; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+      <h3 style="margin-top: 0; color: #333; font-family: Arial, sans-serif;">Crop Image</h3>
+      <p style="color: #666; font-size: 14px; margin-bottom: 15px;">Drag to reposition, use corners to resize the crop
+        area</p>
+      <div style="max-width: 500px; max-height: 400px; overflow: hidden; border: 1px solid #ddd; border-radius: 4px;">
+        <img id="imageToCrop" style="max-width: 100%; display: block;">
+      </div>
+      <div style="margin-top: 15px; text-align: center;">
+        <button id="cropButton"
+          style="background: #28a745; color: white; border: none; padding: 12px 24px; border-radius: 4px; margin-right: 10px; cursor: pointer; font-weight: 500; transition: background-color 0.3s;">
+          <span style="margin-right: 5px;">✓</span>Crop & Save
+        </button>
+        <button id="cancelCrop"
+          style="background: #6c757d; color: white; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer; font-weight: 500; transition: background-color 0.3s;">
+          <span style="margin-right: 5px;">✕</span>Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <script>
@@ -140,6 +209,20 @@
       const form = document.getElementById("productForm");
       const formData = new FormData(form);
       const productId = document.getElementById("productId").value;
+
+      // Remove name attribute from original file inputs to prevent multer processing both
+      ['1', '2', '3'].forEach(num => {
+        const input = document.getElementById(`image${num}`);
+        if (input && croppedImages.has(`image${num}`)) {
+          input.removeAttribute('name');
+        }
+      });
+
+      // Append cropped images to form data
+      croppedImages.forEach((blob, inputId) => {
+        const imageNum = inputId.slice(-1);
+        formData.append('images', blob, `cropped-image${imageNum}.jpg`);
+      });
 
       try {
         Swal.fire({
@@ -182,7 +265,11 @@
       }
     });
 
-    // Image preview and remove logic
+    // Image cropping and preview logic
+    let currentImageInput = null;
+    let cropper = null;
+    const croppedImages = new Map();
+
     document.addEventListener("DOMContentLoaded", function () {
       ['1', '2', '3'].forEach((num) => {
         const input = document.getElementById(`image${num}`);
@@ -192,16 +279,155 @@
         input.addEventListener("change", function (e) {
           const file = e.target.files[0];
           if (file) {
+            // Validate file size
+            if (file.size > 5 * 1024 * 1024) {
+              Swal.fire({
+                icon: 'error',
+                title: 'File Too Large',
+                text: 'Image size must be less than 5MB'
+              });
+              input.value = '';
+              return;
+            }
+
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+              Swal.fire({
+                icon: 'error',
+                title: 'Invalid File Type',
+                text: 'Please upload valid image files'
+              });
+              input.value = '';
+              return;
+            }
+
             const reader = new FileReader();
             reader.onload = function (event) {
-              preview.src = event.target.result;
-              wrapper.style.display = "inline-block";
+              currentImageInput = input;
+              const imageToCrop = document.getElementById('imageToCrop');
+              imageToCrop.src = event.target.result;
+              document.getElementById('cropModal').style.display = 'block';
+
+              // Initialize cropper
+              if (cropper) cropper.destroy();
+
+              // Wait for image to load before initializing cropper
+              imageToCrop.onload = function () {
+                cropper = new Cropper(imageToCrop, {
+                  aspectRatio: 1,
+                  viewMode: 1,
+                  autoCropArea: 0.8,
+                  responsive: true,
+                  restore: false,
+                  guides: true,
+                  center: true,
+                  highlight: false,
+                  cropBoxMovable: true,
+                  cropBoxResizable: true,
+                  toggleDragModeOnDblclick: false,
+                  ready: function () {
+                    console.log('Cropper initialized successfully');
+                  }
+                });
+              };
             };
             reader.readAsDataURL(file);
           }
         });
       });
 
+      // Crop button functionality
+      document.getElementById('cropButton').addEventListener('click', function () {
+        if (!cropper) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Cropper Not Ready',
+            text: 'Please wait for the image to load completely before cropping.'
+          });
+          return;
+        }
+
+        try {
+          const canvas = cropper.getCroppedCanvas({
+            width: 500,
+            height: 500,
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: 'high',
+          });
+
+          if (!canvas) {
+            throw new Error('Failed to create cropped canvas');
+          }
+
+          canvas.toBlob(blob => {
+            if (!blob) {
+              Swal.fire({
+                icon: 'error',
+                title: 'Crop Failed',
+                text: 'Failed to process the cropped image. Please try again.'
+              });
+              return;
+            }
+
+            const url = URL.createObjectURL(blob);
+            const inputNum = currentImageInput.id.slice(-1);
+            const preview = document.getElementById(`preview${inputNum}`);
+            const wrapper = document.getElementById(`wrapper${inputNum}`);
+
+            // Update preview
+            preview.src = url;
+            wrapper.style.display = "inline-block";
+
+            // Add visual indicator for cropped image
+            preview.style.border = "3px solid #28a745";
+            preview.title = "Cropped image ready for upload";
+
+            // Store cropped image
+            croppedImages.set(currentImageInput.id, blob);
+
+            // Clear original input and remove name attribute to prevent multer processing
+            currentImageInput.value = '';
+            currentImageInput.removeAttribute('name');
+
+            // Close modal
+            document.getElementById('cropModal').style.display = 'none';
+            if (cropper) {
+              cropper.destroy();
+              cropper = null;
+            }
+
+            // Show success message
+            Swal.fire({
+              icon: 'success',
+              title: 'Image Cropped!',
+              text: 'Image has been cropped and is ready for upload.',
+              timer: 2000,
+              showConfirmButton: false
+            });
+          }, 'image/jpeg', 0.9);
+        } catch (error) {
+          console.error('Crop error:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Crop Failed',
+            text: 'An error occurred while cropping the image. Please try again.'
+          });
+        }
+      });
+
+      // Cancel crop functionality
+      document.getElementById('cancelCrop').addEventListener('click', function () {
+        document.getElementById('cropModal').style.display = 'none';
+        if (cropper) {
+          cropper.destroy();
+          cropper = null;
+        }
+        if (currentImageInput) {
+          currentImageInput.value = '';
+        }
+      });
+
+      // Remove image functionality
       document.querySelectorAll(".remove-image").forEach((btn) => {
         btn.addEventListener("click", function () {
           const inputId = this.dataset.input;
@@ -215,18 +441,25 @@
           preview.src = "";
           wrapper.style.display = "none";
           input.value = "";
+
+          // Remove from cropped images if exists
+          croppedImages.delete(inputId);
+
+          // Restore name attribute if it was removed
+          input.setAttribute('name', 'images');
         });
       });
     });
 
     document.addEventListener("DOMContentLoaded", function () {
-  // Existing image remove handler
-  document.querySelectorAll(".remove-existing").forEach((btn) => {
-    btn.addEventListener("click", function () {
-      this.closest(".existing-image").remove();
+      // Existing image remove handler
+      document.querySelectorAll(".remove-existing").forEach((btn) => {
+        btn.addEventListener("click", function () {
+          this.closest(".existing-image").remove();
+        });
+      });
     });
-  });
-});
   </script>
 </body>
+
 </html>
