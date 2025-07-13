@@ -68,6 +68,7 @@
       <div class="form-group">
         <label for="productName">Product Name *</label>
         <input type="text" id="productName" name="productName" value="<%= products.productName %>">
+        <span class="error" id="productNameError"></span>
       </div>
 
       <div class="form-group">
@@ -213,8 +214,32 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <script>
+    // Real-time validation - clear error when user starts typing
+    document.getElementById("productName").addEventListener("input", function() {
+      document.getElementById('productNameError').textContent = '';
+    });
+
     document.getElementById("productForm").addEventListener("submit", async function (e) {
       e.preventDefault();
+
+      // Clear previous error messages
+      document.getElementById('productNameError').textContent = '';
+
+      // Client-side validation
+      const productName = document.getElementById("productName").value.trim();
+
+      // Check for empty or space-only product name
+      if (!productName || productName.length === 0) {
+        document.getElementById('productNameError').textContent = 'Product name cannot be empty or only spaces.';
+        document.getElementById('productName').focus();
+        return;
+      }
+
+      if (productName.length < 2 || productName.length > 100) {
+        document.getElementById('productNameError').textContent = 'Product name must be 2-100 characters';
+        document.getElementById('productName').focus();
+        return;
+      }
 
       const form = document.getElementById("productForm");
       const formData = new FormData(form);

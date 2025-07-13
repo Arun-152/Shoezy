@@ -32,7 +32,7 @@
                         <h1>Category Management</h1>
                     </div>
                     <!-- Search Section -->
-                    <form id="searchForm" class="search-section">
+                    <form id="searchForm" class="search-section" method="GET" action="/admin/category">
                         <div class="search-container">
                             <i class="fas fa-search search-icon"></i>
                             <input type="text" id="searchInput" name="search" class="search-input"
@@ -41,15 +41,14 @@
 
                         <div class="search-buttons">
                             <button type="submit" name="search" class="search-btn">Search</button>
-                            <button type="submit" name="clear" class="clear-btn" value="1">Clear</button>
+                            <button type="button" class="clear-btn">Clear</button>
                         </div>
-                       
-                            <div class="right-controls" >
-                                <button id="addproduct"  onclick="openAddCategoryModal()" class="btn-primary" type="button">
-                                    <i class="fas fa-plus"></i>Add New Category
-                                </button>
-                            </div>
-                      
+
+                        <div class="right-controls">
+                            <button id="addproduct" onclick="openAddCategoryModal()" class="btn-primary" type="button">
+                                <i class="fas fa-plus"></i>Add New Category
+                            </button>
+                        </div>
                     </form>
 
                     <!-- Table Section -->
@@ -66,42 +65,59 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <% cat.forEach((category, index)=> { %>
-                                        <tr>
-                                            <td>
-                                                <%= index + 1 %>
-                                            </td>
-                                            <td class="text-start">
-                                                <%= category.name %>
-                                            </td>
-                                            <td class="text-start">
-                                                <%= category.description %>
-                                            </td>
-                                            <td class="text-start">
-                                                <%= category.isListed===true ? 'Listed' : 'Unlisted' %>
-                                            </td>
-                                            <td class="text-start actions-cell">
-                                                <button
-                                                    onclick="togglebtn(event,'<%=category._id%>','<%=category.isListed%>','<%=category.name%>')"
-                                                    class="action-btn toggle-btn <%= category.isListed===true ? 'unblock-btn' : 'block-btn' %>"
-                                                    data-status="<%= category.isListed %>">
-                                                    <%= category.isListed===true ? 'Unlist' : 'List' %>
-                                                </button>
-                                                <button class="action-btn edit-btn"
-                                                    onclick="openEditCategoryModal('<%= category._id %>', '<%= category.name %>', '<%= category.description %>', '<%= category.status %>')">
-                                                    Edit
-                                                </button>
-
-                                                <button class="action-btn delete-btn"
-                                                    onclick="deleteCategory('<%= category._id %>')">
-                                                    Delete
-                                                </button>
-                                            </td>
-
-                                        </tr>
+                                    <% if (cat && cat.length > 0) { %>
+                                        <% cat.forEach((category, index)=> { %>
+                                            <tr>
+                                                <td>
+                                                    <%= index + 1 %>
+                                                </td>
+                                                <td class="text-start">
+                                                    <%= category.name %>
+                                                </td>
+                                                <td class="text-start">
+                                                    <%= category.description %>
+                                                </td>
+                                                <td class="text-start">
+                                                    <span class="<%= category.isListed===true ? 'status-listed' : 'status-unlisted' %>">
+                                                        <%= category.isListed===true ? 'Listed' : 'Unlisted' %>
+                                                    </span>
+                                                </td>
+                                                <td class="text-start actions-cell">
+                                                    <div class="action-buttons-row">
+                                                        <button
+                                                            onclick="togglebtn(event,'<%=category._id%>','<%=category.isListed%>','<%=category.name%>')"
+                                                            class="action-btn <%= category.isListed===true ? 'unlist-btn' : 'list-btn' %>"
+                                                            data-status="<%= category.isListed %>">
+                                                            <%= category.isListed===true ? 'Unlist' : 'List' %>
+                                                        </button>
+                                                        <button class="action-btn edit-btn"
+                                                            onclick="openEditCategoryModal('<%= category._id %>', '<%= category.name %>', '<%= category.description %>', '<%= category.status %>')">
+                                                            Edit
+                                                        </button>
+                                                        <button class="action-btn delete-btn"
+                                                            onclick="deleteCategory('<%= category._id %>')">
+                                                            Delete
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
                                         <% }) %>
-
-
+                                    <% } else { %>
+                                        <tr class="no-results-row">
+                                            <td colspan="5" class="no-results-cell">
+                                                <div class="no-results-message">
+                                                    <i class="fas fa-search"></i>
+                                                    <h3>No categories found</h3>
+                                                    <% if (search && search.trim() !== '') { %>
+                                                        <p>No categories match your search for "<strong><%= search %></strong>"</p>
+                                                        <a href="/admin/category" class="clear-search-btn">Clear Search</a>
+                                                    <% } else { %>
+                                                        <p>No categories available at the moment</p>
+                                                    <% } %>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <% } %>
                                 </tbody>
                             </table>
                         </div>
@@ -201,18 +217,60 @@
                     const searchForm = document.getElementById("searchForm");
                     const searchInput = document.getElementById("searchInput");
 
+                    // Handle form submission for search
                     searchForm.addEventListener("submit", (e) => {
-                        const isClear = e.submitter && e.submitter.name === "clear";
+                        const searchValue = searchInput.value.trim();
 
-                        if (isClear) {
+                        // If search is empty, redirect to show all categories
+                        if (!searchValue) {
                             e.preventDefault();
-                            window.location.href = "/admin/category?page=1";
-                        } else {
-                            const keyword = searchInput.value.trim();
-                            if (keyword) {
-                                e.preventDefault();
-                                window.location.href = `/admin/category?page=1&search=${encodeURIComponent(keyword)}`;
-                            }
+                            window.location.href = "/admin/category";
+                            return;
+                        }
+
+                        // Validate search input
+                        if (searchValue.length < 1) {
+                            e.preventDefault();
+                            alert('Please enter at least 1 character to search');
+                            return;
+                        }
+
+                        // Add loading state to search button
+                        const searchBtn = searchForm.querySelector('.search-btn');
+                        if (searchBtn) {
+                            searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
+                            searchBtn.disabled = true;
+                        }
+
+                        // Allow normal form submission for valid search
+                        // The form will submit to GET /admin/category?search=searchValue
+                    });
+
+                    // Handle clear button functionality
+                    const clearBtn = document.querySelector('.clear-btn');
+                    if (clearBtn) {
+                        clearBtn.addEventListener('click', (e) => {
+                            e.preventDefault();
+
+                            // Clear the search input
+                            searchInput.value = '';
+
+                            // Add visual feedback
+                            clearBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Clearing...';
+                            clearBtn.disabled = true;
+
+                            // Redirect to show all categories
+                            setTimeout(() => {
+                                window.location.href = '/admin/category';
+                            }, 300);
+                        });
+                    }
+
+                    // Handle Enter key in search input
+                    searchInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            searchForm.dispatchEvent(new Event('submit'));
                         }
                     });
                 })

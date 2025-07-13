@@ -370,67 +370,59 @@ body {
     color: #080000;
 }
 
-/* Button Styles */
-.action-btn {
-    border: none;
-    width: 80px;
-    height: 32px;
-    border-radius: 4px;
-    cursor: pointer;
+/* Action Buttons Row */
+.action-buttons-row {
     display: flex;
     align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-    font-size: 14px;
-    font-weight: 500;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* Base Action Button Styles */
+.action-btn {
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 70px;
+    height: 32px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.block-btn {
-    background-color: #0b9e12;
+/* List/Unlist Button - Light Blue */
+.list-btn, .unlist-btn {
+    background-color: #17a2b8;
     color: white;
 }
 
-.block-btn:hover {
-    background-color: #c82333;
-    transform: scale(1.05);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+.list-btn:hover, .unlist-btn:hover {
+    background-color: #138496;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(23, 162, 184, 0.3);
 }
 
-.block-btn:active {
-    transform: scale(0.95);
-}
-
-.unblock-btn {
-    background-color: #28a745;
-    color: white;
-}
-
-.unblock-btn:hover {
-    background-color: #218838;
-    transform: scale(1.05);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.unblock-btn:active {
-    transform: scale(0.95);
-}
-
+/* Edit Button - Dark Blue */
 .edit-btn {
-    background-color: #007bff;
+    background-color: #0056b3;
     color: white;
 }
 
 .edit-btn:hover {
-    background-color: #0056b3;
-    transform: scale(1.05);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    background-color: #004494;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 86, 179, 0.3);
 }
 
-.edit-btn:active {
-    transform: scale(0.95);
-}
-
+/* Delete Button - Red */
 .delete-btn {
     background-color: #dc3545;
     color: white;
@@ -438,12 +430,85 @@ body {
 
 .delete-btn:hover {
     background-color: #c82333;
-    transform: scale(1.05);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
 }
 
-.delete-btn:active {
-    transform: scale(0.95);
+/* Active state for all buttons */
+.action-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Status Styling */
+.status-listed {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.status-unlisted {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+/* No Results Styling */
+.no-results-row {
+    background-color: #f8f9fa;
+}
+
+.no-results-cell {
+    padding: 60px 20px;
+    text-align: center;
+    border: none;
+}
+
+.no-results-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    color: #666;
+}
+
+.no-results-message i {
+    font-size: 48px;
+    color: #ccc;
+    margin-bottom: 10px;
+}
+
+.no-results-message h3 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.no-results-message p {
+    font-size: 16px;
+    color: #666;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.clear-search-btn {
+    background: linear-gradient(135deg, #4a90e2, #357abd);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 4px rgba(74, 144, 226, 0.3);
+}
+
+.clear-search-btn:hover {
+    background: linear-gradient(135deg, #357abd, #2968a3);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(74, 144, 226, 0.4);
 }
 
 /* Pagination Section */
@@ -636,6 +701,19 @@ body {
 }
 
 /* Responsive Design */
+@media (max-width: 992px) {
+    .action-buttons-row {
+        gap: 6px;
+    }
+
+    .action-btn {
+        padding: 7px 10px;
+        font-size: 11px;
+        min-width: 65px;
+        height: 30px;
+    }
+}
+
 @media (max-width: 768px) {
     .sidebar {
         transform: translateX(-100%);
@@ -737,10 +815,33 @@ body {
         font-size: 12px;
     }
     
+    /* Responsive Action Buttons */
+    .action-buttons-row {
+        gap: 4px;
+        justify-content: center;
+    }
+
     .action-btn {
-        width: 70px;
+        padding: 6px 8px;
+        font-size: 10px;
+        min-width: 60px;
         height: 28px;
-        font-size: 12px;
+    }
+
+    .no-results-cell {
+        padding: 40px 15px;
+    }
+
+    .no-results-message i {
+        font-size: 36px;
+    }
+
+    .no-results-message h3 {
+        font-size: 20px;
+    }
+
+    .no-results-message p {
+        font-size: 14px;
     }
 }
 

@@ -57,8 +57,11 @@ const addProduct = async (req, res) => {
 
         const { productName, description, productOffer, color, category, variants, status } = req.body;
 
+        // Trim product name for validation
+        const trimmedProductName = productName ? productName.trim() : '';
+
         // Validation
-        if (!productName || productName.length < 2 || productName.length > 100) {
+        if (!trimmedProductName || trimmedProductName.length < 2 || trimmedProductName.length > 100) {
             return res.status(400).json({
                 success: false,
                 error: "Product name must be 2-100 characters",
@@ -67,8 +70,23 @@ const addProduct = async (req, res) => {
             });
         }
 
+        // Check for duplicate product name (case-insensitive)
+        const existingProduct = await Products.findOne({
+            productName: { $regex: new RegExp(`^${trimmedProductName}$`, 'i') },
+            isDeleted: false
+        });
+
+        if (existingProduct) {
+            return res.status(400).json({
+                success: false,
+                error: "This product already exists.",
+                formData: req.body,
+                cat: await Category.find({ isListed: true, isDeleted: false }),
+            });
+        }
+
         const validNameRegex = /^[a-zA-Z0-9 _-]+$/;
-        if (!validNameRegex.test(productName)) {
+        if (!validNameRegex.test(trimmedProductName)) {
             return res.status(400).json({
                 success: false,
                 error: "Product name can only contain letters, numbers, spaces, underscores, or hyphens",
@@ -283,26 +301,47 @@ const editProducts = async (req, res) => {
         const data = req.body;
 
         if (!data) {
-            return res.status(400).json({ message: "All fields are required" });
+            return res.status(400).json({ success: false, message: "All fields are required" });
         }
 
-        const existingProduct = await Products.findOne({
-            productName: data.productName,
-            _id: { $ne: id }
-        });
+        // Trim product name for validation
+        const trimmedProductName = data.productName ? data.productName.trim() : '';
 
-        if (existingProduct) {
-            return res.status(400).json({ success: false, message: "Product already exists" });
+        // Product name validation - check for empty or space-only names
+        if (!trimmedProductName || trimmedProductName.length === 0) {
+            return res.status(400).json({
+                success: false,
+                error: "Product name cannot be empty or only spaces."
+            });
         }
 
-        // Product name validation
-        if (!data.productName || data.productName.length < 2 || data.productName.length > 100) {
-            return res.status(400).json({ success: false, error: "Product name must be 2-100 characters" });
+        if (trimmedProductName.length < 2 || trimmedProductName.length > 100) {
+            return res.status(400).json({
+                success: false,
+                error: "Product name must be 2-100 characters"
+            });
         }
 
         const validNameRegex = /^[a-zA-Z0-9 _-]+$/;
-        if (!validNameRegex.test(data.productName)) {
-            return res.status(400).json({ success: false, error: "Product name contains invalid characters" });
+        if (!validNameRegex.test(trimmedProductName)) {
+            return res.status(400).json({
+                success: false,
+                error: "Product name contains invalid characters"
+            });
+        }
+
+        // Check for duplicate product name (case-insensitive, excluding current product)
+        const existingProduct = await Products.findOne({
+            productName: { $regex: new RegExp(`^${trimmedProductName}$`, 'i') },
+            _id: { $ne: id },
+            isDeleted: false
+        });
+
+        if (existingProduct) {
+            return res.status(400).json({
+                success: false,
+                error: "This product already exists."
+            });
         }
 
         // Description validation

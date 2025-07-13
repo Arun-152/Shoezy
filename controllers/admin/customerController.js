@@ -14,7 +14,12 @@ const customerPage=async (req,res)=>{
         const limit=5
         const skip=(page-1)*limit
 
-        const searchFilter = escapedSearch ? {fullname:{$regex:escapedSearch,$options:"i"}} : {};
+        const searchFilter = escapedSearch ? {
+            $or: [
+                {fullname: {$regex: escapedSearch, $options: "i"}},
+                {email: {$regex: escapedSearch, $options: "i"}}
+            ]
+        } : {};
 
         const customerData = await User.find({...searchFilter})
         .sort({createdAt:-1})

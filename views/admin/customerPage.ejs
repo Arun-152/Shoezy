@@ -30,20 +30,19 @@
                     <div class="page-header">
                         <h1>Customer Management</h1>
                     </div>
-                    <div class="search-sections">
-                        <form id="searchForm" class="search-section">
-                            <div class="search-container">
-                                <i class="fas fa-search search-icon"></i>
-                                <input type="text" id="searchInput" name="search" class="search-input"
-                                    placeholder="Search customers..." value="<%=search %>">
-                            </div>
+                    <!-- Search Section -->
+                    <form id="searchForm" class="search-section" method="GET" action="/admin/customers">
+                        <div class="search-container">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" id="searchInput" name="search" class="search-input"
+                                placeholder="Search customers by name or email..." value="<%=search %>">
+                        </div>
 
-                            <div class="search-buttons">
-                                <button type="submit" name="search" class="search-btn">Search</button>
-                                <button type="submit" name="clear" class="clear-btn" value="1">Clear</button>
-                            </div>
-                        </form>
-                    </div>
+                        <div class="search-buttons">
+                            <button type="submit" name="search" class="search-btn">Search</button>
+                            <button type="button" class="clear-btn">Clear</button>
+                        </div>
+                    </form>
                     <!-- table -->
 
                     <div class="table-section">
@@ -58,30 +57,49 @@
                                     </tr>
                                 </thead>
                                 <tbody id="customer-table-body">
-                                    <% customers.forEach((customer)=> { %>
-                                        <tr class="table-row" data-customer-id="<%= customer.id %>">
-                                            <td class="table-cell">
-                                                <%= customer.fullname %>
-                                            </td>
-                                            <td class="table-cell">
-                                                <%= customer.email %>
-                                            </td>
-                                            <td class="table-cell">
-                                                <%= customer.phone %>
-                                            </td>
-                                            <td class="table-cell action-cell">
-                                                <% if(customer.isBlocked===false) { %>
-                                                    <a href="/admin/blockCustomer?id=<%=customer._id%>">
-                                                        <button class="action-btn block-btn">Block</button>
-                                                    </a>
+                                    <% if (customers && customers.length > 0) { %>
+                                        <% customers.forEach((customer)=> { %>
+                                            <tr class="table-row" data-customer-id="<%= customer.id %>">
+                                                <td class="table-cell">
+                                                    <%= customer.fullname %>
+                                                </td>
+                                                <td class="table-cell">
+                                                    <%= customer.email %>
+                                                </td>
+                                                <td class="table-cell">
+                                                    <%= customer.phone %>
+                                                </td>
+                                                <td class="table-cell action-cell">
+                                                    <% if(customer.isBlocked===false) { %>
+                                                        <button class="action-btn block-btn"
+                                                                onclick="confirmBlockAction('<%=customer._id%>', '<%=customer.fullname%>', 'block')">
+                                                            Block
+                                                        </button>
+                                                        <% } else { %>
+                                                            <button class="action-btn unblock-btn"
+                                                                    onclick="confirmBlockAction('<%=customer._id%>', '<%=customer.fullname%>', 'unblock')">
+                                                                Unblock
+                                                            </button>
+                                                            <% } %>
+                                                </td>
+                                            </tr>
+                                        <% }) %>
+                                    <% } else { %>
+                                        <tr class="no-results-row">
+                                            <td colspan="4" class="no-results-cell">
+                                                <div class="no-results-message">
+                                                    <i class="fas fa-search"></i>
+                                                    <h3>No customers found</h3>
+                                                    <% if (search && search.trim() !== '') { %>
+                                                        <p>No customers match your search for "<strong><%= search %></strong>"</p>
+                                                        <a href="/admin/customers" class="clear-search-btn">Clear Search</a>
                                                     <% } else { %>
-                                                        <a href="/admin/unblockCustomer?id=<%=customer._id%>">
-                                                            <button class="action-btn unblock-btn">Unblock</button>
-                                                        </a>
-                                                        <% } %>
+                                                        <p>No customers available at the moment</p>
+                                                    <% } %>
+                                                </div>
                                             </td>
                                         </tr>
-                                        <% }) %>
+                                    <% } %>
                                 </tbody>
                             </table>
                         </div>
@@ -134,60 +152,110 @@
             const searchForm = document.getElementById("searchForm");
             const searchInput = document.getElementById("searchInput");
 
+            // Handle form submission for search
             searchForm.addEventListener("submit", (e) => {
-                const isClear = e.submitter && e.submitter.name === "clear";
+                const searchValue = searchInput.value.trim();
 
-                if (isClear) {
+                // If search is empty, redirect to show all customers
+                if (!searchValue) {
                     e.preventDefault();
-                    window.location.href = "/admin/customers?page=1";
-                } else {
-                    const keyword = searchInput.value.trim();
-                    if (keyword) {
-                        e.preventDefault();
-                        window.location.href = `/admin/customers?page=1&search=${encodeURIComponent(keyword)}`;
-                    }
+                    window.location.href = "/admin/customers";
+                    return;
+                }
+
+                // Validate search input
+                if (searchValue.length < 1) {
+                    e.preventDefault();
+                    alert('Please enter at least 1 character to search');
+                    return;
+                }
+
+                // Add loading state to search button
+                const searchBtn = searchForm.querySelector('.search-btn');
+                if (searchBtn) {
+                    searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
+                    searchBtn.disabled = true;
+                }
+
+                // Allow normal form submission for valid search
+                // The form will submit to GET /admin/customers?search=searchValue
+            });
+
+            // Handle clear button functionality
+            const clearBtn = document.querySelector('.clear-btn');
+            if (clearBtn) {
+                clearBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+
+                    // Clear the search input
+                    searchInput.value = '';
+
+                    // Add visual feedback
+                    clearBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Clearing...';
+                    clearBtn.disabled = true;
+
+                    // Redirect to show all customers
+                    setTimeout(() => {
+                        window.location.href = '/admin/customers';
+                    }, 300);
+                });
+            }
+
+            // Handle Enter key in search input
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    searchForm.dispatchEvent(new Event('submit'));
                 }
             });
         })
 
         // SweetAlert for block/unblock confirmation
-        function confirmBlock(customerId, customerName, currentStatus) {
-            const action = currentStatus === 'Active' ? 'block' : 'unblock';
+        function confirmBlockAction(customerId, customerName, action) {
+            const title = action === 'block' ?
+                'Are you sure you want to block this customer?' :
+                'Are you sure you want to unblock this customer?';
+
+            const confirmButtonText = action === 'block' ? 'Yes, Block' : 'Yes, Unblock';
+            const confirmButtonColor = action === 'block' ? '#dc3545' : '#28a745';
+
             Swal.fire({
-                title: 'Are you sure?',
-                text: `Do you want to ${action} ${customerName}?`,
+                title: title,
+                text: `Customer: ${customerName}`,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: action === 'block' ? '#dc3545' : '#28a745',
+                confirmButtonColor: confirmButtonColor,
                 cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes',
-                cancelButtonText: 'No'
+                confirmButtonText: confirmButtonText,
+                cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Update button client-side
-                    const row = document.querySelector(`tr[data-customer-id="${customerId}"]`);
-                    const button = row.querySelector('.action-btn');
-                    const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
-                    button.textContent = newStatus === 'Active' ? 'Block' : 'Unblock';
-                    button.className = `action-btn ${newStatus === 'Active' ? 'block-btn' : 'unblock-btn'}`;
+                    // Show loading state
+                    Swal.fire({
+                        title: 'Processing...',
+                        text: `${action === 'block' ? 'Blocking' : 'Unblocking'} ${customerName}`,
+                        icon: 'info',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
 
-                    // Show success message
-                    Swal.fire(
-                        'Success!',
-                        `${customerName} has been ${action}ed.`,
-                        'success'
-                    );
-                    searchCustomers();
+                    // Proceed with the action by redirecting to the appropriate route
+                    setTimeout(() => {
+                        if (action === 'block') {
+                            window.location.href = `/admin/blockCustomer?id=${customerId}`;
+                        } else {
+                            window.location.href = `/admin/unblockCustomer?id=${customerId}`;
+                        }
+                    }, 500);
                 }
+                // If cancelled, do nothing - the action is prevented
             });
         }
-        function editCustomer(customerId) {
-            Swal.fire(
-                'Edit',
-                `Edit functionality for customer ID ${customerId} would be implemented here.`,
-                'info'
-            );
-        }
+
     </script>
 </body>
 

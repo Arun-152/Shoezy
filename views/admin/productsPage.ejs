@@ -37,30 +37,28 @@
                     </div>
                 </header>
 
-                <section class="page-content">
+                <div class="page-content">
                     <div class="page-header">
                         <h1>Product Management</h1>
                     </div>
 
-                    <!-- Controls Section -->
+                    <!-- Search Section -->
                     <form id="searchForm" class="search-section" method="GET" action="/admin/products">
-                        <div class="search-sections">
-                            <div class="search-container">
-                                <i class="fas fa-search search-icon"></i>
-                                <input type="text" id="searchInput" name="search" class="search-input"
-                                    placeholder="Search products..." value="<%= search %>">
-                            </div>
+                        <div class="search-container">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" id="searchInput" name="search" class="search-input"
+                                placeholder="Search products..." value="<%= search %>">
+                        </div>
 
-                            <div class="search-buttons">
-                                <button type="submit" class="search-btn">Search</button>
-                                <a href="/admin/products" class="clear-btn">Clear</a> <!-- Better as a link -->
-                            </div>
+                        <div class="search-buttons">
+                            <button type="submit" name="search" class="search-btn">Search</button>
+                            <button type="button" class="clear-btn">Clear</button>
                         </div>
 
                         <div class="right-controls">
-                            <button id="addproduct" onclick="openAddCategoryModal()" class="btn-primary" type="button">
-                                <i class="fas fa-plus"></i>Add Product
-                            </button>
+                            <a href="/admin/addproduct" class="btn-primary" type="button">
+                                <i class="fas fa-plus"></i>Add New Product
+                            </a>
                         </div>
                     </form>
 
@@ -81,74 +79,105 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <% for(let i=0;i<products.length;i++){ %>
-                                        <tr class="table-row">
-                                            <td>
-                                                <%= i + 1 %>
-                                            </td>
-                                            <td>
-                                                <%= products[i].productName %>
-                                            </td>
-                                            <td>
-                                                <%= products[i].category ? products[i].category.name : 'No category' %>
-                                            </td>
-                                            <td>
-                                                <%= products[i].variants[0].variantPrice %>
-                                            </td>
-                                            <td>
-                                                <%= products[i].variants[0].variantQuantity %>
-                                            </td>
-                                            <td>
-                                                <%if(products[i].isBlocked){%>
-                                                    <span>InActive</span>
-                                                    <%}else{%>
-                                                        <span>Active</span>
-                                                        <%}%>
-
-                                            </td>
-                                            <td>
-                                                <a href="/admin/editProducts?id=<%= products[i]._id %>"
-                                                    class="update-btn">EDIT</a>
-                                                <%if(products[i].isBlocked){%>
-                                                    <a href="/admin/unblockedProduct?id=<%= products[i]._id %>"
-                                                        class="update-btn">UnBlock</a>
-                                                    <%}else{%>
-                                                        <a href="/admin/blockedProduct?id=<%= products[i]._id %>"
-                                                            class="update-btn">Block</a>
-                                                        <%}%>
-                                                            <button onclick="deleteproduct('<%=products[i]._id %>')"
-                                                                class="update-btn">DELETE</button>
+                                    <% if (products && products.length > 0) { %>
+                                        <% for(let i=0;i<products.length;i++){ %>
+                                            <tr class="table-row">
+                                                <td>
+                                                    <%= i + 1 %>
+                                                </td>
+                                                <td>
+                                                    <%= products[i].productName %>
+                                                </td>
+                                                <td>
+                                                    <%= products[i].category ? products[i].category.name : 'No category' %>
+                                                </td>
+                                                <td>
+                                                    <%= products[i].variants[0].variantPrice %>
+                                                </td>
+                                                <td>
+                                                    <%= products[i].variants[0].variantQuantity %>
+                                                </td>
+                                                <td>
+                                                    <%if(products[i].isBlocked){%>
+                                                        <span class="status-inactive">InActive</span>
+                                                        <%}else{%>
+                                                            <span class="status-active">Active</span>
+                                                            <%}%>
+                                                </td>
+                                                <td>
+                                                    <div class="action-buttons-row">
+                                                        <a href="/admin/editProducts?id=<%= products[i]._id %>"
+                                                            class="action-btn edit-btn">EDIT</a>
+                                                        <%if(products[i].isBlocked){%>
+                                                            <button onclick="unblockProduct('<%= products[i]._id %>', '<%= products[i].productName %>')"
+                                                                class="action-btn unblock-btn">UnBlock</button>
+                                                            <%}else{%>
+                                                                <button onclick="blockProduct('<%= products[i]._id %>', '<%= products[i].productName %>')"
+                                                                    class="action-btn block-btn">Block</button>
+                                                                <%}%>
+                                                                    <button onclick="deleteproduct('<%=products[i]._id %>')"
+                                                                        class="action-btn delete-btn">DELETE</button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        <%}%>
+                                    <% } else { %>
+                                        <tr class="no-results-row">
+                                            <td colspan="7" class="no-results-cell">
+                                                <div class="no-results-message">
+                                                    <i class="fas fa-search"></i>
+                                                    <h3>No products found</h3>
+                                                    <% if (search && search.trim() !== '') { %>
+                                                        <p>No products match your search for "<strong><%= search %></strong>"</p>
+                                                        <a href="/admin/products" class="clear-search-btn">Clear Search</a>
+                                                    <% } else { %>
+                                                        <p>No products available at the moment</p>
+                                                    <% } %>
+                                                </div>
                                             </td>
                                         </tr>
-
-                                        <%}%>
+                                    <% } %>
                                 </tbody>
                             </table>
                             <!-- pagination -->
-                            <div class="pagination-section">
-                                <div class="pagination-info">
-                                    Page <%= currentPage %> of <%= totalPages %> Pages
-                                </div>
-                                <div class="pagination-controls">
-                                    <button class="pagination-btn" <%=currentPage <=1 ? "disabled" : "" %>
-                                        onclick="window.location.href='/admin/products?page=<%= currentPage - 1 %>'">
-                                            <i class="fas fa-chevron-left"></i>
-                                    </button>
-
-                                    <div class="page-numbers">
-                                        <% for(let i=1; i <=totalPages; i++) { %>
-                                            <button class="page-btn <%= i === currentPage ? 'active' : '' %>"
-                                                onclick="window.location.href='/admin/products?page=<%= i %>'">
-                                                <%= i %>
-                                            </button>
-                                            <% } %>
+                            <% if (products && products.length > 0 && totalPages > 1) { %>
+                                <div class="pagination-section">
+                                    <div class="pagination-info">
+                                        Page <%= currentPage %> of <%= totalPages %> Pages
+                                        <% if (search && search.trim() !== '') { %>
+                                            (Showing results for "<%= search %>")
+                                        <% } %>
                                     </div>
-                                    <button class="pagination-btn" <%=currentPage>= totalPages ? "disabled" : "" %>
-                                        onclick="window.location.href='/admin/products?page=<%= currentPage + 1 %>'">
-                                            <i class="fas fa-chevron-right"></i>
-                                    </button>
+                                    <div class="pagination-controls">
+                                        <button class="pagination-btn" <%=currentPage <=1 ? "disabled" : "" %>
+                                            onclick="window.location.href='/admin/products?page=<%= currentPage - 1 %><%= search ? '&search=' + encodeURIComponent(search) : '' %>'">
+                                                <i class="fas fa-chevron-left"></i>
+                                        </button>
+
+                                        <div class="page-numbers">
+                                            <% for(let i=1; i <=totalPages; i++) { %>
+                                                <button class="page-btn <%= i === currentPage ? 'active' : '' %>"
+                                                    onclick="window.location.href='/admin/products?page=<%= i %><%= search ? '&search=' + encodeURIComponent(search) : '' %>'">
+                                                    <%= i %>
+                                                </button>
+                                                <% } %>
+                                        </div>
+                                        <button class="pagination-btn" <%=currentPage>= totalPages ? "disabled" : "" %>
+                                            onclick="window.location.href='/admin/products?page=<%= currentPage + 1 %><%= search ? '&search=' + encodeURIComponent(search) : '' %>'">
+                                                <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
+                            <% } else if (products && products.length > 0) { %>
+                                <div class="pagination-section">
+                                    <div class="pagination-info">
+                                        Showing <%= products.length %> product<%= products.length !== 1 ? 's' : '' %>
+                                        <% if (search && search.trim() !== '') { %>
+                                            for "<%= search %>"
+                                        <% } %>
+                                    </div>
+                                </div>
+                            <% } %>
                         </div>
                 </section>
             </main>
@@ -161,8 +190,68 @@
         menuToggle.addEventListener('click', () => {
             sidebar.classList.toggle('sidebar-open');
         });
-        document.getElementById('addproduct').addEventListener('click', () => {
-            window.location.href = '/admin/addproduct'; 
+
+        // Search form handling
+        document.addEventListener("DOMContentLoaded", () => {
+            const searchForm = document.getElementById("searchForm");
+            const searchInput = document.getElementById("searchInput");
+
+            // Handle form submission
+            searchForm.addEventListener("submit", (e) => {
+                const searchValue = searchInput.value.trim();
+
+                // If search is empty, redirect to show all products
+                if (!searchValue) {
+                    e.preventDefault();
+                    window.location.href = "/admin/products";
+                    return;
+                }
+
+                // Validate search input (basic validation)
+                if (searchValue.length < 1) {
+                    e.preventDefault();
+                    alert('Please enter at least 1 character to search');
+                    return;
+                }
+
+                // Add loading state to search button
+                const searchBtn = searchForm.querySelector('.search-btn');
+                if (searchBtn) {
+                    searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
+                    searchBtn.disabled = true;
+                }
+
+                // Allow normal form submission for valid search
+                // The form will submit to GET /admin/products?search=searchValue
+            });
+
+            // Handle clear button functionality
+            const clearBtn = document.querySelector('.clear-btn');
+            if (clearBtn) {
+                clearBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+
+                    // Clear the search input
+                    searchInput.value = '';
+
+                    // Add visual feedback
+                    clearBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Clearing...';
+                    clearBtn.disabled = true;
+
+                    // Redirect to show all products
+                    setTimeout(() => {
+                        window.location.href = '/admin/products';
+                    }, 300);
+                });
+            }
+
+            // Handle Enter key in search input
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    searchForm.dispatchEvent(new Event('submit'));
+                }
+            });
         });
         function deleteproduct(productId) {
     Swal.fire({
@@ -209,6 +298,46 @@
                 );
             });
         }
+    });
+}
+
+// Block Product Confirmation
+function blockProduct(productId, productName) {
+    Swal.fire({
+        title: 'Are you sure you want to block this product?',
+        text: `Product: ${productName}`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: '✅ Yes, Block it',
+        cancelButtonText: '❌ Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Proceed with the block action
+            window.location.href = `/admin/blockedProduct?id=${productId}`;
+        }
+        // If canceled, do nothing (stay on the page)
+    });
+}
+
+// Unblock Product Confirmation
+function unblockProduct(productId, productName) {
+    Swal.fire({
+        title: 'Are you sure you want to unblock this product?',
+        text: `Product: ${productName}`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#28a745',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: '✅ Yes, Unblock it',
+        cancelButtonText: '❌ Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Proceed with the unblock action
+            window.location.href = `/admin/unblockedProduct?id=${productId}`;
+        }
+        // If canceled, do nothing (stay on the page)
     });
 }
     </script>

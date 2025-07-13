@@ -464,6 +464,66 @@ body {
     opacity: 0.6;
 }
 
+/* No Results Styling */
+.no-results-row {
+    background-color: #f8f9fa;
+}
+
+.no-results-cell {
+    padding: 60px 20px;
+    text-align: center;
+    border: none;
+}
+
+.no-results-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    color: #666;
+}
+
+.no-results-message i {
+    font-size: 48px;
+    color: #ccc;
+    margin-bottom: 10px;
+}
+
+.no-results-message h3 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.no-results-message p {
+    font-size: 16px;
+    color: #666;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.clear-search-btn {
+    background: linear-gradient(135deg, #4a90e2, #357abd);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 4px rgba(74, 144, 226, 0.3);
+}
+
+.clear-search-btn:hover {
+    background: linear-gradient(135deg, #357abd, #2968a3);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(74, 144, 226, 0.4);
+}
+
 /* Pagination Section */
 .pagination-section {
     display: flex;
@@ -666,6 +726,22 @@ body {
         width: 65px;
         height: 28px;
         font-size: 10px;
+    }
+
+    .no-results-cell {
+        padding: 40px 15px;
+    }
+
+    .no-results-message i {
+        font-size: 36px;
+    }
+
+    .no-results-message h3 {
+        font-size: 20px;
+    }
+
+    .no-results-message p {
+        font-size: 14px;
     }
     
     .customers-table {

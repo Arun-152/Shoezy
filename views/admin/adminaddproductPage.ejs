@@ -251,7 +251,10 @@
         document.querySelectorAll('.error').forEach(error => error.textContent = '');
 
         const productName = document.getElementById('productName').value.trim();
-        if (!productName || productName.length < 2 || productName.length > 100) {
+        if (!productName || productName.length === 0) {
+            document.getElementById('productNameError').textContent = 'Product name cannot be empty or only spaces.';
+            isValid = false;
+        } else if (productName.length < 2 || productName.length > 100) {
             document.getElementById('productNameError').textContent = 'Product name must be 2-100 characters';
             isValid = false;
         }
