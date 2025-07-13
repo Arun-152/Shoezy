@@ -54,8 +54,8 @@ const loadAddProductPage = async (req, res) => {
 
 const addProduct = async (req, res) => {
     try {
-       
-        const { productName, description, productOffer, color, category,variants } = req.body;
+
+        const { productName, description, productOffer, color, category, variants, status } = req.body;
 
         // Validation
         if (!productName || productName.length < 2 || productName.length > 100) {
@@ -99,6 +99,16 @@ const addProduct = async (req, res) => {
             return res.status(400).json({
                 success: false,
                 error: "Color must be letters, spaces, or commas (max 50 characters)",
+                formData: req.body,
+                cat: await Category.find({ isListed: true, isDeleted: false }),
+            });
+        }
+
+        // Status validation
+        if (!status || !["Available", "out of stock"].includes(status)) {
+            return res.status(400).json({
+                success: false,
+                error: "Please select a valid product status",
                 formData: req.body,
                 cat: await Category.find({ isListed: true, isDeleted: false }),
             });
@@ -199,7 +209,7 @@ const addProduct = async (req, res) => {
             isBlocked: false,
             ratings: { average: 0, count: 0 },
             isDeleted: false,
-            status: 'Available'
+            status: status
         });
         await newProduct.save();
         return res.status(200).json({
@@ -308,6 +318,12 @@ const editProducts = async (req, res) => {
         if (!data.color || !/^[A-Za-z, ]{1,50}$/.test(data.color.trim())) {
             return res.status(400).json({ success: false, error: "Invalid color format" });
         }
+
+        // Status validation
+        if (!data.status || !["Available", "out of stock"].includes(data.status)) {
+            return res.status(400).json({ success: false, error: "Please select a valid product status" });
+        }
+
         // Variant validation
         const variants = data.variants;
         if (!variants || !variants.size || !Array.isArray(variants.size) || variants.size.length === 0) {
@@ -370,7 +386,8 @@ const editProducts = async (req, res) => {
                 color: data.color.trim(),
                 category: categoryDoc._id,
                 variants: variantData,
-                images: imagePaths
+                images: imagePaths,
+                status: data.status
             },
             { new: true }
         );

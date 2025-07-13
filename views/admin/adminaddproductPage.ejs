@@ -35,6 +35,17 @@
                 <span class="error" id="productOfferError"></span>
             </div>
 
+            <!-- Product Status -->
+            <div class="form-group">
+                <label for="status">Product Status *</label>
+                <select id="status" name="status" required>
+                    <option value="" disabled selected>Select product status</option>
+                    <option value="Available">Available</option>
+                    <option value="out of stock">Out of Stock</option>
+                </select>
+                <span class="error" id="statusError"></span>
+            </div>
+
             <!-- Product Images -->
             <div class="form-group">
                 <label>Product Images * (Upload exactly 3 images)</label>
@@ -265,6 +276,12 @@
         const category = document.getElementById('category').value;
         if (!category) {
             document.getElementById('categoryError').textContent = 'Please select a category';
+            isValid = false;
+        }
+
+        const status = document.getElementById('status').value;
+        if (!status) {
+            document.getElementById('statusError').textContent = 'Please select a product status';
             isValid = false;
         }
 

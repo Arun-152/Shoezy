@@ -133,18 +133,27 @@
             productsToShow.forEach(product => {
                 const productCard = document.createElement('div');
                 productCard.className = 'product-card';
-                
+
+                // Status badge logic - Always show availability status
+                let statusBadge = '';
+                if (product.status === 'out of stock' || product.quantity <= 0) {
+                    statusBadge = `<div class="status-badge out-of-stock"><span class="status-icon">❌</span> Out of Stock</div>`;
+                } else {
+                    statusBadge = `<div class="status-badge available"><span class="status-icon">✅</span> Available</div>`;
+                }
+
                 // Handle pricing display - show only one price
                 let priceHTML = `<p class="price">₹${product.salePrice || product.price}</p>`;
 
                 productCard.innerHTML = `
-                    <div class="product-image" onclick="window.location.href='/product/${product.id}'" style="cursor: pointer;">
+                    <div class="product-image" style="cursor: pointer;">
                         <img src="${product.image}" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300&h=200&fit=crop'">
+                        ${statusBadge}
                         <div class="product-overlay">
-                            <button class="quick-view" onclick="event.stopPropagation(); quickView('${product.id}')">View Details</button>
+                            <button class="quick-view" data-id="${product.id}">View Details</button>
                         </div>
                     </div>
-                    <div class="product-info" onclick="window.location.href='/product/${product.id}'" style="cursor: pointer;">
+                    <div class="product-info" style="cursor: pointer;">
                         <h3>${product.name}</h3>
                         <p class="category">${product.categoryName}</p>
                         <div class="rating">
@@ -153,12 +162,25 @@
                         </div>
                         ${priceHTML}
                         <div class="product-actions">
-                            <button class="add-to-cart" onclick="event.stopPropagation(); addToCart('${product.id}')" ${product.quantity <= 0 ? 'disabled' : ''}>
-                                ${product.quantity <= 0 ? 'Out of Stock' : 'Add to Cart'}
+                            <button class="add-to-cart" data-id="${product.id}" ${product.status === 'out of stock' || product.quantity <= 0 ? 'disabled' : ''}>
+                                ${product.status === 'out of stock' || product.quantity <= 0 ? 'Out of Stock' : 'Add to Cart'}
                             </button>
                         </div>
                     </div>
                 `;
+                // Card click navigates to product page
+                productCard.querySelector('.product-image').onclick = () => window.location.href = `/product/${product.id}`;
+                productCard.querySelector('.product-info').onclick = () => window.location.href = `/product/${product.id}`;
+                // Quick view button
+                productCard.querySelector('.quick-view').onclick = (e) => {
+                    e.stopPropagation();
+                    quickView(product.id);
+                };
+                // Add to cart button
+                productCard.querySelector('.add-to-cart').onclick = (e) => {
+                    e.stopPropagation();
+                    addToCart(product.id);
+                };
                 grid.appendChild(productCard);
             });
         }
@@ -222,7 +244,8 @@
 
         // Update cart count
         function updateCartCount() {
-            document.querySelector('.cart-count').textContent = cart.length;
+            const cartCountElem = document.querySelector('.cart-count');
+            if (cartCountElem) cartCountElem.textContent = cart.length;
         }
 
         // Quick view - Navigate to product detail page
@@ -245,6 +268,8 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             displayProducts();
+            // Optionally initialize cart count if element exists
+            updateCartCount();
         });
     </script>
 </body>

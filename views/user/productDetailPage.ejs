@@ -26,6 +26,45 @@
             padding: 0 20px;
         }
 
+        /* Product Status Badge Styles */
+        .product-status {
+            margin: 1rem 0;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .status-badge.available {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-badge.out-of-stock {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .status-badge .status-icon {
+            font-size: 16px;
+            line-height: 1;
+        }
+
+        .status-badge:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
         /* Remove conflicting header styles - let header partial handle it */
         /* Breadcrumb */
         .breadcrumb {
@@ -620,7 +659,22 @@
                 <div class="product-info">
                     <h1 class="product-title"><%= product.productName %></h1>
                     <p class="product-category"><%= product.category ? product.category.name : 'Uncategorized' %></p>
-                    
+
+                    <!-- Product Status Badge -->
+                    <div class="product-status">
+                        <% if (product.status === 'Available') { %>
+                            <span class="status-badge available">
+                                <span class="status-icon">✅</span>
+                                Available
+                            </span>
+                        <% } else { %>
+                            <span class="status-badge out-of-stock">
+                                <span class="status-icon">❌</span>
+                                Out of Stock
+                            </span>
+                        <% } %>
+                    </div>
+
                     <div class="product-rating">
                         <div class="stars">
                             <% const rating = product.ratings && product.ratings.average ? product.ratings.average : 4.5; %>
@@ -709,10 +763,17 @@
                     </div>
 
                     <div class="product-actions">
-                        <button class="btn btn-primary" id="addToCartBtn" onclick="addToCart()">
-                            <i class="fas fa-shopping-cart"></i>
-                            Add to Cart
-                        </button>
+                        <% if (product.status === 'out of stock') { %>
+                            <button class="btn btn-primary" id="addToCartBtn" disabled style="background-color: #ccc; cursor: not-allowed;">
+                                <i class="fas fa-ban"></i>
+                                Out of Stock
+                            </button>
+                        <% } else { %>
+                            <button class="btn btn-primary" id="addToCartBtn" onclick="addToCart()">
+                                <i class="fas fa-shopping-cart"></i>
+                                Add to Cart
+                            </button>
+                        <% } %>
                         <button class="btn btn-secondary" onclick="addToWishlist()">
                             <i class="fas fa-heart"></i>
                             Wishlist
@@ -886,11 +947,18 @@
         }
 
         function addToCart() {
+            // Check if product is out of stock
+            const productStatus = '<%= product.status %>';
+            if (productStatus === 'out of stock') {
+                alert('This product is currently out of stock');
+                return;
+            }
+
             if (!selectedSize) {
                 alert('Please select a size first');
                 return;
             }
-            
+
             if (availableStock <= 0) {
                 alert('This size is out of stock');
                 return;

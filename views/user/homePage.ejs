@@ -61,6 +61,18 @@
                                 <% } else { %>
                                     <img src="https://via.placeholder.com/250x200/ffffff/cccccc?text=Shoe" alt="<%= product.productName %>">
                                 <% } %>
+
+                                <!-- Product Status Badge -->
+                                <% if (product.status === 'Available') { %>
+                                    <div class="status-badge available">
+                                        <span class="status-icon">✅</span> Available
+                                    </div>
+                                <% } else { %>
+                                    <div class="status-badge out-of-stock">
+                                        <span class="status-icon">❌</span> Out of Stock
+                                    </div>
+                                <% } %>
+
                                 <div class="product-overlay">
                                     <button class="view-details-btn" onclick="event.stopPropagation(); <%= typeof user !== 'undefined' && user ? `window.location.href='/product/${product._id}'` : 'redirectToLogin()' %>">
                                         View Details
@@ -100,9 +112,15 @@
                                     <p class="brand"><%= product.brand %></p>
                                 <% } %>
                                 <div class="product-actions">
-                                    <button class="quick-add-btn" onclick="event.stopPropagation(); <%= typeof user !== 'undefined' && user ? `quickAddToCart('${product._id}')` : 'redirectToLogin()' %>">
-                                        Quick Add
-                                    </button>
+                                    <% if (product.status === 'out of stock') { %>
+                                        <button class="quick-add-btn disabled" disabled style="background-color: #ccc; cursor: not-allowed; color: #666;">
+                                            Out of Stock
+                                        </button>
+                                    <% } else { %>
+                                        <button class="quick-add-btn" onclick="event.stopPropagation(); <%= typeof user !== 'undefined' && user ? `quickAddToCart('${product._id}')` : 'redirectToLogin()' %>">
+                                            Quick Add
+                                        </button>
+                                    <% } %>
                                 </div>
                             </div>
                         </div>
@@ -219,8 +237,18 @@
     <script>
         // Quick add to cart functionality
         function quickAddToCart(productId) {
+            // Find the product to check its status
+            const productCard = event.target.closest('.product-card');
+            const statusBadge = productCard.querySelector('.status-badge');
+
+            // Check if product is out of stock
+            if (statusBadge && statusBadge.classList.contains('out-of-stock')) {
+                showNotification('This product is currently out of stock!');
+                return;
+            }
+
             // Here you would typically send an AJAX request to add the product to cart
-            // Show notification
+            // For now, just show a success notification
             showNotification('Product added to cart!');
         }
 

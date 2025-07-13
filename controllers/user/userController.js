@@ -297,9 +297,7 @@ const resendOTP = async (req, res) => {
             code: newOTP,
             expiresAt: Date.now() + 5 * 60 * 1000,
         };
-
-        // Keep OTP log for testing: Resent Signup OTP
-        console.log("Resent Signup OTP:", newOTP);
+        console.log("Resend Signup OTP:", newOTP);
         res.json({ success: true, message: "New OTP has been sent to your email address" });
     } catch (error) {
         console.error("Resend OTP error:", error);
@@ -598,12 +596,9 @@ async function sendPasswordResetOTP(email, otp) {
             console.error("Email configuration validation failed:", validation.message);
             throw new Error(validation.message);
         }
-        console.log("✅ Email configuration validated successfully");
-
-        console.log("🔧 Creating email transporter...");
         const transporter = createEmailTransporter();
         if (!transporter) {
-            console.error("❌ Failed to create email transporter");
+            console.error("Failed to create email transporter");
             throw new Error("Failed to create email transporter");
         }
    
@@ -627,19 +622,10 @@ async function sendPasswordResetOTP(email, otp) {
                 </div>
             `,
         };
-
-        console.log("📤 Sending password reset email to:", email);
         const result = await sendEmail(transporter, mailOptions);
-
-        if (result.success) {
-            console.log("✅ Password reset email sent successfully, Message ID:", result.messageId);
-        } else {
-            console.log("❌ Failed to send password reset email");
-        }
-
         return result.success;
     } catch (error) {
-        console.error("❌ Error sending password reset OTP:", error.message);
+        console.error("Error sending password reset OTP:", error.message);
         throw error;
     }
 }
@@ -698,13 +684,7 @@ const postForgotPassword = async (req, res) => {
                                   process.env.NODEMAILER_PASSWORD.trim() !== '';
 
         if (!isEmailConfigured) {
-            console.log("📧 EMAIL CONFIGURATION ISSUE:");
-            console.log("- NODEMAILER_EMAIL:", process.env.NODEMAILER_EMAIL ? "Set" : "Not set");
-            console.log("- NODEMAILER_PASSWORD:", process.env.NODEMAILER_PASSWORD ? "Set" : "Not set");
-            console.log("- Running in TESTING MODE - OTP will be logged to console");
-            console.log("- Password Reset OTP for testing:", otp);
-
-            res.json({
+            return res.json({
                 success: true,
                 message: "OTP generated successfully. Check console for OTP (Testing Mode)",
                 redirect: "/verify-reset-otp"
@@ -713,23 +693,18 @@ const postForgotPassword = async (req, res) => {
         }
 
         try {
-            console.log("📧 Attempting to send password reset OTP to:", email);
             const emailSent = await sendPasswordResetOTP(email, otp);
 
             if (!emailSent) {
-                console.log("❌ Email sending failed. OTP for testing:", otp);
                 return res.status(500).json({
                     success: false,
                     message: "Failed to send OTP email. Please try again later. (For testing, check console for OTP)"
                 });
             }
-
-            console.log("✅ Password Reset OTP sent successfully to:", email);
-            console.log("📝 Password Reset OTP for reference:", otp);
+            console.log("forgott password otp :", otp);
             res.json({ success: true, message: "OTP has been sent to your email address", redirect: "/verify-reset-otp" });
         } catch (emailError) {
-            console.error("❌ Email sending error:", emailError.message);
-            console.log("📝 OTP for testing (email failed):", otp);
+            console.error("Email sending error:", emailError.message)
 
             // Provide more specific error messages
             let errorMessage = "Failed to send OTP email. Please try again later.";
@@ -846,21 +821,15 @@ const resendResetOTP = async (req, res) => {
         try {
             const emailSent = await sendPasswordResetOTP(sessionOTP.email, newOtp);
             if (!emailSent) {
-                // Keep OTP log for testing when email fails
-                console.log("Email sending failed. Resent OTP for testing:", newOtp);
                 return res.status(500).json({
                     success: false,
                     message: "Failed to send OTP email. Please try again later. (For testing, check console for OTP)"
                 });
             }
-
-            // Keep OTP log for testing
-            console.log("Resent Password Reset OTP:", newOtp);
+            console.log("Resend Password OTP:", newOtp);
             res.json({ success: true, message: "New OTP has been sent to your email address" });
         } catch (emailError) {
             console.error("Email sending error:", emailError);
-            // Keep OTP log for testing when email fails
-            console.log("Resent OTP for testing:", newOtp);
             return res.status(500).json({
                 success: false,
                 message: "Failed to send OTP email due to email service error. Please try again later. (For testing, check console for OTP)"

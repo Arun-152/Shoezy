@@ -82,6 +82,16 @@
       </div>
 
       <div class="form-group">
+        <label for="status">Product Status *</label>
+        <select id="status" name="status" required>
+          <option value="" disabled>Select product status</option>
+          <option value="Available" <%= products.status === 'Available' ? 'selected' : '' %>>Available</option>
+          <option value="out of stock" <%= products.status === 'out of stock' ? 'selected' : '' %>>Out of Stock</option>
+        </select>
+        <span class="error" id="statusError"></span>
+      </div>
+
+      <div class="form-group">
         <label>Product Images * (Upload exactly 3 images)</label>
         <p class="image-note">Upload high-quality images of your product</p>
         <div class="image-upload">
