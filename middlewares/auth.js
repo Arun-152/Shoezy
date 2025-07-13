@@ -11,7 +11,6 @@ const userAuth=(req,res,next)=>{
                 res.render("loginPage")
             }
         }).catch(error=>{
-            console.log(error)
             res.status(500).send("server error")
         })
     }else{

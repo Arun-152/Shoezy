@@ -54,7 +54,7 @@
             <div class="products-grid">
                 <% if (products && products.length > 0) { %>
                     <% products.forEach(product => { %>
-                        <div class="product-card" onclick="window.location.href='/product/<%= product._id %>'" style="cursor: pointer;">
+                        <div class="product-card" onclick="<%= typeof user !== 'undefined' && user ? `window.location.href='/product/${product._id}'` : 'redirectToLogin()' %>" style="cursor: pointer;">
                             <div class="product-image">
                                 <% if (product.images && product.images.length > 0) { %>
                                     <img src="<%= product.images[0] %>" alt="<%= product.productName %>">
@@ -62,7 +62,7 @@
                                     <img src="https://via.placeholder.com/250x200/ffffff/cccccc?text=Shoe" alt="<%= product.productName %>">
                                 <% } %>
                                 <div class="product-overlay">
-                                    <button class="view-details-btn" onclick="event.stopPropagation(); window.location.href='/product/<%= product._id %>'">
+                                    <button class="view-details-btn" onclick="event.stopPropagation(); <%= typeof user !== 'undefined' && user ? `window.location.href='/product/${product._id}'` : 'redirectToLogin()' %>">
                                         View Details
                                     </button>
                                 </div>
@@ -100,7 +100,7 @@
                                     <p class="brand"><%= product.brand %></p>
                                 <% } %>
                                 <div class="product-actions">
-                                    <button class="quick-add-btn" onclick="event.stopPropagation(); quickAddToCart('<%= product._id %>')">
+                                    <button class="quick-add-btn" onclick="event.stopPropagation(); <%= typeof user !== 'undefined' && user ? `quickAddToCart('${product._id}')` : 'redirectToLogin()' %>">
                                         Quick Add
                                     </button>
                                 </div>
@@ -220,8 +220,6 @@
         // Quick add to cart functionality
         function quickAddToCart(productId) {
             // Here you would typically send an AJAX request to add the product to cart
-            console.log('Quick adding product to cart:', productId);
-            
             // Show notification
             showNotification('Product added to cart!');
         }
@@ -241,12 +239,23 @@
             }, 2700);
         }
 
+        // Redirect to login page for non-authenticated users
+        function redirectToLogin() {
+            alert('Please login to access this feature');
+            window.location.href = '/login';
+            return false;
+        }
+
         // Shop Now button functionality
         document.addEventListener('DOMContentLoaded', function() {
             const shopBtn = document.querySelector('.shop-btn');
             if (shopBtn) {
                 shopBtn.addEventListener('click', function() {
-                    window.location.href = '/shop';
+                    <% if (typeof user !== 'undefined' && user) { %>
+                        window.location.href = '/shop';
+                    <% } else { %>
+                        redirectToLogin();
+                    <% } %>
                 });
             }
         });

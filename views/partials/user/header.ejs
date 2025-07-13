@@ -15,64 +15,37 @@
             </div>
             <ul class="nav-links">
                 <li><a href="/home">Home</a></li>
-                <li><a href="/shop">Shop</a></li>
-                <li><a href="/order">Orders</a></li>
-                <li><a href="/contact">Contact</a></li>
+                <li><a href="<%= typeof user !== 'undefined' && user ? '/shop' : '#' %>" onclick="<%= typeof user !== 'undefined' && user ? '' : 'redirectToLogin()' %>">Shop</a></li>
+                <li><a href="<%= typeof user !== 'undefined' && user ? '/order' : '#' %>" onclick="<%= typeof user !== 'undefined' && user ? '' : 'redirectToLogin()' %>">Orders</a></li>
+
+                <!-- Show Login link only when user is not logged in -->
+                <% if (typeof user === 'undefined' || !user) { %>
+                    <li><a href="/login" class="login-link">Login</a></li>
+                <% } %>
             </ul>
             <div class="nav-icons">
-                <!-- Wishlist Icon -->
-                <span class="nav-icon wishlist-icon" title="Wishlist">
-                    <a href="/wishlist" style="color: inherit; text-decoration: none;">
-                        <i class="fas fa-heart"></i>
-                        <span class="icon-badge" id="wishlist-count">0</span>
-                    </a>
-                </span>
-                
-                <!-- Cart Icon -->
-                <span class="nav-icon cart-icon" title="Shopping Cart">
-                    <a href="/cart" style="color: inherit; text-decoration: none;">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span class="icon-badge" id="cart-count">0</span>
-                    </a>
-                </span>
-                
-                <!-- User Profile Dropdown -->
+                <!-- Show Wishlist, Cart, and Profile only when user is logged in -->
                 <% if (typeof user !== 'undefined' && user) { %>
-                    <div class="nav-icon profile-dropdown">
-                        <span class="profile-trigger" title="Account">
+                    <!-- Wishlist Icon -->
+                    <span class="nav-icon wishlist-icon" title="Wishlist">
+                        <a href="/wishlist" style="color: inherit; text-decoration: none;">
+                            <i class="fas fa-heart"></i>
+                            <span class="icon-badge" id="wishlist-count">0</span>
+                        </a>
+                    </span>
+
+                    <!-- Cart Icon -->
+                    <span class="nav-icon cart-icon" title="Shopping Cart">
+                        <a href="/cart" style="color: inherit; text-decoration: none;">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="icon-badge" id="cart-count">0</span>
+                        </a>
+                    </span>
+
+                    <!-- User Profile Icon -->
+                    <span class="nav-icon profile-icon" title="Profile">
+                        <a href="/profile" style="color: inherit; text-decoration: none;">
                             <i class="fas fa-user"></i>
-                            <span class="user-name"><%= user.fullname %></span>
-                            <i class="fas fa-chevron-down dropdown-arrow"></i>
-                        </span>
-                        <div class="dropdown-menu">
-                            <a href="/profile" class="dropdown-item">
-                                <i class="fas fa-user-circle"></i>
-                                My Profile
-                            </a>
-                            <a href="/orders" class="dropdown-item">
-                                <i class="fas fa-box"></i>
-                                My Orders
-                            </a>
-                            <a href="/wishlist" class="dropdown-item">
-                                <i class="fas fa-heart"></i>
-                                Wishlist
-                            </a>
-                            <a href="/addresses" class="dropdown-item">
-                                <i class="fas fa-map-marker-alt"></i>
-                                Addresses
-                            </a>
-                            <div class="dropdown-divider"></div>
-                            <a href="/logout" class="dropdown-item logout-item">
-                                <i class="fas fa-sign-out-alt"></i>
-                                Logout
-                            </a>
-                        </div>
-                    </div>
-                <% } else { %>
-                    <!-- Guest User Icons -->
-                    <span class="nav-icon login-icon" title="Login">
-                        <a href="/login" style="color: inherit; text-decoration: none;">
-                            <i class="fas fa-sign-in-alt"></i>
                         </a>
                     </span>
                 <% } %>
@@ -227,6 +200,372 @@
         .logo a:hover {
             color: #2563eb !important;
         }
+
+        /* Login Link Styles */
+        .login-link {
+            background: linear-gradient(135deg, #2563eb, #3b82f6) !important;
+            color: white !important;
+            padding: 8px 16px !important;
+            border-radius: 20px !important;
+            font-weight: 600 !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .login-link:hover {
+            background: linear-gradient(135deg, #1d4ed8, #2563eb) !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
+        }
+
+        /* Disabled link styles for non-authenticated users */
+        .nav-links a[href="#"] {
+            color: #9ca3af !important;
+            cursor: not-allowed !important;
+        }
+
+        .nav-links a[href="#"]:hover {
+            color: #6b7280 !important;
+        }
+
+        /* Ensure nav-icons are always visible and properly styled */
+        .nav-icons {
+            display: flex !important;
+            align-items: center !important;
+            gap: 1rem !important;
+            font-size: 1.2rem !important;
+            z-index: 1001 !important;
+        }
+
+        .nav-icon {
+            position: relative !important;
+            cursor: pointer !important;
+            padding: 0.5rem !important;
+            border-radius: 50% !important;
+            transition: background-color 0.3s ease !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        .nav-icon:hover {
+            background-color: rgba(255, 255, 255, 0.1) !important;
+        }
+
+        .nav-icon a {
+            color: inherit !important;
+            text-decoration: none !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        /* Override any page-specific styles that might hide nav-icons */
+        .header .nav-icons,
+        .navbar .nav-icons {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
+        .header .nav-icon,
+        .navbar .nav-icon {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
+        /* Ensure navbar structure is consistent across all pages */
+        .navbar {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            padding: 1rem 2rem !important;
+            max-width: 1200px !important;
+            margin: 0 auto !important;
+        }
+
+        .nav-links {
+            display: flex !important;
+            list-style: none !important;
+            gap: 2rem !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .nav-links li {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .nav-links a {
+            text-decoration: none !important;
+            color: #333 !important;
+            font-weight: 500 !important;
+            transition: color 0.3s ease !important;
+            padding: 0.5rem 0 !important;
+        }
+
+        .nav-links a:hover {
+            color: #2563eb !important;
+        }
+
+        /* Ensure header background and positioning */
+        .header {
+            background: #fff !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+            position: fixed !important;
+            width: 100% !important;
+            top: 0 !important;
+            z-index: 1000 !important;
+            padding: 0 !important;
+        }
+
+        /* Override shop page specific header styles */
+        body .header {
+            background: #fff !important;
+            color: #333 !important;
+            padding: 0 !important;
+        }
+
+        body .header .container {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            padding: 1rem 2rem !important;
+            max-width: 1200px !important;
+            margin: 0 auto !important;
+        }
+
+        /* Fix logo styling on shop page */
+        body .header .logo h1 {
+            color: #2563eb !important;
+            font-size: 1.8rem !important;
+            font-weight: bold !important;
+        }
+
+        /* Override shop page nav styles */
+        body .header .nav ul,
+        body .header .nav-links {
+            display: flex !important;
+            list-style: none !important;
+            gap: 2rem !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        body .header .nav a,
+        body .header .nav-links a {
+            color: #333 !important;
+            text-decoration: none !important;
+            font-weight: 500 !important;
+            transition: color 0.3s ease !important;
+            opacity: 1 !important;
+        }
+
+        body .header .nav a:hover,
+        body .header .nav-links a:hover {
+            color: #2563eb !important;
+            opacity: 1 !important;
+        }
+
+        /* Ensure nav-icons are visible on shop page */
+        body .header .nav-icons {
+            display: flex !important;
+            align-items: center !important;
+            gap: 1rem !important;
+            font-size: 1.2rem !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
+        body .header .nav-icon {
+            position: relative !important;
+            cursor: pointer !important;
+            padding: 0.5rem !important;
+            border-radius: 50% !important;
+            transition: background-color 0.3s ease !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            color: #333 !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
+        body .header .nav-icon:hover {
+            background-color: #f3f4f6 !important;
+        }
+
+        body .header .nav-icon a {
+            color: #333 !important;
+            text-decoration: none !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        body .header .nav-icon i {
+            color: #333 !important;
+        }
+
+        /* Override any cart styles from shop page */
+        body .header .cart,
+        body .header .cart-icon,
+        body .header .cart-count {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
+        /* Ensure consistent navbar height across all pages */
+        body .header {
+            height: auto !important;
+            min-height: 70px !important;
+        }
+
+        body .header .navbar {
+            height: auto !important;
+            min-height: 70px !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+
+        /* Ensure consistent font sizes */
+        body .header .nav-links a {
+            font-size: 16px !important;
+            font-weight: 500 !important;
+        }
+
+        body .header .logo h1 {
+            font-size: 1.8rem !important;
+        }
+
+        body .header .nav-icon {
+            font-size: 1.2rem !important;
+        }
+
+        /* Badge styling consistency */
+        body .header .icon-badge {
+            position: absolute !important;
+            top: -8px !important;
+            right: -8px !important;
+            background: #dc3545 !important;
+            color: white !important;
+            border-radius: 50% !important;
+            width: 18px !important;
+            height: 18px !important;
+            font-size: 10px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-weight: bold !important;
+        }
+
+        /* Login button styling consistency */
+        body .header .login-link {
+            background: linear-gradient(135deg, #2563eb, #3b82f6) !important;
+            color: white !important;
+            padding: 8px 16px !important;
+            border-radius: 20px !important;
+            font-weight: 600 !important;
+            transition: all 0.3s ease !important;
+        }
+
+        body .header .login-link:hover {
+            background: linear-gradient(135deg, #1d4ed8, #2563eb) !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
+        }
+
+        /* Additional overrides for Product Details and Orders pages */
+        body .header .nav {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            padding: 1rem 2rem !important;
+            max-width: 1200px !important;
+            margin: 0 auto !important;
+        }
+
+        /* Override any sticky positioning that might affect layout */
+        body .header {
+            position: fixed !important;
+            top: 0 !important;
+            z-index: 1000 !important;
+        }
+
+        /* Ensure logo consistency across all pages */
+        body .header .logo {
+            font-size: 1.8rem !important;
+            font-weight: 700 !important;
+            color: #2563eb !important;
+        }
+
+        /* Override any conflicting nav-links styles */
+        body .header .nav-links,
+        body .header .nav ul {
+            display: flex !important;
+            list-style: none !important;
+            gap: 2rem !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            align-items: center !important;
+        }
+
+        body .header .nav-links li,
+        body .header .nav ul li {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        /* Ensure all nav links have consistent styling */
+        body .header .nav-links a,
+        body .header .nav ul a,
+        body .header .nav a {
+            color: #333 !important;
+            text-decoration: none !important;
+            font-weight: 500 !important;
+            font-size: 16px !important;
+            transition: color 0.3s ease !important;
+            padding: 0.5rem 0 !important;
+            opacity: 1 !important;
+        }
+
+        body .header .nav-links a:hover,
+        body .header .nav ul a:hover,
+        body .header .nav a:hover {
+            color: #2563eb !important;
+            opacity: 1 !important;
+        }
+
+        /* Force nav-icons visibility on all pages */
+        body .header .nav-icons,
+        body .header .user-actions,
+        body .header .actions {
+            display: flex !important;
+            align-items: center !important;
+            gap: 1rem !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
+        /* Responsive design consistency */
+        @media (max-width: 768px) {
+            body .header .nav-links,
+            body .header .nav ul {
+                gap: 1rem !important;
+            }
+
+            body .header .navbar,
+            body .header .nav {
+                padding: 1rem !important;
+            }
+
+            body .header .logo h1,
+            body .header .logo {
+                font-size: 1.5rem !important;
+            }
+        }
     </style>
 
     <!-- JavaScript for Enhanced Functionality -->
@@ -235,7 +574,7 @@
             // Update cart and wishlist counts (you can implement AJAX calls here)
             updateCartCount();
             updateWishlistCount();
-            
+
             // Close dropdown when clicking outside
             document.addEventListener('click', function(event) {
                 const dropdown = document.querySelector('.profile-dropdown');
@@ -244,6 +583,13 @@
                 }
             });
         });
+
+        // Redirect to login page for non-authenticated users
+        function redirectToLogin() {
+            alert('Please login to access this page');
+            window.location.href = '/login';
+            return false;
+        }
 
         function updateCartCount() {
             // Implement AJAX call to get cart count

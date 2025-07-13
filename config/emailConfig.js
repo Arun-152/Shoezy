@@ -1,7 +1,7 @@
 const nodemailer = require("nodemailer");
 require("dotenv").config();
 
-// Email configuration validation
+// Email validation
 function validateEmailConfig() {
     const email = process.env.NODEMAILER_EMAIL;
     const password = process.env.NODEMAILER_PASSWORD;
@@ -54,7 +54,7 @@ function createEmailTransporter() {
     }
     
     try {
-        const transporter = nodemailer.createTransporter({
+        const transporter = nodemailer.createTransport({
             service: "gmail",
             port: 587,
             secure: false,
@@ -64,8 +64,7 @@ function createEmailTransporter() {
                 pass: process.env.NODEMAILER_PASSWORD,
             },
         });
-        
-        console.log(" Email transporter created successfully");
+
         return transporter;
     } catch (error) {
         console.error(" Error creating email transporter:", error.message);
@@ -78,19 +77,24 @@ async function sendEmail(transporter, mailOptions) {
     if (!transporter) {
         throw new Error("Email transporter not configured");
     }
-    
+
     try {
         const info = await transporter.sendMail(mailOptions);
-        console.log(" Email sent successfully:", info.messageId);
         return { success: true, messageId: info.messageId };
     } catch (error) {
-        console.error(" Error sending email:", error.message);
-        
+        console.error("Error sending email:", error.message);
+        console.error("Error code:", error.code);
+        console.error("Error details:", error);
+
         // Provide specific error messages
         if (error.code === 'EAUTH') {
             throw new Error("Gmail authentication failed. Please check your email and app password.");
         } else if (error.code === 'ENOTFOUND') {
             throw new Error("Network error. Please check your internet connection.");
+        } else if (error.code === 'ETIMEDOUT') {
+            throw new Error("Email sending timed out. Please try again.");
+        } else if (error.code === 'ECONNECTION') {
+            throw new Error("Connection error. Please check your internet connection.");
         } else {
             throw new Error(`Email sending failed: ${error.message}`);
         }

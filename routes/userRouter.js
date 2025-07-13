@@ -10,14 +10,15 @@ router.post("/signup", userController.postSignup);
 router.get("/otpverification", userController.otpverification);
 router.post("/verify-otp", userController.verifyOTP);
 router.post("/login", userController.postlogin);
-router.get("/home", userAuth, userController.homePage);
+router.get("/home", userController.homePage);
 router.get("/logout", userController.logout);
 router.get("/shop", userController.shopPage);
 router.get("/product/:id", userController.productDetailPage);
 router.post("/resendotp", userController.resendOTP);
 router.get("/profile", userAuth, userController.showuser);
-router.get("/contact", userController.contactPage);
-router.get("/order", userAuth, userController.orderPage);
+// Contact page route removed as Contact link was removed from navbar
+// router.get("/contact", userController.contactPage);
+router.get("/order", userController.orderPage);
 router.get("/usererrorPage", userController.usererrorPage);
 
 // Forgot Password Routes

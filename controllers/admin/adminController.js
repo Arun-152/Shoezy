@@ -15,12 +15,15 @@ const adminerrorPage = (req, res) => {
 
 const adminloginpage = async (req, res) => {
   try {
-    const { email = "", password = "" } = req.query;
     if (req.session.adminId) {
-      console.log("Admin already logged in, redirecting to dashboard");
       return res.redirect("/admin/dashboard");
     }
-    res.render("adminloginPage", { email, password, title: "Admin Login" });
+    // Always render with clean form - no pre-filled values
+    res.render("adminloginPage", {
+      email: "",
+      password: "",
+      title: "Admin Login"
+    });
   } catch (error) {
     console.error("Error rendering admin login page:", error.message);
     res.redirect("/admin/adminerrorPage");
@@ -30,19 +33,138 @@ const adminloginpage = async (req, res) => {
 const postLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const admin = await User.findOne({ email, isAdmin: true });
-    if (!admin) {
-      return res.redirect("/admin/login");
+
+    // Check if this is an AJAX request
+    const isAjax = req.headers['content-type'] === 'application/json' || req.headers['x-requested-with'] === 'XMLHttpRequest';
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email.trim())) {
+      if (isAjax) {
+        return res.status(400).json({
+          success: false,
+          message: "Please enter a valid email address.",
+          errorType: "email"
+        });
+      }
+      return res.render("adminloginPage", {
+        message: "Please enter a valid email address.",
+        messageType: "error",
+        email: "",
+        password: "",
+        title: "Admin Login"
+      });
     }
+
+    // Password validation
+    if (!password || password.trim().length === 0) {
+      if (isAjax) {
+        return res.status(400).json({
+          success: false,
+          message: "Please enter your password.",
+          errorType: "password"
+        });
+      }
+      return res.render("adminloginPage", {
+        message: "Please enter your password.",
+        messageType: "error",
+        email: "",
+        password: "",
+        title: "Admin Login"
+      });
+    }
+
+    // First check if any user exists with this email
+    const user = await User.findOne({ email: email.trim().toLowerCase() });
+
+    if (!user) {
+      if (isAjax) {
+        return res.status(400).json({
+          success: false,
+          message: "No admin account found with this email address.",
+          errorType: "email"
+        });
+      }
+      return res.render("adminloginPage", {
+        message: "No admin account found with this email address.",
+        messageType: "error",
+        errorType: "email",
+        email: "",
+        password: "",
+        title: "Admin Login"
+      });
+    }
+
+    // Check if the user has admin access
+    if (!user.isAdmin) {
+      if (isAjax) {
+        return res.status(400).json({
+          success: false,
+          message: "This email does not have admin access.",
+          errorType: "email"
+        });
+      }
+      return res.render("adminloginPage", {
+        message: "This email does not have admin access.",
+        messageType: "error",
+        errorType: "email",
+        email: "",
+        password: "",
+        title: "Admin Login"
+      });
+    }
+
+    const admin = user; // User is confirmed to be an admin
+
     const matchpass = await bcrypt.compare(password, admin.password);
+
     if (!matchpass) {
-      return res.redirect("/admin/login");
+      if (isAjax) {
+        return res.status(400).json({
+          success: false,
+          message: "Incorrect password. Please try again.",
+          errorType: "password"
+        });
+      }
+      return res.render("adminloginPage", {
+        message: "Incorrect password. Please try again.",
+        messageType: "error",
+        errorType: "password",
+        email: "",
+        password: "",
+        title: "Admin Login"
+      });
     }
+
     req.session.adminId = admin._id;
+
+    if (isAjax) {
+      return res.json({
+        success: true,
+        message: "Admin login successful!",
+        redirect: "/admin/dashboard"
+      });
+    }
     return res.redirect("/admin/dashboard");
   } catch (error) {
     console.error("Error during admin login:", error.message);
-    res.status(500).json({ error: "Failed to login" });
+
+    const isAjax = req.headers['content-type'] === 'application/json' || req.headers['x-requested-with'] === 'XMLHttpRequest';
+
+    if (isAjax) {
+      return res.status(500).json({
+        success: false,
+        message: "An error occurred during login. Please try again.",
+        errorType: "general"
+      });
+    }
+    return res.render("adminloginPage", {
+      message: "An error occurred during login. Please try again.",
+      messageType: "error",
+      email: "",
+      password: "",
+      title: "Admin Login"
+    });
   }
 };
 
@@ -152,7 +274,6 @@ const adminLogout = (req, res) => {
       console.error("Logout error:", err.message);
       return res.status(500).send("Logout failed");
     }
-    console.log("Admin logged out successfully");
     res.redirect("/admin/login");
   });
 };

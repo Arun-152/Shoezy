@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="referrer" content="no-referrer" />
   <title>Shoezy - Login</title>
   <link rel="stylesheet" href="/css/loginPage.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -22,24 +27,51 @@
           <p>Signup in to your account to continue</p>
         </div>
 
-        <form class="login-form" id="loginForm" action="/login" method="POST">
+        <form class="login-form" id="loginForm" action="/login" method="POST" autocomplete="off">
+          <!-- Email Field -->
           <div class="input-group">
             <div class="input-wrapper">
               <i class="fas fa-envelope input-icon"></i>
-              <input type="email" id="email" name="email" placeholder="Email" required />
+              <input type="email" id="email" name="email" placeholder="Email" autocomplete="off" autocapitalize="off" spellcheck="false" />
             </div>
+            <div class="error-message" id="email-error" style="display: none;">
+              <i class="fas fa-exclamation-circle error-icon"></i>
+              <span class="error-text">Email field cannot be empty.</span>
+            </div>
+            <% if (locals.message && message.length > 0 && locals.errorType === 'email') { %>
+              <div class="error-message server-error">
+                <i class="fas fa-exclamation-circle error-icon"></i>
+                <span class="error-text"><%= message %></span>
+              </div>
+            <% } %>
           </div>
 
+          <!-- Password Field -->
           <div class="input-group">
             <div class="input-wrapper">
               <i class="fas fa-lock input-icon"></i>
-              <input type="password" id="password" name="password" placeholder="Password" required />
+              <input type="password" id="password" name="password" placeholder="Password" autocomplete="off" autocapitalize="off" spellcheck="false" />
               <i class="fas fa-eye-slash toggle-password" id="togglePassword"></i>
             </div>
+            <div class="error-message" id="password-error" style="display: none;">
+              <i class="fas fa-exclamation-circle error-icon"></i>
+              <span class="error-text">Password field cannot be empty.</span>
+            </div>
+            <% if (locals.message && message.length > 0 && locals.errorType === 'password') { %>
+              <div class="error-message server-error">
+                <i class="fas fa-exclamation-circle error-icon"></i>
+                <span class="error-text"><%= message %></span>
+              </div>
+            <% } %>
           </div>
-          <%if(locals.message && message.length>0){%>
-          <div class="alert"><%=message%></div>
-          <%}%>
+
+          <!-- General Server Error -->
+          <% if (locals.message && message.length > 0 && !locals.errorType) { %>
+            <div class="error-message general-error">
+              <i class="fas fa-exclamation-circle error-icon"></i>
+              <span class="error-text"><%= message %></span>
+            </div>
+          <% } %>
 
           <div class="forgot-password">
             <a href="/forgot-password" class="forgot-link">Forgot password?</a>
@@ -81,66 +113,568 @@
     </div>
   </div>
 
+  <style>
+    /* Enhanced Error Message Styling */
+    .error-message {
+      display: flex;
+      align-items: center;
+      margin-top: 8px;
+      padding: 10px 12px;
+      background-color: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #dc2626;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #dc2626;
+      animation: slideInError 0.3s ease-out;
+    }
+
+    .error-message .error-icon {
+      margin-right: 8px;
+      font-size: 13px;
+    }
+
+    .error-message .error-text {
+      flex: 1;
+    }
+
+    /* Legacy alert styling for backward compatibility */
+    .alert {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .alert-error {
+      background-color: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+    }
+
+    .alert-success {
+      background-color: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #16a34a;
+    }
+
+    .alert-icon {
+      margin-right: 8px;
+      font-size: 16px;
+    }
+
+    .alert-text {
+      flex: 1;
+    }
+
+    /* Enhanced input validation styling */
+    .input-wrapper.error-state {
+      border-color: #dc2626 !important;
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
+    }
+
+    .input-wrapper.success {
+      border-color: #16a34a !important;
+      box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1) !important;
+    }
+
+    /* Real-time validation feedback */
+    .input-wrapper {
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    /* Loading button state */
+    .login-btn.loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    /* Animations */
+    @keyframes slideInError {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Input group spacing adjustment */
+    .input-group {
+      margin-bottom: 15px;
+    }
+
+    /* Server errors should be visible when present */
+    .server-error {
+      display: flex;
+      align-items: center;
+      margin-top: 8px;
+      padding: 10px 12px;
+      background-color: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #dc2626;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #dc2626;
+      animation: slideInError 0.3s ease-out;
+    }
+
+    .general-error {
+      display: flex;
+      align-items: center;
+      margin: 15px 0;
+      padding: 10px 12px;
+      background-color: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #dc2626;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #dc2626;
+      animation: slideInError 0.3s ease-out;
+    }
+
+    /* Dynamic server errors */
+    .server-error-email,
+    .server-error-password,
+    .general-error-dynamic {
+      display: flex;
+      align-items: center;
+      margin-top: 8px;
+      padding: 10px 12px;
+      background-color: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #dc2626;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #dc2626;
+      animation: slideInError 0.3s ease-out;
+    }
+
+    .general-error-dynamic {
+      margin: 15px 0;
+    }
+
+    /* Cache prevention */
+    input[type="email"], input[type="password"] {
+      background-color: white !important;
+    }
+  </style>
+
   <script>
-    // Toggle password visibility
-    const togglePassword = document.getElementById('togglePassword');
-    const passwordInput = document.getElementById('password');
-
-    togglePassword.addEventListener('click', function () {
-      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-      passwordInput.setAttribute('type', type);
-      this.classList.toggle('fa-eye');
-      this.classList.toggle('fa-eye-slash');
-    });
-
-    // Form validation before submission
+    // Get DOM elements
     const loginForm = document.getElementById('loginForm');
-    loginForm.addEventListener('submit', function (e) {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const togglePassword = document.getElementById('togglePassword');
 
-      if (!email || !password) {
-        e.preventDefault();
-        alert('Please fill in all fields');
-        return false;
+    // Simple form clearing function
+    function clearAllFormData(clearServerErrors = false) {
+      // Clear input values
+      if (emailInput) {
+        emailInput.value = '';
+        emailInput.defaultValue = '';
+        emailInput.setAttribute('value', '');
+      }
+      if (passwordInput) {
+        passwordInput.value = '';
+        passwordInput.defaultValue = '';
+        passwordInput.setAttribute('value', '');
       }
 
-      // Basic email validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        e.preventDefault();
-        alert('Please enter a valid email address');
-        return false;
+      // Hide frontend error messages
+      hideError('email-error');
+      hideError('password-error');
+
+      // Remove error states from input wrappers
+      const inputWrappers = document.querySelectorAll('.input-wrapper');
+      inputWrappers.forEach(wrapper => {
+        wrapper.classList.remove('error-state', 'success', 'focused');
+      });
+
+      // Only clear server errors if explicitly requested
+      if (clearServerErrors) {
+        const serverErrors = document.querySelectorAll('.server-error, .general-error');
+        serverErrors.forEach(error => {
+          error.style.display = 'none';
+          error.remove();
+        });
       }
 
-      // Password length validation
-      if (password.length < 6) {
-        e.preventDefault();
-        alert('Password must be at least 6 characters long');
-        return false;
+      // Reset form
+      if (loginForm) {
+        loginForm.reset();
       }
 
-      // If validation passes, form will submit normally
-      return true;
+      // Reset button state
+      const submitBtn = document.querySelector('.login-btn');
+      if (submitBtn) {
+        submitBtn.classList.remove('loading');
+        submitBtn.innerHTML = 'Login Now';
+      }
+    }
+
+    // Only clear errors on direct page access (not form submissions)
+   (function () {
+  const hasServerErrors = document.querySelector('.server-error, .general-error');
+
+  // Only remove if the element is truly empty (not real backend-rendered message)
+  if (!hasServerErrors) {
+    setTimeout(() => {
+      document.querySelectorAll('.server-error, .general-error').forEach(error => {
+        const text = error.textContent || error.innerText;
+        if (!text || text.trim() === '') {
+          error.remove();
+        }
+      });
+    }, 50);
+  }
+})();
+
+
+ window.addEventListener('pageshow', function(event) {
+  if (event.persisted || !document.referrer || !document.referrer.includes('/login')) {
+    clearAllFormData(false); // ✅ only clear form, not server errors
+  }
+});
+
+
+    // Clear form on fresh page load
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check if this is direct access (not from form submission)
+      if (!document.referrer || !document.referrer.includes('/login')) {
+        clearAllFormData(true);
+      }
     });
 
-    // Animations
+    // Real-time validation as user types
+    if (emailInput) {
+      emailInput.addEventListener('input', function() {
+        const emailValue = this.value.trim();
+        clearServerErrors(); // Clear server errors when user starts typing
+
+        if (emailValue) {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (emailRegex.test(emailValue)) {
+            hideError('email-error');
+            removeErrorState('email');
+          } else {
+            showError('email-error', 'Please enter a valid email address.');
+            addErrorState('email');
+          }
+        } else {
+          hideError('email-error');
+          removeErrorState('email');
+        }
+      });
+
+      emailInput.addEventListener('blur', function() {
+        const emailValue = this.value.trim();
+        if (!emailValue) {
+          showError('email-error', 'Email field cannot be empty.');
+          addErrorState('email');
+        }
+      });
+    }
+
+    if (passwordInput) {
+      passwordInput.addEventListener('input', function() {
+        const passwordValue = this.value.trim();
+        clearServerErrors(); // Clear server errors when user starts typing
+
+        if (passwordValue) {
+          hideError('password-error');
+          removeErrorState('password');
+        }
+      });
+
+      passwordInput.addEventListener('blur', function() {
+        const passwordValue = this.value.trim();
+        if (!passwordValue) {
+          showError('password-error', 'Password field cannot be empty.');
+          addErrorState('password');
+        }
+      });
+    }
+
+    // Password visibility toggle (preserve existing functionality)
+    if (togglePassword) {
+      togglePassword.addEventListener('click', function () {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        this.classList.toggle('fa-eye');
+        this.classList.toggle('fa-eye-slash');
+      });
+    }
+
+    // Dynamic form validation and submission
+    if (loginForm) {
+      loginForm.addEventListener('submit', async function (e) {
+        e.preventDefault(); // Always prevent default form submission
+
+        let isValid = true;
+
+        // Clear previous server errors
+        clearServerErrors();
+
+        // Email validation
+        const emailValue = emailInput.value.trim();
+        if (!emailValue) {
+          showError('email-error', 'Email field cannot be empty.');
+          addErrorState('email');
+          isValid = false;
+        } else {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(emailValue)) {
+            showError('email-error', 'Please enter a valid email address.');
+            addErrorState('email');
+            isValid = false;
+          } else {
+            hideError('email-error');
+            removeErrorState('email');
+          }
+        }
+
+        // Password validation
+        const passwordValue = passwordInput.value.trim();
+        if (!passwordValue) {
+          showError('password-error', 'Password field cannot be empty.');
+          addErrorState('password');
+          isValid = false;
+        } else {
+          hideError('password-error');
+          removeErrorState('password');
+        }
+
+        // If client-side validation fails, don't proceed
+        if (!isValid) {
+          return false;
+        }
+
+        // Show loading state
+        const submitBtn = this.querySelector('.login-btn');
+        if (submitBtn) {
+          submitBtn.classList.add('loading');
+          submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+          submitBtn.disabled = true;
+        }
+
+        try {
+          // Send AJAX request
+          const response = await fetch('/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+              email: emailValue,
+              password: passwordValue
+            })
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            // Success - redirect to home page
+            window.location.href = data.redirect || '/home';
+          } else {
+            // Show dynamic error based on errorType
+            if (data.errorType === 'email') {
+              showServerError('email', data.message);
+              addErrorState('email');
+            } else if (data.errorType === 'password') {
+              showServerError('password', data.message);
+              addErrorState('password');
+            } else {
+              showGeneralError(data.message);
+            }
+          }
+        } catch (error) {
+          console.error('Login error:', error);
+          showGeneralError('Network error. Please check your connection and try again.');
+        } finally {
+          // Reset button state
+          if (submitBtn) {
+            submitBtn.classList.remove('loading');
+            submitBtn.innerHTML = 'Login Now';
+            submitBtn.disabled = false;
+          }
+        }
+
+        return false;
+      });
+    }
+
+    // Helper functions for error handling
+    function showError(errorId, message = null) {
+      const errorElement = document.getElementById(errorId);
+      if (errorElement) {
+        if (message) {
+          const errorText = errorElement.querySelector('.error-text');
+          if (errorText) {
+            errorText.textContent = message;
+          }
+        }
+        errorElement.style.display = 'flex';
+      }
+    }
+
+    function hideError(errorId) {
+      const errorElement = document.getElementById(errorId);
+      if (errorElement) {
+        errorElement.style.display = 'none';
+      }
+    }
+
+    // Dynamic server error display functions
+    function showServerError(fieldType, message) {
+      // Remove any existing server errors for this field
+      const existingErrors = document.querySelectorAll(`.server-error-${fieldType}`);
+      existingErrors.forEach(error => error.remove());
+
+      // Create new server error element
+      const errorDiv = document.createElement('div');
+      errorDiv.className = `error-message server-error server-error-${fieldType}`;
+      errorDiv.innerHTML = `
+        <i class="fas fa-exclamation-circle error-icon"></i>
+        <span class="error-text">${message}</span>
+      `;
+
+      // Insert after the appropriate input wrapper
+      const inputGroup = fieldType === 'email' ?
+        document.querySelector('#email').closest('.input-group') :
+        document.querySelector('#password').closest('.input-group');
+
+      if (inputGroup) {
+        const inputWrapper = inputGroup.querySelector('.input-wrapper');
+        inputWrapper.insertAdjacentElement('afterend', errorDiv);
+      }
+    }
+
+    function showGeneralError(message) {
+      // Remove any existing general errors
+      const existingErrors = document.querySelectorAll('.general-error-dynamic');
+      existingErrors.forEach(error => error.remove());
+
+      // Create new general error element
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'error-message general-error general-error-dynamic';
+      errorDiv.innerHTML = `
+        <i class="fas fa-exclamation-circle error-icon"></i>
+        <span class="error-text">${message}</span>
+      `;
+
+      // Insert before the forgot password link
+      const forgotPassword = document.querySelector('.forgot-password');
+      if (forgotPassword) {
+        forgotPassword.insertAdjacentElement('beforebegin', errorDiv);
+      }
+    }
+
+    function clearServerErrors() {
+      // Clear all dynamic server errors
+      const serverErrors = document.querySelectorAll('.server-error-email, .server-error-password, .general-error-dynamic');
+      serverErrors.forEach(error => error.remove());
+    }
+
+    // Clear server errors when user starts typing in any field
+    function setupErrorClearingOnInput() {
+      const inputs = document.querySelectorAll('#email, #password');
+      inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+          // Clear server errors when user focuses on input
+          clearServerErrors();
+        });
+      });
+    }
+
+    // Initialize error clearing
+    setupErrorClearingOnInput();
+
+    function addErrorState(fieldId) {
+      const fieldInput = document.getElementById(fieldId);
+      if (fieldInput) {
+        const wrapper = fieldInput.parentElement;
+        wrapper.classList.add('error-state');
+        wrapper.classList.remove('success');
+      }
+    }
+
+    function removeErrorState(fieldId) {
+      const fieldInput = document.getElementById(fieldId);
+      if (fieldInput) {
+        const wrapper = fieldInput.parentElement;
+        wrapper.classList.remove('error-state');
+        wrapper.classList.add('success');
+      }
+    }
+
+    // Real-time input validation
+    [emailInput, passwordInput].forEach(input => {
+      if (input) {
+        // Focus effects (preserve existing functionality)
+        input.addEventListener('focus', function () {
+          this.parentElement.classList.add('focused');
+        });
+
+        input.addEventListener('blur', function () {
+          if (!this.value) {
+            this.parentElement.classList.remove('focused');
+          }
+        });
+
+        // Real-time validation
+        input.addEventListener('input', function () {
+          const fieldId = this.id;
+          const wrapper = this.parentElement;
+
+          // Hide frontend validation error
+          hideError(fieldId + '-error');
+
+          // Remove error state
+          wrapper.classList.remove('error-state');
+
+          // Add success state if field has content
+          if (this.value.trim()) {
+            wrapper.classList.add('success');
+          } else {
+            wrapper.classList.remove('success');
+          }
+
+          // Hide server error when user starts typing
+          const serverError = wrapper.parentElement.querySelector('.server-error');
+          if (serverError) {
+            serverError.style.display = 'none';
+          }
+        });
+      }
+    });
+
+    // Floating dots animation (preserve existing functionality)
     const floatingDots = document.querySelectorAll('.floating-dot');
     floatingDots.forEach((dot, index) => {
       dot.style.animationDelay = `${index * 0.5}s`;
-    });
-
-    // Input focus effects
-    const inputs = document.querySelectorAll('input');
-    inputs.forEach((input) => {
-      input.addEventListener('focus', function () {
-        this.parentElement.classList.add('focused');
-      });
-      input.addEventListener('blur', function () {
-        if (!this.value) {
-          this.parentElement.classList.remove('focused');
-        }
-      });
     });
   </script>
 </body>

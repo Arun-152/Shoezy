@@ -26,14 +26,11 @@ app.use(session({
     }
 }))
 
-// Flash middleware
 app.use(flash())
 
-// Passport middleware
 app.use(passport.initialize())
 app.use(passport.session())
 
-// Make flash messages available to all views
 app.use((req, res, next) => {
     res.locals.success_msg = req.flash('success_msg')
     res.locals.error_msg = req.flash('error_msg')
@@ -55,6 +52,9 @@ app.use("/", userRouter)
 app.use("/auth", authRouter)
 app.use("/admin", adminRouter);
 
-app.listen(process.env.PORT, () => {
-    console.log("server running")
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+    console.log("Server running");
+    
 })

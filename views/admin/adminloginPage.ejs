@@ -1,138 +1,626 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shoezy -Login</title>
-    <link rel="stylesheet" href="/css/adminloginPage.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="referrer" content="no-referrer" />
+  <title>Shoezy - Login</title>
+  <link rel="stylesheet" href="/css/adminloginPage.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
 </head>
 <body>
-    <div class="login-container">
-        <!-- Left Side - Login Form -->
-        <div class="login-section">
-            <div class="login-wrapper">
-                <div class="brand-header">
-                    <h1 class="brand-name">Shoezy</h1>
-                    <h2 class="login-title">ADMIN LOGIN</h2>
-                    <p class="login-subtitle">How to i get started lorem ipsum dolor sit?</p>
-                </div>
-
-                <form class="login-form" action="/admin/login" method="POST">
-                    <div class="input-group">
-                        <div class="input-wrapper">
-                            <i class="fas fa-envelope input-icon"></i>
-                            <input type="email" name="email" placeholder="Email" required>
-                        </div>
-                    </div>
-
-                    <div class="input-group">
-                        <div class="input-wrapper">
-                            <i class="fas fa-lock input-icon"></i>
-                            <input type="password" name="password" id="password" placeholder="Password" required>
-                            <i class="fas fa-eye-slash toggle-password" id="togglePassword"></i>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="login-btn">Login Now</button>
-                </form>
-
-                <div class="divider">
-                    <span class="divider-text">Login with Others</span>
-                </div>
-
-                <div class="social-login">
-                    <form action="/admin/auth/google" method="POST">
-                        <button type="submit" class="google-btn">
-                            <i class="fab fa-google"></i>
-                            <span>Login with Google</span>
-                        </button>
-                    </form>
-                </div>
-            </div>
+  <div class="login-container">
+    <!-- Login Section -->
+    <div class="login-section">
+      <div class="login-wrapper">
+        <div class="brand-header">
+          <h1 class="brand-name">Shoezy</h1>
+          <h2 class="login-title">ADMIN LOGIN</h2>
+          <p class="login-subtitle">How to i get started lorem ipsum dolor sit?</p>
         </div>
 
-        <!-- Right Side - Shoe Image -->
-        <div class="image-section">
-            <div class="shoe-display">
-                <div class="gradient-bg">
-                    <div class="gradient-circle"></div>
-                    <div class="gradient-circle-2"></div>
-                </div>
-                <div class="shoe-container">
-                    <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?w=600&h=400&fit=crop&crop=center" alt="Black Sneakers" class="shoe-image">
-                </div>
+        <form class="login-form" action="/admin/login" method="POST" id="adminLoginForm" autocomplete="off">
+          <!-- Email Field -->
+          <div class="input-group">
+            <div class="input-wrapper">
+              <i class="fas fa-envelope input-icon"></i>
+              <input type="email" name="email" id="email" placeholder="Email" autocomplete="off" autocapitalize="off" spellcheck="false" />
             </div>
-        </div>
+            <div class="error-message" id="email-error" style="display: none;">
+              <i class="fas fa-exclamation-circle error-icon"></i>
+              <span class="error-text">Email field cannot be empty.</span>
+            </div>
+            <% if (locals.message && message.length > 0 && locals.errorType === 'email') { %>
+              <div class="error-message server-error">
+                <i class="fas fa-exclamation-circle error-icon"></i>
+                <span class="error-text"><%= message %></span>
+              </div>
+            <% } %>
+          </div>
+
+          <!-- Password Field -->
+          <div class="input-group">
+            <div class="input-wrapper">
+              <i class="fas fa-lock input-icon"></i>
+              <input type="password" name="password" id="password" placeholder="Password" autocomplete="off" autocapitalize="off" spellcheck="false" />
+              <i class="fas fa-eye-slash toggle-password" id="togglePassword"></i>
+            </div>
+            <div class="error-message" id="password-error" style="display: none;">
+              <i class="fas fa-exclamation-circle error-icon"></i>
+              <span class="error-text">Password field cannot be empty</span>
+            </div>
+            <% if (locals.message && message.length > 0 && locals.errorType === 'password') { %>
+              <div class="error-message server-error">
+                <i class="fas fa-exclamation-circle error-icon"></i>
+                <span class="error-text"><%= message %></span>
+              </div>
+            <% } %>
+          </div>
+
+          <!-- General Server Error -->
+          <% if (locals.message && message.length > 0 && !locals.errorType) { %>
+            <div class="error-message general-error">
+              <i class="fas fa-exclamation-circle error-icon"></i>
+              <span class="error-text"><%= message %></span>
+            </div>
+          <% } %>
+
+          <button type="submit" class="login-btn">Login Now</button>
+          </form>
+      </div>
     </div>
 
-    <script>
-        // Toggle password visibility
-        const togglePassword = document.getElementById('togglePassword');
-        const passwordInput = document.getElementById('password');
+    <!-- Right Image Section -->
+    <div class="image-section">
+      <div class="shoe-display">
+        <div class="gradient-bg">
+          <div class="gradient-circle"></div>
+          <div class="gradient-circle-2"></div>
+        </div>
+        <div class="shoe-container">
+          <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?w=600&h=400&fit=crop&crop=center" alt="Black Sneakers" class="shoe-image" />
+        </div>
+      </div>
+    </div>
+  </div>
 
-        togglePassword.addEventListener('click', function() {
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
-            this.classList.toggle('fa-eye');
-            this.classList.toggle('fa-eye-slash');
+  <!-- Your existing style remains unchanged, keeping it external or inline -->
+
+  <style>
+    /* Error message styling */
+    .error-message {
+      display: flex;
+      align-items: center;
+      margin-top: 8px;
+      padding: 10px 12px;
+      background-color: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #dc2626;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #dc2626;
+      animation: slideInError 0.3s ease-out;
+    }
+
+    .error-message .error-icon {
+      margin-right: 8px;
+      font-size: 13px;
+    }
+
+    .error-message .error-text {
+      flex: 1;
+    }
+
+    /* Input wrapper states */
+    .input-wrapper.error-state {
+      border-color: #dc2626 !important;
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
+    }
+
+    .input-wrapper.success {
+      border-color: #16a34a !important;
+      box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1) !important;
+    }
+
+    /* Loading button state */
+    .login-btn.loading {
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    /* Animation for error messages */
+    @keyframes slideInError {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Server errors should be visible when present */
+    .server-error {
+      display: flex;
+      align-items: center;
+      margin-top: 8px;
+      padding: 10px 12px;
+      background-color: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #dc2626;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #dc2626;
+      animation: slideInError 0.3s ease-out;
+    }
+
+    .general-error {
+      display: flex;
+      align-items: center;
+      margin: 15px 0;
+      padding: 10px 12px;
+      background-color: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #dc2626;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #dc2626;
+      animation: slideInError 0.3s ease-out;
+    }
+
+    /* Server errors are visible by default, JavaScript can override */
+    .server-error {
+      display: flex;
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .general-error {
+      display: flex;
+      visibility: visible;
+      opacity: 1;
+    }
+
+    /* Cache prevention */
+    input[type="email"], input[type="password"] {
+      background-color: white !important;
+    }
+
+    /* Dynamic server errors */
+    .server-error-email,
+    .server-error-password,
+    .general-error-dynamic {
+      display: flex;
+      align-items: center;
+      margin-top: 8px;
+      padding: 10px 12px;
+      background-color: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #dc2626;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #dc2626;
+      animation: slideInError 0.3s ease-out;
+    }
+
+    .general-error-dynamic {
+      margin: 15px 0;
+    }
+
+    /* Error animation */
+    @keyframes slideInError {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+
+  <script>
+    // Get DOM elements
+    const loginForm = document.getElementById('adminLoginForm');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const togglePassword = document.getElementById('togglePassword');
+
+
+
+    // Simple form clearing function
+    function clearAllFormData(forceServerErrorClear = false) {
+      // Clear input values
+      if (emailInput) {
+        emailInput.value = '';
+        emailInput.defaultValue = '';
+        emailInput.setAttribute('value', '');
+      }
+      if (passwordInput) {
+        passwordInput.value = '';
+        passwordInput.defaultValue = '';
+        passwordInput.setAttribute('value', '');
+      }
+
+      // Hide frontend error messages
+      hideError('email-error');
+      hideError('password-error');
+
+      // Remove error states from input wrappers
+      const inputWrappers = document.querySelectorAll('.input-wrapper');
+      inputWrappers.forEach(wrapper => {
+        wrapper.classList.remove('error-state', 'success');
+      });
+
+      // Only clear server errors if explicitly forced (for page refresh)
+      if (forceServerErrorClear) {
+        const serverErrors = document.querySelectorAll('.server-error, .general-error');
+        serverErrors.forEach(error => {
+          error.style.display = 'none';
+          error.remove();
         });
+      }
 
-        // Form validation
-        const loginForm = document.querySelector('.login-form');
-        loginForm.addEventListener('submit', function(e) {
-            const email = this.querySelector('input[name="email"]').value;
-            const password = this.querySelector('input[name="password"]').value;
+      // Reset form
+      if (loginForm) {
+        loginForm.reset();
+      }
 
-            if (!email || !password) {
-                e.preventDefault();
-                alert('Please fill in all fields');
-                return false;
+      // Reset button state
+      const submitBtn = document.querySelector('.login-btn');
+      if (submitBtn) {
+        submitBtn.classList.remove('loading');
+        submitBtn.innerHTML = 'Login Now';
+      }
+    }
+
+    // Simple and reliable error clearing - only on genuine page refresh
+    (function() {
+      // Only clear errors on page refresh, never on form submission responses
+      const isPageRefresh = performance.navigation.type === 1; // TYPE_RELOAD
+
+      if (isPageRefresh) {
+        // This is a genuine page refresh, clear all errors after a delay
+        setTimeout(function() {
+          const allErrors = document.querySelectorAll('.server-error, .general-error');
+          allErrors.forEach(error => {
+            error.style.display = 'none';
+            error.remove();
+          });
+        }, 500); // Longer delay to ensure errors are displayed first if needed
+      }
+    })();
+
+    // Simple page refresh detection and clearing
+    window.addEventListener('pageshow', function(event) {
+      // Clear if page was loaded from cache (browser back/forward)
+      if (event.persisted) {
+        // This is from cache, clear everything
+        setTimeout(function() {
+          clearAllFormData(true);
+          const allErrors = document.querySelectorAll('.server-error, .general-error');
+          allErrors.forEach(error => {
+            error.style.display = 'none';
+            error.remove();
+          });
+        }, 100);
+      }
+    });
+
+    // Clear form only on direct URL access (not form submissions)
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check if this is direct URL access (not from form submission)
+      const isDirectAccess = !document.referrer ||
+                            !document.referrer.includes('/admin/login');
+
+      if (isDirectAccess) {
+        // This is direct access, clear any cached errors
+        clearAllFormData(true);
+      }
+    });
+
+    // Real-time validation as admin types
+    if (emailInput) {
+      emailInput.addEventListener('input', function() {
+        const emailValue = this.value.trim();
+        clearServerErrors(); // Clear server errors when admin starts typing
+
+        if (emailValue) {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (emailRegex.test(emailValue)) {
+            hideError('email-error');
+            removeErrorState('email');
+          } else {
+            showError('email-error', 'Please enter a valid email address.');
+            addErrorState('email');
+          }
+        } else {
+          hideError('email-error');
+          removeErrorState('email');
+        }
+      });
+
+      emailInput.addEventListener('blur', function() {
+        const emailValue = this.value.trim();
+        if (!emailValue) {
+          showError('email-error', 'Email field cannot be empty.');
+          addErrorState('email');
+        }
+      });
+    }
+
+    if (passwordInput) {
+      passwordInput.addEventListener('input', function() {
+        const passwordValue = this.value.trim();
+        clearServerErrors(); // Clear server errors when admin starts typing
+
+        if (passwordValue) {
+          hideError('password-error');
+          removeErrorState('password');
+        }
+      });
+
+      passwordInput.addEventListener('blur', function() {
+        const passwordValue = this.value.trim();
+        if (!passwordValue) {
+          showError('password-error', 'Password field cannot be empty.');
+          addErrorState('password');
+        }
+      });
+    }
+
+    // Password visibility toggle
+    if (togglePassword) {
+      togglePassword.addEventListener('click', function () {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        this.classList.toggle('fa-eye');
+        this.classList.toggle('fa-eye-slash');
+      });
+    }
+
+    // Dynamic form validation and submission
+    if (loginForm) {
+      loginForm.addEventListener('submit', async function (e) {
+        e.preventDefault(); // Always prevent default form submission
+
+        let isValid = true;
+
+        // Clear previous server errors
+        clearServerErrors();
+
+        // Email validation
+        const emailValue = emailInput ? emailInput.value.trim() : '';
+        if (!emailValue) {
+          showError('email-error', 'Email field cannot be empty.');
+          addErrorState('email');
+          isValid = false;
+        } else {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(emailValue)) {
+            showError('email-error', 'Please enter a valid email address.');
+            addErrorState('email');
+            isValid = false;
+          } else {
+            hideError('email-error');
+            removeErrorState('email');
+          }
+        }
+
+        // Password validation
+        const passwordValue = passwordInput ? passwordInput.value.trim() : '';
+        if (!passwordValue) {
+          showError('password-error', 'Password field cannot be empty.');
+          addErrorState('password');
+          isValid = false;
+        } else {
+          hideError('password-error');
+          removeErrorState('password');
+        }
+
+        // If client-side validation fails, don't proceed
+        if (!isValid) {
+          return false;
+        }
+
+        // Show loading state
+        const submitBtn = this.querySelector('.login-btn');
+        if (submitBtn) {
+          submitBtn.classList.add('loading');
+          submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+          submitBtn.disabled = true;
+        }
+
+        try {
+          // Send AJAX request
+          const response = await fetch('/admin/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+              email: emailValue,
+              password: passwordValue
+            })
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            // Success - redirect to admin dashboard
+            window.location.href = data.redirect || '/admin/dashboard';
+          } else {
+            // Show dynamic error based on errorType
+            if (data.errorType === 'email') {
+              showServerError('email', data.message);
+              addErrorState('email');
+            } else if (data.errorType === 'password') {
+              showServerError('password', data.message);
+              addErrorState('password');
+            } else {
+              showGeneralError(data.message);
             }
+          }
+        } catch (error) {
+          console.error('Admin login error:', error);
+          showGeneralError('Network error. Please check your connection and try again.');
+        } finally {
+          // Reset button state
+          if (submitBtn) {
+            submitBtn.classList.remove('loading');
+            submitBtn.innerHTML = 'Login Now';
+            submitBtn.disabled = false;
+          }
+        }
 
-            // Email validation
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                e.preventDefault();
-                alert('Please enter a valid email address');
-                return false;
-            }
+        return false;
+      });
+    }
 
-            // Password validation
-            if (password.length < 6) {
-                e.preventDefault();
-                alert('Password must be at least 6 characters long');
-                return false;
-            }
+    // Helper functions for error handling
+    function showError(errorId, message = null) {
+      const errorElement = document.getElementById(errorId);
+      if (errorElement) {
+        if (message) {
+          const errorText = errorElement.querySelector('.error-text');
+          if (errorText) {
+            errorText.textContent = message;
+          }
+        }
+        errorElement.style.display = 'flex';
+      }
+    }
+
+    function hideError(errorId) {
+      const errorElement = document.getElementById(errorId);
+      if (errorElement) {
+        errorElement.style.display = 'none';
+      }
+    }
+
+    // Dynamic server error display functions
+    function showServerError(fieldType, message) {
+      // Remove any existing server errors for this field
+      const existingErrors = document.querySelectorAll(`.server-error-${fieldType}`);
+      existingErrors.forEach(error => error.remove());
+
+      // Create new server error element
+      const errorDiv = document.createElement('div');
+      errorDiv.className = `error-message server-error server-error-${fieldType}`;
+      errorDiv.innerHTML = `
+        <i class="fas fa-exclamation-circle error-icon"></i>
+        <span class="error-text">${message}</span>
+      `;
+
+      // Insert after the appropriate input wrapper
+      const inputGroup = fieldType === 'email' ?
+        document.querySelector('#email').closest('.input-group') :
+        document.querySelector('#password').closest('.input-group');
+
+      if (inputGroup) {
+        const inputWrapper = inputGroup.querySelector('.input-wrapper');
+        inputWrapper.insertAdjacentElement('afterend', errorDiv);
+      }
+    }
+
+    function showGeneralError(message) {
+      // Remove any existing general errors
+      const existingErrors = document.querySelectorAll('.general-error-dynamic');
+      existingErrors.forEach(error => error.remove());
+
+      // Create new general error element
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'error-message general-error general-error-dynamic';
+      errorDiv.innerHTML = `
+        <i class="fas fa-exclamation-circle error-icon"></i>
+        <span class="error-text">${message}</span>
+      `;
+
+      // Insert before the login button
+      const loginBtn = document.querySelector('.login-btn');
+      if (loginBtn) {
+        loginBtn.insertAdjacentElement('beforebegin', errorDiv);
+      }
+    }
+
+    function clearServerErrors() {
+      // Clear all dynamic server errors
+      const serverErrors = document.querySelectorAll('.server-error-email, .server-error-password, .general-error-dynamic');
+      serverErrors.forEach(error => error.remove());
+    }
+
+    // Clear server errors when admin starts typing in any field
+    function setupErrorClearingOnInput() {
+      const inputs = document.querySelectorAll('#email, #password');
+      inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+          // Clear server errors when admin focuses on input
+          clearServerErrors();
         });
+      });
+    }
 
-        // Input focus effects
-        const inputs = document.querySelectorAll('input');
-        inputs.forEach(input => {
-            input.addEventListener('focus', function() {
-                this.parentElement.classList.add('focused');
-            });
-            
-            input.addEventListener('blur', function() {
-                if (!this.value) {
-                    this.parentElement.classList.remove('focused');
-                }
-            });
-        });
+    // Initialize error clearing
+    setupErrorClearingOnInput();
 
-        // Add loading state to login button
-        loginForm.addEventListener('submit', function(e) {
-            const submitBtn = this.querySelector('.login-btn');
-            submitBtn.classList.add('loading');
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
-            
-            // Remove loading state after 3 seconds (for demo purposes)
-            setTimeout(() => {
-                submitBtn.classList.remove('loading');
-                submitBtn.innerHTML = 'Login Now';
-            }, 3000);
+    function addErrorState(fieldId) {
+      const fieldInput = document.getElementById(fieldId);
+      if (fieldInput) {
+        const wrapper = fieldInput.parentElement;
+        wrapper.classList.add('error-state');
+        wrapper.classList.remove('success');
+      }
+    }
+
+    function removeErrorState(fieldId) {
+      const fieldInput = document.getElementById(fieldId);
+      if (fieldInput) {
+        const wrapper = fieldInput.parentElement;
+        wrapper.classList.remove('error-state');
+        wrapper.classList.add('success');
+      }
+    }
+
+    // Real-time input validation
+    [emailInput, passwordInput].forEach(input => {
+      if (input) {
+        input.addEventListener('input', function () {
+          const fieldId = this.id;
+          const wrapper = this.parentElement;
+
+          // Hide frontend validation error
+          hideError(fieldId + '-error');
+
+          // Remove error state
+          wrapper.classList.remove('error-state');
+
+          // Add success state if field has content
+          if (this.value.trim()) {
+            wrapper.classList.add('success');
+          } else {
+            wrapper.classList.remove('success');
+          }
+
+          // Hide server error when user starts typing
+          const serverError = wrapper.parentElement.querySelector('.server-error');
+          if (serverError) {
+            serverError.style.display = 'none';
+          }
         });
-    </script>
+      }
+    });
+  </script>
 </body>
 </html>
