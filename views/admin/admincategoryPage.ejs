@@ -161,12 +161,12 @@
                     <div class="modal-body">
                         <div class="form-group">
                             <label for="categoryName">Category Name *</label>
-                            <input type="text" id="categoryName" placeholder="Enter category name" required>
+                            <input type="text" id="categoryName" placeholder="Enter category name">
                             <div id="nameError" class="error-message" style="color: red; display: none;"></div>
                         </div>
                         <div class="form-group">
                             <label for="description">Description *</label>
-                            <textarea id="description" placeholder="Enter description" required></textarea>
+                            <textarea id="description" placeholder="Enter description"></textarea>
                             <div id="descriptionError" class="error-message" style="color: red; display: none;"></div>
                         </div>
                     </div>
@@ -191,13 +191,13 @@
                                 <input type="text" id="editCategoryId" readonly>
                             </div>
                             <div class="form-group">
-                                <label for="editCategoryName">Category Name </label>
-                                <input type="text" id="editCategoryName" placeholder="Enter category name" required>
+                                <label for="editCategoryName">Category Name *</label>
+                                <input type="text" id="editCategoryName" placeholder="Enter category name">
                                 <div id="editNameError" class="error-message" style="color: red; display: none;"></div>
                             </div>
                             <div class="form-group">
                                 <label for="editDescription">Description *</label>
-                                <textarea id="editDescription" placeholder="Enter description" required></textarea>
+                                <textarea id="editDescription" placeholder="Enter description"></textarea>
                                 <div id="editDescriptionError" class="error-message" style="color: red; display: none;">
                                 </div>
                             </div>
@@ -216,6 +216,38 @@
                 document.addEventListener("DOMContentLoaded", () => {
                     const searchForm = document.getElementById("searchForm");
                     const searchInput = document.getElementById("searchInput");
+
+                    // Real-time validation clearing for Add Category form
+                    const categoryNameInput = document.getElementById("categoryName");
+                    const descriptionInput = document.getElementById("description");
+
+                    if (categoryNameInput) {
+                        categoryNameInput.addEventListener("input", () => {
+                            document.getElementById("nameError").style.display = "none";
+                        });
+                    }
+
+                    if (descriptionInput) {
+                        descriptionInput.addEventListener("input", () => {
+                            document.getElementById("descriptionError").style.display = "none";
+                        });
+                    }
+
+                    // Real-time validation clearing for Edit Category form
+                    const editCategoryNameInput = document.getElementById("editCategoryName");
+                    const editDescriptionInput = document.getElementById("editDescription");
+
+                    if (editCategoryNameInput) {
+                        editCategoryNameInput.addEventListener("input", () => {
+                            document.getElementById("editNameError").style.display = "none";
+                        });
+                    }
+
+                    if (editDescriptionInput) {
+                        editDescriptionInput.addEventListener("input", () => {
+                            document.getElementById("editDescriptionError").style.display = "none";
+                        });
+                    }
 
                     // Handle form submission for search
                     searchForm.addEventListener("submit", (e) => {
@@ -285,12 +317,14 @@
                 // Add Category Modal functions
                 function openAddCategoryModal() {
                     document.getElementById('addCategoryModal').style.display = 'flex';
+                    clearErrorMessage(); // Clear any previous errors
                     document.getElementById('categoryName').focus();
                 }
                 function closeAddCategoryModal() {
                     document.getElementById('addCategoryModal').style.display = 'none';
                     document.getElementById('categoryName').value = '';
                     document.getElementById('description').value = '';
+                    clearErrorMessage(); // Clear errors when closing
                 }
 
                 // Edit Category Modal functions
@@ -298,29 +332,31 @@
                     document.getElementById('editCategoryId').value = id;
                     document.getElementById('editCategoryName').value = name;
                     document.getElementById('editDescription').value = description;
+                    clearEditErrorMessages(); // Clear any previous errors
                     document.getElementById('editCategoryModal').style.display = 'flex';
                     document.getElementById('editCategoryName').focus();
                 }
 
                 function closeEditCategoryModal() {
                     document.getElementById('editCategoryModal').style.display = 'none';
+                    clearEditErrorMessages(); // Clear errors when closing
                 }
                 function saveEditCategory(event) {
                     event.preventDefault();
+
+                    // Clear previous error messages
+                    clearEditErrorMessages();
 
                     // Get form values
                     const id = document.getElementById('editCategoryId').value;
                     const name = document.getElementById('editCategoryName').value.trim();
                     const description = document.getElementById('editDescription').value.trim();
 
-                    if (name === '' || description === '') {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Missing Fields',
-                            text: 'Please fill in all required fields.'
-                        });
+                    // Validate form
+                    if (!validateEditForm(name, description)) {
                         return;
                     }
+
                     fetch(`/admin/editCategory/${id}`, {
                         method: 'PATCH',
                         headers: {
@@ -330,29 +366,53 @@
                     })
                         .then(response => {
                             if (!response.ok) {
-                                return response.text().then(text => {
-                                    console.error("Server returned:", text);
-                                    throw new Error(`HTTP error! status: ${response.status}`);
+                                return response.json().then(err => {
+                                    throw new Error(err.message || `HTTP error! status: ${response.status}`);
                                 });
                             }
                             return response.json();
                         })
                         .then(data => {
+                            // Close modal first
                             closeEditCategoryModal();
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Success',
-                                text: 'Category updated successfully!'
-                            }).then(() => {
-                                location.reload();
-                            });
+
+                            // Small delay to ensure modal is fully closed, then show success SweetAlert
+                            setTimeout(() => {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Success!',
+                                    text: 'Category updated successfully!',
+                                    confirmButtonText: 'OK',
+                                    confirmButtonColor: '#28a745'
+                                }).then(() => {
+                                    location.reload();
+                                });
+                            }, 100)
                         })
                         .catch(error => {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: error.message
-                            });
+                            // Close modal first, then show error SweetAlert
+                            closeEditCategoryModal();
+
+                            // Small delay to ensure modal is fully closed
+                            setTimeout(() => {
+                                if (error.message === "Category name already existing") {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Duplicate Category',
+                                        text: 'Category name already existing',
+                                        confirmButtonText: 'OK',
+                                        confirmButtonColor: '#d33'
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: error.message || 'An error occurred while updating category',
+                                        confirmButtonText: 'OK',
+                                        confirmButtonColor: '#d33'
+                                    });
+                                }
+                            }, 100)
                         });
                 }
                 // Toggle List/Unlist button state
@@ -379,8 +439,8 @@
                     if (!validateForm()) {
                         return
                     }
-                    const name = document.getElementById("categoryName").value
-                    const description = document.getElementById("description").value
+                    const name = document.getElementById("categoryName").value.trim()
+                    const description = document.getElementById("description").value.trim()
 
                     fetch("/admin/addCategory", {
                         method: "POST",
@@ -392,30 +452,52 @@
                         .then(response => {
                             if (!response.ok) {
                                 return response.json().then(err => {
-                                    throw new Error(err.message || "something went wrong")
+                                    throw new Error(err.error || "something went wrong")
                                 })
                             }
                             return response.json()
                         })
-
                         .then(data => {
-                            location.reload()
+                            // Close modal first, then show success SweetAlert
+                            closeAddCategoryModal()
+
+                            // Small delay to ensure modal is fully closed
+                            setTimeout(() => {
+                                Swal.fire({
+                                    icon: "success",
+                                    title: "Success!",
+                                    text: "Category added successfully!",
+                                    confirmButtonText: "OK",
+                                    confirmButtonColor: "#28a745"
+                                }).then(() => {
+                                    location.reload()
+                                })
+                            }, 100)
                         })
                         .catch(error => {
-                            if (error.message === "Category already exists") {
-                                Swal.fire({
-                                    icon: "error",
-                                    title: "Oops",
-                                    text: "Category already exists",
-                                })
-                            } else {
-                                Swal.fire({
-                                    icon: "error",
-                                    title: "Oops",
-                                    text: "An erreor occured while adding category",
-                                })
-                            }
+                            // Close modal first, then show error SweetAlert
+                            closeAddCategoryModal()
 
+                            // Small delay to ensure modal is fully closed
+                            setTimeout(() => {
+                                if (error.message === "Category already exists") {
+                                    Swal.fire({
+                                        icon: "error",
+                                        title: "Duplicate Category",
+                                        text: "Category name already existing",
+                                        confirmButtonText: "OK",
+                                        confirmButtonColor: "#d33"
+                                    })
+                                } else {
+                                    Swal.fire({
+                                        icon: "error",
+                                        title: "Error",
+                                        text: "An error occurred while adding category",
+                                        confirmButtonText: "OK",
+                                        confirmButtonColor: "#d33"
+                                    })
+                                }
+                            }, 100)
                         })
                 }
 
@@ -425,18 +507,33 @@
                     const description = document.getElementById("description").value.trim()
                     let isvalid = true
 
-                    if (name === "") {
-                        displayErrorMessage("nameError", "please enter a name")
+                    // Validate category name
+                    if (name === "" || name.length === 0) {
+                        displayErrorMessage("nameError", "Category name cannot be empty")
+                        isvalid = false
+                    } else if (name.length < 2) {
+                        displayErrorMessage("nameError", "Category name must be at least 2 characters.")
+                        isvalid = false
+                    } else if (name.length > 50) {
+                        displayErrorMessage("nameError", "Category name cannot exceed 50 characters.")
                         isvalid = false
                     } else if (!/^[A-Za-z\s]+$/.test(name)) {
-                        displayErrorMessage("nameError", "please enter alphabetic characters ")
+                        displayErrorMessage("nameError", "Category name must contain only letters and spaces.")
                         isvalid = false
+                    }
 
-                    }
-                    if (description === "") {
-                        displayErrorMessage("descriptionError", "please enter a description")
+                    // Validate description
+                    if (description === "" || description.length === 0) {
+                        displayErrorMessage("descriptionError", "Description is required.")
+                        isvalid = false
+                    } else if (description.length < 10) {
+                        displayErrorMessage("descriptionError", "Description must be at least 10 characters.")
+                        isvalid = false
+                    } else if (description.length > 200) {
+                        displayErrorMessage("descriptionError", "Description cannot exceed 200 characters.")
                         isvalid = false
                     }
+
                     return isvalid
                 }
 
@@ -453,6 +550,59 @@
                     Array.from(errorElements).forEach((element) => {
                         element.innerText = ""
                         element.style.display = "none"
+                    })
+                }
+
+                // Edit form validation function
+                function validateEditForm(name, description) {
+                    let isValid = true;
+
+                    // Validate category name
+                    if (name === "" || name.length === 0) {
+                        displayEditErrorMessage("editNameError", "Category name cannot be empty")
+                        isValid = false
+                    } else if (name.length < 2) {
+                        displayEditErrorMessage("editNameError", "Category name must be at least 2 characters.")
+                        isValid = false
+                    } else if (name.length > 50) {
+                        displayEditErrorMessage("editNameError", "Category name cannot exceed 50 characters.")
+                        isValid = false
+                    } else if (!/^[A-Za-z\s]+$/.test(name)) {
+                        displayEditErrorMessage("editNameError", "Category name must contain only letters and spaces.")
+                        isValid = false
+                    }
+
+                    // Validate description
+                    if (description === "" || description.length === 0) {
+                        displayEditErrorMessage("editDescriptionError", "Description is required.")
+                        isValid = false
+                    } else if (description.length < 10) {
+                        displayEditErrorMessage("editDescriptionError", "Description must be at least 10 characters.")
+                        isValid = false
+                    } else if (description.length > 200) {
+                        displayEditErrorMessage("editDescriptionError", "Description cannot exceed 200 characters.")
+                        isValid = false
+                    }
+
+                    return isValid;
+                }
+
+                // Display error message for edit form
+                function displayEditErrorMessage(elementId, message) {
+                    const errorElement = document.getElementById(elementId)
+                    errorElement.innerText = message
+                    errorElement.style.display = "block"
+                }
+
+                // Clear edit form error messages
+                function clearEditErrorMessages() {
+                    const editErrorElements = ["editNameError", "editDescriptionError"]
+                    editErrorElements.forEach((elementId) => {
+                        const element = document.getElementById(elementId)
+                        if (element) {
+                            element.innerText = ""
+                            element.style.display = "none"
+                        }
                     })
                 }
 

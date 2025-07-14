@@ -37,22 +37,106 @@
       background: #5a6268 !important;
     }
 
-    /* Responsive crop modal */
+    /* Enhanced responsive crop modal */
     @media (max-width: 768px) {
-      #cropModal>div {
-        max-width: 95% !important;
-        max-height: 95% !important;
+      .crop-modal-container {
+        width: 95% !important;
+        height: 90vh !important;
+        max-height: 90vh !important;
+      }
+
+      .crop-modal-header {
+        padding: 12px 15px 8px 15px !important;
+      }
+
+      .crop-modal-content {
+        max-height: calc(90vh - 120px) !important;
+      }
+
+      .crop-image-container {
         padding: 15px !important;
+        min-height: 300px !important;
+      }
+
+      .crop-modal-footer {
+        padding: 12px 15px !important;
       }
 
       #cropModal h3 {
-        font-size: 18px !important;
+        font-size: 16px !important;
       }
 
       #cropModal button {
-        padding: 10px 16px !important;
+        padding: 10px 18px !important;
+        font-size: 13px !important;
+        margin: 0 5px !important;
+      }
+
+      #imageToCrop {
+        max-height: 60vh !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .crop-modal-container {
+        width: 98% !important;
+        height: 95vh !important;
+        max-height: 95vh !important;
+      }
+
+      .crop-modal-content {
+        max-height: calc(95vh - 110px) !important;
+      }
+
+      .crop-image-container {
+        padding: 10px !important;
+        min-height: 250px !important;
+      }
+
+      .crop-modal-footer {
+        padding: 10px !important;
+        text-align: center !important;
+      }
+
+      #cropModal h3 {
         font-size: 14px !important;
       }
+
+      #cropModal button {
+        display: inline-block !important;
+        width: 45% !important;
+        margin: 0 2% !important;
+        padding: 10px 12px !important;
+        font-size: 12px !important;
+      }
+
+      #imageToCrop {
+        max-height: 50vh !important;
+      }
+    }
+
+    /* Button hover effects */
+    #cropButton:hover {
+      background: linear-gradient(135deg, #218838, #1e7e34) !important;
+      transform: translateY(-1px) !important;
+      box-shadow: 0 4px 8px rgba(40, 167, 69, 0.4) !important;
+    }
+
+    #cancelCrop:hover {
+      background: linear-gradient(135deg, #5a6268, #495057) !important;
+      transform: translateY(-1px) !important;
+      box-shadow: 0 4px 8px rgba(108, 117, 125, 0.4) !important;
+    }
+
+    /* Ensure footer is always pinned */
+    .crop-modal-footer {
+      position: absolute !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      z-index: 1000 !important;
+      background: white !important;
+      box-shadow: 0 -4px 8px rgba(0,0,0,0.1) !important;
     }
   </style>
 </head>
@@ -188,23 +272,34 @@
 
   <!-- Crop Modal -->
   <div id="cropModal"
-    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; overflow: auto;">
-    <div
-      style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; max-width: 90%; max-height: 90%; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
-      <h3 style="margin-top: 0; color: #333; font-family: Arial, sans-serif;">Crop Image</h3>
-      <p style="color: #666; font-size: 14px; margin-bottom: 15px;">Drag to reposition, use corners to resize the crop
-        area</p>
-      <div style="max-width: 500px; max-height: 400px; overflow: hidden; border: 1px solid #ddd; border-radius: 4px;">
-        <img id="imageToCrop" style="max-width: 100%; display: block;">
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; overflow: hidden;">
+    <div class="crop-modal-container"
+      style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 8px; width: 90%; max-width: 900px; height: 85vh; max-height: 85vh; box-shadow: 0 4px 20px rgba(0,0,0,0.3); display: flex; flex-direction: column;">
+
+      <!-- Modal Header (Fixed) -->
+      <div class="crop-modal-header" style="padding: 15px 20px 10px 20px; flex-shrink: 0; border-bottom: 1px solid #eee; background: white; border-radius: 8px 8px 0 0;">
+        <h3 style="margin: 0; color: #333; font-family: Arial, sans-serif; font-size: 18px; font-weight: 600;">Crop Image</h3>
+        <p style="color: #666; font-size: 13px; margin: 8px 0 0 0;">Drag to reposition, use corners to resize the crop area</p>
       </div>
-      <div style="margin-top: 15px; text-align: center;">
+
+      <!-- Modal Content (Scrollable with Max Height) -->
+      <div class="crop-modal-content" style="flex: 1; overflow-y: auto; overflow-x: hidden; min-height: 0; max-height: calc(85vh - 140px); position: relative;">
+        <div class="crop-image-container" style="padding: 20px; display: flex; justify-content: center; align-items: flex-start; min-height: 400px;">
+          <div class="crop-wrapper" style="width: 100%; max-width: 100%; border: 2px solid #ddd; border-radius: 8px; overflow: hidden; background: #f8f9fa; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <img id="imageToCrop" style="width: 100%; height: auto; max-height: 70vh; display: block; object-fit: contain;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer (Pinned to Bottom) -->
+      <div class="crop-modal-footer" style="position: absolute; bottom: 0; left: 0; right: 0; padding: 15px 20px; text-align: center; border-top: 2px solid #eee; background: white; border-radius: 0 0 8px 8px; z-index: 1000; box-shadow: 0 -4px 8px rgba(0,0,0,0.1);">
         <button id="cropButton"
-          style="background: #28a745; color: white; border: none; padding: 12px 24px; border-radius: 4px; margin-right: 10px; cursor: pointer; font-weight: 500; transition: background-color 0.3s;">
-          <span style="margin-right: 5px;">✓</span>Crop & Save
+          style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; padding: 12px 24px; border-radius: 6px; margin-right: 10px; cursor: pointer; font-weight: 600; transition: all 0.3s ease; font-size: 14px; box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);">
+          <span style="margin-right: 6px;">✓</span>Crop & Save
         </button>
         <button id="cancelCrop"
-          style="background: #6c757d; color: white; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer; font-weight: 500; transition: background-color 0.3s;">
-          <span style="margin-right: 5px;">✕</span>Cancel
+          style="background: linear-gradient(135deg, #6c757d, #5a6268); color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.3s ease; font-size: 14px; box-shadow: 0 2px 4px rgba(108, 117, 125, 0.3);">
+          <span style="margin-right: 6px;">✕</span>Cancel
         </button>
       </div>
     </div>
@@ -277,15 +372,18 @@
         const result = await response.json();
 
         if (response.ok) {
+          // Show success SweetAlert message
           await Swal.fire({
             title: "Success!",
-            text: result.message || "Product updated successfully!",
+            text: "Product updated successfully.",
             icon: "success",
             confirmButtonText: "OK",
-            timer: 1500,
+            confirmButtonColor: "#28a745",
+            timer: 3000,
             timerProgressBar: true
           });
 
+          // Redirect to products page
           window.location.href = "/admin/products";
         } else {
           throw new Error(result.error || "Something went wrong.");
@@ -409,13 +507,55 @@
             const preview = document.getElementById(`preview${inputNum}`);
             const wrapper = document.getElementById(`wrapper${inputNum}`);
 
-            // Update preview
-            preview.src = url;
-            wrapper.style.display = "inline-block";
+            // Revoke previous object URL to prevent memory leaks
+            if (preview.src && preview.src.startsWith('blob:')) {
+              URL.revokeObjectURL(preview.src);
+            }
 
-            // Add visual indicator for cropped image
-            preview.style.border = "3px solid #28a745";
-            preview.title = "Cropped image ready for upload";
+            // Update preview immediately
+            preview.onload = function() {
+              // Image loaded successfully
+              wrapper.style.display = "inline-block";
+
+              // Add visual indicator for cropped image
+              preview.style.border = "3px solid #28a745";
+              preview.style.borderRadius = "4px";
+              preview.title = "Cropped image ready for upload";
+
+              // Add a small badge or indicator
+              let indicator = wrapper.querySelector('.crop-indicator');
+              if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.className = 'crop-indicator';
+                indicator.style.cssText = `
+                  position: absolute;
+                  top: 5px;
+                  right: 5px;
+                  background: #28a745;
+                  color: white;
+                  border-radius: 50%;
+                  width: 20px;
+                  height: 20px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-size: 12px;
+                  font-weight: bold;
+                `;
+                indicator.innerHTML = '✓';
+                wrapper.style.position = 'relative';
+                wrapper.appendChild(indicator);
+              }
+            };
+
+            preview.onerror = function() {
+              console.error('Failed to load cropped image preview');
+              // Fallback: still show the wrapper
+              wrapper.style.display = "inline-block";
+            };
+
+            // Set the new image source
+            preview.src = url;
 
             // Store cropped image
             croppedImages.set(currentImageInput.id, blob);
@@ -431,14 +571,7 @@
               cropper = null;
             }
 
-            // Show success message
-            Swal.fire({
-              icon: 'success',
-              title: 'Image Cropped!',
-              text: 'Image has been cropped and is ready for upload.',
-              timer: 2000,
-              showConfirmButton: false
-            });
+            // No SweetAlert for image cropping - just visual feedback through border change
           }, 'image/jpeg', 0.9);
         } catch (error) {
           console.error('Crop error:', error);

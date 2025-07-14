@@ -86,6 +86,9 @@ body {
 .nav-item {
     margin: 5px 0;
 }
+.my-custom-popup {
+  z-index: 9999 !important;  
+}
 
 .nav-link {
     display: flex;
