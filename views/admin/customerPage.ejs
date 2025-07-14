@@ -38,6 +38,17 @@
                                 placeholder="Search customers by name or email..." value="<%=search %>">
                         </div>
 
+                        <div class="sort-container">
+                            <label for="sortSelect" class="sort-label">
+                                <i class="fas fa-sort-alpha-down"></i> Sort:
+                            </label>
+                            <select id="sortSelect" class="sort-select" onchange="applySorting()">
+                                <option value="">Default</option>
+                                <option value="asc">A → Z</option>
+                                <option value="desc">Z → A</option>
+                            </select>
+                        </div>
+
                         <div class="search-buttons">
                             <button type="submit" name="search" class="search-btn">Search</button>
                             <button type="button" class="clear-btn">Clear</button>
@@ -50,16 +61,20 @@
                             <table class="customers-table">
                                 <thead>
                                     <tr>
-                                        <th class="table-header">Name</th>
+                                        <th class="table-header si-no-header">SI No</th>
+                                        <th class="table-header">Customer Name</th>
                                         <th class="table-header">Email</th>
-                                        <th class="table-header">Phone</th>
+                                        <th class="table-header">Phone Number</th>
                                         <th class="table-header">Update</th>
                                     </tr>
                                 </thead>
                                 <tbody id="customer-table-body">
                                     <% if (customers && customers.length > 0) { %>
-                                        <% customers.forEach((customer)=> { %>
+                                        <% customers.forEach((customer, index)=> { %>
                                             <tr class="table-row" data-customer-id="<%= customer.id %>">
+                                                <td class="table-cell si-no-cell">
+                                                    <%= index + 1 %>
+                                                </td>
                                                 <td class="table-cell">
                                                     <%= customer.fullname %>
                                                 </td>
@@ -151,6 +166,9 @@
         document.addEventListener("DOMContentLoaded", () => {
             const searchForm = document.getElementById("searchForm");
             const searchInput = document.getElementById("searchInput");
+
+            // Initialize sorting state
+            resetSorting();
 
             // Handle form submission for search
             searchForm.addEventListener("submit", (e) => {
@@ -255,6 +273,82 @@
                 // If cancelled, do nothing - the action is prevented
             });
         }
+
+        // Sorting functionality
+        let currentSortColumn = null;
+        let currentSortDirection = 'asc'; // 'asc' or 'desc'
+
+        // Reset sorting state
+        function resetSorting() {
+            currentSortColumn = null;
+            currentSortDirection = 'asc';
+
+            // Reset dropdown
+            const sortSelect = document.getElementById('sortSelect');
+            if (sortSelect) {
+                sortSelect.value = '';
+            }
+        }
+
+        // Apply sorting from dropdown
+        function applySorting() {
+            const sortSelect = document.getElementById('sortSelect');
+            const sortValue = sortSelect.value;
+
+            if (sortValue === '') {
+                // Reset to original order
+                resetSorting();
+                updateSerialNumbers();
+                return;
+            }
+
+            // Set the direction and apply sorting
+            currentSortColumn = 'name';
+            currentSortDirection = sortValue; // 'asc' or 'desc'
+
+            const tableBody = document.getElementById('customer-table-body');
+            const rows = Array.from(tableBody.querySelectorAll('.table-row'));
+
+            if (rows.length === 0) {
+                return;
+            }
+
+            // Sort the rows
+            rows.sort((a, b) => {
+                const nameA = a.querySelector('.table-cell:nth-child(2)').textContent.trim().toLowerCase();
+                const nameB = b.querySelector('.table-cell:nth-child(2)').textContent.trim().toLowerCase();
+
+                if (currentSortDirection === 'asc') {
+                    return nameA.localeCompare(nameB, undefined, { sensitivity: 'base' });
+                } else {
+                    return nameB.localeCompare(nameA, undefined, { sensitivity: 'base' });
+                }
+            });
+
+            // Preserve any non-customer rows
+            const nonCustomerRows = Array.from(tableBody.querySelectorAll('tr:not(.table-row)'));
+
+            // Clear and rebuild table
+            tableBody.innerHTML = '';
+            rows.forEach(row => tableBody.appendChild(row));
+            nonCustomerRows.forEach(row => tableBody.appendChild(row));
+
+            // Update serial numbers
+            updateSerialNumbers();
+        }
+
+        // Update serial numbers after sorting
+        function updateSerialNumbers() {
+            const rows = document.querySelectorAll('.table-row');
+            rows.forEach((row, index) => {
+                const siNoCell = row.querySelector('.si-no-cell');
+                if (siNoCell) {
+                    siNoCell.textContent = index + 1;
+                }
+            });
+        }
+
+
 
     </script>
 </body>
