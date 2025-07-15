@@ -215,7 +215,7 @@ const postSignup = async (req, res) => {
         };
         req.session.userOtp = {
             code: otp,
-            expiresAt: Date.now() + 10* 60 * 1000,
+            expiresAt: Date.now() + 60 * 1000, // 60 seconds OTP validity
         };
         res.render("otpverification")
     } catch (error) {
@@ -236,7 +236,7 @@ const otpverification = async (req, res) => {
             success_msg: req.flash("success_msg"),
         });
     } catch (error) {
-        res.status(500).send("Server error");
+        res.status(500).redirect("/usererrorPage");
     }
 };
 
@@ -295,7 +295,7 @@ const resendOTP = async (req, res) => {
 
         req.session.userOtp = {
             code: newOTP,
-            expiresAt: Date.now() + 5 * 60 * 1000,
+            expiresAt: Date.now() + 5 * 60 * 1000, 
         };
         console.log("Resend Signup OTP:", newOTP);
         res.json({ success: true, message: "New OTP has been sent to your email address" });
@@ -423,171 +423,14 @@ const postlogin = async (req, res) => {
     }
 };
 
-const homePage = async (req, res) => {
-    try {
-        // Check if user is logged in (optional for home page)
-        let userData = null;
-        if (req.session.userId) {
-            userData = await User.findById(req.session.userId);
-        }
 
-        const featuredProducts = await Product.find({ isDeleted: false, isBlocked: false })
-            .populate("category")
-            .sort({ createdAt: -1 })
-            .limit(6);
 
-        return res.render("homePage", {
-            products: featuredProducts,
-            user: userData,
-            isLandingPage: false,
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Server error" });
-    }
-};
 
-const shopPage = async (req, res) => {
-    try {
-        // Check if user is logged in
-        let userData = null;
-        if (req.session.userId) {
-            userData = await User.findById(req.session.userId);
-            if (!userData) {
-                return res.redirect("/login");
-            }
-        } else {
-            // Redirect to login if user is not authenticated
-            return res.redirect("/login");
-        }
 
-        const products = await Product.find({ isDeleted: false, isBlocked: false })
-            .populate("category")
-            .sort({ createdAt: -1 });
 
-        const categories = await Category.find({ isDeleted: false, isListed: true });
 
-        return res.render("shopPage", {
-            products: products,
-            categories: categories,
-            user: userData,
-            isLandingPage: false,
-        });
-    } catch (error) {
-        console.error("Shop page error:", error);
-        res.status(500).send("Server error");
-    }
-};
 
-const productDetailPage = async (req, res) => {
-    try {
-        // Check if user is logged in
-        let userData = null;
-        if (req.session.userId) {
-            userData = await User.findById(req.session.userId);
-            if (!userData) {
-                return res.redirect("/login");
-            }
-        } else {
-            // Redirect to login if user is not authenticated
-            return res.redirect("/login");
-        }
 
-        const productId = req.params.id;
-
-        // Validate product ID
-        if (!productId || !productId.match(/^[0-9a-fA-F]{24}$/)) {
-            return res.status(404).render("usererrorPage");
-        }
-
-        // Find the product with populated category
-        const product = await Product.findOne({
-            _id: productId,
-            isDeleted: false,
-            isBlocked: false
-        }).populate("category");
-
-        if (!product) {
-            return res.status(404).render("usererrorPage");
-        }
-
-        // Find related products from the same category
-        let relatedProducts = [];
-        if (product.category) {
-            relatedProducts = await Product.find({
-                _id: { $ne: productId }, // Exclude current product
-                category: product.category._id,
-                isDeleted: false,
-                isBlocked: false
-            })
-            .populate("category")
-            .limit(4); // Limit to 4 related products
-        }
-
-        // If not enough related products from same category, get random products
-        if (relatedProducts.length < 4) {
-            const additionalProducts = await Product.find({
-                _id: { $ne: productId },
-                isDeleted: false,
-                isBlocked: false
-            })
-            .populate("category")
-            .limit(4 - relatedProducts.length);
-
-            relatedProducts = [...relatedProducts, ...additionalProducts];
-        }
-
-        return res.render("productDetailPage", {
-            product: product,
-            relatedProducts: relatedProducts,
-            user: userData,
-            isLandingPage: false,
-        });
-
-    } catch (error) {
-        console.error("Product detail page error:", error);
-        res.status(500).render("usererrorPage");
-    }
-};
-
-const showuser = async (req, res) => {
-    const userId = req.session.userId;
-
-    const userData = await User.findById(userId);
-    if (!userData) {
-        return res.redirect("/loginPage");
-    }
-    res.render("myaccount", {
-        user: userData,
-        isLandingPage: false,
-    });
-};
-
-const orderPage = async (req, res) => {
-    try {
-        // Check if user is logged in
-        let userData = null;
-        if (req.session.userId) {
-            userData = await User.findById(req.session.userId);
-            if (!userData) {
-                return res.redirect("/login");
-            }
-        } else {
-            return res.redirect("/login");
-        }
-
-        // Here you can fetch user's orders from database
-        // const orders = await Order.find({ userId: req.session.userId }).populate('products');
-
-        return res.render("orderPage", {
-            user: userData,
-            isLandingPage: false,
-            // orders: orders || []
-        });
-    } catch (error) {
-        res.status(500).send("Server error");
-    }
-};
 
 async function sendPasswordResetOTP(email, otp) {
     try {
@@ -635,10 +478,10 @@ const forgotPasswordPage = async (req, res) => {
         if (req.session.userId) {
             return res.redirect("/home");
         }
-        return res.render("forgot-password");
+        return res.render("forgot-password",{message:"",success:null});
     } catch (error) {
         console.error("Error loading forgot password page:", error);
-        res.status(500).send("Server error");
+        res.redirect("/usererrorPage");
     }
 };
 
@@ -646,22 +489,26 @@ const postForgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
 
+        // Check if email is provided
         if (!email) {
-            return res.status(400).json({ success: false, message: "Email is required" });
+            return res.status(400).json({ success: false, message: "Please enter your email" });
         }
 
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
+        // Basic email format validation
+        const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        if (!isValidEmail) {
             return res.status(400).json({ success: false, message: "Invalid email format" });
         }
 
+        // Check if user exists
         const user = await User.findOne({ email: email.toLowerCase() });
         if (!user) {
-            return res.status(400).json({ success: false, message: "No account found with this email address" });
+            return res.status(404).json({ success: false, message: "No user found with this email" });
         }
 
+        // Check if user is blocked
         if (user.isBlocked) {
-            return res.status(400).json({ success: false, message: "Your account has been blocked. Please contact support." });
+            return res.status(403).json({ success: false, message: "Your account is blocked" });
         }
 
         const otp = generateOtp();
@@ -670,60 +517,34 @@ const postForgotPassword = async (req, res) => {
         req.session.passwordResetOTP = {
             code: otp,
             email: email.toLowerCase(),
-            expiresAt: Date.now() + 30 * 1000,
+            expiresAt: Date.now() + 60 * 1000, // 60 seconds OTP validity
         };
 
-        // Check if email configuration is properly set for production
-        const isEmailConfigured = process.env.NODEMAILER_EMAIL &&
-                                  process.env.NODEMAILER_PASSWORD &&
-                                  process.env.NODEMAILER_EMAIL !== 'your-email@gmail.com' &&
-                                  process.env.NODEMAILER_EMAIL !== 'your-actual-email@gmail.com' &&
-                                  process.env.NODEMAILER_PASSWORD !== 'your-app-password' &&
-                                  process.env.NODEMAILER_PASSWORD !== 'your-actual-app-password' &&
-                                  process.env.NODEMAILER_EMAIL.trim() !== '' &&
-                                  process.env.NODEMAILER_PASSWORD.trim() !== '';
-
-        if (!isEmailConfigured) {
-            return res.json({
-                success: true,
-                message: "OTP generated successfully. Check console for OTP (Testing Mode)",
-                redirect: "/verify-reset-otp"
-            });
-            return;
-        }
-
         try {
-            const emailSent = await sendPasswordResetOTP(email, otp);
-
+            const emailSent = await sendPasswordResetOTP(email.toLowerCase(), otp);
             if (!emailSent) {
                 return res.status(500).json({
                     success: false,
                     message: "Failed to send OTP email. Please try again later. (For testing, check console for OTP)"
                 });
             }
-            console.log("forgott password otp :", otp);
+
+            console.log("Password Reset OTP:", otp);
             res.json({ success: true, message: "OTP has been sent to your email address", redirect: "/verify-reset-otp" });
         } catch (emailError) {
-            console.error("Email sending error:", emailError.message)
-
-            // Provide more specific error messages
-            let errorMessage = "Failed to send OTP email. Please try again later.";
-            if (emailError.message.includes("authentication")) {
-                errorMessage = "Email authentication failed. Please check email configuration.";
-            } else if (emailError.message.includes("network") || emailError.message.includes("ENOTFOUND")) {
-                errorMessage = "Network error. Please check your internet connection.";
-            }
-
+            console.error("Email sending error:", emailError);
             return res.status(500).json({
                 success: false,
-                message: `${errorMessage} (For testing, check console for OTP)`
+                message: "Failed to send OTP email due to email service error. Please try again later. (For testing, check console for OTP)"
             });
         }
+
     } catch (error) {
-        console.error("Forgot password error:", error);
-        res.status(500).json({ success: false, message: "Server error. Please try again." });
+        console.error("Forgot password error:", error.message);
+        res.status(500).json({ success: false, message: "Something went wrong. Please try again." });
     }
 };
+
 
 const verifyOTPPage = async (req, res) => {
     try {
@@ -740,7 +561,7 @@ const verifyOTPPage = async (req, res) => {
         });
     } catch (error) {
         console.error("Error loading verify OTP page:", error);
-        res.status(500).send("Server error");
+        res.status(500).redirect("/usererrorPage");
     }
 };
 
@@ -757,13 +578,15 @@ const postVerifyOTP = async (req, res) => {
         }
 
         const sessionOTP = req.session.passwordResetOTP;
+
         if (!sessionOTP) {
-            return res.status(400).json({ success: false, message: "No OTP session found. Please request a new OTP." });
+            return res.status(400).json({ success: false, message: "No OTP session found. Please request again." });
         }
 
-        if (Date.now() > sessionOTP.expiresAt) {
-            req.session.passwordResetOTP = null;
-            return res.status(400).json({ success: false, message: "OTP has expired. Please request a new one." });
+        if (Date.now() > sessionOTP.expiresAt || sessionOTP.expired) {
+            // Mark as expired but don't delete the session
+            req.session.passwordResetOTP.expired = true;
+            return res.status(400).json({ success: false, message: "OTP has expired. Please click the Resend OTP button." });
         }
 
         if (otp !== sessionOTP.code) {
@@ -783,8 +606,11 @@ const resendResetOTP = async (req, res) => {
     try {
         const sessionOTP = req.session.passwordResetOTP;
         if (!sessionOTP || !sessionOTP.email) {
-            return res.status(400).json({ success: false, message: "No active OTP session found. Please start the process again." });
+            return res.status(400).json({ success: false, message: "No active session found. Please start the process again." });
         }
+
+        // Allow resend even if OTP is expired (but session still exists)
+        // This is the key fix - don't reject expired sessions for resend
 
         const user = await User.findOne({ email: sessionOTP.email });
         if (!user) {
@@ -792,31 +618,6 @@ const resendResetOTP = async (req, res) => {
         }
 
         const newOtp = generateOtp();
-
-        req.session.passwordResetOTP = {
-            code: newOtp,
-            email: sessionOTP.email,
-            expiresAt: Date.now() + 30 * 1000,
-            verified: false,
-        };
-
-        // Check if email configuration is properly set for production
-        const isEmailConfigured = process.env.NODEMAILER_EMAIL && 
-                                  process.env.NODEMAILER_PASSWORD &&
-                                  process.env.NODEMAILER_EMAIL !== 'your-email@gmail.com' && 
-                                  process.env.NODEMAILER_EMAIL !== 'your-actual-email@gmail.com' &&
-                                  process.env.NODEMAILER_PASSWORD !== 'your-app-password' &&
-                                  process.env.NODEMAILER_PASSWORD !== 'your-actual-app-password' &&
-                                  process.env.NODEMAILER_EMAIL.trim() !== '' &&
-                                  process.env.NODEMAILER_PASSWORD.trim() !== '';
-
-        if (!isEmailConfigured) {
-            res.json({ 
-                success: true, 
-                message: "New OTP generated successfully. Check console for OTP (Testing Mode)" 
-            });
-            return;
-        }
 
         try {
             const emailSent = await sendPasswordResetOTP(sessionOTP.email, newOtp);
@@ -826,6 +627,15 @@ const resendResetOTP = async (req, res) => {
                     message: "Failed to send OTP email. Please try again later. (For testing, check console for OTP)"
                 });
             }
+
+            req.session.passwordResetOTP = {
+                code: newOtp,
+                email: sessionOTP.email,
+                expiresAt: Date.now() + 5 * 60 * 1000, // 5 minutes resend OTP session timeout
+                verified: false,
+                expired: false, // Clear expired flag
+            };
+
             console.log("Resend Password OTP:", newOtp);
             res.json({ success: true, message: "New OTP has been sent to your email address" });
         } catch (emailError) {
@@ -840,6 +650,7 @@ const resendResetOTP = async (req, res) => {
         res.status(500).json({ success: false, message: "Server error. Please try again." });
     }
 };
+
 
 const resetPasswordPage = async (req, res) => {
     try {
@@ -916,14 +727,8 @@ module.exports = {
     otpverification,
     verifyOTP,
     postlogin,
-    homePage,
     logout,
-    shopPage,
-    productDetailPage,
     resendOTP,
-    showuser,
-    // contactPage, // Removed as Contact link was removed from navbar
-    orderPage,
     usererrorPage,
     forgotPasswordPage,
     postForgotPassword,

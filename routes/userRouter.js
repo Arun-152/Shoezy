@@ -1,7 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const userController = require("../controllers/user/userController");
+const homepageController = require("../controllers/user/homepageController");
+const shopPageController = require("../controllers/user/shoppageController");
+const orderController = require("../controllers/user/orderController");
+const productController = require("../controllers/user/productController");
+const showuserController = require("../controllers/user/showuserController");
 const { userAuth } = require("../middlewares/auth");
+const passport = require("../config/passport");
+
 
 router.get("/", userController.landingPage);
 router.get("/login", userController.loginPage);
@@ -10,16 +17,24 @@ router.post("/signup", userController.postSignup);
 router.get("/otpverification", userController.otpverification);
 router.post("/verify-otp", userController.verifyOTP);
 router.post("/login", userController.postlogin);
-router.get("/home", userController.homePage);
+router.get("/home", homepageController.homePage);
 router.get("/logout", userController.logout);
-router.get("/shop", userController.shopPage);
-router.get("/product/:id", userController.productDetailPage);
+router.get("/shop", shopPageController.shopPage);
+router.get("/product/:id", productController.productDetailPage);
 router.post("/resendotp", userController.resendOTP);
-router.get("/profile", userAuth, userController.showuser);
-// Contact page route removed as Contact link was removed from navbar
-// router.get("/contact", userController.contactPage);
-router.get("/order", userController.orderPage);
+router.get("/profile", userAuth, showuserController.showuser);
+
+
+
+router.get("/order", orderController.orderPage);
 router.get("/usererrorPage", userController.usererrorPage);
+
+
+router.get("/auth/google",passport.authenticate("google",{scope:['profile','email']}))
+router.get('/auth/google/callback',passport.authenticate('google',{failureRedirect:"/signup"}),(req,res)=>{
+    req.session.user = req.user._id
+    res.redirect("/home")
+})
 
 // Forgot Password Routes
 router.get("/forgot-password", userController.forgotPasswordPage);

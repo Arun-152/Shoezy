@@ -30,7 +30,7 @@
       <div style="margin-top: 20px; text-align: center;">
         <button type="button" class="resend-btn" id="resendBtn">Resend OTP</button>
         <div id="resendCooldown" style="display: none; color: #666; font-size: 14px; margin-top: 10px;">
-          Resend available in: <span id="cooldownTimer">30</span> seconds
+          Resend available in: <span id="cooldownTimer">60</span> seconds
         </div>
       </div>
       
@@ -41,15 +41,16 @@
       
       <!-- Timer Display -->
       <div style="margin-top: 15px; text-align: center;">
-        <span id="timer" style="color: #666; font-size: 14px;">OTP expires in: <span id="countdown">5:00</span></span>
+        <span id="timer" style="color: #666; font-size: 14px;">OTP expires in: <span id="countdown">1:00</span></span>
       </div>
     </div>
   </div>
 
   <script>
     // Timer functionality
-    let timeLeft = 1 * 60; // 5 minutes in seconds
+    let timeLeft = 60; // 60 seconds OTP validity
     const countdownElement = document.getElementById('countdown');
+    let expiredAlertShown = false; // Flag to prevent multiple expired alerts
     
     function updateTimer() {
       const minutes = Math.floor(timeLeft / 60);
@@ -58,20 +59,51 @@
       
       if (timeLeft <= 0) {
         clearInterval(timerInterval);
-        Swal.fire({
-          icon: 'warning',
-          title: 'OTP Expired',
-          text: 'Your OTP has expired. Please request a new one.',
-          confirmButtonText: 'Request New OTP'
-        }).then(() => {
-          window.location.href = '/forgot-password';
-        });
+
+        // Only show expired alert if it hasn't been shown already
+        if (!expiredAlertShown) {
+          expiredAlertShown = true;
+          Swal.fire({
+            icon: 'warning',
+            title: 'OTP Expired',
+            text: 'Your OTP has expired. Please click the Resend OTP button to get a new one.',
+            confirmButtonText: 'OK'
+          }).then(() => {
+            // Enable the resend button immediately when OTP expires
+            if (resendCooldownActive) {
+              clearInterval(resendCooldownInterval);
+              resendCooldownActive = false;
+              const resendBtn = document.getElementById('resendBtn');
+              const resendCooldown = document.getElementById('resendCooldown');
+              resendBtn.style.display = 'inline-block';
+              resendBtn.disabled = false;
+              resendBtn.textContent = 'Resend OTP';
+              resendCooldown.style.display = 'none';
+            }
+          });
+        }
       }
       timeLeft--;
     }
     
-    const timerInterval = setInterval(updateTimer, 1000);
+    let timerInterval = setInterval(updateTimer, 1000);
     updateTimer(); // Initial call
+
+    // Function to reset timer completely
+    function resetTimer() {
+      // Clear existing timer interval
+      if (timerInterval) {
+        clearInterval(timerInterval);
+      }
+
+      // Reset expired alert flag
+      expiredAlertShown = false;
+
+      // Reset time and restart timer
+      timeLeft = 60; // 60 seconds OTP validity
+      timerInterval = setInterval(updateTimer, 1000);
+      updateTimer();
+    }
 
     document.getElementById('verifyOtpForm').addEventListener('submit', async function(e) {
       e.preventDefault();
@@ -108,25 +140,33 @@
         });
         
         const data = await response.json();
-        
-        if (data.success) {
-          clearInterval(timerInterval); // Stop timer
-          Swal.fire({
-            icon: 'success',
-            title: 'OTP Verified!',
-            text: data.message,
-            confirmButtonText: 'Reset Password'
-          }).then(() => {
-            window.location.href = '/reset-password';
-          });
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Verification Failed',
-            text: data.message,
-            confirmButtonText: 'Try Again'
-          });
-        }
+       if (data.success) {
+  clearInterval(timerInterval); // Stop timer
+  Swal.fire({
+    icon: 'success',
+    title: 'OTP Verified!',
+    text: data.message,
+    confirmButtonText: 'Reset Password'
+  }).then(() => {
+    window.location.href = '/reset-password';
+  });
+} else {
+  // Check if OTP expired
+  if (data.message && data.message.toLowerCase().includes("expired")) {
+    clearInterval(timerInterval); // Stop countdown
+    document.getElementById('resendBtn').style.display = 'inline-block'; // Show resend button
+    document.getElementById('resendBtn').disabled = false;
+    document.getElementById('resendCooldown').style.display = 'none';   // Hide countdown
+  }
+
+  Swal.fire({
+    icon: 'error',
+    title: 'Verification Failed',
+    text: data.message,
+    confirmButtonText: 'Try Again'
+  });
+}
+
       } catch (error) {
         Swal.fire({
           icon: 'error',
@@ -161,13 +201,13 @@
 
     // Resend OTP functionality
     let resendCooldownActive = true; // Start with cooldown active
-    let resendCooldownTime = 30; // 30 seconds cooldown
+    let resendCooldownTime = 60; // 60 seconds resend OTP cooldown
     let resendCooldownInterval;
 
     // Function to start resend cooldown
     function startResendCooldown() {
       resendCooldownActive = true;
-      resendCooldownTime = 30;
+      resendCooldownTime = 60; // 60 seconds resend OTP cooldown
 
       const resendBtn = document.getElementById('resendBtn');
       const resendCooldown = document.getElementById('resendCooldown');
@@ -234,9 +274,8 @@
           document.getElementById('otp').value = '';
           document.getElementById('otpError').textContent = '';
 
-          // Reset the main timer to 5 minutes
-          timeLeft = 5 * 60;
-          updateTimer();
+          // Reset the timer completely to prevent old expired alerts
+          resetTimer();
 
           // Start cooldown
           startResendCooldown();

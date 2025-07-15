@@ -136,3 +136,23 @@ body {
     text-align: center;
   }
 }
+
+.error-message {
+  color: #dc3545;
+  font-size: 13px;
+  margin-top: 8px;
+  margin-bottom: 5px;
+  display: block;
+  font-weight: 500;
+  line-height: 1.4;
+  min-height: 18px;
+  opacity: 1;
+  visibility: visible;
+  transition: all 0.3s ease;
+}
+
+.error-message:empty {
+  min-height: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+}

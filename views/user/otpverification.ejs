@@ -40,7 +40,7 @@
         <div class="resend-section">
           <button type="button" id="resendOtpBtn" class="resend-btn">Resend OTP</button>
           <div id="resendCooldown" style="display: none; color: #666; font-size: 14px; margin-top: 10px; padding: 8px 12px; background-color: #f8f9fa; border-radius: 4px; border: 1px solid #dee2e6;">
-            Resend available in: <span id="cooldownTimer" style="font-weight: bold; color: #007bff;">30</span> seconds
+            Resend available in: <span id="cooldownTimer" style="font-weight: bold; color: #007bff;">60</span> seconds
           </div>
         </div>
       </form>
@@ -51,7 +51,7 @@
   const otpInputs = document.querySelectorAll('.otp-input');
   const form = document.querySelector('.otp-form');
   const timerElement = document.querySelector('.timer');
-  let timeLeft = 300; // 5 minutes
+  let timeLeft = 60; // 60 seconds OTP validity
 
   // Auto-focus handling
   otpInputs.forEach((input, index) => {
@@ -130,13 +130,13 @@
 
   // Resend OTP functionality
   let resendCooldownActive = true; // Start with cooldown active
-  let resendCooldownTime = 30; // 30 seconds cooldown
+  let resendCooldownTime = 60; // 60 seconds resend OTP cooldown
   let resendCooldownInterval;
 
   // Function to start resend cooldown
   function startResendCooldown() {
     resendCooldownActive = true;
-    resendCooldownTime = 30;
+    resendCooldownTime = 60; // 60 seconds resend OTP cooldown
 
     const resendBtn = document.getElementById('resendOtpBtn');
     const resendCooldown = document.getElementById('resendCooldown');
@@ -203,8 +203,8 @@
         otpInputs.forEach(input => input.value = '');
         otpInputs[0].focus();
 
-        // Reset the main timer to 5 minutes
-        timeLeft = 300;
+        // Reset the main timer to 60 seconds
+        timeLeft = 60; // 60 seconds OTP validity
         updateTimer();
 
         // Start cooldown

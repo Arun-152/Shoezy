@@ -110,6 +110,16 @@ body {
   background-color: white;
 }
 
+.form-group input.error {
+  border-color: #dc3545;
+  background-color: #fff5f5;
+}
+
+.form-group input.error:focus {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
 .btn {
   width: 100%;
   padding: 15px;
@@ -137,9 +147,22 @@ body {
 
 .error-message {
   color: #dc3545;
-  font-size: 12px;
-  margin-top: 5px;
+  font-size: 13px;
+  margin-top: 8px;
+  margin-bottom: 5px;
   display: block;
+  font-weight: 500;
+  line-height: 1.4;
+  min-height: 18px;
+  opacity: 1;
+  visibility: visible;
+  transition: all 0.3s ease;
+}
+
+.error-message:empty {
+  min-height: 0;
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 /* Responsive Design */
