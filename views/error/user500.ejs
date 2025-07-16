@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title || 'Server Error' %></title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .error-container {
+            text-align: center;
+            background: white;
+            padding: 60px 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 90%;
+        }
+
+        .error-icon {
+            font-size: 120px;
+            color: #ff6b6b;
+            margin-bottom: 30px;
+            animation: shake 2s infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            10%, 30%, 50%, 70%, 90% {
+                transform: translateX(-5px);
+            }
+            20%, 40%, 60%, 80% {
+                transform: translateX(5px);
+            }
+        }
+
+        .error-code {
+            font-size: 72px;
+            font-weight: 700;
+            color: #ff6b6b;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .error-title {
+            font-size: 32px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .error-message {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(108, 117, 125, 0.3);
+        }
+
+        .error-details {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+            text-align: left;
+            font-family: monospace;
+            font-size: 12px;
+            color: #666;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .toggle-details {
+            background: none;
+            border: none;
+            color: #ff6b6b;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 20px;
+            text-decoration: underline;
+        }
+
+        .footer-text {
+            margin-top: 40px;
+            font-size: 14px;
+            color: #999;
+        }
+
+        @media (max-width: 768px) {
+            .error-container {
+                padding: 40px 20px;
+            }
+            
+            .error-code {
+                font-size: 48px;
+            }
+            
+            .error-title {
+                font-size: 24px;
+            }
+            
+            .error-message {
+                font-size: 16px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        
+        <div class="error-code">500</div>
+        
+        <h1 class="error-title">Server Error</h1>
+        
+        <p class="error-message">
+            <%= message || "Something went wrong on our end. We're working to fix this issue." %>
+        </p>
+        
+        <div class="action-buttons">
+            <a href="/home" class="btn btn-primary">
+                <i class="fas fa-home"></i>
+                Go to Home
+            </a>
+            <a href="javascript:history.back()" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i>
+                Go Back
+            </a>
+        </div>
+        
+        <% if (typeof error !== 'undefined' && error && error.stack) { %>
+        <button class="toggle-details" onclick="toggleErrorDetails()">
+            Show Error Details
+        </button>
+        <div class="error-details" id="errorDetails">
+            <strong>Error Stack:</strong><br>
+            <%= error.stack %>
+        </div>
+        <% } %>
+        
+        <p class="footer-text">
+            Our technical team has been notified. Please try again in a few minutes.
+        </p>
+    </div>
+
+    <script>
+        function toggleErrorDetails() {
+            const details = document.getElementById('errorDetails');
+            const button = document.querySelector('.toggle-details');
+            
+            if (details.style.display === 'none' || details.style.display === '') {
+                details.style.display = 'block';
+                button.textContent = 'Hide Error Details';
+            } else {
+                details.style.display = 'none';
+                button.textContent = 'Show Error Details';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -30,6 +30,7 @@ const signupPage = async (req, res) => {
 };
 
 const landingPage = async (req, res) => {
+     if(req.session.userId)return res.redirect("/home")
     try {
         // Fetch featured products for landing page (same logic as home page)
         const featuredProducts = await Product.find({ isDeleted: false, isBlocked: false })

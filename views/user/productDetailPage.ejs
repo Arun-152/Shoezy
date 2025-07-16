@@ -17,7 +17,6 @@
             font-family: 'Inter', sans-serif;
             background-color: #f8f9fa;
             color: #333;
-            padding-top: 80px; /* Account for fixed header */
         }
 
         .container {
@@ -789,7 +788,7 @@
 </head>
 <body>
     <!-- Header -->
-      <%-include("../partials/user/header")%>
+      <%-include("../partials/user/navbar")%>
 
     <!-- Breadcrumb -->
     <div class="breadcrumb">
@@ -912,15 +911,9 @@
                             <span class="current-price">Price not available</span>
                         <% } %>
                     </div>
-
-                   
-
                     <div class="product-description">
                         <h3 class="description-title">Description</h3>
                         <p class="description-text"><%= product.description %></p>
-                        <% if (product.brand) { %>
-                            <p class="description-text"><strong>Brand:</strong> <%= product.brand %></p>
-                        <% } %>
                         <% if (product.color) { %>
                             <p class="description-text"><strong>Color:</strong> <%= product.color %></p>
                         <% } %>
@@ -1045,6 +1038,37 @@
         </div>
     </main>
     <%-include("../partials/user/userfooter")%>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/jquery-zoom/jquery.zoom.min.js"></script>
+
+            <script>
+                $(function () {
+                    const imageContainer = $('#imageZoomContainer');
+                    const mainImage = $('#mainImage');
+
+                    // Function to bind zoom
+                    function initZoom() {
+                        imageContainer.trigger('zoom.destroy'); 
+                        imageContainer.zoom({ magnify: 2.5 });  
+                    }
+
+                    // Initialize on first load
+                    initZoom();
+
+                    // Thumbnail click handler
+                    $('.thumbnail').on('click', function () {
+                        const newSrc = $(this).data('image');
+                        mainImage.attr('src', newSrc); 
+
+                       
+                        setTimeout(() => {
+                            initZoom();
+                        }, 100);
+                    });
+                });
+            </script>
+
+
     <script>
         let selectedSize = null;
         let selectedPrice = 0;
@@ -1211,8 +1235,6 @@
                 quantity: quantity,
                 image: '<%= product.images && product.images.length > 0 ? product.images[0] : "" %>'
             };
-            
-            console.log('Adding to cart:', cartItem);
             alert(`Added ${quantity} x <%= product.productName %> (Size: ${selectedSize}) to cart!`);
         }
 
@@ -1255,11 +1277,8 @@
                     updateTotalPrice();
                 }
             });
-
-            // Initialize image zoom functionality
-            console.log('About to initialize zoom...');
             initializeImageZoom();
-            console.log('Zoom initialization complete');
+          
         });
 
         // Image Zoom Functionality
@@ -1270,16 +1289,7 @@
             const zoomResult = document.getElementById('zoomResult');
             const zoomImage = document.getElementById('zoomImage');
 
-            console.log('Zoom elements check:', {
-                zoomContainer: !!zoomContainer,
-                mainImage: !!mainImage,
-                zoomLens: !!zoomLens,
-                zoomResult: !!zoomResult,
-                zoomImage: !!zoomImage
-            });
-
             if (!zoomContainer || !mainImage || !zoomLens || !zoomResult || !zoomImage) {
-                console.log('Some zoom elements not found, implementing simple zoom');
                 // Fallback to simple zoom
                 if (zoomContainer && mainImage) {
                     zoomContainer.addEventListener('mouseenter', function() {
@@ -1293,8 +1303,6 @@
                 return;
             }
 
-            console.log('Initializing full zoom functionality');
-
             let isZooming = false;
 
             function showZoom() {
@@ -1303,7 +1311,6 @@
                 zoomResult.style.display = 'block';
                 zoomLens.style.opacity = '1';
                 zoomResult.style.opacity = '1';
-                console.log('Showing zoom');
             }
 
             function hideZoom() {
@@ -1316,7 +1323,7 @@
                         zoomResult.style.display = 'none';
                     }
                 }, 300);
-                console.log('Hiding zoom');
+            
             }
 
             function updateZoom(e) {
@@ -1355,12 +1362,10 @@
 
             // Event listeners
             zoomContainer.addEventListener('mouseenter', function(e) {
-                console.log('Mouse entered zoom container');
                 showZoom();
             });
 
             zoomContainer.addEventListener('mouseleave', function(e) {
-                console.log('Mouse left zoom container');
                 hideZoom();
             });
 
@@ -1371,8 +1376,6 @@
             // Initial setup
             zoomLens.style.display = 'none';
             zoomResult.style.display = 'none';
-
-            console.log('Zoom event listeners attached');
         }
     </script>
 </body>

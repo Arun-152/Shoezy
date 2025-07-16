@@ -2,19 +2,17 @@ const User=require("../models/userSchema")
 
 
 const userAuth=(req,res,next)=>{
-    if(req.session.userId){
-        User.findById(req.session.userId)
-        .then(data=>{
-            if(data && !data.isBlocked){
-                next()
-            }else{
-                res.render("loginPage")
-            }
-        }).catch(error=>{
-            res.status(500).send("server error")
-        })
-    }else{
-        res.redirect("/login")
+    try{
+       const user = req.session.userId
+       if(!user){
+        return res.redirect('/login')
+       }
+       if(user.isBlocked){
+        return res.redirect('/login')
+       }
+       next()
+    }catch(error){
+
     }
 }
 

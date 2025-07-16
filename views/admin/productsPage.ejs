@@ -310,8 +310,8 @@ function blockProduct(productId, productName) {
         showCancelButton: true,
         confirmButtonColor: '#d33',
         cancelButtonColor: '#3085d6',
-        confirmButtonText: '✅ Yes, Block it',
-        cancelButtonText: '❌ Cancel'
+        confirmButtonText: 'Yes, Block it',
+        cancelButtonText: 'Cancel'
     }).then((result) => {
         if (result.isConfirmed) {
             // Proceed with the block action
@@ -330,8 +330,8 @@ function unblockProduct(productId, productName) {
         showCancelButton: true,
         confirmButtonColor: '#28a745',
         cancelButtonColor: '#3085d6',
-        confirmButtonText: '✅ Yes, Unblock it',
-        cancelButtonText: '❌ Cancel'
+        confirmButtonText: ' Yes, Unblock it',
+        cancelButtonText: ' Cancel'
     }).then((result) => {
         if (result.isConfirmed) {
             // Proceed with the unblock action

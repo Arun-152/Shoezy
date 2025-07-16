@@ -332,15 +332,12 @@
         }
 
         if (isValid) {
-            // ✅ Remove name from original file inputs so Multer doesn't process both
             ['image1', 'image2', 'image3'].forEach(id => {
                 const input = document.getElementById(id);
                 if (input) input.removeAttribute('name');
             });
 
             const formData = new FormData(this);
-
-            // ✅ Append cropped blobs
             croppedImages.forEach((blob, id) => {
                 formData.append('images', blob, `image${id.slice(-1)}.jpg`);
             });

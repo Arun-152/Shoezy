@@ -27,57 +27,6 @@ body {
     top: 0;
     z-index: 1000;
 }
-
-.navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.logo h1 {
-    color: #2563eb;
-    font-size: 1.8rem;
-    font-weight: bold;
-}
-
-.nav-links {
-    display: flex;
-    list-style: none;
-    gap: 2rem;
-}
-
-.nav-links a {
-    text-decoration: none;
-    color: #333;
-    font-weight: 500;
-    transition: color 0.3s ease;
-}
-
-.nav-links a:hover {
-    color: #2563eb;
-}
-
-.nav-icons {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    font-size: 1.2rem;
-}
-
-.nav-icon {
-    cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 50%;
-    transition: background-color 0.3s ease;
-}
-
-.nav-icon:hover {
-    background-color: #f3f4f6;
-}
-
 .search-container {
     position: relative;
     display: flex;

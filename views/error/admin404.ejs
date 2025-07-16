@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title || 'Admin - Page Not Found' %></title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .error-container {
+            text-align: center;
+            background: white;
+            padding: 60px 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 90%;
+            border-top: 5px solid #e74c3c;
+        }
+
+        .admin-badge {
+            background: #e74c3c;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 30px;
+            display: inline-block;
+        }
+
+        .error-icon {
+            font-size: 120px;
+            color: #e74c3c;
+            margin-bottom: 30px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .error-code {
+            font-size: 72px;
+            font-weight: 700;
+            color: #e74c3c;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .error-title {
+            font-size: 32px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .error-message {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .error-url {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            color: #e74c3c;
+            margin-bottom: 40px;
+            word-break: break-all;
+            border-left: 4px solid #e74c3c;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-secondary {
+            background: #34495e;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #2c3e50;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(52, 73, 94, 0.3);
+        }
+
+        .footer-text {
+            margin-top: 40px;
+            font-size: 14px;
+            color: #999;
+        }
+
+        .admin-info {
+            background: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+            border-left: 4px solid #3498db;
+        }
+
+        .admin-info h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .admin-info ul {
+            text-align: left;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .admin-info li {
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .error-container {
+                padding: 40px 20px;
+            }
+            
+            .error-code {
+                font-size: 48px;
+            }
+            
+            .error-title {
+                font-size: 24px;
+            }
+            
+            .error-message {
+                font-size: 16px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="admin-badge">
+            <i class="fas fa-shield-alt"></i>
+            Admin Panel
+        </div>
+        
+        <div class="error-icon">
+            <i class="fas fa-search"></i>
+        </div>
+        
+        <div class="error-code">404</div>
+        
+        <h1 class="error-title">Admin Page Not Found</h1>
+        
+        <p class="error-message">
+            <%= message || "The admin page you are looking for doesn't exist or you don't have permission to access it." %>
+        </p>
+        
+        <% if (typeof url !== 'undefined' && url) { %>
+        <div class="error-url">
+            Requested URL: <%= url %>
+        </div>
+        <% } %>
+        
+        <div class="admin-info">
+            <h4><i class="fas fa-info-circle"></i> Common Admin Routes:</h4>
+            <ul>
+                <li>/admin/dashboard - Admin Dashboard</li>
+                <li>/admin/products - Product Management</li>
+                <li>/admin/customers - Customer Management</li>
+                <li>/admin/orders - Order Management</li>
+                <li>/admin/categories - Category Management</li>
+            </ul>
+        </div>
+        
+        <div class="action-buttons">
+            <a href="/admin/dashboard" class="btn btn-primary">
+                <i class="fas fa-tachometer-alt"></i>
+                Admin Dashboard
+            </a>
+            <a href="/admin/login" class="btn btn-secondary">
+                <i class="fas fa-sign-in-alt"></i>
+                Admin Login
+            </a>
+        </div>
+        
+        <p class="footer-text">
+            If you believe this is an error, please contact the system administrator.
+        </p>
+    </div>
+</body>
+</html>

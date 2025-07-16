@@ -25,10 +25,6 @@ router.get('/google/callback',
     }),
     (req, res) => {
         try {
-            // Successful authentication
-            console.log('✅ Google OAuth successful for user:', req.user.email);
-
-            // Ensure session exists before setting userId
             if (req.session) {
                 req.session.userId = req.user._id;
 
@@ -36,11 +32,11 @@ router.get('/google/callback',
                 req.flash('success_msg', 'Successfully signed in with Google!');
                 res.redirect('/home');
             } else {
-                console.error('❌ Session not available after OAuth success');
+                console.error('Session not available after OAuth success');
                 res.redirect('/login?error=session_error');
             }
         } catch (error) {
-            console.error('❌ Error in OAuth callback:', error);
+            console.error('Error in OAuth callback:', error);
             req.flash('error_msg', 'Authentication failed. Please try again.');
             res.redirect('/login');
         }

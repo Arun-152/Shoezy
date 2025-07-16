@@ -1,43 +1,92 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shoezy - Premium Sneakers</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="/css/navbar.css">
-</head>
-<body>
-    <header class="header">
-        <nav class="navbar">
-            <div class="logo">
-                <h1>Shoezy</h1>
-            </div>
-            <ul class="nav-links">
-                <li><a href="/home">Home</a></li>
-                <li><a href="/shop">Shop</a></li>
-                <li><a href="/order">Orders</a></li>
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
+<link rel="stylesheet" href="/css/navbar.css">
 
-                <!-- Show Login/Register only on Landing Page -->
-                <% if (typeof isLandingPage !== 'undefined' && isLandingPage) { %>
-                    <% if (typeof user !== 'undefined' && user) { %>
-                        <!-- User is logged in on landing page -->
-                        <li><a href="/profile">Welcome, <%= user.fullname %></a></li>
-                        <li><a href="/logout" style="color: #dc3545;">Logout</a></li>
-                    <% } else { %>
-                        <!-- User is not logged in on landing page -->
-                        <li><a href="/login">Login</a></li>
-                        <li><a href="/signup">Register</a></li>
-                    <% } %>
-                <% } %>
-            </ul>
-            <div class="nav-icons">
-                <span class="nav-icon wishlist-icon"><i class="fas fa-heart"></i></span>
-                <span class="nav-icon cart-icon"><i class="fas fa-shopping-cart"></i></span>
-                <!-- Show profile icon on all pages if user is logged in -->
-                <% if (typeof user !== 'undefined' && user) { %>
-                    <span class="nav-icon profile-icon"><a href="/profile"><i class="fas fa-user"></i></a></span>
-                <% } %>
+<body>
+  <% if (user) { %>
+    <header class="navbar-wrapper">
+      <nav class="navbar">
+        <div class="logo">
+          <h1>Shoezy</h1>
+        </div>
+        <ul class="nav-links">
+          <li><a href="/">Home</a></li>
+          <li><a href="/shop">Shop</a></li>
+          <li><a href="/#">Contact</a></li>
+          <li><a href="/#">About</a></li>
+          <li><a href="/profile"><%= user.fullName %></a></li>
+        </ul>
+        <div class="nav-icons">
+          <span class="nav-icon wishlist-icon"><i class="fas fa-heart"></i></span>
+          <span class="nav-icon cart-icon"><i class="fas fa-shopping-cart"></i></span>
+          <span class="nav-icon profile-icon">
+            <i class="fas fa-user"></i>
+            <div class="dropdown-menu">
+              <a onclick="window.location.href = '/profile'">My Account</a>
+              <a onclick="window.location.href = '/order'">My Orders</a>
+              <a onclick="logout()" style="color: #dc3545;">Logout</a>
             </div>
-        </nav>
+          </span>
+        </div>
+      </nav>
     </header>
+  <% } else { %>
+    <header class="navbar-wrapper">
+      <nav class="navbar">
+        <div class="logo">
+          <h1>Shoezy</h1>
+        </div>
+        <ul class="nav-links">
+          <li><a href="/">Home</a></li>
+          <li><a href="/shop">Shop</a></li>
+          <li><a href="/#">Contact</a></li>
+          <li><a href="/#">About</a></li>
+          <li class="nav-icon login-icon">
+            <a href="/login"><i class="fas fa-sign-in-alt"></i></a>
+            <div class="dropdown-menu">
+              <a onclick="logout()">Login</a>
+              <a onclick="signup()">Register</a>
+            </div>
+          </li>
+        </ul>
+        <div class="nav-icons">
+          <span class="nav-icon wishlist-icon"><i class="fas fa-heart"></i></span>
+          <span class="nav-icon cart-icon"><i class="fas fa-shopping-cart"></i></span>
+        </div>
+      </nav>
+    </header>
+  <% } %>
+
+  <script>
+    function logout() {
+      window.location.href = '/logout';
+    }
+
+    function signup() {
+      window.location.href = '/signup';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const icons = document.querySelectorAll('.login-icon, .profile-icon');
+      icons.forEach(icon => {
+        icon.addEventListener('click', (e) => {
+          e.preventDefault();
+          const dropdown = icon.querySelector('.dropdown-menu');
+          document.querySelectorAll('.dropdown-menu').forEach(other => {
+            if (other !== dropdown) other.classList.remove('show');
+          });
+          dropdown.classList.toggle('show');
+        });
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.login-icon') && !e.target.closest('.profile-icon')) {
+          document.querySelectorAll('.dropdown-menu').forEach(dropdown => {
+            dropdown.classList.remove('show');
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>

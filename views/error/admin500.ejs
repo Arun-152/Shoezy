@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title || 'Admin - Server Error' %></title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .error-container {
+            text-align: center;
+            background: white;
+            padding: 60px 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            max-width: 700px;
+            width: 90%;
+            border-top: 5px solid #e74c3c;
+        }
+
+        .admin-badge {
+            background: #e74c3c;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 30px;
+            display: inline-block;
+        }
+
+        .error-icon {
+            font-size: 120px;
+            color: #e74c3c;
+            margin-bottom: 30px;
+            animation: shake 2s infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            10%, 30%, 50%, 70%, 90% {
+                transform: translateX(-5px);
+            }
+            20%, 40%, 60%, 80% {
+                transform: translateX(5px);
+            }
+        }
+
+        .error-code {
+            font-size: 72px;
+            font-weight: 700;
+            color: #e74c3c;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .error-title {
+            font-size: 32px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .error-message {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-secondary {
+            background: #34495e;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #2c3e50;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(52, 73, 94, 0.3);
+        }
+
+        .error-details {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+            text-align: left;
+            font-family: monospace;
+            font-size: 12px;
+            color: #666;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            border-left: 4px solid #e74c3c;
+        }
+
+        .toggle-details {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 20px;
+            text-decoration: underline;
+        }
+
+        .admin-actions {
+            background: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+            border-left: 4px solid #f39c12;
+        }
+
+        .admin-actions h4 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .admin-actions ul {
+            text-align: left;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .admin-actions li {
+            margin-bottom: 8px;
+        }
+
+        .footer-text {
+            margin-top: 40px;
+            font-size: 14px;
+            color: #999;
+        }
+
+        .status-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            color: #856404;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .error-container {
+                padding: 40px 20px;
+            }
+            
+            .error-code {
+                font-size: 48px;
+            }
+            
+            .error-title {
+                font-size: 24px;
+            }
+            
+            .error-message {
+                font-size: 16px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="admin-badge">
+            <i class="fas fa-shield-alt"></i>
+            Admin Panel
+        </div>
+        
+        <div class="error-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        
+        <div class="error-code">500</div>
+        
+        <h1 class="error-title">Admin Server Error</h1>
+        
+        <p class="error-message">
+            <%= message || "A critical error occurred in the admin panel. Our technical team has been notified." %>
+        </p>
+        
+        <div class="status-info">
+            <i class="fas fa-info-circle"></i>
+            <strong>Error Time:</strong> <%= new Date().toLocaleString() %>
+        </div>
+        
+        <div class="admin-actions">
+            <h4><i class="fas fa-tools"></i> Recommended Actions:</h4>
+            <ul>
+                <li>Try refreshing the page</li>
+                <li>Clear your browser cache and cookies</li>
+                <li>Check if the issue persists in an incognito window</li>
+                <li>Contact the system administrator if the problem continues</li>
+                <li>Check server logs for detailed error information</li>
+            </ul>
+        </div>
+        
+        <div class="action-buttons">
+            <a href="/admin/dashboard" class="btn btn-primary">
+                <i class="fas fa-tachometer-alt"></i>
+                Admin Dashboard
+            </a>
+            <a href="javascript:location.reload()" class="btn btn-secondary">
+                <i class="fas fa-redo"></i>
+                Refresh Page
+            </a>
+        </div>
+        
+        <% if (typeof error !== 'undefined' && error && error.stack) { %>
+        <button class="toggle-details" onclick="toggleErrorDetails()">
+            Show Technical Details
+        </button>
+        <div class="error-details" id="errorDetails">
+            <strong>Error Stack Trace:</strong><br>
+            <%= error.stack %>
+        </div>
+        <% } %>
+        
+        <p class="footer-text">
+            System administrators have been automatically notified of this error.
+        </p>
+    </div>
+
+    <script>
+        function toggleErrorDetails() {
+            const details = document.getElementById('errorDetails');
+            const button = document.querySelector('.toggle-details');
+            
+            if (details.style.display === 'none' || details.style.display === '') {
+                details.style.display = 'block';
+                button.textContent = 'Hide Technical Details';
+            } else {
+                details.style.display = 'none';
+                button.textContent = 'Show Technical Details';
+            }
+        }
+    </script>
+</body>
+</html>

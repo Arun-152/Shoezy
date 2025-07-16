@@ -9,7 +9,7 @@
 </head>
 <body>
     <!-- Header -->
-    <%-include("../partials/user/header")%>
+     <%-include('../partials/user/navbar')%>
     <!-- Hero Section -->
     <section class="hero">
         <div class="hero-content">
@@ -619,8 +619,6 @@
 
         // Quick add to cart functionality
         function quickAddToCart(productId) {
-            // Here you would typically send an AJAX request to add to cart
-            console.log('Adding product to cart:', productId);
             showNotification('Product added to cart!');
         }
 
