@@ -30,11 +30,7 @@ router.get("/order", orderController.orderPage);
 router.get("/usererrorPage", userController.usererrorPage);
 
 
-router.get("/auth/google",passport.authenticate("google",{scope:['profile','email']}))
-router.get('/auth/google/callback',passport.authenticate('google',{failureRedirect:"/signup"}),(req,res)=>{
-    req.session.user = req.user._id
-    res.redirect("/home")
-})
+
 
 // Forgot Password Routes
 router.get("/forgot-password", userController.forgotPasswordPage);

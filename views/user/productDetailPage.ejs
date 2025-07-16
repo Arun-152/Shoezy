@@ -26,43 +26,109 @@
             padding: 0 20px;
         }
 
-        /* Product Status Badge Styles */
+        /* Product Offer Section */
+        .offer-section {
+            margin: 1.5rem 0;
+        }
+
+        .offer-badge-large {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 8px 25px rgba(255,107,107,0.3);
+            position: relative;
+            overflow: hidden;
+            animation: offerPulse 3s infinite;
+        }
+
+        .offer-badge-large::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shine 2s infinite;
+        }
+
+        @keyframes offerPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .offer-badge-large i {
+            font-size: 20px;
+            animation: fire 1.5s infinite alternate;
+        }
+
+        @keyframes fire {
+            0% { transform: scale(1) rotate(-5deg); }
+            100% { transform: scale(1.1) rotate(5deg); }
+        }
+
+        .offer-text {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .offer-percent {
+            font-size: 18px;
+            font-weight: 800;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 12px;
+            border-radius: 20px;
+            margin-left: auto;
+        }
+
+        /* Enhanced Product Status Badge */
         .product-status {
-            margin: 1rem 0;
+            margin: 1.5rem 0;
         }
 
         .status-badge {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 16px;
-            border-radius: 25px;
-            font-size: 14px;
+            padding: 10px 18px;
+            border-radius: 20px;
+            font-size: 13px;
             font-weight: 600;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
             transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .status-badge.available {
-            background: linear-gradient(135deg, #10b981, #059669);
+            background: rgba(34, 197, 94, 0.9);
             color: white;
-            border: 1px solid rgba(16, 185, 129, 0.3);
         }
 
         .status-badge.out-of-stock {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
+            background: rgba(239, 68, 68, 0.9);
             color: white;
-            border: 1px solid rgba(239, 68, 68, 0.3);
         }
 
-        .status-badge .status-icon {
-            font-size: 16px;
+        .status-badge i {
+            font-size: 14px;
             line-height: 1;
         }
 
         .status-badge:hover {
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.12);
         }
 
         /* Remove conflicting header styles - let header partial handle it */
@@ -93,20 +159,27 @@
             color: #999;
         }
 
-        /* Product Detail */
+        /* Enhanced Product Detail */
         .product-detail {
             padding: 2rem 0;
-            background: #fff;
+            background: #fafbfc;
             margin-top: 1rem;
+            min-height: 100vh;
         }
 
         .product-main {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 4rem;
-            margin-bottom: 3rem;
+            margin-bottom: 4rem;
             align-items: start;
-            padding: 2rem 0;
+            padding: 3rem;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid #f1f3f4;
+            max-width: 1200px;
+            margin: 0 auto 4rem auto;
         }
 
         .product-images {
@@ -117,25 +190,30 @@
             top: 100px;
         }
 
-        /* Image Zoom Container */
+        /* Enhanced Image Zoom Container */
         .image-zoom-container {
             position: relative;
             width: 100%;
             height: 500px;
             overflow: hidden;
-            border-radius: 15px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             cursor: crosshair;
-            background: #fff;
+            background: #f8f9fa;
+            border: 1px solid #f1f3f4;
         }
 
         .main-image {
             width: 100%;
             height: 100%;
             object-fit: contain;
-            border-radius: 15px;
+            border-radius: 16px;
             transition: transform 0.3s ease;
-            padding: 1rem;
+            padding: 20px;
+        }
+
+        .image-zoom-container:hover .main-image {
+            transform: scale(1.02);
         }
 
         /* Zoom Lens */
@@ -247,10 +325,8 @@
         }
 
         .product-info {
-            padding: 2rem;
-            background: #fff;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            padding: 0;
+            background: transparent;
             height: fit-content;
         }
 
@@ -258,14 +334,14 @@
             font-size: 2.5rem;
             font-weight: 700;
             margin-bottom: 0.5rem;
-            color: #333;
+            color: #1a1a1a;
             line-height: 1.2;
         }
 
         .product-category {
-            color: #666;
+            color: #6b7280;
             margin-bottom: 1.5rem;
-            font-size: 1.1rem;
+            font-size: 0.9rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             font-weight: 500;
@@ -294,28 +370,29 @@
         .product-price {
             margin-bottom: 2rem;
             padding: 1.5rem;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: 15px;
-            border-left: 4px solid #007bff;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 1px solid #f1f3f4;
         }
 
         .current-price {
             font-size: 2.5rem;
             font-weight: 700;
-            color: #007bff;
+            color: #1a1a1a;
             display: block;
             margin-bottom: 0.5rem;
         }
 
         .original-price {
             font-size: 1.2rem;
-            color: #999;
+            color: #9ca3af;
             text-decoration: line-through;
             margin-left: 0.5rem;
+            font-weight: 500;
         }
 
         .discount-badge {
-            background: #dc3545;
+            background: #ef4444;
             color: white;
             padding: 0.25rem 0.5rem;
             border-radius: 4px;
@@ -483,21 +560,110 @@
 
         .product-card {
             background: white;
-            border-radius: 10px;
+            border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             cursor: pointer;
+            border: 1px solid rgba(0,0,0,0.05);
         }
 
         .product-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            border-color: rgba(0,123,255,0.2);
+        }
+
+        .product-card-image-container {
+            position: relative;
+            overflow: hidden;
+            height: 200px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
         }
 
         .product-card-image {
             width: 100%;
-            height: 200px;
+            height: 100%;
             object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .product-card:hover .product-card-image {
+            transform: scale(1.1);
+        }
+
+        /* Related Product Offer Ribbon */
+        .related-offer-ribbon {
+            position: absolute;
+            top: 10px;
+            left: -8px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 4px 12px 4px 8px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(255,107,107,0.4);
+            clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 0 100%);
+        }
+
+        /* Related Product Status Badge */
+        .related-status-badge {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        .related-status-badge.available {
+            background: rgba(40, 167, 69, 0.9);
+            color: white;
+        }
+
+        .related-status-badge.out-of-stock {
+            background: rgba(220, 53, 69, 0.9);
+            color: white;
+        }
+
+        /* Related Product Wishlist Icon */
+        .related-wishlist-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 30px;
+            height: 30px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .related-wishlist-icon:hover {
+            background: #ff6b6b;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .related-wishlist-icon i {
+            font-size: 12px;
+            transition: all 0.3s ease;
         }
 
         .product-card-info {
@@ -507,11 +673,33 @@
         .product-card-title {
             font-weight: 600;
             margin-bottom: 0.5rem;
+            font-size: 14px;
+            color: #2c3e50;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.3;
         }
 
-        .product-card-price {
+        /* Related Product Price */
+        .related-price-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .related-current-price {
             color: #007bff;
             font-weight: 700;
+            font-size: 16px;
+        }
+
+        .related-original-price {
+            color: #95a5a6;
+            text-decoration: line-through;
+            font-size: 12px;
         }
 
         /* Responsive Design */
@@ -660,17 +848,28 @@
                     <h1 class="product-title"><%= product.productName %></h1>
                     <p class="product-category"><%= product.category ? product.category.name : 'Uncategorized' %></p>
 
+                    <!-- Product Offer Badge -->
+                    <% if (product.productOffer && product.productOffer > 0) { %>
+                        <div class="offer-section">
+                            <div class="offer-badge-large">
+                                <i class="fas fa-fire"></i>
+                                <span class="offer-text">Limited Time Offer</span>
+                                <span class="offer-percent"><%= product.productOffer %>% OFF</span>
+                            </div>
+                        </div>
+                    <% } %>
+
                     <!-- Product Status Badge -->
                     <div class="product-status">
                         <% if (product.status === 'Available') { %>
                             <span class="status-badge available">
-                                <span class="status-icon">✅</span>
-                                Available
+                                <i class="fas fa-check-circle"></i>
+                                <span>Available</span>
                             </span>
                         <% } else { %>
                             <span class="status-badge out-of-stock">
-                                <span class="status-icon">❌</span>
-                                Out of Stock
+                                <i class="fas fa-times-circle"></i>
+                                <span>Out of Stock</span>
                             </span>
                         <% } %>
                     </div>
@@ -789,16 +988,53 @@
                     <div class="products-grid">
                         <% relatedProducts.forEach(relatedProduct => { %>
                             <div class="product-card" onclick="window.location.href='/product/<%= relatedProduct._id %>'">
-                                <% if (relatedProduct.images && relatedProduct.images.length > 0) { %>
-                                    <img src="<%= relatedProduct.images[0] %>" alt="<%= relatedProduct.productName %>" class="product-card-image">
-                                <% } else { %>
-                                    <img src="https://via.placeholder.com/250x200/ffffff/cccccc?text=Shoe" alt="<%= relatedProduct.productName %>" class="product-card-image">
-                                <% } %>
+                                <div class="product-card-image-container">
+                                    <% if (relatedProduct.images && relatedProduct.images.length > 0) { %>
+                                        <img src="<%= relatedProduct.images[0] %>" alt="<%= relatedProduct.productName %>" class="product-card-image">
+                                    <% } else { %>
+                                        <img src="https://via.placeholder.com/250x200/ffffff/cccccc?text=Shoe" alt="<%= relatedProduct.productName %>" class="product-card-image">
+                                    <% } %>
+
+                                    <!-- Offer Ribbon for Related Products -->
+                                    <% if (relatedProduct.productOffer && relatedProduct.productOffer > 0) { %>
+                                        <div class="related-offer-ribbon">
+                                            <span><%= relatedProduct.productOffer %>% OFF</span>
+                                        </div>
+                                    <% } %>
+
+                                    <!-- Status Badge for Related Products -->
+                                    <% if (relatedProduct.status === 'Available') { %>
+                                        <div class="related-status-badge available">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                    <% } else { %>
+                                        <div class="related-status-badge out-of-stock">
+                                            <i class="fas fa-times-circle"></i>
+                                        </div>
+                                    <% } %>
+
+                                    <!-- Wishlist Icon for Related Products -->
+                                    <div class="related-wishlist-icon" onclick="event.stopPropagation(); addToWishlist()">
+                                        <i class="far fa-heart"></i>
+                                    </div>
+                                </div>
+
                                 <div class="product-card-info">
                                     <h3 class="product-card-title"><%= relatedProduct.productName %></h3>
                                     <% if (relatedProduct.variants && relatedProduct.variants.length > 0) { %>
-                                        <% const minPrice = Math.min(...relatedProduct.variants.map(v => v.salePrice)); %>
-                                        <p class="product-card-price">$<%= minPrice %></p>
+                                        <%
+                                            const prices = relatedProduct.variants.map(v => v.salePrice);
+                                            const originalPrices = relatedProduct.variants.map(v => v.variantPrice);
+                                            const minPrice = Math.min(...prices);
+                                            const minOriginalPrice = Math.min(...originalPrices);
+                                            const hasDiscount = minPrice < minOriginalPrice;
+                                        %>
+                                        <div class="related-price-container">
+                                            <span class="related-current-price">₹<%= minPrice %></span>
+                                            <% if (hasDiscount) { %>
+                                                <span class="related-original-price">₹<%= minOriginalPrice %></span>
+                                            <% } %>
+                                        </div>
                                     <% } %>
                                 </div>
                             </div>

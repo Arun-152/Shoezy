@@ -17,19 +17,36 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(session({
     secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: true,
+    resave: true,  // Changed to true to ensure session persistence
+    saveUninitialized: true,  // Changed back to true for OAuth compatibility
     cookie: {
         secure: false,
         httpOnly: true,
         maxAge: 72 * 60 * 60 * 1000
-    }
+    },
+    name: 'connect.sid',  // Explicit session name
+    rolling: false  // Don't reset expiry on every request
 }))
 
 app.use(flash())
 
 app.use(passport.initialize())
 app.use(passport.session())
+
+// Custom middleware to handle session regeneration issues
+app.use((req, res, next) => {
+    if (req.session && !req.session.regenerate) {
+        req.session.regenerate = (cb) => {
+            cb()
+        }
+    }
+    if (req.session && !req.session.save) {
+        req.session.save = (cb) => {
+            cb()
+        }
+    }
+    next()
+})
 
 app.use((req, res, next) => {
     res.locals.success_msg = req.flash('success_msg')

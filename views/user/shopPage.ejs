@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shoezy - Premium Footwear Store</title>
     <link rel="stylesheet" href="/css/shopPage.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <!-- Header -->
@@ -134,50 +135,81 @@
                 const productCard = document.createElement('div');
                 productCard.className = 'product-card';
 
-                // Status badge logic - Always show availability status
-                let statusBadge = '';
-                if (product.status === 'out of stock' || product.quantity <= 0) {
-                    statusBadge = `<div class="status-badge out-of-stock"><span class="status-icon">❌</span> Out of Stock</div>`;
-                } else {
-                    statusBadge = `<div class="status-badge available"><span class="status-icon">✅</span> Available</div>`;
+                // Offer badge logic
+                let offerBadge = '';
+                if (product.productOffer && product.productOffer > 0) {
+                    offerBadge = `<div class="offer-badge">${product.productOffer}% OFF</div>`;
                 }
 
-                // Handle pricing display - show only one price
-                let priceHTML = `<p class="price">₹${product.salePrice || product.price}</p>`;
+                // Stock status badge logic
+                let stockBadge = '';
+                if (product.status === 'out of stock' || product.quantity <= 0) {
+                    stockBadge = `<div class="stock-badge out-of-stock">Out of Stock</div>`;
+                } else {
+                    stockBadge = `<div class="stock-badge in-stock">Available</div>`;
+                }
+
+                // Handle pricing display
+                let priceHTML = '';
+                if (product.originalPrice && product.originalPrice > product.salePrice) {
+                    priceHTML = `
+                        <div class="product-price">
+                            <span class="current-price">₹${product.salePrice || product.price}</span>
+                            <span class="original-price">₹${product.originalPrice}</span>
+                        </div>
+                    `;
+                } else {
+                    priceHTML = `
+                        <div class="product-price">
+                            <span class="current-price">₹${product.salePrice || product.price}</span>
+                        </div>
+                    `;
+                }
 
                 productCard.innerHTML = `
-                    <div class="product-image" style="cursor: pointer;">
-                        <img src="${product.image}" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300&h=200&fit=crop'">
-                        ${statusBadge}
+                    <div class="product-image-container" style="cursor: pointer;">
+                        <div class="product-image">
+                            <img src="${product.image}" alt="${product.name}" onerror="this.src='https://via.placeholder.com/280x280/f8f9fa/dee2e6?text=No+Image'">
+                        </div>
+                        ${offerBadge}
+                        ${stockBadge}
+                        <div class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${product.id}', this)">
+                            <i class="far fa-heart"></i>
+                        </div>
                         <div class="product-overlay">
-                            <button class="quick-view" data-id="${product.id}">View Details</button>
+                            <button class="quick-view-btn" data-id="${product.id}">
+                                <i class="fas fa-eye"></i> Quick View
+                            </button>
                         </div>
                     </div>
                     <div class="product-info" style="cursor: pointer;">
-                        <h3>${product.name}</h3>
-                        <p class="category">${product.categoryName}</p>
-                        <div class="rating">
-                            ${'★'.repeat(Math.floor(product.rating))}${'☆'.repeat(5 - Math.floor(product.rating))}
-                            <span>(${product.rating})</span>
+                        <h3 class="product-name">${product.name}</h3>
+                        <p class="product-category">${product.categoryName}</p>
+                        <div class="product-rating">
+                            <div class="stars">
+                                ${generateStars(product.rating)}
+                            </div>
+                            <span class="rating-text">(${product.ratingCount})</span>
                         </div>
                         ${priceHTML}
                         <div class="product-actions">
-                            <button class="add-to-cart" data-id="${product.id}" ${product.status === 'out of stock' || product.quantity <= 0 ? 'disabled' : ''}>
+                            <button class="add-to-cart-btn" data-id="${product.id}" ${product.status === 'out of stock' || product.quantity <= 0 ? 'disabled' : ''}>
+                                <i class="fas fa-shopping-cart"></i>
                                 ${product.status === 'out of stock' || product.quantity <= 0 ? 'Out of Stock' : 'Add to Cart'}
                             </button>
                         </div>
                     </div>
                 `;
                 // Card click navigates to product page
-                productCard.querySelector('.product-image').onclick = () => window.location.href = `/product/${product.id}`;
+                productCard.querySelector('.product-image-container').onclick = () => window.location.href = `/product/${product.id}`;
                 productCard.querySelector('.product-info').onclick = () => window.location.href = `/product/${product.id}`;
                 // Quick view button
-                productCard.querySelector('.quick-view').onclick = (e) => {
+                productCard.querySelector('.quick-view-btn').onclick = (e) => {
                     e.stopPropagation();
                     quickView(product.id);
                 };
                 // Add to cart button
-                productCard.querySelector('.add-to-cart').onclick = (e) => {
+                productCard.querySelector('.add-to-cart-btn').onclick = (e) => {
                     e.stopPropagation();
                     addToCart(product.id);
                 };
@@ -253,16 +285,52 @@
             window.location.href = `/product/${productId}`;
         }
 
+        // Generate star rating HTML
+        function generateStars(rating) {
+            let starsHTML = '';
+            for (let i = 1; i <= 5; i++) {
+                if (i <= Math.floor(rating)) {
+                    starsHTML += '<i class="fas fa-star"></i>';
+                } else if (i - 0.5 <= rating) {
+                    starsHTML += '<i class="fas fa-star-half-alt"></i>';
+                } else {
+                    starsHTML += '<i class="far fa-star"></i>';
+                }
+            }
+            return starsHTML;
+        }
+
+        // Toggle wishlist
+        function toggleWishlist(productId, element) {
+            const heartIcon = element.querySelector('i');
+
+            if (heartIcon.classList.contains('far')) {
+                heartIcon.classList.remove('far');
+                heartIcon.classList.add('fas');
+                showNotification('Added to wishlist!');
+            } else {
+                heartIcon.classList.remove('fas');
+                heartIcon.classList.add('far');
+                showNotification('Removed from wishlist!');
+            }
+        }
+
         // Show notification
         function showNotification(message) {
             const notification = document.createElement('div');
             notification.className = 'notification';
-            notification.textContent = message;
+            notification.innerHTML = `
+                <i class="fas fa-check-circle"></i>
+                <span>${message}</span>
+            `;
             document.body.appendChild(notification);
-            
+
             setTimeout(() => {
-                notification.remove();
-            }, 3000);
+                notification.style.animation = 'slideOut 0.3s ease forwards';
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 2700);
         }
 
         // Initialize
@@ -272,5 +340,479 @@
             updateCartCount();
         });
     </script>
+
+    <style>
+        /* Modern Shop Page Product Card Design */
+        .product-card {
+            background: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #f1f3f4;
+            position: relative;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 24px;
+        }
+
+        .product-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+            border-color: #e8eaed;
+        }
+
+        /* Enhanced Products Grid */
+        #products-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            padding: 24px;
+            min-height: 400px;
+        }
+
+        /* Product Image Container */
+        .product-image-container {
+            position: relative;
+            width: 100%;
+            height: 280px;
+            overflow: hidden;
+            background: #fafbfc;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+            border-radius: 8px;
+        }
+
+        .product-card:hover .product-image img {
+            transform: scale(1.05);
+        }
+
+        /* Offer Badge (Corner Style) */
+        .offer-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: linear-gradient(135deg, #ff4757, #ff3742);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(255, 71, 87, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        /* Stock Status Badge (Small Pill) */
+        .stock-badge {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stock-badge.in-stock {
+            background: rgba(34, 197, 94, 0.9);
+            color: white;
+        }
+
+        .stock-badge.out-of-stock {
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+        }
+
+        /* Wishlist Button */
+        .wishlist-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .wishlist-btn:hover {
+            background: #ff4757;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .wishlist-btn i {
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        /* Product Overlay */
+        .product-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(2px);
+        }
+
+        .product-card:hover .product-overlay {
+            opacity: 1;
+        }
+
+        .quick-view-btn {
+            background: #ffffff;
+            color: #1a1a1a;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .quick-view-btn:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Product Info Section */
+        .product-info {
+            padding: 20px;
+            background: white;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .product-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+            line-height: 1.4;
+            margin: 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product-category {
+            font-size: 12px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        /* Rating */
+        .product-rating {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stars {
+            display: flex;
+            align-items: center;
+            gap: 1px;
+        }
+
+        .stars i {
+            color: #fbbf24;
+            font-size: 12px;
+        }
+
+        .rating-text {
+            font-size: 11px;
+            color: #9ca3af;
+            font-weight: 500;
+        }
+
+        /* Price */
+        .product-price {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .current-price {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .original-price {
+            font-size: 14px;
+            color: #9ca3af;
+            text-decoration: line-through;
+            font-weight: 500;
+        }
+
+        /* Product Actions */
+        .product-actions {
+            margin-top: 16px;
+        }
+
+        .add-to-cart-btn {
+            background: #1a1a1a;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .add-to-cart-btn:hover {
+            background: #2d2d2d;
+            transform: translateY(-1px);
+        }
+
+        .add-to-cart-btn:disabled {
+            background: #e5e7eb;
+            color: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Notification Styles */
+        .notification {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            background: #10b981;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            font-weight: 500;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        /* No Products Message */
+        .no-products {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+            grid-column: 1 / -1;
+        }
+
+        .no-products h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #1a1a1a;
+        }
+
+        .no-products p {
+            font-size: 16px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .product-image-container {
+                height: 240px;
+            }
+
+            .product-info {
+                padding: 16px;
+            }
+
+            .product-name {
+                font-size: 15px;
+            }
+
+            .current-price {
+                font-size: 16px;
+            }
+
+            .offer-badge {
+                font-size: 10px;
+                padding: 4px 8px;
+            }
+
+            .stock-badge {
+                font-size: 9px;
+                padding: 3px 8px;
+            }
+
+            .wishlist-btn {
+                width: 32px;
+                height: 32px;
+            }
+
+            .wishlist-btn i {
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .product-image-container {
+                height: 200px;
+            }
+
+            .product-info {
+                padding: 12px;
+                gap: 8px;
+            }
+
+            .product-name {
+                font-size: 14px;
+            }
+
+            .current-price {
+                font-size: 15px;
+            }
+
+            #products-container {
+                grid-template-columns: 1fr;
+                gap: 16px;
+                padding: 16px;
+            }
+        }
+
+        /* Enhanced Filter Section */
+        .filter-section {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border: 1px solid #f1f3f4;
+        }
+
+        .filter-section h3 {
+            color: #1a1a1a;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .filter-section select,
+        .filter-section input {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: #ffffff;
+        }
+
+        .filter-section select:focus,
+        .filter-section input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Enhanced Search Bar */
+        .search-container {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 12px 16px 12px 48px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 16px;
+            background: #ffffff;
+            transition: all 0.3s ease;
+        }
+
+        .search-container input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-container .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 16px;
+        }
+    </style>
 </body>
 </html>

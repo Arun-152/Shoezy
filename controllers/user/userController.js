@@ -70,13 +70,39 @@ const loginPage = async (req, res) => {
 };
 
 const logout = (req, res) => {
-    req.session.destroy((err) => {
-        if (err) {
-            return res.status(500).json({ message: "Server error" });
+    // Check if session exists before attempting logout
+    if (req.session) {
+        // Clear passport session if it exists
+        if (req.logout && typeof req.logout === 'function') {
+            req.logout((err) => {
+                if (err) {
+                    console.error('Passport logout error:', err);
+                }
+                // After passport logout, destroy the session
+                destroySession();
+            });
         } else {
-            res.redirect("/login");
+            // If no passport logout needed, just destroy session
+            destroySession();
         }
-    });
+    } else {
+        // No session exists, just redirect
+        res.clearCookie('connect.sid');
+        res.redirect("/login");
+    }
+
+    function destroySession() {
+        req.session.destroy((err) => {
+            if (err) {
+                console.error('Session destroy error:', err);
+                return res.status(500).json({ message: "Server error" });
+            } else {
+                // Clear the session cookie
+                res.clearCookie('connect.sid');
+                res.redirect("/login");
+            }
+        });
+    }
 };
 
 function generateOtp() {
