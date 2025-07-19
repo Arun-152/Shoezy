@@ -350,48 +350,41 @@
 
             // Form submission validation
             form.addEventListener('submit', function(e) {
+                // Always prevent default submission first
+                e.preventDefault();
+
                 // Hide any existing frontend flash message when new validation starts
                 hideFrontendFlash();
-                
-                // Check for empty fields
-                const emptyFields = checkEmptyFields();
-                
-                if (emptyFields.length === 5) {
-                    // All fields are empty - show persistent frontend message and prevent submission
-                    e.preventDefault();
-                    showFrontendFlash('All fields are required');
-                    
-                    // Add error styling to all required fields
-                    fullnameInput.classList.add('form-error');
-                    emailInput.classList.add('form-error');
-                    phoneInput.classList.add('form-error');
-                    passwordInput.classList.add('form-error');
-                    confirmPasswordInput.classList.add('form-error');
-                    
-                    return false;
-                } else if (emptyFields.length > 0) {
-                    // Some fields are empty - show specific persistent message and prevent submission
-                    e.preventDefault();
-                    const fieldText = emptyFields.length === 1 ? 'field is' : 'fields are';
-                    showFrontendFlash(`The following ${fieldText} required: ${emptyFields.join(', ')}`);
-                    return false;
-                }
 
-                // All fields have content - run detailed validation
+                // Trigger all individual field validations to show specific error messages
                 const isFullnameValid = validateFullname();
                 const isEmailValid = validateEmail();
                 const isPhoneValid = validatePhone();
                 const isPasswordValid = validatePassword();
                 const isConfirmPasswordValid = validateConfirmPassword();
 
-                if (!isFullnameValid || !isEmailValid || !isPhoneValid || !isPasswordValid || !isConfirmPasswordValid) {
-                    e.preventDefault();
+                // Check if all validations passed
+                const allValid = isFullnameValid && isEmailValid && isPhoneValid && isPasswordValid && isConfirmPasswordValid;
+
+                if (!allValid) {
+                    // Show general error message at top if any validation failed
                     showFrontendFlash('Please fix the errors below before submitting');
+
+                    // Scroll to first error field for better UX
+                    const firstErrorField = document.querySelector('.form-error');
+                    if (firstErrorField) {
+                        firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        firstErrorField.focus();
+                    }
+
                     return false;
                 }
 
-                // All validation passed - hide any frontend flash message and allow form submission
+                // All validation passed - hide any frontend flash message and submit form
                 hideFrontendFlash();
+
+                // Submit the form programmatically
+                form.submit();
                 return true;
             });
 

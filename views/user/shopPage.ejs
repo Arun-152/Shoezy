@@ -32,6 +32,18 @@
             
             <!-- Filters -->
             <div class="filters">
+                <!-- Search Filter - Positioned at top -->
+                <div class="filter-group search-filter">
+                    <label for="searchInput">
+                        <i class="fas fa-search"></i>
+                        Search Products:
+                    </label>
+                    <div class="search-container">
+                        <input type="text" id="searchInput" placeholder="Search products..." autocomplete="off">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
+                </div>
+
                 <div class="filter-group">
                     <label for="category">Category:</label>
                     <select id="category" onchange="filterProducts()">
@@ -217,19 +229,67 @@
             });
         }
 
-        // Filter products
+        // Enhanced filter products with search functionality
         function filterProducts() {
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
             const category = document.getElementById('category').value;
             const minPrice = parseFloat(document.getElementById('minPrice').value) || 0;
             const maxPrice = parseFloat(document.getElementById('maxPrice').value) || Infinity;
 
             filteredProducts = products.filter(product => {
+                const matchesSearch = !searchQuery || product.name.toLowerCase().includes(searchQuery);
                 const matchesCategory = !category || product.category === category;
                 const matchesPrice = product.price >= minPrice && product.price <= maxPrice;
-                return matchesCategory && matchesPrice;
+                return matchesSearch && matchesCategory && matchesPrice;
             });
 
             displayProducts();
+
+            // Show "Product not found" message if no results
+            showNoResultsMessage(searchQuery);
+
+            // Update filter highlighting
+            updateFilterHighlighting();
+        }
+
+        // Update filter highlighting based on active filters
+        function updateFilterHighlighting() {
+            const searchInput = document.getElementById('searchInput');
+            const categorySelect = document.getElementById('category');
+            const minPriceInput = document.getElementById('minPrice');
+            const maxPriceInput = document.getElementById('maxPrice');
+
+            // Highlight search filter
+            const searchGroup = searchInput.closest('.filter-group');
+            if (searchInput.value.trim()) {
+                searchGroup.classList.add('filter-active');
+            } else {
+                searchGroup.classList.remove('filter-active');
+            }
+
+            // Highlight category filter
+            const categoryGroup = categorySelect.closest('.filter-group');
+            if (categorySelect.value) {
+                categoryGroup.classList.add('filter-active');
+            } else {
+                categoryGroup.classList.remove('filter-active');
+            }
+
+            // Highlight price filters
+            const minPriceGroup = minPriceInput.closest('.filter-group');
+            const maxPriceGroup = maxPriceInput.closest('.filter-group');
+
+            if (minPriceInput.value) {
+                minPriceGroup.classList.add('filter-active');
+            } else {
+                minPriceGroup.classList.remove('filter-active');
+            }
+
+            if (maxPriceInput.value) {
+                maxPriceGroup.classList.add('filter-active');
+            } else {
+                maxPriceGroup.classList.remove('filter-active');
+            }
         }
 
         // Sort products
@@ -254,14 +314,63 @@
             displayProducts();
         }
 
-        // Clear filters
+        // Show "Product not found" message
+        function showNoResultsMessage(searchQuery) {
+            const productsGrid = document.querySelector('.products-grid');
+            const existingMessage = document.querySelector('.no-results-message');
+
+            // Remove existing message
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+
+            // Show message only if there are no filtered products and there's a search query or filters applied
+            if (filteredProducts.length === 0) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'no-results-message';
+
+                let messageText = 'No products found';
+                if (searchQuery) {
+                    messageText = `No products found for "${searchQuery}"`;
+                }
+
+                messageDiv.innerHTML = `
+                    <div class="no-results-content">
+                        <i class="fas fa-search"></i>
+                        <h3>${messageText}</h3>
+                        <p>Try adjusting your search terms or filters</p>
+                        <button onclick="clearFilters()" class="clear-search-btn">
+                            <i class="fas fa-times"></i>
+                            Clear All Filters
+                        </button>
+                    </div>
+                `;
+
+                productsGrid.appendChild(messageDiv);
+            }
+        }
+
+        // Enhanced clear filters function
         function clearFilters() {
+            document.getElementById('searchInput').value = '';
             document.getElementById('category').value = '';
             document.getElementById('minPrice').value = '';
             document.getElementById('maxPrice').value = '';
             document.getElementById('sortBy').value = 'name-asc';
+
+            // Remove active filter styling
+            document.querySelectorAll('.filter-group').forEach(group => {
+                group.classList.remove('filter-active');
+            });
+
             filteredProducts = [...products];
             displayProducts();
+
+            // Remove no results message
+            const existingMessage = document.querySelector('.no-results-message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
         }
 
         // Add to cart
@@ -338,6 +447,27 @@
             displayProducts();
             // Optionally initialize cart count if element exists
             updateCartCount();
+
+            // Add real-time search functionality
+            document.getElementById('searchInput').addEventListener('input', function() {
+                filterProducts();
+            });
+
+            // Add event listeners for enhanced filter interactivity
+            document.getElementById('category').addEventListener('change', function() {
+                filterProducts();
+            });
+
+            document.getElementById('minPrice').addEventListener('input', function() {
+                filterProducts();
+            });
+
+            document.getElementById('maxPrice').addEventListener('input', function() {
+                filterProducts();
+            });
+
+            // Initialize filter highlighting
+            updateFilterHighlighting();
         });
     </script>
 
