@@ -7,13 +7,19 @@ const shopPage = async (req, res) => {
        
         const userData = req.session.userId
         const products = await Product.find({ isDeleted: false, isBlocked: false })
-            .populate("category")
+            .populate({
+                path: "category",
+                match: { isListed: true, isDeleted: false }
+            })
             .sort({ createdAt: -1 });
+
+        // Filter out products with unlisted categories
+        const filteredProducts = products.filter(product => product.category !== null);
 
         const categories = await Category.find({ isDeleted: false, isListed: true });
 
         return res.render("shopPage", {
-            products: products,
+            products: filteredProducts,
             categories: categories,
             user: userData,
             isLandingPage: false,

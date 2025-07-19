@@ -34,9 +34,15 @@ const landingPage = async (req, res) => {
     try {
         // Fetch featured products for landing page (same logic as home page)
         const featuredProducts = await Product.find({ isDeleted: false, isBlocked: false })
-            .populate("category")
+            .populate({
+                path: "category",
+                match: { isListed: true, isDeleted: false }
+            })
             .sort({ createdAt: -1 })
             .limit(6);
+
+        // Filter out products with unlisted categories
+        const filteredProducts = featuredProducts.filter(product => product.category !== null);
 
         // Check if user is logged in for navbar display
         let userData = null;
@@ -45,7 +51,7 @@ const landingPage = async (req, res) => {
         }
 
         return res.render("landingPage", {
-            products: featuredProducts,
+            products: filteredProducts,
             user: userData,
             isLandingPage: true,
         });

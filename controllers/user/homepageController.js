@@ -11,12 +11,18 @@ const homePage = async (req, res) => {
         }
 
         const featuredProducts = await Product.find({ isDeleted: false, isBlocked: false })
-            .populate("category")
+            .populate({
+                path: "category",
+                match: { isListed: true, isDeleted: false }
+            })
             .sort({ createdAt: -1 })
             .limit(6);
 
+        // Filter out products with unlisted categories
+        const filteredProducts = featuredProducts.filter(product => product.category !== null);
+
         return res.render("homePage", {
-            products: featuredProducts,
+            products: filteredProducts,
             user: userData,
             isLandingPage: false,
         });

@@ -43,8 +43,14 @@ const productDetailPage = async (req, res) => {
                 isDeleted: false,
                 isBlocked: false
             })
-            .populate("category")
+            .populate({
+                path: "category",
+                match: { isListed: true, isDeleted: false }
+            })
             .limit(4); // Limit to 4 related products
+
+            // Filter out products with unlisted categories
+            relatedProducts = relatedProducts.filter(product => product.category !== null);
         }
         if (relatedProducts.length < 4) {
             const additionalProducts = await Product.find({
@@ -52,10 +58,15 @@ const productDetailPage = async (req, res) => {
                 isDeleted: false,
                 isBlocked: false
             })
-            .populate("category")
+            .populate({
+                path: "category",
+                match: { isListed: true, isDeleted: false }
+            })
             .limit(4 - relatedProducts.length);
 
-            relatedProducts = [...relatedProducts, ...additionalProducts];
+            // Filter out products with unlisted categories
+            const filteredAdditionalProducts = additionalProducts.filter(product => product.category !== null);
+            relatedProducts = [...relatedProducts, ...filteredAdditionalProducts];
         }
 
         return res.render("productDetailPage", {
