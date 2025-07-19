@@ -382,3 +382,90 @@ textarea {
 #cancelCrop:hover {
     background-color: #cc0000;
 }
+
+/* Variant Field Styles */
+.variant-field-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    align-items: center;
+}
+
+.variant-field-group select,
+.variant-field-group input {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.variant-field-group select:focus,
+.variant-field-group input:focus {
+    outline: none;
+    border-color: #28a745;
+    box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.2);
+}
+
+.size-select {
+    min-width: 120px;
+}
+
+.variant-price-input,
+.sale-price-input,
+.quantity-input {
+    min-width: 100px;
+}
+
+.remove-variant {
+    padding: 10px 15px;
+    background-color: #ff4d4d;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    white-space: nowrap;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.remove-variant:hover {
+    background-color: #cc0000;
+}
+
+#add-variant {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 10px;
+    font-weight: 500;
+}
+
+#add-variant:hover {
+    background-color: #218838;
+}
+
+/* Responsive design for variants */
+@media (max-width: 768px) {
+    .variant-field-group {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .variant-field-group select,
+    .variant-field-group input,
+    .remove-variant {
+        width: 100%;
+        min-width: auto;
+    }
+}

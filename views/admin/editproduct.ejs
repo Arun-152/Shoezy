@@ -171,7 +171,7 @@
 
       <div class="form-group">
         <label for="status">Product Status *</label>
-        <select id="status" name="status" required>
+        <select id="status" name="status" >
           <option value="" disabled>Select product status</option>
           <option value="Available" <%= products.status === 'Available' ? 'selected' : '' %>>Available</option>
           <option value="out of stock" <%= products.status === 'out of stock' ? 'selected' : '' %>>Out of Stock</option>
@@ -235,19 +235,20 @@
           <% if (products.variants && products.variants.length) { %>
             <% products.variants.forEach(variant=> { %>
               <div class="variant-field-group">
-                <select name="variants[size][]" required>
-                  <option value="">Select size</option>
+                <select name="variants[size][]" class="size-select" >
+                  <option value="" disabled>Select size</option>
                   <% ['6', '7' , '8' , '9' , '10' ].forEach(size=> { %>
                     <option value="<%= size %>" <%=variant.size==size ? 'selected' : '' %>><%= size %>
                     </option>
                     <% }) %>
                 </select>
-                <input type="number" name="variants[variantPrice][]" value="<%= variant.variantPrice %>"
-                  placeholder="Variant Price" required>
-                <input type="number" name="variants[salePrice][]" value="<%= variant.salePrice %>"
-                  placeholder="Sale Price" required>
-                <input type="number" name="variants[variantQuantity][]" value="<%= variant.variantQuantity %>"
-                  placeholder="Quantity" required>
+                <input type="number" name="variants[variantPrice][]" class="variant-price-input" value="<%= variant.variantPrice %>"
+                  placeholder="Variant Price" min="0" step="0.01" >
+                <input type="number" name="variants[salePrice][]" class="sale-price-input" value="<%= variant.salePrice %>"
+                  placeholder="Sale Price" min="0" step="0.01" >
+                <input type="number" name="variants[variantQuantity][]" class="quantity-input" value="<%= variant.variantQuantity %>"
+                  placeholder="Quantity" min="0" >
+                <button type="button" class="remove-variant" onclick="removeVariant(this)">Remove</button>
               </div>
               <% }); %>
                 <% } %>
@@ -257,7 +258,7 @@
 
       <div class="form-group">
         <label for="category">Category *</label>
-        <select id="category" name="category" required>
+        <select id="category" name="category" >
           <option value="" disabled <%=!products.category ? 'selected' : '' %>>Select category</option>
           <% cat.forEach(category=> { %>
             <option value="<%= category._id %>" <%=(products.category._id ? products.category._id.toString() :
@@ -628,7 +629,41 @@
           this.closest(".existing-image").remove();
         });
       });
+
+      // Add Variant functionality
+      document.getElementById('add-variant').addEventListener('click', function() {
+        const variantContainer = document.getElementById('variantContainer');
+
+        // Create new variant field group
+        const newVariantGroup = document.createElement('div');
+        newVariantGroup.className = 'variant-field-group';
+
+        newVariantGroup.innerHTML = `
+          <select name="variants[size][]" class="size-select" required>
+            <option value="" disabled selected>Select size</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+          </select>
+          <input type="number" name="variants[variantPrice][]" class="variant-price-input" placeholder="Variant Price" min="0" step="0.01" required>
+          <input type="number" name="variants[salePrice][]" class="sale-price-input" placeholder="Sale Price" min="0" step="0.01" required>
+          <input type="number" name="variants[variantQuantity][]" class="quantity-input" placeholder="Quantity" min="0" required>
+          <button type="button" class="remove-variant" onclick="removeVariant(this)">Remove</button>
+        `;
+
+        variantContainer.appendChild(newVariantGroup);
+      });
     });
+
+    // Function to remove variant
+    function removeVariant(button) {
+      const variantGroup = button.closest('.variant-field-group');
+      if (variantGroup) {
+        variantGroup.remove();
+      }
+    }
   </script>
 </body>
 
