@@ -10,6 +10,9 @@
 </head>
 <body>
     <div class="container">
+        <!-- Breadcrumb Navigation -->
+        <%- include('../partials/admin/breadcrumb', { currentPath: '/admin/products/add' }) %>
+
         <h1>Add New Product</h1>
         <p class="subtitle">Create and manage your product inventory with ease</p>
 
@@ -38,7 +41,7 @@
             <!-- Product Status -->
             <div class="form-group">
                 <label for="status">Product Status *</label>
-                <select id="status" name="status" required>
+                <select id="status" name="status" >
                     <option value="" disabled selected>Select product status</option>
                     <option value="Available">Available</option>
                     <option value="out of stock">Out of Stock</option>
@@ -96,7 +99,7 @@
                 <label>Variants *</label>
                 <div id="variantContainer">
                     <div class="variant-field-group">
-                        <select name="variants[size][]" class="size-select" required>
+                        <select name="variants[size][]" class="size-select" >
                             <option value="" disabled selected>Select size</option>
                             <option value="6">6</option>
                             <option value="7">7</option>
@@ -104,9 +107,9 @@
                             <option value="9">9</option>
                             <option value="10">10</option>
                         </select>
-                        <input type="number" name="variants[variantPrice][]" class="variant-price-input" placeholder="Variant Price" min="0" step="0.01" required>
-                        <input type="number" name="variants[salePrice][]" class="sale-price-input" placeholder="Sale Price" min="0" step="0.01" required>
-                        <input type="number" name="variants[variantQuantity][]" class="quantity-input" placeholder="Quantity" min="0" required>
+                        <input type="number" name="variants[variantPrice][]" class="variant-price-input" placeholder="Variant Price" min="0" step="0.01" >
+                        <input type="number" name="variants[salePrice][]" class="sale-price-input" placeholder="Sale Price" min="0" step="0.01" >
+                        <input type="number" name="variants[variantQuantity][]" class="quantity-input" placeholder="Quantity" min="0" >
                         <button type="button" class="remove-variant" style="display: none;">Remove</button>
                     </div>
                 </div>

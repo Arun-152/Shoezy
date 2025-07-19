@@ -1,0 +1,229 @@
+<!-- Admin Breadcrumb Component -->
+<nav class="admin-breadcrumb" aria-label="Breadcrumb">
+    <ul class="breadcrumb-list">
+        <% 
+        // Define breadcrumb mappings based on current route
+        const breadcrumbMappings = {
+            '/admin/dashboard': [
+                { name: 'Dashboard', url: '/admin/dashboard', icon: 'fas fa-tachometer-alt' }
+            ],
+            '/admin/products': [
+                { name: 'Dashboard', url: '/admin/dashboard', icon: 'fas fa-tachometer-alt' },
+                { name: 'Products', url: '/admin/products', icon: 'fas fa-box' }
+            ],
+            '/admin/products/add': [
+                { name: 'Dashboard', url: '/admin/dashboard', icon: 'fas fa-tachometer-alt' },
+                { name: 'Products', url: '/admin/products', icon: 'fas fa-box' },
+                { name: 'Add Product', url: '/admin/products/add', icon: 'fas fa-plus' }
+            ],
+            '/admin/products/edit': [
+                { name: 'Dashboard', url: '/admin/dashboard', icon: 'fas fa-tachometer-alt' },
+                { name: 'Products', url: '/admin/products', icon: 'fas fa-box' },
+                { name: 'Edit Product', url: '#', icon: 'fas fa-edit' }
+            ],
+            '/admin/categories': [
+                { name: 'Dashboard', url: '/admin/dashboard', icon: 'fas fa-tachometer-alt' },
+                { name: 'Categories', url: '/admin/categories', icon: 'fas fa-tags' }
+            ],
+            '/admin/customers': [
+                { name: 'Dashboard', url: '/admin/dashboard', icon: 'fas fa-tachometer-alt' },
+                { name: 'Customers', url: '/admin/customers', icon: 'fas fa-users' }
+            ],
+            '/admin/orders': [
+                { name: 'Dashboard', url: '/admin/dashboard', icon: 'fas fa-tachometer-alt' },
+                { name: 'Orders', url: '/admin/orders', icon: 'fas fa-shopping-cart' }
+            ],
+            '/admin/coupons': [
+                { name: 'Dashboard', url: '/admin/dashboard', icon: 'fas fa-tachometer-alt' },
+                { name: 'Coupons', url: '/admin/coupons', icon: 'fas fa-ticket-alt' }
+            ],
+            '/admin/offers': [
+                { name: 'Dashboard', url: '/admin/dashboard', icon: 'fas fa-tachometer-alt' },
+                { name: 'Offers', url: '/admin/offers', icon: 'fas fa-percent' }
+            ],
+            '/admin/sales-report': [
+                { name: 'Dashboard', url: '/admin/dashboard', icon: 'fas fa-tachometer-alt' },
+                { name: 'Sales Report', url: '/admin/sales-report', icon: 'fas fa-chart-line' }
+            ]
+        };
+
+        // Get current path from locals or default
+        const currentPath = locals.currentPath || '/admin/dashboard';
+        const breadcrumbs = breadcrumbMappings[currentPath] || breadcrumbMappings['/admin/dashboard'];
+        %>
+
+        <% breadcrumbs.forEach((crumb, index) => { %>
+            <li class="breadcrumb-item <%= index === breadcrumbs.length - 1 ? 'active' : '' %>">
+                <% if (index === breadcrumbs.length - 1) { %>
+                    <!-- Current page - not clickable -->
+                    <span class="breadcrumb-current">
+                        <i class="<%= crumb.icon %>"></i>
+                        <%= crumb.name %>
+                    </span>
+                <% } else { %>
+                    <!-- Clickable breadcrumb -->
+                    <a href="<%= crumb.url %>" class="breadcrumb-link">
+                        <i class="<%= crumb.icon %>"></i>
+                        <%= crumb.name %>
+                    </a>
+                    <!-- Separator -->
+                    <i class="fas fa-chevron-right breadcrumb-separator"></i>
+                <% } %>
+            </li>
+        <% }); %>
+    </ul>
+</nav>
+
+<style>
+/* Admin Breadcrumb Styles */
+.admin-breadcrumb {
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.breadcrumb-list {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.breadcrumb-item {
+    display: flex;
+    align-items: center;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.breadcrumb-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #6b7280;
+    text-decoration: none;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.breadcrumb-link:hover {
+    color: #3b82f6;
+    background-color: #f3f4f6;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.breadcrumb-link i {
+    font-size: 0.75rem;
+    opacity: 0.8;
+}
+
+.breadcrumb-current {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #1f2937;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+}
+
+.breadcrumb-current i {
+    font-size: 0.75rem;
+    color: #3b82f6;
+}
+
+.breadcrumb-separator {
+    color: #d1d5db;
+    font-size: 0.75rem;
+    margin: 0 0.25rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .admin-breadcrumb {
+        padding: 0.75rem 1rem;
+    }
+    
+    .breadcrumb-list {
+        font-size: 0.8rem;
+    }
+    
+    .breadcrumb-link,
+    .breadcrumb-current {
+        padding: 0.2rem 0.4rem;
+        gap: 0.4rem;
+    }
+    
+    /* Hide icons on very small screens */
+    @media (max-width: 480px) {
+        .breadcrumb-link i,
+        .breadcrumb-current i {
+            display: none;
+        }
+        
+        .breadcrumb-separator {
+            margin: 0 0.15rem;
+        }
+    }
+}
+
+/* Dark mode support (if needed) */
+@media (prefers-color-scheme: dark) {
+    .admin-breadcrumb {
+        background: #1f2937;
+        border-bottom-color: #374151;
+    }
+    
+    .breadcrumb-link {
+        color: #9ca3af;
+    }
+    
+    .breadcrumb-link:hover {
+        color: #60a5fa;
+        background-color: #374151;
+    }
+    
+    .breadcrumb-current {
+        color: #f9fafb;
+    }
+    
+    .breadcrumb-current i {
+        color: #60a5fa;
+    }
+}
+
+/* Animation for breadcrumb appearance */
+.admin-breadcrumb {
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Hover effect for the entire breadcrumb */
+.breadcrumb-item:hover .breadcrumb-link {
+    transform: translateY(-1px);
+}
+
+/* Focus styles for accessibility */
+.breadcrumb-link:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+</style>
