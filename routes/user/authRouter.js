@@ -15,7 +15,7 @@ router.get('/google/callback',
     (req, res, next) => {
         // Ensure session exists before passport authentication
         if (!req.session) {
-            console.error('❌ Session not found during OAuth callback');
+            console.error('Session not found during OAuth callback');
             return res.redirect('/login?error=session_error');
         }
         next();

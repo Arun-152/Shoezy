@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - ShopHub</title>
+    <link rel="stylesheet" href="css/addToCartPage.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <%-include("../partials/user/navbar")%>
+
+    <!-- Header with Breadcrumbs -->
+    <header class="header">
+        <div class="container">
+            <div class="breadcrumbs">
+                <a href="#" class="breadcrumb-item">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="#" class="breadcrumb-item">Shop</a>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-item active">
+                    <i class="fas fa-shopping-cart"></i> Shopping Cart
+                </span>
+            </div>
+            <h1><i class="fas fa-shopping-cart"></i> Shopping Cart</h1>
+            <p class="header-subtitle">Review your items and proceed to checkout</p>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <!-- Cart Summary Bar -->
+            <div class="cart-summary-bar">
+                <div class="cart-info">
+                    <span class="cart-items-count" id="cartItemsCount">3 items</span>
+                    <span class="cart-total-amount" id="cartTotalAmount">$629.97</span>
+                </div>
+                <div class="cart-actions-quick">
+                    <button class="save-later-btn" onclick="saveForLater()">
+                        <i class="fas fa-heart"></i> Save for Later
+                    </button>
+                    <button class="clear-cart-btn" onclick="clearCart()">
+                        <i class="fas fa-trash"></i> Clear Cart
+                    </button>
+                </div>
+            </div>
+
+            <div class="cart-layout">
+                <!-- Cart Items Section -->
+                <div class="cart-items-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-box"></i> Your Items</h2>
+                        <button class="continue-shopping-btn" onclick="continueShopping()">
+                            <i class="fas fa-arrow-left"></i> Continue Shopping
+                        </button>
+                    </div>
+
+                    <div class="cart-items" id="cartItems">
+                        <!-- Cart Item 1 -->
+                        <div class="cart-item" data-id="1" data-price="299.99">
+                            <div class="item-checkbox">
+                                <input type="checkbox" id="item1" class="item-select" checked onchange="updateSelection()">
+                                <label for="item1"></label>
+                            </div>
+                            <div class="item-image">
+                                <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=150&h=150&fit=crop" alt="Wireless Headphones">
+                            </div>
+                            <div class="item-details">
+                                <h3 class="item-title">Premium Wireless Headphones</h3>
+                                <p class="item-description">High-quality noise-canceling headphones</p>
+                                <div class="item-specs">
+                                    <span class="spec">Color: Black</span>
+                                    <span class="spec">Brand: AudioTech</span>
+                                </div>
+                                <div class="item-rating">
+                                    <div class="stars">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star-half-alt"></i>
+                                    </div>
+                                    <span class="rating-text">4.5 (234 reviews)</span>
+                                </div>
+                            </div>
+                            <div class="item-controls">
+                                <div class="quantity-controls">
+                                    <button class="qty-btn" onclick="updateQuantity(1, -1)">-</button>
+                                    <input type="number" class="qty-input" value="1" min="1" max="10" onchange="validateQuantity(1, this.value)">
+                                    <button class="qty-btn" onclick="updateQuantity(1, 1)">+</button>
+                                </div>
+                                <div class="item-price">
+                                    <span class="current-price">$299.99</span>
+                                    <span class="original-price">$399.99</span>
+                                </div>
+                                <div class="item-actions">
+                                    <button class="action-btn save-btn" onclick="saveForLaterItem(1)">
+                                        <i class="fas fa-heart"></i> Save
+                                    </button>
+                                    <button class="action-btn remove-btn" onclick="removeItem(1)">
+                                        <i class="fas fa-trash"></i> Remove
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                <!-- Order Summary Section -->
+                <div class="order-summary-section">
+                    <div class="summary-card">
+                        <h3><i class="fas fa-receipt"></i> Order Summary</h3>
+                        
+                        <div class="summary-row">
+                            <span>Subtotal (3 items)</span>
+                            <span id="subtotal">$629.97</span>
+                        </div>
+                        
+                        <div class="summary-row">
+                            <span>Shipping</span>
+                            <span class="free-shipping" id="shipping">FREE</span>
+                        </div>
+                        
+                        <div class="summary-row">
+                            <span>Tax</span>
+                            <span id="tax">$50.40</span>
+                        </div>
+                        
+                        <div class="summary-row discount-row">
+                            <span>Discount</span>
+                            <span class="discount-amount" id="discount">-$62.99</span>
+                        </div>
+                        
+                        <hr class="summary-divider">
+                        
+                        <div class="summary-row total-row">
+                            <span>Total</span>
+                            <span class="total-amount" id="total">$617.38</span>
+                        </div>
+                        
+                        <div class="promo-section">
+                            <input type="text" placeholder="Enter promo code" class="promo-input" id="promoInput">
+                            <button class="apply-promo-btn" onclick="applyPromoCode()">Apply</button>
+                        </div>
+                        
+                        <button class="checkout-btn" onclick="proceedToCheckout()">
+                            <i class="fas fa-lock"></i> Proceed to Checkout
+                        </button>
+                        
+                        <div class="payment-methods">
+                            <p>We accept:</p>
+                            <div class="payment-icons">
+                                <i class="fab fa-cc-visa"></i>
+                                <i class="fab fa-cc-mastercard"></i>
+                                <i class="fab fa-cc-paypal"></i>
+                                <i class="fab fa-cc-apple-pay"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="security-badges">
+                            <div class="security-item">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Secure Checkout</span>
+                            </div>
+                            <div class="security-item">
+                                <i class="fas fa-truck"></i>
+                                <span>Free Shipping</span>
+                            </div>
+                            <div class="security-item">
+                                <i class="fas fa-undo"></i>
+                                <span>Easy Returns</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+   <%-include("../partials/user/userfooter")%>
+
+    <!-- Success Toast -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage"></span>
+    </div>
+
+    <script>
+        let cartData = {
+            1: { price: 299.99, quantity: 1, selected: true },
+            2: { price: 199.99, quantity: 1, selected: true },
+            3: { price: 129.99, quantity: 1, selected: true }
+        };
+
+        function updateQuantity(itemId, change) {
+            const qtyInput = document.querySelector(`[data-id="${itemId}"] .qty-input`);
+            let newQty = parseInt(qtyInput.value) + change;
+            
+            if (newQty < 1) newQty = 1;
+            if (newQty > 10) newQty = 10;
+            
+            qtyInput.value = newQty;
+            cartData[itemId].quantity = newQty;
+            
+            updateCartTotals();
+            showToast(`Quantity updated to ${newQty}`);
+        }
+
+        function validateQuantity(itemId, value) {
+            let qty = parseInt(value);
+            if (qty < 1) qty = 1;
+            if (qty > 10) qty = 10;
+            
+            cartData[itemId].quantity = qty;
+            updateCartTotals();
+        }
+
+        function updateSelection() {
+            const checkboxes = document.querySelectorAll('.item-select');
+            checkboxes.forEach(checkbox => {
+                const itemId = checkbox.id.replace('item', '');
+                cartData[itemId].selected = checkbox.checked;
+            });
+            updateCartTotals();
+        }
+
+        function updateCartTotals() {
+            let subtotal = 0;
+            let itemCount = 0;
+            
+            Object.keys(cartData).forEach(itemId => {
+                if (cartData[itemId].selected) {
+                    subtotal += cartData[itemId].price * cartData[itemId].quantity;
+                    itemCount += cartData[itemId].quantity;
+                }
+            });
+            
+            const tax = subtotal * 0.08;
+            const discount = subtotal * 0.1;
+            const total = subtotal + tax - discount;
+            
+            document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+            document.getElementById('tax').textContent = `$${tax.toFixed(2)}`;
+            document.getElementById('discount').textContent = `-$${discount.toFixed(2)}`;
+            document.getElementById('total').textContent = `$${total.toFixed(2)}`;
+            document.getElementById('cartItemsCount').textContent = `${itemCount} item${itemCount !== 1 ? 's' : ''}`;
+            document.getElementById('cartTotalAmount').textContent = `$${total.toFixed(2)}`;
+            document.getElementById('cartCount').textContent = itemCount;
+        }
+
+        function removeItem(itemId) {
+            if (confirm('Are you sure you want to remove this item from your cart?')) {
+                const item = document.querySelector(`[data-id="${itemId}"]`);
+                item.style.animation = 'slideOut 0.3s ease-in';
+                
+                setTimeout(() => {
+                    item.remove();
+                    delete cartData[itemId];
+                    updateCartTotals();
+                    showToast('Item removed from cart');
+                }, 300);
+            }
+        }
+
+        function saveForLaterItem(itemId) {
+            const item = document.querySelector(`[data-id="${itemId}"]`);
+            const itemTitle = item.querySelector('.item-title').textContent;
+            
+            item.style.animation = 'slideOut 0.3s ease-in';
+            
+            setTimeout(() => {
+                item.remove();
+                delete cartData[itemId];
+                updateCartTotals();
+                showToast(`${itemTitle} saved for later`);
+            }, 300);
+        }
+
+        function saveForLater() {
+            showToast('All selected items saved for later');
+        }
+
+        function clearCart() {
+            if (confirm('Are you sure you want to clear your entire cart?')) {
+                const items = document.querySelectorAll('.cart-item');
+                items.forEach((item, index) => {
+                    setTimeout(() => {
+                        item.style.animation = 'slideOut 0.3s ease-in';
+                        setTimeout(() => item.remove(), 300);
+                    }, index * 100);
+                });
+                
+                setTimeout(() => {
+                    cartData = {};
+                    updateCartTotals();
+                    showToast('Cart cleared');
+                }, items.length * 100 + 300);
+            }
+        }
+
+        function continueShopping() {
+            showToast('Redirecting to shop...');
+            // Add navigation logic here
+        }
+
+        function addRecommendation(itemId) {
+            showToast('Item added to cart!');
+            // Add logic to add recommended item to cart
+        }
+
+        function applyPromoCode() {
+            const promoCode = document.getElementById('promoInput').value.trim();
+            if (promoCode) {
+                if (promoCode.toUpperCase() === 'SAVE10') {
+                    showToast('Promo code applied! 10% extra discount');
+                    // Apply additional discount logic here
+                } else {
+                    showToast('Invalid promo code');
+                }
+                document.getElementById('promoInput').value = '';
+            }
+        }
+
+        function proceedToCheckout() {
+            const selectedItems = Object.keys(cartData).filter(id => cartData[id].selected);
+            if (selectedItems.length === 0) {
+                showToast('Please select at least one item to checkout');
+                return;
+            }
+            showToast('Proceeding to secure checkout...');
+            // Add checkout navigation logic here
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            toastMessage.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Mobile Navigation
+        const navToggle = document.getElementById('navToggle');
+        const navMenu = document.getElementById('navMenu');
+
+        navToggle.addEventListener('click', function() {
+            navMenu.classList.toggle('nav-menu-active');
+            navToggle.classList.toggle('nav-toggle-active');
+        });
+
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('nav-menu-active');
+                navToggle.classList.remove('nav-toggle-active');
+            });
+        });
+
+        // Newsletter subscription
+        document.querySelector('.newsletter-btn').addEventListener('click', function() {
+            const email = document.querySelector('.newsletter-input').value;
+            if (email) {
+                showToast('Successfully subscribed to newsletter!');
+                document.querySelector('.newsletter-input').value = '';
+            }
+        });
+
+        // Search functionality
+        document.querySelector('.search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const searchTerm = this.value;
+                if (searchTerm) {
+                    showToast(`Searching for "${searchTerm}"`);
+                    this.value = '';
+                }
+            }
+        });
+
+        // Initialize cart totals on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCartTotals();
+        });
+    </script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 const User = require("../../models/userSchema");
 
-const showuser = async (req, res) => {
+const showUser = async (req, res) => {
     try {
         const userId = req.session.userId;
 
@@ -8,7 +8,7 @@ const showuser = async (req, res) => {
         if (!userData) {
             return res.redirect("/loginPage");
         }
-        
+
         res.render("myaccount", {
             user: userData,
             isLandingPage: false,
@@ -20,5 +20,5 @@ const showuser = async (req, res) => {
 };
 
 module.exports = {
-    showuser
+    showUser
 };

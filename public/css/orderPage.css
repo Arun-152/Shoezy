@@ -1,0 +1,266 @@
+/* Orders Page Specific Styles */
+
+/* Order Filters */
+.order-filters {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 10px 20px;
+    border: 2px solid #e5e7eb;
+    background: white;
+    color: #666;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.filter-btn.active,
+.filter-btn:hover {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+}
+
+/* Orders List */
+.orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.order-card {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.order-card:hover {
+    transform: translateY(-2px);
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.order-info h3 {
+    color: #1f2937;
+    margin-bottom: 5px;
+    font-size: 1.1rem;
+}
+
+.order-date {
+    color: #6b7280;
+    font-size: 14px;
+    margin: 0;
+}
+
+.status-badge {
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.delivered .status-badge {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.shipped .status-badge {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.pending .status-badge {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.cancelled .status-badge {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* Order Items */
+.order-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.order-item img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.item-details {
+    flex: 1;
+}
+
+.item-details h4 {
+    color: #1f2937;
+    margin-bottom: 5px;
+    font-size: 1rem;
+}
+
+.item-details p {
+    color: #6b7280;
+    font-size: 14px;
+    margin: 2px 0;
+}
+
+.item-price {
+    color: #3b82f6;
+    font-weight: 600;
+}
+
+.item-quantity {
+    color: #6b7280;
+    font-weight: 500;
+}
+
+/* Order Footer */
+.order-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.order-total {
+    font-size: 1.2rem;
+    color: #1f2937;
+}
+
+.order-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* Button Styles */
+.btn-primary, .btn-secondary, .btn-danger {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+}
+
+.btn-primary {
+    background: #3b82f6;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #2563eb;
+}
+
+.btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+
+.btn-secondary:hover {
+    background: #e5e7eb;
+}
+
+.btn-danger {
+    background: #dc2626;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #b91c1c;
+}
+
+/* Empty State */
+.empty-orders {
+    text-align: center;
+    padding: 60px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.empty-icon {
+    width: 80px;
+    height: 80px;
+    background: #f3f4f6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    color: #9ca3af;
+    font-size: 2rem;
+}
+
+.empty-orders h3 {
+    color: #374151;
+    margin-bottom: 10px;
+}
+
+.empty-orders p {
+    color: #6b7280;
+    margin-bottom: 30px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .order-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .order-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .order-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .filter-btn {
+        font-size: 14px;
+        padding: 8px 16px;
+    }
+
+    .order-item {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+    }
+
+    .order-item img {
+        width: 100%;
+        max-width: 200px;
+        height: auto;
+    }
+}

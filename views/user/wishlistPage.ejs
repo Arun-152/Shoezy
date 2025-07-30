@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Wishlist</title>
+    <link rel="stylesheet" href="/css/wishlistPage.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation Bar -->
+   <%-include("../partials/user/navbar")%>
+
+    <!-- Header with Breadcrumbs -->
+    <header class="header">
+        <div class="container">
+            <div class="breadcrumbs">
+                <a href="#" class="breadcrumb-item">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="#" class="breadcrumb-item">Account</a>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-item active">
+                    <i class="fas fa-heart"></i> Wishlist
+                </span>
+            </div>
+            <h1><i class="fas fa-heart"></i> My Wishlist</h1>
+            <p class="header-subtitle">Save your favorite items for later</p>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <div class="wishlist-stats">
+                <p><span id="item-count"><%=wishlist.length%></span> items in your wishlist</p>
+                <button class="clear-all-btn" onclick="clearWishlist()">
+                    <i class="fas fa-trash"></i> Clear All
+                </button>
+            </div>
+
+            <div class="wishlist-grid" id="wishlistGrid">
+                <!-- Product 1 -->
+                 <%if(wishlist.lengtgh>0){%>
+                    <%for(let product of wishlist){%>
+                <div class="product-card" data-product-id="<%= product._id%>">
+                    <div class="product-image">
+                        <img src="/uploads/products/<%=product.Images[0]%>" alt="Wireless Headphones">
+                        <button class="remove-btn" onclick="removeFromWishlist(1)">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <div class="quick-view-btn" onclick="openQuickView(1)">
+                            <i class="fas fa-eye"></i> Quick View
+                        </div>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-title"><%=product.productName%></h3>
+                        <div class="price-section">
+                            const sortedVariants = product.variants.sort((a, b) => {
+                            const aNum = parseFloat(a.size);
+                            const bNum = parseFloat(b.size);
+                            if (!isNaN(aNum) && !isNaN(bNum)) {
+                                return aNum - bNum;
+                            }
+                            return a.size.localeCompare(b.size);
+                        });
+                            <span class="current-price"><%=product.variants.variantPrice%></span>
+                            <span class="original-price"><%=product.variants.salePrice%></span>
+                            <span class="discount">0% OFF</span>
+                            <div class="size-selector">
+                            <label>Select Size:</label>
+                            <select class="size-select" data-product-id="<%=product._id%>" onchange="updateWishlistPrice(this)">
+                                <option value="">Choose a size</option>
+                                <% if (product.variants && product.variants.length > 0) { %>
+                                    <% sortedVariants.forEach(variants => { %>
+                                        <% if (variants.varientQuantity > 0) { %>
+                                            <option value="<%= variants.size %>" data-price="<%= variant.varientPrice %>"><%= variants.size %></option>
+                                        <% } %>
+                                    <% }); %>
+                                <% } else { %>
+                                    <option value="N/A" disabled>No sizes available</option>
+                                <% } %>
+                            </select>
+                        </div>
+                        </div>
+                        <div class="product-actions">
+                            <button class="add-to-cart-btn" onclick="addToCart(1)">
+                                <i class="fas fa-shopping-cart"></i> Add to Cart
+                            </button>
+                          
+                        </div>
+                    </div>
+                    <%}%>
+                </div>
+                <%}else{%>
+                    <div class="empty-state" id="emptyState">
+                <i class="fas fa-heart"></i>
+                <h3>Your wishlist is empty</h3>
+                <p>Start adding items you love to see them here!</p>
+                <button class="continue-shopping-btn">Continue Shopping</button>
+            </div>
+            <%}%>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+     <%-include("../partials/user/userfooter")%>
+
+    <!-- Quick View Modal -->
+    <div class="modal-overlay" id="quickViewModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeQuickView()">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="modal-body">
+                <div class="modal-image">
+                    <img id="modalImage" src="" alt="">
+                </div>
+                <div class="modal-info">
+                    <h2 id="modalTitle"></h2>
+                    <p id="modalDescription"></p>
+                    <div class="modal-rating">
+                        <div id="modalStars" class="stars"></div>
+                        <span id="modalRating"></span>
+                    </div>
+                    <div class="modal-price">
+                        <span id="modalCurrentPrice" class="current-price"></span>
+                        <span id="modalOriginalPrice" class="original-price"></span>
+                        <span id="modalDiscount" class="discount"></span>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="add-to-cart-btn" onclick="addToCartFromModal()">
+                            <i class="fas fa-shopping-cart"></i> Add to Cart
+                        </button>
+                        <button class="remove-btn" onclick="removeFromModal()">
+                            <i class="fas fa-heart-broken"></i> Remove from Wishlist
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Toast -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage"></span>
+    </div>
+
+    <script>
+        let cartCount = 0;
+        let currentModalProductId = null;
+
+         function addToCart(productId) {
+            cartCount++;
+            document.querySelector('.cart-count').textContent = cartCount;
+            showToast(`Added ${productData[productId].title} to cart!`);
+        }
+
+        function removeFromWishlist(productId) {
+            const productCard = document.querySelector(`[data-id="${productId}"]`);
+            productCard.style.animation = 'slideOut 0.3s ease-in';
+            
+            setTimeout(() => {
+                productCard.remove();
+                updateItemCount();
+                showToast('Item removed from wishlist');
+            }, 300);
+        }
+
+        function openQuickView(productId) {
+            currentModalProductId = productId;
+            const product = productData[productId];
+            
+            document.getElementById('modalImage').src = product.image;
+            document.getElementById('modalTitle').textContent = product.title;
+            document.getElementById('modalDescription').textContent = product.description;
+            document.getElementById('modalCurrentPrice').textContent = product.currentPrice;
+            document.getElementById('modalOriginalPrice').textContent = product.originalPrice;
+            document.getElementById('modalDiscount').textContent = product.discount;
+            document.getElementById('modalRating').textContent = product.rating;
+            
+            // Generate stars
+            const starsContainer = document.getElementById('modalStars');
+            starsContainer.innerHTML = generateStars(product.stars);
+            
+            document.getElementById('quickViewModal').style.display = 'flex';
+        }
+
+        function closeQuickView() {
+            document.getElementById('quickViewModal').style.display = 'none';
+            currentModalProductId = null;
+        }
+
+        function addToCartFromModal() {
+            if (currentModalProductId) {
+                addToCart(currentModalProductId);
+                closeQuickView();
+            }
+        }
+
+        function removeFromModal() {
+            if (currentModalProductId) {
+                removeFromWishlist(currentModalProductId);
+                closeQuickView();
+            }
+        }
+
+        function clearWishlist() {
+            if (confirm('Are you sure you want to clear your entire wishlist?')) {
+                const productCards = document.querySelectorAll('.product-card');
+                productCards.forEach((card, index) => {
+                    setTimeout(() => {
+                        card.style.animation = 'slideOut 0.3s ease-in';
+                        setTimeout(() => card.remove(), 300);
+                    }, index * 100);
+                });
+                
+                setTimeout(() => {
+                    updateItemCount();
+                    showToast('Wishlist cleared');
+                }, productCards.length * 100 + 300);
+            }
+        }
+
+        function updateItemCount() {
+            const count = document.querySelectorAll('.product-card').length;
+            document.getElementById('item-count').textContent = count;
+        }
+
+        function generateStars(rating) {
+            let starsHTML = '';
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 !== 0;
+            
+            for (let i = 0; i < fullStars; i++) {
+                starsHTML += '<i class="fas fa-star"></i>';
+            }
+            
+            if (hasHalfStar) {
+                starsHTML += '<i class="fas fa-star-half-alt"></i>';
+            }
+            
+            const emptyStars = 5 - Math.ceil(rating);
+            for (let i = 0; i <script emptyStars; i++) {
+                starsHTML += '<i class="far fa-star"></i>';
+            }
+            
+            return starsHTML;
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            toastMessage.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('quickViewModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeQuickView();
+            }
+        });
+
+        // Mobile Navigation Toggle
+        const navToggle = document.getElementById('navToggle');
+        const navMenu = document.getElementById('navMenu');
+
+        navToggle.addEventListener('click', function() {
+            navMenu.classList.toggle('nav-menu-active');
+            navToggle.classList.toggle('nav-toggle-active');
+        });
+
+        // Close mobile menu when clicking on a link
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('nav-menu-active');
+                navToggle.classList.remove('nav-toggle-active');
+            });
+        });
+
+        // Newsletter subscription
+        document.querySelector('.newsletter-btn').addEventListener('click', function() {
+            const email = document.querySelector('.newsletter-input').value;
+            if (email) {
+                showToast('Successfully subscribed to newsletter!');
+                document.querySelector('.newsletter-input').value = '';
+            } else {
+                showToast('Please enter a valid email address');
+            }
+        });
+
+        // Search functionality
+        document.querySelector('.search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const searchTerm = this.value;
+                if (searchTerm) {
+                    showToast(`Searching for "${searchTerm}"`);
+                    this.value = '';
+                }
+            }
+        });
+
+        function updateWishlistPrice(selectElement) {
+            try {
+                const productId = selectElement.getAttribute('data-product-id');
+                const selectedSize = selectElement.value;
+
+                console.log('🔄 Updating price for product:', productId, 'size:', selectedSize);
+
+                // Get product data from the hidden script tag
+                const productDataScript = document.querySelector(.product-data[data-product-id="${productId}"]);
+                if (!productDataScript) {
+                    console.error('❌ Product data not found for:', productId);
+                    return;
+                }
+
+                const productData = JSON.parse(productDataScript.textContent);
+                const { variants, totalOffer } = productData;
+
+                // Find the selected variant
+                let selectedVariant = null;
+                if (selectedSize && selectedSize !== '') {
+                    selectedVariant = variants.find(variant => variant.size === selectedSize);
+                }
+
+                // If no size selected, use first variant (sorted)
+                if (!selectedVariant && variants.length > 0) {
+                    const sortedVariants = variants.sort((a, b) => {
+                        const aNum = parseFloat(a.size);
+                        const bNum = parseFloat(b.size);
+                        if (!isNaN(aNum) && !isNaN(bNum)) {
+                            return aNum - bNum;
+                        }
+                        return a.size.localeCompare(b.size);
+                    });
+                    selectedVariant = sortedVariants[0];
+                }
+
+                if (!selectedVariant) {
+                    console.error('❌ No variant found for product:', productId);
+                    return;
+                }
+
+                // Calculate prices
+                const originalPrice = selectedVariant.varientPrice;
+                const discountedPrice = totalOffer > 0 ?
+                    Math.round(originalPrice - (originalPrice * totalOffer / 100)) :
+                    originalPrice;
+
+                // Update price display
+                const priceContainer = document.querySelector(.product-price[data-product-id="${productId}"]);
+                if (priceContainer) {
+                    if (totalOffer > 0) {
+                        priceContainer.innerHTML = `
+                            <span class="current-price">₹${discountedPrice.toLocaleString('en-IN')}</span>
+                            <span class="original-price" style="text-decoration: line-through; color: #999; margin-left: 8px; font-size: 16px;">₹${originalPrice.toLocaleString('en-IN')}</span>
+                        `;
+                    } else {
+                        priceContainer.innerHTML = `
+                            <span class="current-price">₹${originalPrice.toLocaleString('en-IN')}</span>
+                        `;
+                    }
+
+                    console.log('✅ Price updated:', {
+                        originalPrice,
+                        discountedPrice,
+                        totalOffer
+                    });
+                }
+
+            } catch (error) {
+                console.error('💥 Error updating wishlist price:', error);
+        }
+    }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.getElementById('quickViewModal').style.display === 'flex') {
+                closeQuickView();
+            }
+        });
+    </script>
+    
+</body>
+</html>

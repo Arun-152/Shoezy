@@ -31,7 +31,7 @@ const productsPage = async (req, res) => {
         });
     } catch (error) {
         console.error("Error in productsPage:", error);
-        return res.redirect("/admin/adminerrorPage");
+        return res.redirect("/admin/adminErrorPage");
     }
 };
 
@@ -253,29 +253,29 @@ const addProduct = async (req, res) => {
     }
 };
 
-const blockedProduct= async(req,res)=>{
+const blockProduct= async(req,res)=>{
     try {
         let id= req.query.id
 
         await Products.updateOne({_id:id},{$set:{isBlocked:true}})
         res.redirect("/admin/products")
     } catch (error) {
-        res.redirect("/admin/adminerrorPage")
+        res.redirect("/admin/adminErrorPage")
     }
-   
+
 }
  
-const unblockedProduct= async(req,res)=>{
+const unblockProduct= async(req,res)=>{
     try {
         let id= req.query.id
         await Products.updateOne({_id:id},{$set:{isBlocked:false}})
     res.redirect("/admin/products")
-        
+
     } catch (error) {
-        res.redirect("/admin/adminerrorPage")
-        
+        res.redirect("/admin/adminErrorPage")
+
     }
-   
+
 }
 const loadEditProduct= async(req,res)=>{
     try {
@@ -290,7 +290,7 @@ const loadEditProduct= async(req,res)=>{
         })
         
     } catch (error) {
-        res.redirect("/admin/adminerrorPage")
+        res.redirect("/admin/adminErrorPage")
         
     }
 }
@@ -459,8 +459,8 @@ module.exports = {
     productsPage,
     loadAddProductPage,
     addProduct,
-    blockedProduct,
-    unblockedProduct,
+    blockProduct,
+    unblockProduct,
     loadEditProduct,
     editProducts,
     deleteProducts

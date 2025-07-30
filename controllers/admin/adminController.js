@@ -4,7 +4,7 @@ const Category = require("../../models/categorySchema");
 const bcrypt = require("bcrypt");
 require("dotenv").config();
 
-const adminerrorPage = (req, res) => {
+const adminErrorPage = (req, res) => {
   try {
     return res.render("adminerrorPage", { title: "Error" });
   } catch (error) {
@@ -13,7 +13,7 @@ const adminerrorPage = (req, res) => {
   }
 };
 
-const adminloginpage = async (req, res) => {
+const adminLoginPage = async (req, res) => {
   try {
     if (req.session.adminId) {
       return res.redirect("/admin/dashboard");
@@ -26,7 +26,7 @@ const adminloginpage = async (req, res) => {
     });
   } catch (error) {
     console.error("Error rendering admin login page:", error.message);
-    res.redirect("/admin/adminerrorPage");
+    res.redirect("/admin/adminErrorPage");
   }
 };
 
@@ -223,7 +223,7 @@ const ordersPage = (req, res) => {
   }
 };
 
-const coupenPage = (req, res) => {
+const couponPage = (req, res) => {
   try {
     res.render("admincoupenPage", { title: "Coupons" });
   } catch (error) {
@@ -241,14 +241,7 @@ const salesPage = (req, res) => {
   }
 };
 
-const categoryPage = (req, res) => {
-  try {
-    res.render("admincategoryPage", { title: "Categories" });
-  } catch (error) {
-    console.error("Error rendering category page:", error.message);
-    res.status(500).send(`Server error: ${error.message}`);
-  }
-};
+
 
 const offersPage = (req, res) => {
   try {
@@ -279,15 +272,14 @@ const adminLogout = (req, res) => {
 };
 
 module.exports = {
-  adminloginpage,
+  adminLoginPage,
   postLogin,
   dashboardPage,
   ordersPage,
-  coupenPage,
+  couponPage,
   salesPage,
-  categoryPage,
   offersPage,
   settingsPage,
   adminLogout,
-  adminerrorPage,
+  adminErrorPage,
 };

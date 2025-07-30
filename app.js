@@ -2,13 +2,11 @@
 const express = require("express")
 const app = express()
 const path = require("path")
-const userRouter = require("./routes/userRouter")
-const authRouter = require("./routes/authRouter")
 const env = require("dotenv").config()
 const session = require("express-session")
 const flash = require("connect-flash")
-const adminRouter = require("./routes/adminRouter")
 const passport = require("./config/passport")
+const {registerRoutes} = require("./routes/index")
 const db = require("./config/db")
 db()
 
@@ -65,9 +63,7 @@ app.set("view engine", "ejs")
 app.set("views", [path.join(__dirname, "views/user"), path.join(__dirname, "views/admin"), path.join(__dirname, "views")])
 app.use(express.static(path.join(__dirname, "public")))
 
-app.use("/", userRouter)
-app.use("/auth", authRouter)
-app.use("/admin", adminRouter);
+registerRoutes(app)
 
 // 404 Error Handler - Route not found
 app.use((req, res, next) => {

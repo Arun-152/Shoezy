@@ -6,7 +6,7 @@ const nodemailer = require("nodemailer");
 const { validateEmailConfig, createEmailTransporter, sendEmail } = require("../../config/emailConfig");
 require("dotenv").config();
 
-const usererrorPage = (req, res) => {
+const userErrorPage = (req, res) => {
     try {
         return res.render("usererrorPage");
     } catch (error) {
@@ -257,7 +257,7 @@ const postSignup = async (req, res) => {
     }
 };
 
-const otpverification = async (req, res) => {
+const otpVerification = async (req, res) => {
     try {
         if (!req.session.user || !req.session.userOtp) {
             req.flash("error_msg", "No active signup session found. Please try again.");
@@ -338,7 +338,7 @@ const resendOTP = async (req, res) => {
     }
 };
 
-const postlogin = async (req, res) => {
+const postLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
 
@@ -757,12 +757,12 @@ module.exports = {
     landingPage,
     loginPage,
     postSignup,
-    otpverification,
+    otpVerification,
     verifyOTP,
-    postlogin,
+    postLogin,
     logout,
     resendOTP,
-    usererrorPage,
+    userErrorPage,
     forgotPasswordPage,
     postForgotPassword,
     verifyOTPPage,

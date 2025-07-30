@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shoezy - My Wallet</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/walletPage.css">
+</head>
+<body>
+    <!-- Header -->
+    <%-include("../partials/user/navbar")%>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <div class="container">
+            <a href="/" class="breadcrumb-link">
+                <i class="fas fa-home"></i> Home
+            </a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="/myaccount" class="breadcrumb-link">My Account</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Wallet</span>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Sidebar -->
+        <% const currentPage = 'wallet'; %>
+        <%-include("../partials/user/account-sidebar", { user, currentPage })%>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-header">
+                <h2>My Wallet</h2>
+            </div>
+
+            <!-- Wallet Balance Card -->
+            <div class="wallet-balance-card">
+                <div class="balance-info">
+                    <div class="balance-icon">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <div class="balance-details">
+                        <h3>Current Balance</h3>
+                        <div class="balance-amount">₹2,450.00</div>
+                        <p class="last-updated">Last updated: Today, 2:30 PM</p>
+                    </div>
+                </div>
+                <div class="balance-actions">
+                    <button class="add-money-btn">
+                        <i class="fas fa-plus"></i>
+                        Add Money
+                    </button>
+                    <button class="withdraw-btn">
+                        <i class="fas fa-minus"></i>
+                        Withdraw
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <h3>Quick Actions</h3>
+                <div class="actions-grid">
+                    <div class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                        <h4>Add Money</h4>
+                        <p>Add money to your wallet using UPI, cards, or net banking</p>
+                        <button class="action-btn">Add Now</button>
+                    </div>
+                    <div class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-university"></i>
+                        </div>
+                        <h4>Bank Transfer</h4>
+                        <p>Transfer money directly to your bank account</p>
+                        <button class="action-btn">Transfer</button>
+                    </div>
+                    <div class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-history"></i>
+                        </div>
+                        <h4>Transaction History</h4>
+                        <p>View all your wallet transactions and statements</p>
+                        <button class="action-btn">View History</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Transactions -->
+            <div class="recent-transactions">
+                <div class="section-header">
+                    <h3>Recent Transactions</h3>
+                    <button class="view-all-btn">View All</button>
+                </div>
+                
+                <div class="transactions-list">
+                    <!-- Transaction 1 -->
+                    <div class="transaction-item">
+                        <div class="transaction-icon credit">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <div class="transaction-details">
+                            <h4>Money Added</h4>
+                            <p>Added via UPI</p>
+                            <span class="transaction-date">Today, 2:30 PM</span>
+                        </div>
+                        <div class="transaction-amount credit">
+                            +₹1,000.00
+                        </div>
+                    </div>
+
+                    <!-- Transaction 2 -->
+                    <div class="transaction-item">
+                        <div class="transaction-icon debit">
+                            <i class="fas fa-shopping-bag"></i>
+                        </div>
+                        <div class="transaction-details">
+                            <h4>Order Payment</h4>
+                            <p>Order #ORD-2024-003</p>
+                            <span class="transaction-date">Yesterday, 4:15 PM</span>
+                        </div>
+                        <div class="transaction-amount debit">
+                            -₹2,499.00
+                        </div>
+                    </div>
+
+                    <!-- Transaction 3 -->
+                    <div class="transaction-item">
+                        <div class="transaction-icon credit">
+                            <i class="fas fa-undo"></i>
+                        </div>
+                        <div class="transaction-details">
+                            <h4>Refund Received</h4>
+                            <p>Order #ORD-2024-001 refund</p>
+                            <span class="transaction-date">Jan 20, 11:30 AM</span>
+                        </div>
+                        <div class="transaction-amount credit">
+                            +₹1,299.00
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wallet Features -->
+            <div class="wallet-features">
+                <h3>Wallet Features</h3>
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <i class="fas fa-shield-alt"></i>
+                        <h4>Secure Payments</h4>
+                        <p>Your money is safe with bank-level security</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-bolt"></i>
+                        <h4>Instant Transfers</h4>
+                        <p>Quick and seamless money transfers</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-percentage"></i>
+                        <h4>Cashback Rewards</h4>
+                        <p>Earn cashback on every purchase</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-clock"></i>
+                        <h4>24/7 Support</h4>
+                        <p>Round-the-clock customer support</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <%-include("../partials/user/userfooter")%>
+
+    <script>
+        // Simple wallet functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add money buttons
+            document.querySelectorAll('.add-money-btn, .action-btn').forEach(btn => {
+                if (btn.textContent.includes('Add')) {
+                    btn.addEventListener('click', () => {
+                        alert('Add money functionality would be implemented here');
+                    });
+                }
+            });
+
+            // Other action buttons
+            document.querySelector('.withdraw-btn').addEventListener('click', () => {
+                alert('Withdraw feature coming soon!');
+            });
+
+            document.querySelector('.view-all-btn').addEventListener('click', () => {
+                alert('Redirecting to transaction history...');
+            });
+
+            // Action card buttons
+            document.querySelectorAll('.action-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const action = btn.textContent.trim();
+                    alert(`${action} functionality would be implemented here`);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
