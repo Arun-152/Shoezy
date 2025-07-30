@@ -24,7 +24,9 @@ router.post("/signup", userController.postSignup);
 router.get("/otpVerification", userController.otpVerification);
 router.post("/verifyOtp", userController.verifyOTP);
 router.post("/login", userController.postLogin);
-router.get("/home",userAuth, homepageController.homePage);
+
+
+router.get("/home", homepageController.homePage);
 router.get("/logout", userController.logout);
 router.get("/shop", shopPageController.shopPage);
 router.get("/product/:id", productController.productDetailPage);

@@ -116,30 +116,28 @@ const removeWishlist = async(req,res)=>{
 // Toggle wishlist - Add if not present, remove if present
 const toggleWishlist = async(req,res)=>{
     try {
-        console.log('🔄 Toggle wishlist request:', req.body);
+       
         
         const { productId } = req.body
         const userId = req.session.userId
-        
-        console.log('👤 User ID:', userId);
-        console.log('📦 Product ID:', productId);
+    
         
         if (!userId) {
-            console.log('❌ User not authenticated');
+            
             return res.status(401).json({success: false, message: "User not authenticated"})
         }
 
         // Check if product exists
         const product = await Product.findById(productId)
         if (!product) {
-            console.log('❌ Product not found');
+          
             return res.status(404).json({success: false, message: "Product not found"})
         }
 
         // Find or create wishlist
         let userWishlist = await Wishlist.findOne({ userId })
         if (!userWishlist) {
-            console.log('🆕 Creating new wishlist');
+          
             userWishlist = new Wishlist({ userId, products: [] })
         }
 
@@ -156,18 +154,18 @@ const toggleWishlist = async(req,res)=>{
             userWishlist.products.splice(existingProductIndex, 1)
             action = 'removed';
             message = 'Product removed from wishlist';
-            console.log('🗑️ Product removed from wishlist');
+          
         } else {
             // Product doesn't exist, add it
             userWishlist.products.push({ productId })
             action = 'added';
             message = 'Product added to wishlist';
-            console.log('➕ Product added to wishlist');
+         
         }
 
         await userWishlist.save()
         
-        console.log('✅ Wishlist toggle completed:', action);
+        
         return res.status(200).json({
             success: true, 
             message: message,

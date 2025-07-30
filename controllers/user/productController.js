@@ -1,8 +1,9 @@
-const User = require("../../models/userSchema");
+const User = require("../../models/userSchema")
 const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
 const Cart = require("../../models/cartSchema");
 const Wishlist = require("../../models/wishlistSchema");
+
 
 const productDetailPage = async (req, res) => {
     try {
@@ -33,7 +34,7 @@ const productDetailPage = async (req, res) => {
         }).populate("category");
 
         if (!product) {
-            return res.status(404).render("usererrorPage");
+            return res.render("usererrorPage");
         }
 
         // Find related products from the same category

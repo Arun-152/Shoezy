@@ -457,14 +457,6 @@ const postLogin = async (req, res) => {
 };
 
 
-
-
-
-
-
-
-
-
 async function sendPasswordResetOTP(email, otp) {
     try {
         const validation = validateEmailConfig();

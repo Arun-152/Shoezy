@@ -5,14 +5,17 @@ const Cart = require("../../models/cartSchema");
 const Wishlist = require("../../models/wishlistSchema");
 
 const homePage = async (req, res) => {
+ 
     try {
-        // Check if user is logged in (optional for home page)
         const userData = req.session.userId;
         let user = null;
+
+        // Check if user is logged in
         if (userData) {
             user = await User.findById(userData);
         }
 
+        // Fetch products with conditions
         const featuredProducts = await Product.find({ isDeleted: false, isBlocked: false })
             .populate({
                 path: "category",
@@ -20,28 +23,52 @@ const homePage = async (req, res) => {
             })
             .sort({ createdAt: -1 })
             .limit(6);
+          
 
-        // Filter out products with unlisted categories
+        // Filter products whose category is valid (not null after populate)
         const filteredProducts = featuredProducts.filter(product => product.category !== null);
+     
 
-        // Initialize empty arrays for wishlist and cart items
+      
         let wishlistItems = [];
         let cartItems = [];
 
-        // If user is logged in, fetch their wishlist and cart data
         if (userData) {
-            // Fetch user's wishlist
-            const userWishlist = await Wishlist.findOne({ userId: userData }).populate('products.productId');
-            if (userWishlist && userWishlist.products) {
-                wishlistItems = userWishlist.products.map(item => item.productId._id.toString()).filter(id => id !== null);
-            }
+            // Fetch wishlist
+            const userWishlist = await Wishlist.findOne({ userId: userData }).populate({
+                path: 'products.productId',
+                match: { isDeleted: false, isBlocked: false },
+                populate: {
+                    path: 'category',
+                    match: { isListed: true, isDeleted: false }
+                }
+                
+            });
+           
 
-            // Fetch user's cart
-            const userCart = await Cart.findOne({ userId: userData }).populate('items.productId');
-            if (userCart && userCart.items) {
-                cartItems = userCart.items.map(item => item.productId).filter(product => product !== null);
+            if (userWishlist && userWishlist.products.length > 0) {
+                wishlistItems = userWishlist.products
+                    .filter(item => item.productId && item.productId.category) // Ensure valid product and category
+                    .map(item => item.productId._id.toString());
+            }
+          
+
+            // Fetch cart
+            const userCart = await Cart.findOne({ userId: userData }).populate({
+                path: 'items.productId',
+                match: { isDeleted: false, isBlocked: false },
+                populate: {
+                    path: 'category',
+                    match: { isListed: true, isDeleted: false }
+                }
+            });
+            if (userCart && userCart.items.length > 0) {
+                cartItems = userCart.items
+                    .filter(item => item.productId && item.productId.category)
+                    .map(item => item.productId._id.toString());
             }
         }
+        
 
         return res.render("homePage", {
             products: filteredProducts,
@@ -50,11 +77,12 @@ const homePage = async (req, res) => {
             cartItems: cartItems,
             wishlistCount: wishlistItems.length,
             cartCount: cartItems.length,
-            isLandingPage: false,
+            isLandingPage: false
         });
+
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Server error" });
+        console.error("Error in homePage:", error.message);
+        return res.redirect("/usererrorPage");
     }
 };
 
