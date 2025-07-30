@@ -40,66 +40,73 @@
             </div>
 
             <div class="wishlist-grid" id="wishlistGrid">
-                <!-- Product 1 -->
-                 <%if(wishlist.lengtgh>0){%>
-                    <%for(let product of wishlist){%>
-                <div class="product-card" data-product-id="<%= product._id%>">
-                    <div class="product-image">
-                        <img src="/uploads/products/<%=product.Images[0]%>" alt="Wireless Headphones">
-                        <button class="remove-btn" onclick="removeFromWishlist(1)">
-                            <i class="fas fa-times"></i>
-                        </button>
-                        <div class="quick-view-btn" onclick="openQuickView(1)">
-                            <i class="fas fa-eye"></i> Quick View
-                        </div>
-                    </div>
-                    <div class="product-info">
-                        <h3 class="product-title"><%=product.productName%></h3>
-                        <div class="price-section">
-                            const sortedVariants = product.variants.sort((a, b) => {
-                            const aNum = parseFloat(a.size);
-                            const bNum = parseFloat(b.size);
-                            if (!isNaN(aNum) && !isNaN(bNum)) {
-                                return aNum - bNum;
-                            }
-                            return a.size.localeCompare(b.size);
-                        });
-                            <span class="current-price"><%=product.variants.variantPrice%></span>
-                            <span class="original-price"><%=product.variants.salePrice%></span>
-                            <span class="discount">0% OFF</span>
-                            <div class="size-selector">
-                            <label>Select Size:</label>
-                            <select class="size-select" data-product-id="<%=product._id%>" onchange="updateWishlistPrice(this)">
-                                <option value="">Choose a size</option>
-                                <% if (product.variants && product.variants.length > 0) { %>
-                                    <% sortedVariants.forEach(variants => { %>
-                                        <% if (variants.varientQuantity > 0) { %>
-                                            <option value="<%= variants.size %>" data-price="<%= variant.varientPrice %>"><%= variants.size %></option>
+                <% if(wishlist.length > 0) { %>
+                    <% for(let product of wishlist) { %>
+                        <div class="product-card" data-product-id="<%= product._id %>">
+                            <div class="product-image">
+                                <img src="<%= product.images && product.images.length > 0 ? product.images[0] : 'https://via.placeholder.com/300x300/f8f9fa/dee2e6?text=No+Image' %>" alt="<%= product.productName %>">
+                                <button class="remove-btn" onclick="removeFromWishlist('<%= product._id %>')">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                <div class="quick-view-btn" onclick="openQuickView('<%= product._id %>')">
+                                    <i class="fas fa-eye"></i> Quick View
+                                </div>
+                            </div>
+                            <div class="product-info">
+                                <h3 class="product-title"><%= product.productName %></h3>
+                                <div class="price-section">
+                                    <% if (product.variants && product.variants.length > 0) { %>
+                                        <% 
+                                            const sortedVariants = product.variants.sort((a, b) => {
+                                                const aNum = parseFloat(a.size);
+                                                const bNum = parseFloat(b.size);
+                                                if (!isNaN(aNum) && !isNaN(bNum)) {
+                                                    return aNum - bNum;
+                                                }
+                                                return a.size.localeCompare(b.size);
+                                            });
+                                            const firstVariant = sortedVariants[0];
+                                            const minPrice = Math.min(...product.variants.map(v => v.salePrice));
+                                            const maxPrice = Math.max(...product.variants.map(v => v.variantPrice));
+                                        %>
+                                        <span class="current-price">₹<%= minPrice %></span>
+                                        <% if (maxPrice > minPrice) { %>
+                                            <span class="original-price">₹<%= maxPrice %></span>
                                         <% } %>
-                                    <% }); %>
-                                <% } else { %>
-                                    <option value="N/A" disabled>No sizes available</option>
-                                <% } %>
-                            </select>
+                                        <% if (product.productOffer && product.productOffer > 0) { %>
+                                            <span class="discount"><%= product.productOffer %>% OFF</span>
+                                        <% } %>
+                                        <div class="size-selector">
+                                            <label>Select Size:</label>
+                                            <select class="size-select" data-product-id="<%= product._id %>" onchange="updateWishlistPrice(this)">
+                                                <option value="">Choose a size</option>
+                                                <% sortedVariants.forEach(variant => { %>
+                                                    <% if (variant.variantQuantity > 0) { %>
+                                                        <option value="<%= variant.size %>" data-price="<%= variant.salePrice %>"><%= variant.size %></option>
+                                                    <% } %>
+                                                <% }); %>
+                                            </select>
+                                        </div>
+                                    <% } else { %>
+                                        <span class="current-price">Price not available</span>
+                                    <% } %>
+                                </div>
+                                <div class="product-actions">
+                                    <button class="add-to-cart-btn" onclick="addToCart('<%= product._id %>')">
+                                        <i class="fas fa-shopping-cart"></i> Add to Cart
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        </div>
-                        <div class="product-actions">
-                            <button class="add-to-cart-btn" onclick="addToCart(1)">
-                                <i class="fas fa-shopping-cart"></i> Add to Cart
-                            </button>
-                          
-                        </div>
-                    </div>
-                    <%}%>
-                </div>
-                <%}else{%>
+                    <% } %>
+                <% } else { %>
                     <div class="empty-state" id="emptyState">
-                <i class="fas fa-heart"></i>
-                <h3>Your wishlist is empty</h3>
-                <p>Start adding items you love to see them here!</p>
-                <button class="continue-shopping-btn">Continue Shopping</button>
-            </div>
-            <%}%>
+                        <i class="fas fa-heart"></i>
+                        <h3>Your wishlist is empty</h3>
+                        <p>Start adding items you love to see them here!</p>
+                        <button class="continue-shopping-btn" onclick="window.location.href='/shop'">Continue Shopping</button>
+                    </div>
+                <% } %>
             </div>
         </div>
     </main>
@@ -158,15 +165,50 @@
             showToast(`Added ${productData[productId].title} to cart!`);
         }
 
-        function removeFromWishlist(productId) {
-            const productCard = document.querySelector(`[data-id="${productId}"]`);
-            productCard.style.animation = 'slideOut 0.3s ease-in';
-            
-            setTimeout(() => {
-                productCard.remove();
-                updateItemCount();
-                showToast('Item removed from wishlist');
-            }, 300);
+        async function removeFromWishlist(productId) {
+            try {
+                const response = await fetch('/wishlist/remove', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ productId: productId })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const productCard = document.querySelector(`[data-product-id="${productId}"]`);
+                    if (productCard) {
+                        productCard.style.animation = 'slideOut 0.3s ease-in';
+                        
+                        setTimeout(() => {
+                            productCard.remove();
+                            updateItemCount();
+                            
+                            // Check if wishlist is empty and show empty state
+                            const remainingCards = document.querySelectorAll('.product-card');
+                            if (remainingCards.length === 0) {
+                                document.getElementById('wishlistGrid').innerHTML = `
+                                    <div class="empty-state" id="emptyState">
+                                        <i class="fas fa-heart"></i>
+                                        <h3>Your wishlist is empty</h3>
+                                        <p>Start adding items you love to see them here!</p>
+                                        <button class="continue-shopping-btn" onclick="window.location.href='/shop'">Continue Shopping</button>
+                                    </div>
+                                `;
+                            }
+                            
+                            showToast('Item removed from wishlist');
+                        }, 300);
+                    }
+                } else {
+                    showToast(data.message || 'Error removing item from wishlist');
+                }
+            } catch (error) {
+                console.error('Error removing from wishlist:', error);
+                showToast('Error removing item from wishlist. Please try again.');
+            }
         }
 
         function openQuickView(productId) {

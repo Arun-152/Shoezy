@@ -71,6 +71,51 @@
       color: #007bff;
     }
 
+    /* Wishlist and Cart Count Badges */
+    .wishlist-count, .cart-count {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: #ff4757;
+      color: white;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 11px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      min-width: 18px;
+      padding: 0 2px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    .cart-count {
+      background: #007bff;
+    }
+
+    /* Hide count when it's 0 */
+    .wishlist-count:empty,
+    .cart-count:empty,
+    .wishlist-count[data-count="0"],
+    .cart-count[data-count="0"] {
+      display: none;
+    }
+
+    /* Animation for count changes */
+    .wishlist-count, .cart-count {
+      animation: countPulse 0.3s ease;
+    }
+
+    @keyframes countPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
     .dropdown-menu {
       display: none;
       opacity: 0;

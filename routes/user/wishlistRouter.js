@@ -4,8 +4,10 @@ const { userAuth } = require("../../middlewares/auth");
 const wishlistController = require("../../controllers/user/wishlistController")
 
 router.get("/",userAuth,wishlistController.loadWishlist)
-router.post("/addToWishlist",wishlistController.addToWishlist)
-router.patch("/removeWishlist",wishlistController.removeWishlist)
+router.post("/add",userAuth,wishlistController.addToWishlist)
+router.post("/remove",userAuth,wishlistController.removeWishlist)
+router.post("/addToWishlist",wishlistController.addToWishlist) // Keep for backward compatibility
+router.patch("/removeWishlist",wishlistController.removeWishlist) // Keep for backward compatibility
 
 
 

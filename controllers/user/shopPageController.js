@@ -1,6 +1,8 @@
 const User = require("../../models/userSchema");
 const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
+const Cart = require("../../models/cartSchema");
+const Wishlist = require("../../models/wishlistSchema");
 
 const shopPage = async (req, res) => {
     try {
@@ -18,10 +20,33 @@ const shopPage = async (req, res) => {
 
         const categories = await Category.find({ isDeleted: false, isListed: true });
 
+        // Initialize empty arrays for wishlist and cart items
+        let wishlistItems = [];
+        let cartItems = [];
+
+        // If user is logged in, fetch their wishlist and cart data
+        if (userData) {
+            // Fetch user's wishlist
+            const userWishlist = await Wishlist.findOne({ userId: userData }).populate('products.productId');
+            if (userWishlist && userWishlist.products) {
+                wishlistItems = userWishlist.products.map(item => item.productId).filter(product => product !== null);
+            }
+
+            // Fetch user's cart
+            const userCart = await Cart.findOne({ userId: userData }).populate('items.productId');
+            if (userCart && userCart.items) {
+                cartItems = userCart.items.map(item => item.productId).filter(product => product !== null);
+            }
+        }
+
         return res.render("shopPage", {
             products: filteredProducts,
             categories: categories,
             user: userData,
+            wishlistItems: wishlistItems,
+            cartItems: cartItems,
+            wishlistCount: wishlistItems.length,
+            cartCount: cartItems.length,
             isLandingPage: false,
         });
     } catch (error) {
