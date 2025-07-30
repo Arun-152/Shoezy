@@ -355,12 +355,11 @@
                 const productId = selectElement.getAttribute('data-product-id');
                 const selectedSize = selectElement.value;
 
-                console.log('🔄 Updating price for product:', productId, 'size:', selectedSize);
 
                 // Get product data from the hidden script tag
                 const productDataScript = document.querySelector(.product-data[data-product-id="${productId}"]);
                 if (!productDataScript) {
-                    console.error('❌ Product data not found for:', productId);
+                    console.error(' Product data not found for:', productId);
                     return;
                 }
 
@@ -411,15 +410,10 @@
                         `;
                     }
 
-                    console.log('✅ Price updated:', {
-                        originalPrice,
-                        discountedPrice,
-                        totalOffer
-                    });
                 }
 
             } catch (error) {
-                console.error('💥 Error updating wishlist price:', error);
+                console.error('Error updating wishlist price:', error);
         }
     }
 

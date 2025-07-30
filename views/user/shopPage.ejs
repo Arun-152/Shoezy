@@ -132,7 +132,7 @@
                                 <% } %>
                                 
                                 <div class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('<%= product._id %>', this)">
-                                    <% if (wishlistItems && wishlistItems.some(item => item._id.toString() === product._id.toString())) { %>
+                                    <% if (wishlistItems && wishlistItems.includes(product._id.toString())) { %>
                                         <i class="fas fa-heart" style="color: #ff4757;"></i>
                                     <% } else { %>
                                         <i class="far fa-heart"></i>
@@ -410,8 +410,7 @@
             const isInWishlist = heartIcon.classList.contains('fas');
 
             try {
-                const url = isInWishlist ? '/wishlist/remove' : '/wishlist/add';
-                const response = await fetch(url, {
+                const response = await fetch('/wishlist/toggle', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -422,20 +421,20 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    if (isInWishlist) {
-                        // Remove from wishlist
-                        heartIcon.classList.remove('fas');
-                        heartIcon.classList.add('far');
-                        heartIcon.style.color = '';
-                        updateWishlistCount(-1);
-                        showNotification('Removed from wishlist!');
-                    } else {
-                        // Add to wishlist
+                    if (data.action === 'added') {
+                        // Product was added to wishlist
                         heartIcon.classList.remove('far');
                         heartIcon.classList.add('fas');
                         heartIcon.style.color = '#ff4757';
                         updateWishlistCount(1);
                         showNotification('Added to wishlist!');
+                    } else if (data.action === 'removed') {
+                        // Product was removed from wishlist
+                        heartIcon.classList.remove('fas');
+                        heartIcon.classList.add('far');
+                        heartIcon.style.color = '';
+                        updateWishlistCount(-1);
+                        showNotification('Removed from wishlist!');
                     }
                 } else {
                     showNotification(data.message || 'Error updating wishlist');

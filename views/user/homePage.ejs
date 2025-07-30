@@ -78,8 +78,12 @@
                                 </div>
 
                                 <!-- Wishlist Icon -->
-                                <div class="wishlist-btn" onclick="event.stopPropagation(); addToWishlist('<%= product._id %>')">
-                                    <i class="far fa-heart"></i>
+                                <div class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('<%= product._id %>', this)">
+                                    <% if (wishlistItems && wishlistItems.includes(product._id.toString())) { %>
+                                        <i class="fas fa-heart" style="color: #ff4757;"></i>
+                                    <% } else { %>
+                                        <i class="far fa-heart"></i>
+                                    <% } %>
                                 </div>
 
                                 <!-- Hover Overlay -->
@@ -603,17 +607,53 @@
         }
 
         // Toggle wishlist - Same as Shop Page
-        function toggleWishlist(productId, element) {
+        async function toggleWishlist(productId, element) {
             const heartIcon = element.querySelector('i');
+            const isInWishlist = heartIcon.classList.contains('fas');
 
-            if (heartIcon.classList.contains('far')) {
-                heartIcon.classList.remove('far');
-                heartIcon.classList.add('fas');
-                showNotification('Added to wishlist!');
-            } else {
-                heartIcon.classList.remove('fas');
-                heartIcon.classList.add('far');
-                showNotification('Removed from wishlist!');
+            try {
+                const response = await fetch('/wishlist/toggle', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ productId: productId })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    if (data.action === 'added') {
+                        // Product was added to wishlist
+                        heartIcon.classList.remove('far');
+                        heartIcon.classList.add('fas');
+                        heartIcon.style.color = '#ff4757';
+                        updateWishlistCount(1);
+                        showNotification('Added to wishlist!');
+                    } else if (data.action === 'removed') {
+                        // Product was removed from wishlist
+                        heartIcon.classList.remove('fas');
+                        heartIcon.classList.add('far');
+                        heartIcon.style.color = '';
+                        updateWishlistCount(-1);
+                        showNotification('Removed from wishlist!');
+                    }
+                } else {
+                    showNotification(data.message || 'Error updating wishlist');
+                }
+            } catch (error) {
+                console.error('Error toggling wishlist:', error);
+                showNotification('Error updating wishlist. Please try again.');
+            }
+        }
+
+        // Update wishlist count in navbar
+        function updateWishlistCount(change) {
+            const wishlistCountElem = document.getElementById('wishlistCount');
+            if (wishlistCountElem) {
+                const currentCount = parseInt(wishlistCountElem.textContent) || 0;
+                const newCount = Math.max(0, currentCount + change);
+                wishlistCountElem.textContent = newCount;
             }
         }
 
