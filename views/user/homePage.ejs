@@ -87,12 +87,14 @@
                                 </div>
 
                                 <!-- Hover Overlay -->
-                                <div class="product-overlay">
-                                    <button class="quick-view-btn" onclick="event.stopPropagation(); <%= typeof user !== 'undefined' && user ? `window.location.href='/product/${product._id}'` : 'redirectToLogin()' %>">
-                                        <i class="fas fa-eye"></i>
-                                        Quick View
-                                    </button>
-                                </div>
+                                <% if (typeof user !== 'undefined' && user) { %>
+                                    <div class="product-overlay">
+                                        <button class="quick-view-btn" onclick="event.stopPropagation(); window.location.href='/product/<%= product._id %>'">
+                                            <i class="fas fa-eye"></i>
+                                            Quick View
+                                        </button>
+                                    </div>
+                                <% } %>
                             </div>
                             <div class="product-info">
                                 <h3 class="product-name"><%= product.productName %></h3>
@@ -138,14 +140,7 @@
                                     <% } %>
                                 </div>
 
-                                <!-- Add to Cart Button - Same structure as Shop Page -->
-                                <div class="product-actions">
-                                    <button class="add-to-cart-btn" onclick="event.stopPropagation(); <%= typeof user !== 'undefined' && user ? `quickAddToCart('${product._id}')` : 'redirectToLogin()' %>" <%= product.status !== 'Available' ? 'disabled' : '' %>>
-                                        <i class="fas fa-shopping-cart"></i>
-                                        <%= product.status === 'Available' ? 'Add to Cart' : 'Out of Stock' %>
-                                    </button>
-                                </div>
-                            </div>
+                                                            </div>
                         </div>
                     <% }) %>
                 <% } else { %>

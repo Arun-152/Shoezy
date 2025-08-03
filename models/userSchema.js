@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
+const { Schema } = mongoose;
 
-const UserSchema = new mongoose.Schema(
+const UserSchema = new Schema(
     {
         fullname: {
             type: String,
@@ -16,7 +17,7 @@ const UserSchema = new mongoose.Schema(
         },
         phone: {
             type: String,
-            required: function() {
+            required: function () {
                 // Phone is not required for Google OAuth users
                 return !this.googleId;
             },
@@ -24,7 +25,7 @@ const UserSchema = new mongoose.Schema(
         },
         password: {
             type: String,
-            required: function() {
+            required: function () {
                 // Password is not required for Google OAuth users
                 return !this.googleId;
             },
@@ -45,6 +46,15 @@ const UserSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
+
+        wishlist: [{
+            type:Schema.Types.ObjectId,
+            ref: "Product"
+        }],
+        cart: [{
+            type:Schema.Types.ObjectId,
+            ref: "Cart"
+        }],
         isAdmin: {
             type: Boolean,
             default: false,
