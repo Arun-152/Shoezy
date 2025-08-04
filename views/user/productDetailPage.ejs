@@ -960,11 +960,6 @@
                                 <i class="fas fa-ban"></i>
                                 Out of Stock
                             </button>
-                        <% } else if (cartItems && cartItems.some(item => item._id.toString() === product._id.toString())) { %>
-                            <button class="btn btn-primary in-cart" id="addToCartBtn" onclick="viewCart()" style="background-color: #10b981;">
-                                <i class="fas fa-check"></i>
-                                In Cart
-                            </button>
                         <% } else { %>
                             <button class="btn btn-primary" id="addToCartBtn" onclick="addToCart()">
                                 <i class="fas fa-shopping-cart"></i>
@@ -1017,7 +1012,7 @@
                                     <% } %>
 
                                     <!-- Wishlist Icon for Related Products -->
-                                    <div class="related-wishlist-icon" onclick="event.stopPropagation(); addToWishlist()">
+                                    <div class="related-wishlist-icon" onclick="addToWishlist()">
                                         <i class="far fa-heart"></i>
                                     </div>
                                 </div>
@@ -1048,6 +1043,7 @@
         </div>
     </main>
     <%-include("../partials/user/userfooter")%>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/jquery-zoom/jquery.zoom.min.js"></script>
 
@@ -1216,36 +1212,110 @@
             }
         }
 
-        function addToCart() {
-            // Check if product is out of stock
-            const productStatus = '<%= product.status %>';
-            if (productStatus === 'out of stock') {
-                alert('This product is currently out of stock');
-                return;
-            }
+        async function addToCart() {
+            try {
+                // Check if product is out of stock
+                const productStatus = '<%= product.status %>';
+                if (productStatus === 'out of stock') {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'error',
+                        title: 'This product is currently out of stock',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true
+                    });
+                    return;
+                }
 
-            if (!selectedSize) {
-                alert('Please select a size first');
-                return;
-            }
+                if (!selectedSize) {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'warning',
+                        title: 'Please select a size first',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true
+                    });
+                    return;
+                }
 
-            if (availableStock <= 0) {
-                alert('This size is out of stock');
-                return;
+                if (availableStock <= 0) {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'error',
+                        title: 'This size is out of stock',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true
+                    });
+                    return;
+                }
+                
+                const quantity = parseInt(document.getElementById('quantityInput').value);
+                
+                // Send data to backend
+                const response = await fetch('/cart/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        productId: '<%= product._id %>',
+                        size: selectedSize,
+                        price: selectedPrice,
+                        quantity: quantity
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Update navbar cart count using server response
+                    const cartCountElem = document.getElementById('cartCount');
+                    if (cartCountElem && data.totalQuantity) {
+                        cartCountElem.textContent = data.totalQuantity;
+                    }
+
+                    // Show success message
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: `Added ${quantity} x <%= product.productName %> (Size: ${selectedSize}) to cart!`,
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true
+                    });
+
+                } else {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'error',
+                        title: data.message || 'Error adding product to cart',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true
+                    });
+                }
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Error adding product to cart. Please try again.',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true
+                });
             }
-            
-            const quantity = parseInt(document.getElementById('quantityInput').value);
-            
-            // Here you would typically send this data to your backend
-            const cartItem = {
-                productId: '<%= product._id %>',
-                productName: '<%= product.productName %>',
-                size: selectedSize,
-                price: selectedPrice,
-                quantity: quantity,
-                image: '<%= product.images && product.images.length > 0 ? product.images[0] : "" %>'
-            };
-            alert(`Added ${quantity} x <%= product.productName %> (Size: ${selectedSize}) to cart!`);
         }
 
         async function addToWishlist() {
@@ -1255,8 +1325,7 @@
             const isInWishlist = heartIcon.classList.contains('fas');
 
             try {
-                const url = isInWishlist ? '/wishlist/remove' : '/wishlist/add';
-                const response = await fetch(url, {
+                const response = await fetch('/wishlist/toggle', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1267,29 +1336,61 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    if (isInWishlist) {
-                        // Remove from wishlist
-                        heartIcon.classList.remove('fas');
-                        heartIcon.classList.add('far');
-                        heartIcon.style.color = '';
-                        wishlistBtn.innerHTML = '<i class="far fa-heart"></i> Add to Wishlist';
-                        updateWishlistCount(-1);
-                        alert('Removed from wishlist!');
-                    } else {
-                        // Add to wishlist
+                    if (data.action === 'added') {
+                        // Product was added to wishlist
                         heartIcon.classList.remove('far');
                         heartIcon.classList.add('fas');
                         heartIcon.style.color = '#ff4757';
                         wishlistBtn.innerHTML = '<i class="fas fa-heart" style="color: #ff4757;"></i> In Wishlist';
                         updateWishlistCount(1);
-                        alert('Added to wishlist!');
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'Added to wishlist successfully!',
+                            showConfirmButton: false,
+                            timer: 1500,
+                            timerProgressBar: true
+                        });
+                    } else if (data.action === 'removed') {
+                        // Product was removed from wishlist
+                        heartIcon.classList.remove('fas');
+                        heartIcon.classList.add('far');
+                        heartIcon.style.color = '';
+                        wishlistBtn.innerHTML = '<i class="far fa-heart"></i> Add to Wishlist';
+                        updateWishlistCount(-1);
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'Removed from wishlist!',
+                            showConfirmButton: false,
+                            timer: 1500,
+                            timerProgressBar: true
+                        });
                     }
                 } else {
-                    alert(data.message || 'Error updating wishlist');
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'error',
+                        title: data.message || 'Error updating wishlist',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true
+                    });
                 }
             } catch (error) {
                 console.error('Error toggling wishlist:', error);
-                alert('Error updating wishlist. Please try again.');
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Error updating wishlist. Please try again.',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true
+                });
             }
         }
 
@@ -1308,6 +1409,7 @@
             }
         }
 
+        
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             // Auto-select the smallest/default size when page loads

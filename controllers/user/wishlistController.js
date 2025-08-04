@@ -13,18 +13,47 @@ const loadWishlist = async(req,res)=>{
         }
 
         // Find user's wishlist
-        const userWishlist = await Wishlist.findOne({ userId }).populate('products.productId');
+        const userWishlist = await Wishlist.findOne({ userId }).populate({
+            path: 'products.productId',
+            match: { isDeleted: false, isBlocked: false },
+            populate: {
+                path: 'category',
+                match: { isListed: true, isDeleted: false }
+            }
+        });
+        
         let wishlistProducts = [];
+        let wishlistCount = 0;
         
         if (userWishlist && userWishlist.products) {
             wishlistProducts = userWishlist.products
                 .map(item => item.productId)
-                .filter(product => product !== null);
+                .filter(product => product !== null && product.category !== null);
+            wishlistCount = wishlistProducts.length;
+        }
+
+        // Also get cart count for navbar
+        const Cart = require("../../models/cartSchema");
+        const userCart = await Cart.findOne({ userId }).populate({
+            path: 'items.productId',
+            match: { isDeleted: false, isBlocked: false },
+            populate: {
+                path: 'category',
+                match: { isListed: true, isDeleted: false }
+            }
+        });
+        
+        let cartCount = 0;
+        if (userCart && userCart.items.length > 0) {
+            const validCartItems = userCart.items.filter(item => item.productId && item.productId.category);
+            cartCount = validCartItems.length;
         }
 
         return res.render("wishlistPage",{
             user,
             wishlist: wishlistProducts,
+            wishlistCount: wishlistCount,
+            cartCount: cartCount
         })
     }catch(error){
         console.error(error)
@@ -97,8 +126,12 @@ const removeWishlist = async(req,res)=>{
 
         await userWishlist.save()
 
-        // If this is an AJAX request, return JSON response
-        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+        // Check if this is an AJAX request
+        const isAjax = req.headers['x-requested-with'] === 'XMLHttpRequest' || 
+                      req.headers['accept'] && req.headers['accept'].includes('application/json') ||
+                      req.headers['content-type'] && req.headers['content-type'].includes('application/json');
+
+        if (isAjax) {
             return res.status(200).json({success: true, message: "Product removed from wishlist"})
         }
 
@@ -106,7 +139,13 @@ const removeWishlist = async(req,res)=>{
         return res.redirect("/wishlist")
     } catch (error) {
         console.error(error)
-        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+        
+        // Check if this is an AJAX request for error handling too
+        const isAjax = req.headers['x-requested-with'] === 'XMLHttpRequest' || 
+                      req.headers['accept'] && req.headers['accept'].includes('application/json') ||
+                      req.headers['content-type'] && req.headers['content-type'].includes('application/json');
+        
+        if (isAjax) {
             return res.status(500).json({success: false, message: "Server error"})
         }
         return res.redirect("/usererrorPage") 
@@ -179,9 +218,148 @@ const toggleWishlist = async(req,res)=>{
     }
 }
 
+// Clear entire wishlist
+const clearWishlist = async(req,res)=>{
+    try {
+        const userId = req.session.userId
+
+        if (!userId) {
+            return res.status(401).json({success: false, message: "User not authenticated"})
+        }
+
+        // Find user's wishlist
+        const userWishlist = await Wishlist.findOne({ userId })
+        
+        if (!userWishlist) {
+            return res.status(404).json({success: false, message: "Wishlist not found"})
+        }
+
+        // Clear all products from wishlist
+        userWishlist.products = []
+        await userWishlist.save()
+
+        // Check if this is an AJAX request
+        const isAjax = req.headers['x-requested-with'] === 'XMLHttpRequest' || 
+                      req.headers['accept'] && req.headers['accept'].includes('application/json') ||
+                      req.headers['content-type'] && req.headers['content-type'].includes('application/json');
+
+        if (isAjax) {
+            return res.status(200).json({success: true, message: "Wishlist cleared successfully"})
+        }
+
+        // Otherwise redirect to wishlist page
+        return res.redirect("/wishlist")
+    } catch (error) {
+        console.error(error)
+        
+        // Check if this is an AJAX request for error handling too
+        const isAjax = req.headers['x-requested-with'] === 'XMLHttpRequest' || 
+                      req.headers['accept'] && req.headers['accept'].includes('application/json') ||
+                      req.headers['content-type'] && req.headers['content-type'].includes('application/json');
+        
+        if (isAjax) {
+            return res.status(500).json({success: false, message: "Server error"})
+        }
+        return res.redirect("/usererrorPage") 
+    }
+}
+
+// Add to cart from wishlist
+const addToCartFromWishlist = async(req,res)=>{
+    try {
+        const { productId, size } = req.body
+        const userId = req.session.userId
+
+        if (!userId) {
+            return res.status(401).json({success: false, message: "User not authenticated"})
+        }
+
+        if (!productId || !size) {
+            return res.status(400).json({success: false, message: "Product ID and size are required"})
+        }
+
+        // Check if product exists and is available
+        const product = await Product.findById(productId).populate("category")
+        if (!product || product.isDeleted || product.isBlocked) {
+            return res.status(400).json({success: false, message: "This product is unavailable"})
+        }
+
+        if (!product.category || !product.category.isListed || product.category.isDeleted) {
+            return res.status(400).json({success: false, message: "This product category is unavailable"})
+        }
+
+        // Find the variant with the selected size
+        const selectedVariant = product.variants.find(v => v.size === size);
+        if (!selectedVariant) {
+            return res.status(400).json({success: false, message: "Selected size not available"})
+        }
+
+        // Check if the selected variant is out of stock
+        if (selectedVariant.variantQuantity <= 0) {
+            return res.status(400).json({success: false, message: "Out of Stock", isOutOfStock: true})
+        }
+
+        // Check overall product stock status
+        const totalStock = product.variants.reduce((sum, variant) => sum + variant.variantQuantity, 0);
+        if (totalStock <= 0) {
+            return res.status(400).json({success: false, message: "Out of Stock", isOutOfStock: true})
+        }
+
+        // Add to cart
+        const Cart = require("../../models/cartSchema");
+        let userCart = await Cart.findOne({userId})
+        if (!userCart) {
+            userCart = new Cart({userId, items: []})
+        }
+
+        // Check if product with same size already exists in cart
+        const existingItemIndex = userCart.items.findIndex(item => 
+            item.productId.toString() === productId && (item.size || "Default") === size
+        )
+
+        if (existingItemIndex > -1) {
+            // Update existing item quantity
+            userCart.items[existingItemIndex].quantity += 1
+            userCart.items[existingItemIndex].totalPrice = userCart.items[existingItemIndex].price * userCart.items[existingItemIndex].quantity
+        } else {
+            // Add new item to cart
+            userCart.items.push({
+                productId: productId,
+                size: size,
+                quantity: 1,
+                price: selectedVariant.salePrice,
+                totalPrice: selectedVariant.salePrice
+            })
+        }
+
+        await userCart.save()
+
+        // Remove from wishlist
+        const userWishlist = await Wishlist.findOne({ userId })
+        if (userWishlist) {
+            userWishlist.products = userWishlist.products.filter(
+                item => item.productId.toString() !== productId
+            )
+            await userWishlist.save()
+        }
+
+        return res.status(200).json({
+            success: true, 
+            message: "Product moved to cart successfully",
+            cartCount: userCart.items.length
+        })
+
+    } catch (error) {
+        console.error('Error adding to cart from wishlist:', error)
+        return res.status(500).json({success: false, message: "Server error"})
+    }
+}
+
 module.exports = {
     loadWishlist,
     addToWishlist,
     removeWishlist,
     toggleWishlist,
+    clearWishlist,
+    addToCartFromWishlist,
 }

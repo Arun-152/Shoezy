@@ -84,10 +84,17 @@ const productDetailPage = async (req, res) => {
                 wishlistItems = userWishlist.products.map(item => item.productId).filter(product => product !== null);
             }
 
-            // Fetch user's cart
+            // Fetch user's cart - Fixed to properly check if product is in cart
             const userCart = await Cart.findOne({ userId: userData._id }).populate('items.productId');
             if (userCart && userCart.items) {
-                cartItems = userCart.items.map(item => item.productId).filter(product => product !== null);
+                cartItems = userCart.items
+                    .filter(item => item.productId !== null)
+                    .map(item => ({
+                        _id: item.productId._id,
+                        productName: item.productId.productName,
+                        size: item.size,
+                        quantity: item.quantity
+                    }));
             }
         }
 
