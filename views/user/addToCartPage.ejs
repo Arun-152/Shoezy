@@ -110,9 +110,7 @@
                     <span class="cart-total-amount" id="cartTotalAmount">₹<%= total.toFixed(2) %></span>
                 </div>
                 <div class="cart-actions-quick">
-                    <button class="save-later-btn" onclick="saveForLater()">
-                        <i class="fas fa-heart"></i> Save for Later
-                    </button>
+                    
                     <button class="clear-cart-btn" onclick="clearCart()">
                         <i class="fas fa-trash"></i> Clear Cart
                     </button>
@@ -132,11 +130,7 @@
                     <div class="cart-items" id="cartItems">
                         <% if (cartItems && cartItems.length > 0) { %>
                             <% cartItems.forEach((item, index) => { %>
-                                <div class="cart-item" data-id="<%= item._id %>" data-product-id="<%= item.productId._id %>" data-price="<%= item.price %>">
-                                    <div class="item-checkbox">
-                                        <input type="checkbox" id="item<%= index %>" class="item-select" checked onchange="updateSelection()">
-                                        <label for="item<%= index %>"></label>
-                                    </div>
+                                <div class="cart-item" data-id="<%= item._id %>" data-product-id="<%= item.productId._id %>" data-price="<%= item.price %>">                             
                                     <div class="item-image">
                                         <% if (item.productId.images && item.productId.images.length > 0) { %>
                                             <img src="<%= item.productId.images[0] %>" alt="<%= item.productId.productName %>">
@@ -195,15 +189,13 @@
                         <div class="summary-row">
                             <span>Subtotal (<%= cartCount %> item<%= cartCount !== 1 ? 's' : '' %>)</span>
                             <span id="subtotal">₹<%= subtotal.toFixed(2) %></span>
-                        </div>
-                        
+                        </div>  
                         <div class="summary-row">
                             <span>Shipping</span>
                             <span class="<%= shipping === 0 ? 'free-shipping' : '' %>" id="shipping">
                                 <%= shipping === 0 ? 'FREE' : '₹' + shipping.toFixed(2) %>
                             </span>
                         </div>
-                        
                         <div class="summary-row">
                             <span>Tax (8%)</span>
                             <span id="tax">₹<%= tax.toFixed(2) %></span>

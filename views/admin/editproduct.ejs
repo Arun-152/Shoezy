@@ -390,7 +390,14 @@
           // Redirect to products page
           window.location.href = "/admin/products";
         } else {
-          throw new Error(result.error || "Something went wrong.");
+          await Swal.fire({
+            icon:"error",
+            tittle:"Error",
+            text:result.message,
+            showConfirmButton:true,
+            confirmButtonText:"Ok",
+            showCancelButton:false
+          })
         }
       } catch (err) {
         Swal.fire({

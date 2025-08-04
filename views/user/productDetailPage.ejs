@@ -955,7 +955,7 @@
                     </div>
 
                     <div class="product-actions">
-                        <% if (product.status === 'out of stock') { %>
+                        <% if (product.status !== 'Available') { %>
                             <button class="btn btn-primary" id="addToCartBtn" disabled style="background-color: #ccc; cursor: not-allowed;">
                                 <i class="fas fa-ban"></i>
                                 Out of Stock
