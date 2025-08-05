@@ -320,6 +320,62 @@ const verifyEmailOTP = async (req, res) => {
     }
 };
 
+// Change Password functionality
+const changePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword, confirmPassword } = req.body;
+        const userId = req.session.userId;
+
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "User not authenticated" });
+        }
+
+        // Validation
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            return res.status(400).json({ success: false, message: "All password fields are required" });
+        }
+
+        if (newPassword.length < 8) {
+            return res.status(400).json({ success: false, message: "New password must be at least 8 characters long" });
+        }
+
+        if (newPassword !== confirmPassword) {
+            return res.status(400).json({ success: false, message: "New password and confirm password do not match" });
+        }
+
+        // Get user from database
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        // Check if current password is correct
+        const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+        if (!isCurrentPasswordValid) {
+            return res.status(400).json({ success: false, message: "Current password is incorrect" });
+        }
+
+        // Check if new password is same as current password
+        const isSamePassword = await bcrypt.compare(newPassword, user.password);
+        if (isSamePassword) {
+            return res.status(400).json({ success: false, message: "New password cannot be the same as current password" });
+        }
+
+        // Hash new password
+        const saltRounds = 10;
+        const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
+
+        // Update password in database
+        await User.findByIdAndUpdate(userId, { password: hashedNewPassword });
+
+        res.json({ success: true, message: "Password updated successfully!" });
+
+    } catch (error) {
+        console.error("Change password error:", error);
+        res.status(500).json({ success: false, message: "Server error, please try again later" });
+    }
+};
+
 // Legacy function - keeping for compatibility
 const chnageEmailValid = async(req,res)=>{
     try{
@@ -336,6 +392,7 @@ module.exports = {
     loadEditProfile,
     updateProfile,
     loadChangePassword,
+    changePassword,
     sendEmailOTP,
     resendEmailOTP,
     verifyEmailOTP,
