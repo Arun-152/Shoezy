@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeliveryApp - My Addresses</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="/css/addressPage.css">
+</head>
+<body>
+     <%- include("../partials/user/navbar") %>
+
+    <main class="main-content">
+        <div class="container">
+            <div class="page-header">
+                <div class="header-icon">
+                    <span class="material-icons">location_on</span>
+                </div>
+                <div class="header-text">
+                    <h1>My Addresses</h1>
+                    <p>Manage your delivery locations</p>
+                </div>
+            </div>
+
+            <div class="addresses-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>Saved Addresses</h2>
+                        <p>Choose from your saved delivery locations</p>
+                    </div>
+                    <button class="btn btn-primary" id="openModal">Add New Address</button>
+                </div>
+                <div class="addresses-grid">
+                    <!-- Address Card 1 -->
+                    <div class="address-card">
+                        <div class="address-header">
+                            <div class="address-type-badge home">
+                                <span class="material-icons">home</span>
+                                <span>Home</span>
+                            </div>
+                            <div class="address-actions">
+                                <button class="action-btn edit-btn" title="Edit Address">
+                                    <span class="material-icons">edit</span>
+                                </button>
+                                <button class="action-btn delete-btn" title="Delete Address">
+                                    <span class="material-icons">delete</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="address-content">
+                            <div class="address-name">
+                                <span class="material-icons">person</span>
+                                <strong>John Doe</strong>
+                            </div>
+                            <div class="address-phone">
+                                <span class="material-icons">phone</span>
+                                <span>+1 (555) 123-4567</span>
+                            </div>
+                            <div class="address-location">
+                                <span class="material-icons">location_on</span>
+                                <div class="address-details">
+                                    <p>123 Main Street, Apartment 4B</p>
+                                    <p>Downtown District, New York</p>
+                                    <p>NY 10001</p>
+                                    <p class="landmark">Near Central Park</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="address-footer">
+                            <button class="btn btn-primary select-address">Select This Address</button>
+                        </div>
+                    </div>
+
+                    <!-- Address Card 2 -->
+                    <div class="address-card">
+                        <div class="address-header">
+                            <div class="address-type-badge work">
+                                <span class="material-icons">work</span>
+                                <span>Work</span>
+                            </div>
+                            <div class="address-actions">
+                                <button class="action-btn edit-btn" title="Edit Address">
+                                    <span class="material-icons">edit</span>
+                                </button>
+                                <button class="action-btn delete-btn" title="Delete Address">
+                                    <span class="material-icons">delete</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="address-content">
+                            <div class="address-name">
+                                <span class="material-icons">person</span>
+                                <strong>John Doe</strong>
+                            </div>
+                            <div class="address-phone">
+                                <span class="material-icons">phone</span>
+                                <span>+1 (555) 123-4567</span>
+                            </div>
+                            <div class="address-location">
+                                <span class="material-icons">location_on</span>
+                                <div class="address-details">
+                                    <p>456 Business Avenue, Suite 200</p>
+                                    <p>Financial District, New York</p>
+                                    <p>NY 10005</p>
+                                    <p class="landmark">Near Wall Street</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="address-footer">
+                            <button class="btn btn-primary select-address">Select This Address</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <%- include("../partials/user/userfooter") %>
+
+    <div class="modal" id="addressModal">
+        <div class="modal-content">
+            <span class="modal-close" id="closeModal">&times;</span>
+            <div class="modal-header">
+                <span class="material-icons">location_on</span>
+                <h2>Add New Address</h2>
+            </div>
+            <form class="address-form">
+                <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required>
+                </div>
+                <div class="form-group">
+                    <label for="mobileNumber">Mobile Number</label>
+                    <input type="tel" id="mobileNumber" name="mobileNumber" placeholder="Enter mobile number" required>
+                </div>
+                <div class="form-group">
+                    <label for="district">District</label>
+                    <input type="text" id="district" name="district" placeholder="Enter district" required>
+                </div>
+                <div class="form-group">
+                    <label for="state">State</label>
+                    <input type="text" id="state" name="state" placeholder="Enter state" required>
+                </div>
+                <div class="form-group">
+                    <label for="pinCode">Pin Code</label>
+                    <input type="text" id="pinCode" name="pinCode" placeholder="Enter pin code" required>
+                </div>
+                <div class="form-group">
+                    <label for="landmark">Landmark</label>
+                    <input type="text" id="landmark" name="landmark" placeholder="Enter landmark" required>
+                </div>
+                <div class="address-type">
+                    <h3>Address Type</h3>
+                    <div class="address-options">
+                        <button type="button" class="address-btn" data-type="home">Home</button>
+                        <button type="button" class="address-btn active" data-type="work">Work</button>
+                        <button type="button" class="address-btn" data-type="other">Other</button>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelModal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Address</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('#openModal').forEach(button => {
+            button.addEventListener('click', function() {
+                document.getElementById('addressModal').style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            });
+        });
+
+        document.getElementById('closeModal').addEventListener('click', function() {
+            document.getElementById('addressModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        });
+
+        document.getElementById('cancelModal').addEventListener('click', function() {
+            document.getElementById('addressModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        });
+
+        document.querySelectorAll('.address-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                document.querySelectorAll('.address-btn').forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        document.querySelector('.address-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Address saved!'); // Replace with actual save logic
+            document.getElementById('addressModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        });
+    </script>

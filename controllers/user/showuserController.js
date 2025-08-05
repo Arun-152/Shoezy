@@ -389,6 +389,24 @@ const chnageEmailValid = async(req,res)=>{
         return res.redirect("/usererrorPage")
     }
 }
+const loadAddress = async(req,res)=>{
+    try{
+       
+        const userId = req.session.userId
+        const userData = await User.findById(userId)
+
+        if(!userData){
+            return res.redirect("/login")
+        }
+         res.render("addressPage", {
+            user: userData
+         })
+   
+    }catch(error){
+        console.error(error.data)
+        res.redirect("/usererrorPage")
+    }
+}
 
 module.exports = {
     showUser,
@@ -399,5 +417,6 @@ module.exports = {
     sendEmailOTP,
     resendEmailOTP,
     verifyEmailOTP,
-    chnageEmailValid
+    chnageEmailValid,
+    loadAddress
 };

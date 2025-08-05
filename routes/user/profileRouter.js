@@ -30,6 +30,7 @@ router.post("/changeemail",userAuth,showUserController.chnageEmailValid)
 router.post("/send-email-otp",userAuth,showUserController.sendEmailOTP)
 router.post("/resend-email-otp",userAuth,showUserController.resendEmailOTP)
 router.post("/verify-email-otp",userAuth,showUserController.verifyEmailOTP)
+router.get("/address",userAuth,showUserController.loadAddress)
 
 
 module.exports = router
