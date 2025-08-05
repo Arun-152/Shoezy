@@ -11,7 +11,9 @@ const showUser = async (req, res) => {
         const userData = await User.findById(userId);
         if (!userData) {
             return res.redirect("/login");
+           
         }
+         
 
         res.render("myaccount", {
             user: userData,
@@ -42,6 +44,7 @@ const loadEditProfile = async(req,res)=>{
 }
 const updateProfile = async (req, res) => {
     try {
+        console.log("hyy")
         const userId = req.session.userId;
 
         if (!userId) {
@@ -62,15 +65,15 @@ const updateProfile = async (req, res) => {
             return res.status(400).json({ success: false, message: "Phone number must be a valid 10-digit Indian number starting with 7, 8, or 9" });
         }
 
-        let profileImageName = user.profileImage;
+        let profileImageName = user.profilePicture;
         if (req.file) {
-            profileImageName = '/profiles/' + req.file.filename;
+            profileImageName = '/uploads/profiles' + req.file.filename;
         }
 
         const updateData = {
             fullname: fullName,
             phone: phoneNumber || user.phone, // Keep existing phone if not provided
-            profileImage: profileImageName
+            profilePicture: profileImageName
         };
 
         await User.findByIdAndUpdate(userId, updateData);
@@ -96,7 +99,7 @@ const updateProfile = async (req, res) => {
 
 const loadChangePassword = async(req,res)=>{
      try{
-       
+        
         const userId = req.session.userId
         const userData = await User.findById(userId)
 

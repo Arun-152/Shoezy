@@ -24,8 +24,8 @@
             <div class="profile-pic-section">
                 <div class="profile-pic-container">
                     <div class="profile-pic" onclick="triggerFileUpload()"
-                         style="background-image: url('<%= user.profileImage ? '/uploads' + user.profileImage + '?t=' + Date.now() : '' %>');">
-                        <% if (!user.profileImage) { %>A<% } %>
+                         style="background-image: url('<%= user.profilePicture ? '/uploads' + user.profilePicture + '?t=' + Date.now() : '' %>');">
+                        <% if (!user.profilePicture) { %>A<% } %>
                         <div class="camera-overlay">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2">
@@ -57,7 +57,7 @@
                         <div id="phoneNumber-error" class="validationError" style="display: none;"></div>
                     </div>
                     <!-- Hidden file input for form submission -->
-                    <input type="file" id="profileImageFile" name="profileImage" accept=".jpg,.jpeg,.png,.gif,.webp" style="display: none;">
+                    <input type="file" id="profilePictureFile" name="profilePicture" accept=".jpg,.jpeg,.png,.gif,.webp" style="display: none;">
                     <div class="buttons">
                         <button type="button" class="cancel-btn" onclick="cancelChanges()">Cancel</button>
                         <button type="submit" class="save-btn">Save Changes</button>
@@ -104,7 +104,7 @@
                 }
 
                 // Sync the file to the hidden form input
-                const formFileInput = document.getElementById('profileImageFile');
+                const formFileInput = document.getElementById('profilePictureFile');
                 const dt = new DataTransfer();
                 dt.items.add(file);
                 formFileInput.files = dt.files;
@@ -159,7 +159,7 @@
 
             const fullName = document.getElementById('fullName').value.trim();
             const phoneNumber = document.getElementById('phoneNumber').value.trim();
-            const formFileInput = document.getElementById('profileImageFile');
+            const formFileInput = document.getElementById('profilePictureFile');
             const file = formFileInput.files[0];
 
             // Clear previous errors
@@ -193,7 +193,7 @@
             formData.append('fullName', fullName);
             formData.append('phoneNumber', phoneNumber);
             if (file) {
-                formData.append('profileImage', file);
+                formData.append('profilePicture', file);
             }
 
             try {

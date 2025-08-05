@@ -12,8 +12,8 @@
     <aside class="sidebar">
         <div class="profile-section">
             <div class="profile-avatar">
-                <% if (user.profileImage) { %>
-                    <img src="/uploads<%= user.profileImage %>?t=<%= Date.now() %>" alt="Profile Avatar">
+                <% if (user.profilePicture) { %>
+                    <img src="<%=user.profilePicture%>" alt="Profile Avatar">
                 <% } else { %>
                     <div class="default-avatar"><%= user.fullname.charAt(0).toUpperCase() %></div>
                 <% } %>
@@ -74,8 +74,8 @@
                         <p><%=user.phone%></p>
                     </div>
                     <div class="profile-image">
-                        <% if (user.profileImage) { %>
-                            <img src="/uploads<%= user.profileImage %>?t=<%= Date.now() %>" alt="Profile Image">
+                        <% if (user.profilePicture) { %>
+                            <img src="/uploads<%= user.profilePicture %>?t=<%= Date.now() %>" alt="Profile Image">
                         <% } else { %>
                             <div class="default-profile-image"><%= user.fullname.charAt(0).toUpperCase() %></div>
                         <% } %>

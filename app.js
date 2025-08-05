@@ -77,8 +77,7 @@ app.use((req, res, next) => {
             url: req.originalUrl
         });
     } else {
-        // User side 404
-        console.log(req.session.userId)
+        
         res.status(404).render('error/user404', {
             title: 'Page Not Found',
             message: 'The page you are looking for does not exist.',

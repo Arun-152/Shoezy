@@ -63,11 +63,11 @@ const profileUpload = multer({
   },
   fileFilter: function (req, file, cb) {
     // Check file type
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    const allowedTypes = ['image/jpeg', 'image/png', ];
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Only JPEG, PNG, GIF, and WebP files are allowed!'), false);
+      cb(new Error('Only JPEG, PNG files are allowed!'), false);
     }
   }
 });

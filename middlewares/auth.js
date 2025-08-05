@@ -2,7 +2,6 @@ const User=require("../models/userSchema")
 
 
 const userAuth=(req,res,next)=>{
-    console.log("user",req.session.userId)
     try{
        const user = req.session.userId
        if(!user){

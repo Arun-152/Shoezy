@@ -23,7 +23,7 @@ const handleMulterError = (err, req, res, next) => {
 
 router.get("/",userAuth,showUserController.showUser)
 router.get("/edit",userAuth,showUserController.loadEditProfile)
-router.patch("/updateProfile",userAuth,profileUpload.single('profileImage'),handleMulterError,showUserController.updateProfile)
+router.patch("/updateProfile",userAuth,profileUpload.single('profilePicture'),handleMulterError,showUserController.updateProfile)
 router.get("/changePassword",userAuth,showUserController.loadChangePassword)
 router.post("/change-password",userAuth,showUserController.changePassword)
 router.post("/changeemail",userAuth,showUserController.chnageEmailValid)
