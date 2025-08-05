@@ -13,7 +13,7 @@ const handleMulterError = (err, req, res, next) => {
         if (err.code === 'LIMIT_UNEXPECTED_FILE') {
             return res.status(400).json({ success: false, message: "Invalid file upload." });
         }
-        if (err.message && err.message.includes('Only JPEG, PNG, GIF, and WebP files are allowed')) {
+        if (err.message && err.message.includes('Only JPEG, PNG,  and WebP files are allowed')) {
             return res.status(400).json({ success: false, message: "Invalid file type. Only JPEG, PNG, GIF, and WebP files are allowed." });
         }
         return res.status(400).json({ success: false, message: err.message || "File upload error." });

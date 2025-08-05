@@ -3,6 +3,7 @@ const passport = require('passport');
 const router = express.Router();
 
 // Google OAuth routes
+
 router.get('/google',
     passport.authenticate('google', {
         scope: ['profile', 'email'],
@@ -13,7 +14,6 @@ router.get('/google',
 // Google OAuth callback
 router.get('/google/callback',
     (req, res, next) => {
-        // Ensure session exists before passport authentication
         if (!req.session) {
             console.error('Session not found during OAuth callback');
             return res.redirect('/login?error=session_error');
@@ -45,7 +45,6 @@ router.get('/google/callback',
 
 // Handle POST request to /auth/google (from the form)
 router.post('/google', (req, res) => {
-    // Redirect to the GET route which handles the actual OAuth
     res.redirect('/auth/google');
 });
 

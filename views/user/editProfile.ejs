@@ -48,11 +48,13 @@
                 <form id="profileForm" enctype="multipart/form-data">
                     <div class="form-group">
                         <label for="fullName">Full Name *</label>
-                        <input type="text" id="fullName" name="fullName" value="<%= user.fullname %>" required>
+                        <input type="text" id="fullName" name="fullName" value="<%= user.fullname %>" >
+                        <div id="fullName-error" class="validationError" style="display: none;"></div>
                     </div>
                     <div class="form-group">
                         <label for="phoneNumber">Phone Number</label>
                         <input type="text" id="phoneNumber" name="phoneNumber" value="<%= user.phone %>">
+                        <div id="phoneNumber-error" class="validationError" style="display: none;"></div>
                     </div>
                     <!-- Hidden file input for form submission -->
                     <input type="file" id="profileImageFile" name="profileImage" accept=".jpg,.jpeg,.png,.gif,.webp" style="display: none;">
@@ -139,6 +141,19 @@
             });
         }
 
+        // Clear form errors
+        function clearFormErrors() {
+            document.getElementById('fullName-error').style.display = 'none';
+            document.getElementById('phoneNumber-error').style.display = 'none';
+        }
+
+        // Show form error
+        function showFormError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+
         document.getElementById('profileForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
@@ -147,22 +162,30 @@
             const formFileInput = document.getElementById('profileImageFile');
             const file = formFileInput.files[0];
 
+            // Clear previous errors
+            clearFormErrors();
+
             // Client-side validation
-            if (!fullName || fullName.length < 3) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Invalid Input',
-                    text: 'Full name is required and must be at least 3 characters'
-                });
-                return;
+            let hasErrors = false;
+
+            if (!fullName) {
+                showFormError('fullName-error', 'Full name is required');
+                hasErrors = true;
+            } else if (fullName.length < 3) {
+                showFormError('fullName-error', 'Full name must be at least 3 characters');
+                hasErrors = true;
+            }
+            if(!phoneNumber){
+                  showFormError('phoneNumber-error', 'Phonenumber is required');
+                hasErrors = true;
             }
 
             if (phoneNumber && (!/^\d{10}$/.test(phoneNumber) || !/^[789]\d{9}$/.test(phoneNumber))) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Invalid Phone Number',
-                    text: 'Phone number must be a valid 10-digit Indian number starting with 7, 8, or 9'
-                });
+                showFormError('phoneNumber-error', 'Phone number must be a valid 10-digit Indian number starting with 7, 8, or 9');
+                hasErrors = true;
+            }
+
+            if (hasErrors) {
                 return;
             }
 
@@ -190,11 +213,18 @@
                         window.location.href = '/profile';
                     });
                 } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: result.message || 'Something went wrong.'
-                    });
+                    // Show backend validation errors inline
+                    if (result.message.includes('Full name')) {
+                        showFormError('fullName-error', result.message);
+                    } else if (result.message.includes('Phone number')) {
+                        showFormError('phoneNumber-error', result.message);
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: result.message || 'Something went wrong.'
+                        });
+                    }
                 }
             } catch (err) {
                 console.error(err);

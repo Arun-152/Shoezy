@@ -240,6 +240,15 @@ body {
     font-style: italic;
 }
 
+/* Validation Error Styles */
+.validationError {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    font-weight: 500;
+    display: block;
+}
+
 /* Buttons */
 .buttons {
     display: flex;

@@ -11,6 +11,7 @@ const showUserController = require("../../controllers/user/showUserController")
 const { userAuth } = require("../../middlewares/auth");
 const passport = require("../../config/passport");
 
+const authRouter = require("./authRouter")
 
 const cartRouter = require("./addToCartRouter")
 
@@ -49,6 +50,7 @@ router.post("/resendResetOtp", userController.resendResetOTP);
 router.get("/resetPassword", userController.resetPasswordPage);
 router.post("/resetPassword", userController.postResetPassword);
 
+router.use("/auth",authRouter)
 router.use("/cart",cartRouter)
 router.use("/wishlist",wishlistRouter)
 router.use("/profile",profileRouter)
