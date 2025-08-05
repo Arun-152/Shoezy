@@ -26,6 +26,9 @@ router.get("/edit",userAuth,showUserController.loadEditProfile)
 router.patch("/updateProfile",userAuth,profileUpload.single('profileImage'),handleMulterError,showUserController.updateProfile)
 router.get("/changePassword",userAuth,showUserController.loadChangePassword)
 router.post("/changeemail",userAuth,showUserController.chnageEmailValid)
+router.post("/send-email-otp",userAuth,showUserController.sendEmailOTP)
+router.post("/resend-email-otp",userAuth,showUserController.resendEmailOTP)
+router.post("/verify-email-otp",userAuth,showUserController.verifyEmailOTP)
 
 
 module.exports = router
