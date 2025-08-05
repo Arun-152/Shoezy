@@ -12,5 +12,6 @@ function registerRoutes(app){
 module.exports = {
     registerRoutes,
     userRouter,
-    adminRouter
+    adminRouter,
+    
 }

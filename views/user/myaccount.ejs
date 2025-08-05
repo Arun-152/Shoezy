@@ -3,140 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shoezy - Account Settings</title>
+    <title>My Account</title>
     <link rel="stylesheet" href="/css/myaccount.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <!-- Header -->
-    <%-include("../partials/user/navbar")%>
-    <div class="main-container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="profile-section">
-                <div class="profile-avatar">
-                    <img src="" alt="Profile">
-                </div>
-                <h3><%=user.fullname%></h3>
+    <%- include("../partials/user/navbar") %>
+<div class="main-container">
+    <aside class="sidebar">
+        <div class="profile-section">
+            <div class="profile-avatar">
+                <% if (user.profileImage) { %>
+                    <img src="/uploads<%= user.profileImage %>?t=<%= Date.now() %>" alt="Profile Avatar">
+                <% } else { %>
+                    <div class="default-avatar"><%= user.fullname.charAt(0).toUpperCase() %></div>
+                <% } %>
             </div>
+            <h3><%=user.fullname%></h3>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="#" class="sidebar-link active">
+                <i class="fas fa-user"></i>
+                Account Overview
+            </a>
+            <a href="#" class="sidebar-link">
+                <i class="fas fa-box"></i>
+                My Orders
+            </a>
+            <a href="#" class="sidebar-link">
+                <i class="fas fa-map-marker-alt"></i>
+                Manage Addresses
+            </a>
+            <a href="#" class="sidebar-link">
+                <i class="fas fa-wallet"></i>
+                Wallet
+            </a>
+            <a href="/wishlist" class="sidebar-link">
+                <i class="fas fa-heart"></i>
+                Wishlist
+            </a>
+            <a href="#" class="sidebar-link">
+                <i class="fas fa-question-circle"></i>
+                Account Security
+            </a>
+            <a href="#" class="sidebar-link">
+                <i class="fas fa-wallet"></i>
+                Refferal
+            </a>
+            <a href="/logout" class="sidebar-link">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+            </a>
+        </nav>
+    </aside>
 
-            <nav class="sidebar-nav">
-                <a href="#" class="sidebar-link active">
-                    <i class="fas fa-user"></i>
-                    Account Overview
-                </a>
-                <a href="/order" class="sidebar-link">
-                    <i class="fas fa-box"></i>
-                    My Orders
-                </a>
-                <a href="#" class="sidebar-link">
-                    <i class="fas fa-map-marker-alt"></i>
-                    Manage Addresses
-                </a>
-                <a href="#" class="sidebar-link">
-                    <i class="fas fa-wallet"></i>
-                    Wallet
-                </a>
-                <a href="#" class="sidebar-link">
-                    <i class="fas fa-bell"></i>
-                    Notifications
-                </a>
-                <a href="#" class="sidebar-link">
-                    <i class="fas fa-question-circle"></i>
-                    Help Center
-                </a>
-                <a href="/logout" class="sidebar-link">
-                    <i class="fas fa-sign-out-alt"></i>
-                    Logout
-                </a>
-            </nav>
-        </aside>
+    <main class="main-content">
+        <div class="content-header">
+            <h2>Account Settings</h2>
+            <a href="/profile/edit"><button class="save-changes-btn edit-profile-btn">Edit Profile</button></a>
+        </div>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <div class="content-header">
-                <h2>Account Settings</h2>
-            </div>
-
-            <div class="settings-container">
-                <!-- Profile Section -->
-                <div class="settings-section">
-                    <div class="profile-card">
-                        <div class="profile-info">
-                            <div class="profile-details">
-                                <h4>Full Name</h4>
-                                <p><%=user.fullname%></p>
-                                <h4>Email</h4>
-                                <p><%=user.email%></p>
-                                <h4>Phone</h4>
-                                <p><%=user.phone%></p>
-                            </div>
-                            <div class="profile-image">
-                                <img src="" alt="Profile">
-                                <button class="change-image-btn">Change Image</button>
-                            </div>
-                        </div>
-                        <button class="save-changes-btn">Save Changes</button>
+        <div class="settings-container">
+            <div class="settings-section profile-card">
+                <div class="profile-info">
+                    <div class="profile-details">
+                        <h4>Full Name</h4>
+                        <p><%=user.fullname%></p>
+                        <h4>Email</h4>
+                        <p><%=user.email%></p>
+                        <h4>Phone</h4>
+                        <p><%=user.phone%></p>
+                    </div>
+                    <div class="profile-image">
+                        <% if (user.profileImage) { %>
+                            <img src="/uploads<%= user.profileImage %>?t=<%= Date.now() %>" alt="Profile Image">
+                        <% } else { %>
+                            <div class="default-profile-image"><%= user.fullname.charAt(0).toUpperCase() %></div>
+                        <% } %>
                     </div>
                 </div>
+             
+            </div>
 
-                <!-- Password Section -->
-                <div class="settings-section">
-                    <h3>Change Password</h3>
-                    <div class="password-form">
-                        <div class="form-group">
-                            <label>Current Password</label>
-                            <input type="password" placeholder="Enter current password">
-                            <i class="fas fa-eye toggle-password"></i>
-                        </div>
-                        <div class="form-group">
-                            <label>New Password</label>
-                            <input type="password" placeholder="Enter new password">
-                            <i class="fas fa-eye toggle-password"></i>
-                        </div>
-                        <div class="form-group">
-                            <label>Confirm Password</label>
-                            <input type="password" placeholder="Confirm new password">
-                            <i class="fas fa-eye toggle-password"></i>
-                        </div>
-                        <button class="save-password-btn">Save Password</button>
-                    </div>
+            <div class="settings-section">
+                <h3>Account Management</h3>
+                <div class="account-management-buttons">
+                    <button class="save-changes-btn">Manage Addresses</button>
+                    <a href="/profile/changePassword"><button class="save-changes-btn">Change Password</button></a>
                 </div>
             </div>
-        </main>
-    </div>
+        </div>
+    </main>
+</div>
+  <%- include("../partials/user/userfooter") %>
+  
 
-    <!-- Footer -->
-    <%-include("../partials/user/userfooter")%>
-
-
-    <script>
-        // Toggle password visibility
-        document.querySelectorAll('.toggle-password').forEach(icon => {
-            icon.addEventListener('click', function() {
-                const input = this.previousElementSibling;
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    this.classList.replace('fa-eye', 'fa-eye-slash');
-                } else {
-                    input.type = 'password';
-                    this.classList.replace('fa-eye-slash', 'fa-eye');
-                }
-            });
-        });
-
-        // Form submissions
-        document.querySelector('.save-changes-btn').addEventListener('click', function() {
-            alert('Profile changes saved!');
-        });
-
-        document.querySelector('.save-password-btn').addEventListener('click', function() {
-            alert('Password updated successfully!');
-        });
-
-        document.querySelector('.change-image-btn').addEventListener('click', function() {
-            alert('Image upload functionality would be implemented here');
-        });
-    </script>
 </body>
 </html>

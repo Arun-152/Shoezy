@@ -586,7 +586,7 @@ const verifyOTPPage = async (req, res) => {
         });
     } catch (error) {
         console.error("Error loading verify OTP page:", error);
-        res.status(500).redirect("/usererrorPage");
+        return res.redirect("/usererrorPage");
     }
 };
 

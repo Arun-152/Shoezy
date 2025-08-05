@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile</title>
+    <link rel="stylesheet" href="/css/editProfile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <%- include("../partials/user/navbar") %>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="header">
+                <h2>Edit Profile</h2>
+                <button class="back-btn" onclick="goBack()">Back to Profile</button>
+            </div>
+
+            <div class="profile-pic-section">
+                <div class="profile-pic-container">
+                    <div class="profile-pic" onclick="triggerFileUpload()"
+                         style="background-image: url('<%= user.profileImage ? '/uploads' + user.profileImage + '?t=' + Date.now() : '' %>');">
+                        <% if (!user.profileImage) { %>A<% } %>
+                        <div class="camera-overlay">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path
+                                    d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z">
+                                </path>
+                                <circle cx="12" cy="13" r="4"></circle>
+                            </svg>
+                        </div>
+                    </div>
+                    <input type="file" id="profilePicInput" accept=".jpg,.jpeg,.png,.gif,.webp"
+                        style="display: none;" onchange="handleFileUpload(event)">
+                </div>
+                <p class="pic-instruction">Click the profile picture to change it</p>
+                <p class="pic-info">Maximum file size: 5MB. Supported formats: JPEG, PNG, GIF, WebP</p>
+            </div>
+
+            <div class="personal-info">
+                <h3>Personal Information</h3>
+                <form id="profileForm" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="fullName">Full Name *</label>
+                        <input type="text" id="fullName" name="fullName" value="<%= user.fullname %>" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phoneNumber">Phone Number</label>
+                        <input type="text" id="phoneNumber" name="phoneNumber" value="<%= user.phone %>">
+                    </div>
+                    <!-- Hidden file input for form submission -->
+                    <input type="file" id="profileImageFile" name="profileImage" accept=".jpg,.jpeg,.png,.gif,.webp" style="display: none;">
+                    <div class="buttons">
+                        <button type="button" class="cancel-btn" onclick="cancelChanges()">Cancel</button>
+                        <button type="submit" class="save-btn">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <%- include("../partials/user/userfooter") %>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        function triggerFileUpload() {
+            document.getElementById('profilePicInput').click();
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                // Check file size (5MB limit)
+                if (file.size > 5 * 1024 * 1024) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'File Too Large',
+                        text: 'File size must be less than 5MB'
+                    });
+                    event.target.value = ''; // Clear the input
+                    return;
+                }
+
+                // Check file type
+                const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                if (!validTypes.includes(file.type)) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Invalid File Type',
+                        text: 'Supported formats: JPEG, PNG, GIF, WebP'
+                    });
+                    event.target.value = ''; // Clear the input
+                    return;
+                }
+
+                // Sync the file to the hidden form input
+                const formFileInput = document.getElementById('profileImageFile');
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                formFileInput.files = dt.files;
+
+                // Create preview
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const profilePic = document.querySelector('.profile-pic');
+                    profilePic.style.backgroundImage = `url(${e.target.result})`;
+                    profilePic.style.backgroundSize = 'cover';
+                    profilePic.style.backgroundPosition = 'center';
+                    profilePic.textContent = '';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        function cancelChanges() {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'Any unsaved changes will be lost.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, cancel',
+                cancelButtonText: 'No, keep editing'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.history.back();
+                }
+            });
+        }
+
+        document.getElementById('profileForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const fullName = document.getElementById('fullName').value.trim();
+            const phoneNumber = document.getElementById('phoneNumber').value.trim();
+            const formFileInput = document.getElementById('profileImageFile');
+            const file = formFileInput.files[0];
+
+            // Client-side validation
+            if (!fullName || fullName.length < 3) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Input',
+                    text: 'Full name is required and must be at least 3 characters'
+                });
+                return;
+            }
+
+            if (phoneNumber && (!/^\d{10}$/.test(phoneNumber) || !/^[789]\d{9}$/.test(phoneNumber))) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid Phone Number',
+                    text: 'Phone number must be a valid 10-digit Indian number starting with 7, 8, or 9'
+                });
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('fullName', fullName);
+            formData.append('phoneNumber', phoneNumber);
+            if (file) {
+                formData.append('profileImage', file);
+            }
+
+            try {
+                const response = await fetch('/profile/updateProfile', {
+                    method: 'PATCH',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Updated!',
+                        text: result.message
+                    }).then(() => {
+                        window.location.href = '/profile';
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: result.message || 'Something went wrong.'
+                    });
+                }
+            } catch (err) {
+                console.error(err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Failed',
+                    text: 'Unable to update profile. Please try again.'
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -5,8 +5,8 @@ const homepageController = require("../../controllers/user/homepageController");
 const shopPageController = require("../../controllers/user/shopPageController");
 const orderController = require("../../controllers/user/orderController");
 const productController = require("../../controllers/user/productController");
-const showuserController = require("../../controllers/user/showuserController");
 const wishlistController = require("../../controllers/user/wishlistController")
+const showUserController = require("../../controllers/user/showUserController")
 
 const { userAuth } = require("../../middlewares/auth");
 const passport = require("../../config/passport");
@@ -15,6 +15,8 @@ const passport = require("../../config/passport");
 const cartRouter = require("./addToCartRouter")
 
 const wishlistRouter = require("./wishlistRouter")
+
+const profileRouter = require("./profileRouter")
 
 
 router.get("/", userController.landingPage);
@@ -31,7 +33,7 @@ router.get("/logout", userController.logout);
 router.get("/shop", shopPageController.shopPage);
 router.get("/product/:id", productController.productDetailPage);
 router.post("/resendOtp", userController.resendOTP);
-router.get("/profile", userAuth, showuserController.showUser);
+
 
 
 
@@ -49,5 +51,6 @@ router.post("/resetPassword", userController.postResetPassword);
 
 router.use("/cart",cartRouter)
 router.use("/wishlist",wishlistRouter)
+router.use("/profile",profileRouter)
 
 module.exports = router;
