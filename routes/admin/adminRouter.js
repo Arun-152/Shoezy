@@ -5,7 +5,7 @@ const customerController = require("../../controllers/admin/customerController")
 const categoryController = require("../../controllers/admin/categoryController");
 const productsController = require("../../controllers/admin/productController");
 const multer = require("multer");
-const { upload } = require("../../helpers/cloudinary");
+const { upload } = require("../../helpers/multerConfig");
 const { userAuth, adminAuth } = require("../../middlewares/auth");
 
 // Admin Login Management

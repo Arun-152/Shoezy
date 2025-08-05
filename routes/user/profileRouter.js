@@ -2,7 +2,7 @@ const express = require("express")
 const router = express.Router()
 const {userAuth} =require("../../middlewares/auth")
 const showUserController = require("../../controllers/user/showUserController") 
-const { profileUpload } = require("../../helpers/cloudinary")
+const { profileUpload } = require("../../helpers/multerConfig")
 
 // Multer error handling middleware
 const handleMulterError = (err, req, res, next) => {

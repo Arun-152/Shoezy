@@ -1,7 +1,6 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-require('dotenv').config();
 
 // Create uploads directories if they don't exist
 const uploadsDir = path.join(__dirname, '../public/uploads/products');
@@ -15,7 +14,7 @@ if (!fs.existsSync(profileUploadsDir)) {
   fs.mkdirSync(profileUploadsDir, { recursive: true });
 }
 
-// Use local storage as fallback when Cloudinary credentials are not properly configured
+// Product image storage configuration
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, uploadsDir);
@@ -39,6 +38,7 @@ const profileStorage = multer.diskStorage({
   }
 });
 
+// Product upload configuration
 const upload = multer({
   storage,
   limits: {
@@ -55,6 +55,7 @@ const upload = multer({
   }
 });
 
+// Profile upload configuration
 const profileUpload = multer({
   storage: profileStorage,
   limits: {
@@ -63,11 +64,11 @@ const profileUpload = multer({
   },
   fileFilter: function (req, file, cb) {
     // Check file type
-    const allowedTypes = ['image/jpeg', 'image/png', ];
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Only JPEG, PNG files are allowed!'), false);
+      cb(new Error('Only JPEG, PNG, GIF, and WebP files are allowed!'), false);
     }
   }
 });
