@@ -1,6 +1,6 @@
 const express = require("express")
 const router = express.Router()
-const {userAuth} =require("../../middlewares/auth")
+const {userAuth} = require("../../middlewares/auth")
 const showUserController = require("../../controllers/user/showUserController") 
 const { profileUpload } = require("../../helpers/multerConfig")
 
@@ -21,17 +21,19 @@ const handleMulterError = (err, req, res, next) => {
     next();
 };
 
-router.get("/",userAuth,showUserController.showUser)
-router.get("/edit",userAuth,showUserController.loadEditProfile)
-router.patch("/updateProfile",userAuth,profileUpload.single('profilePicture'),handleMulterError,showUserController.updateProfile)
-router.get("/changePassword",userAuth,showUserController.loadChangePassword)
-router.post("/change-password",userAuth,showUserController.changePassword)
-router.post("/changeemail",userAuth,showUserController.chnageEmailValid)
-router.post("/send-email-otp",userAuth,showUserController.sendEmailOTP)
-router.post("/resend-email-otp",userAuth,showUserController.resendEmailOTP)
-router.post("/verify-email-otp",userAuth,showUserController.verifyEmailOTP)
-router.get("/address",userAuth,showUserController.loadAddress)
-router.post("/add",userAuth,showUserController.postAdd)
+router.get("/", userAuth, showUserController.showUser)
+router.get("/edit", userAuth, showUserController.loadEditProfile)
+router.patch("/updateProfile", userAuth, profileUpload.single('profilePicture'), handleMulterError, showUserController.updateProfile)
+router.get("/changePassword", userAuth, showUserController.loadChangePassword)
+router.post("/change-password", userAuth, showUserController.changePassword)
+router.post("/changeemail", userAuth, showUserController.chnageEmailValid)
+router.post("/send-email-otp", userAuth, showUserController.sendEmailOTP)
+router.post("/resend-email-otp", userAuth, showUserController.resendEmailOTP)
+router.post("/verify-email-otp", userAuth, showUserController.verifyEmailOTP)
+router.get("/address", userAuth, showUserController.loadAddress)
+router.post("/add", userAuth, showUserController.postAdd)
+router.patch("/update/:id", userAuth, showUserController.updateAddress)
+router.patch("/set-default/:id", userAuth, showUserController.setDefaultAddress)
 
 
 module.exports = router

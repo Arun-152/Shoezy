@@ -7,6 +7,78 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="/css/addressPage.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* Ensure SweetAlert appears above modal */
+        .swal2-container {
+            z-index: 99999 !important;
+        }
+        
+        /* Style for address type buttons in both add and edit modals */
+        .address-btn, .edit-address-btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: 2px solid #ddd;
+            background-color: #f8f9fa;
+            color: #6c757d;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            outline: none;
+            font-size: 14px;
+        }
+        
+        .address-btn:hover, .edit-address-btn:hover {
+            border-color: #007bff;
+            color: #007bff;
+            background-color: #e3f2fd;
+            transform: translateY(-1px);
+        }
+        
+        .address-btn.active, .edit-address-btn.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+            box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+        }
+        
+        .address-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        
+        /* Ensure buttons are properly styled */
+        .address-btn:focus, .edit-address-btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        }
+
+        /* Default address styling */
+        .address-card.default-address {
+            border: 2px solid #28a745;
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.2);
+        }
+
+        .address-card.default-address .address-type-badge {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+
+        .btn-success:disabled {
+            background-color: #28a745;
+            border-color: #28a745;
+            opacity: 0.8;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
 <body>
      <%- include("../partials/user/navbar") %>
@@ -34,7 +106,7 @@
                 <% if (addresses && addresses.length > 0) { %>
                     <div class="addresses-grid">
                         <% addresses.forEach(function(address) { %>
-                            <div class="address-card">
+                            <div class="address-card <%= address.isDefault ? 'default-address' : '' %>">
                                 <div class="address-header">
                                     <div class="address-type-badge <%= address.addressType.toLowerCase() %>">
                                         <span class="material-icons">
@@ -43,9 +115,22 @@
                                                else { %>location_on<% } %>
                                         </span>
                                         <span><%= address.addressType %></span>
+                                        <% if (address.isDefault) { %>
+                                            <span class="material-icons" style="margin-left: 5px; font-size: 16px;">check_circle</span>
+                                        <% } %>
                                     </div>
                                     <div class="address-actions">
-                                        <button class="action-btn edit-btn" title="Edit Address">
+                                        <button class="action-btn edit-btn" title="Edit Address" 
+                                                data-address-id="<%= address._id %>"
+                                                data-full-name="<%= address.fullName %>"
+                                                data-mobile-number="<%= address.mobileNumber %>"
+                                                data-address="<%= address.address %>"
+                                                data-city="<%= address.city %>"
+                                                data-district="<%= address.district %>"
+                                                data-state="<%= address.state %>"
+                                                data-pin-code="<%= address.pinCode %>"
+                                                data-landmark="<%= address.landmark || '' %>"
+                                                data-address-type="<%= address.addressType.toLowerCase() %>">
                                             <span class="material-icons">edit</span>
                                         </button>
                                         <button class="action-btn delete-btn" title="Delete Address" data-address-id="<%= address._id %>">
@@ -75,7 +160,11 @@
                                     </div>
                                 </div>
                                 <div class="address-footer">
-                                    <button class="btn btn-primary select-address">Select This Address</button>
+                                    <button class="btn <%= address.isDefault ? 'btn-success' : 'btn-primary' %> select-address" 
+                                            data-address-id="<%= address._id %>"
+                                            <%= address.isDefault ? 'disabled' : '' %>>
+                                        <%= address.isDefault ? 'Default Address' : 'Select This Address' %>
+                                    </button>
                                 </div>
                             </div>
                         <% }); %>
@@ -212,7 +301,97 @@
         </div>
     </div>
 
+    <!-- Edit Address Modal -->
+    <div class="modal" id="editAddressModal">
+        <div class="modal-content">
+            <span class="modal-close" id="closeEditModal">&times;</span>
+            <div class="modal-header">
+                <span class="material-icons">edit_location</span>
+                <h2>Edit Address</h2>
+            </div>
+            <form class="address-form" id="editAddressForm">
+                <input type="hidden" id="editAddressId" name="addressId">
+                
+                <div class="form-group">
+                    <label for="editFullName">Full Name</label>
+                    <input type="text" id="editFullName" name="fullName" 
+                           placeholder="Enter your full name">
+                    <span class="error-message" id="editFullNameError" style="display: none;"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editMobileNumber">Mobile Number</label>
+                    <input type="tel" id="editMobileNumber" name="mobileNumber" 
+                           placeholder="Enter mobile number">
+                    <span class="error-message" id="editMobileNumberError" style="display: none;"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editAddress">Address</label>
+                    <textarea id="editAddress" name="address" 
+                              placeholder="Enter your complete address" 
+                              rows="3"></textarea>
+                    <span class="error-message" id="editAddressError" style="display: none;"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editCity">City</label>
+                    <input type="text" id="editCity" name="city" 
+                           placeholder="Enter city">
+                    <span class="error-message" id="editCityError" style="display: none;"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editDistrict">District</label>
+                    <input type="text" id="editDistrict" name="district" 
+                           placeholder="Enter district">
+                    <span class="error-message" id="editDistrictError" style="display: none;"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editState">State</label>
+                    <input type="text" id="editState" name="state" 
+                           placeholder="Enter state">
+                    <span class="error-message" id="editStateError" style="display: none;"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editPinCode">Pin Code</label>
+                    <input type="text" id="editPinCode" name="pinCode" 
+                           placeholder="Enter pin code">
+                    <span class="error-message" id="editPinCodeError" style="display: none;"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editLandmark">Landmark (Optional)</label>
+                    <input type="text" id="editLandmark" name="landmark" 
+                           placeholder="Enter landmark">
+                    <span class="error-message" id="editLandmarkError" style="display: none;"></span>
+                </div>
+                
+                <div class="address-type">
+                    <h3>Address Type</h3>
+                    <div class="address-options">
+                        <button type="button" class="edit-address-btn" data-type="home">Home</button>
+                        <button type="button" class="edit-address-btn" data-type="office">Office</button>
+                        <button type="button" class="edit-address-btn" data-type="other">Other</button>
+                    </div>
+                    <input type="hidden" id="editAddressType" name="addressType" value="home">
+                    <span class="error-message" id="editAddressTypeError" style="display: none;"></span>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelEditModal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Address</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
+        // Store original address data for comparison
+        let originalAddressData = {};
+
         // Show SweetAlert success message if present in URL
         const urlParams = new URLSearchParams(window.location.search);
         const successParam = urlParams.get('success');
@@ -283,7 +462,7 @@
             document.body.style.overflow = 'auto';
         });
 
-        // Address type selection
+        // Address type selection for Add modal
         document.querySelectorAll('.address-btn').forEach(button => {
             button.addEventListener('click', function() {
                 document.querySelectorAll('.address-btn').forEach(btn => btn.classList.remove('active'));
@@ -297,6 +476,253 @@
             // Let the form submit normally to the backend
         });
 
+        // Edit address functionality
+        document.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const addressId = this.getAttribute('data-address-id');
+                const fullName = this.getAttribute('data-full-name');
+                const mobileNumber = this.getAttribute('data-mobile-number');
+                const address = this.getAttribute('data-address');
+                const city = this.getAttribute('data-city');
+                const district = this.getAttribute('data-district');
+                const state = this.getAttribute('data-state');
+                const pinCode = this.getAttribute('data-pin-code');
+                const landmark = this.getAttribute('data-landmark');
+                const addressType = this.getAttribute('data-address-type');
+
+                // Store original data for comparison
+                originalAddressData = {
+                    fullName: fullName,
+                    mobileNumber: mobileNumber,
+                    address: address,
+                    city: city,
+                    district: district,
+                    state: state,
+                    pinCode: pinCode,
+                    landmark: landmark,
+                    addressType: addressType
+                };
+
+                // Populate edit form with existing data
+                document.getElementById('editAddressId').value = addressId;
+                document.getElementById('editFullName').value = fullName;
+                document.getElementById('editMobileNumber').value = mobileNumber;
+                document.getElementById('editAddress').value = address;
+                document.getElementById('editCity').value = city;
+                document.getElementById('editDistrict').value = district;
+                document.getElementById('editState').value = state;
+                document.getElementById('editPinCode').value = pinCode;
+                document.getElementById('editLandmark').value = landmark;
+                document.getElementById('editAddressType').value = addressType;
+
+                // Clear all active states first
+                document.querySelectorAll('.edit-address-btn').forEach(btn => btn.classList.remove('active'));
+                
+                // Set active address type button
+                const activeButton = document.querySelector(`.edit-address-btn[data-type="${addressType}"]`);
+                if (activeButton) {
+                    activeButton.classList.add('active');
+                }
+
+                // Show edit modal
+                document.getElementById('editAddressModal').style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            });
+        });
+
+        // Edit modal controls
+        document.getElementById('closeEditModal').addEventListener('click', function() {
+            document.getElementById('editAddressModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        });
+
+        document.getElementById('cancelEditModal').addEventListener('click', function() {
+            document.getElementById('editAddressModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        });
+
+        // Edit address type selection - Fixed event listener
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('edit-address-btn')) {
+                // Remove active class from all edit address buttons
+                document.querySelectorAll('.edit-address-btn').forEach(btn => btn.classList.remove('active'));
+                
+                // Add active class to clicked button
+                e.target.classList.add('active');
+                
+                // Update hidden input value
+                document.getElementById('editAddressType').value = e.target.getAttribute('data-type');
+            }
+        });
+
+        // Select Address functionality
+        document.querySelectorAll('.select-address').forEach(button => {
+            button.addEventListener('click', async function() {
+                if (this.disabled) return; // Don't do anything if already default
+                
+                const addressId = this.getAttribute('data-address-id');
+                
+                try {
+                    const response = await fetch(`/profile/set-default/${addressId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        // Show success message and reload page
+                        Swal.fire({
+                            title: 'Success!',
+                            text: 'Default address updated successfully',
+                            icon: 'success',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#28a745'
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        // Show error message
+                        Swal.fire({
+                            title: 'Error!',
+                            text: result.message || 'Failed to set default address',
+                            icon: 'error',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#dc3545'
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error setting default address:', error);
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Something went wrong. Please try again.',
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#dc3545'
+                    });
+                }
+            });
+        });
+
+        // Edit form submission
+        document.getElementById('editAddressForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const addressId = formData.get('addressId');
+            
+            // Get current form data
+            const currentData = {
+                fullName: formData.get('fullName').trim(),
+                mobileNumber: formData.get('mobileNumber').trim(),
+                address: formData.get('address').trim(),
+                city: formData.get('city').trim(),
+                district: formData.get('district').trim(),
+                state: formData.get('state').trim(),
+                pinCode: formData.get('pinCode').trim(),
+                landmark: formData.get('landmark').trim(),
+                addressType: formData.get('addressType')
+            };
+            
+            // Check if data has changed
+            const hasChanged = Object.keys(currentData).some(key => {
+                return currentData[key] !== originalAddressData[key];
+            });
+            
+            if (!hasChanged) {
+                // Show "No changes made" message with high z-index
+                Swal.fire({
+                    title: 'No Changes!',
+                    text: 'No changes made',
+                    icon: 'info',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#17a2b8',
+                    didOpen: () => {
+                        // Ensure SweetAlert appears above modal
+                        const swalContainer = document.querySelector('.swal2-container');
+                        if (swalContainer) {
+                            swalContainer.style.zIndex = '99999';
+                        }
+                    }
+                });
+                return;
+            }
+            
+            // Clear previous error messages
+            document.querySelectorAll('#editAddressModal .error-message').forEach(error => {
+                error.style.display = 'none';
+                error.textContent = '';
+            });
+            
+            // Remove error classes
+            document.querySelectorAll('#editAddressModal input, #editAddressModal textarea').forEach(input => {
+                input.classList.remove('error');
+            });
+
+            try {
+                const response = await fetch(`/profile/update/${addressId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(currentData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Close modal
+                    document.getElementById('editAddressModal').style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                    
+                    // Show success message and reload page
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'Address updated successfully!',
+                        icon: 'success',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#28a745'
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    if (result.errors) {
+                        // Display field-specific errors
+                        Object.keys(result.errors).forEach(field => {
+                            const errorElement = document.getElementById(`edit${field.charAt(0).toUpperCase() + field.slice(1)}Error`);
+                            const inputElement = document.getElementById(`edit${field.charAt(0).toUpperCase() + field.slice(1)}`);
+                            
+                            if (errorElement && inputElement) {
+                                errorElement.textContent = result.errors[field];
+                                errorElement.style.display = 'block';
+                                inputElement.classList.add('error');
+                            }
+                        });
+                    } else {
+                        // Show general error message
+                        Swal.fire({
+                            title: 'Error!',
+                            text: result.message || 'Failed to update address',
+                            icon: 'error',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#dc3545'
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error updating address:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Something went wrong. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#dc3545'
+                });
+            }
+        });
+
         // Delete address functionality
         document.querySelectorAll('.delete-btn').forEach(button => {
             button.addEventListener('click', function() {
@@ -308,3 +734,5 @@
             });
         });
     </script>
+</body>
+</html>

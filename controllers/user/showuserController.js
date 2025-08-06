@@ -546,6 +546,194 @@ const postAdd = async(req,res)=>{
     }
 }
 
+const updateAddress = async(req, res) => {
+    try {
+        const userId = req.session.userId;
+        const addressId = req.params.id;
+        const {
+            fullName,
+            mobileNumber,
+            address,
+            city,
+            district,
+            state,
+            landmark,
+            pinCode,
+            addressType
+        } = req.body;
+
+        // Validation - Check all required fields are non-empty
+        const errors = {};
+        
+        if (!fullName || fullName.trim() === '') {
+            errors.fullName = 'Full name is required';
+        } else if (fullName.trim().length < 2) {
+            errors.fullName = 'Full name must be at least 2 characters';
+        }
+        
+        if (!mobileNumber || mobileNumber.trim() === '') {
+            errors.mobileNumber = 'Mobile number is required';
+        } else if (!/^[789]\d{9}$/.test(mobileNumber.trim())) {
+            errors.mobileNumber = 'Please enter a valid 10-digit mobile number starting with 7, 8, or 9';
+        }
+        
+        if (!address || address.trim() === '') {
+            errors.address = 'Address is required';
+        } else if (address.trim().length < 5) {
+            errors.address = 'Address must be at least 5 characters';
+        }
+        
+        if (!city || city.trim() === '') {
+            errors.city = 'City is required';
+        } else if (city.trim().length < 2) {
+            errors.city = 'City must be at least 2 characters';
+        }
+        
+        if (!district || district.trim() === '') {
+            errors.district = 'District is required';
+        } else if (district.trim().length < 2) {
+            errors.district = 'District must be at least 2 characters';
+        }
+        
+        if (!state || state.trim() === '') {
+            errors.state = 'State is required';
+        } else if (state.trim().length < 2) {
+            errors.state = 'State must be at least 2 characters';
+        }
+        
+        if (!pinCode || pinCode.trim() === '') {
+            errors.pinCode = 'Pin code is required';
+        } else if (!/^\d{6}$/.test(pinCode.trim())) {
+            errors.pinCode = 'Please enter a valid 6-digit pin code';
+        }
+        
+        if (!addressType || addressType.trim() === '') {
+            errors.addressType = 'Address type is required';
+        } else if (!['home', 'office', 'other'].includes(addressType.toLowerCase())) {
+            errors.addressType = 'Please select a valid address type';
+        }
+
+        if (!landmark || landmark.trim() === '') {
+            errors.landmark = 'Landmark is required';
+        } else if (landmark.trim().length < 4) {
+            errors.landmark = 'Landmark must be at least 4 characters';
+        }
+
+        // If there are validation errors, return them
+        if (Object.keys(errors).length > 0) {
+            return res.status(400).json({
+                success: false,
+                errors: errors
+            });
+        }
+
+        // Check if the address exists and belongs to the user
+        const existingAddress = await Address.findOne({ _id: addressId, userId: userId });
+        if (!existingAddress) {
+            return res.status(404).json({
+                success: false,
+                message: 'Address not found'
+            });
+        }
+
+        // Check if another address with the same details already exists (excluding current address)
+        const duplicateAddress = await Address.findOne({
+            userId: userId,
+            _id: { $ne: addressId }, // Exclude current address
+            address: address.trim(),
+            city: city.trim(),
+            district: district.trim(),
+            state: state.trim(),
+            pinCode: parseInt(pinCode),
+            addressType: addressType.charAt(0).toUpperCase() + addressType.slice(1).toLowerCase()
+        });
+
+        if (duplicateAddress) {
+            return res.status(400).json({
+                success: false,
+                message: 'This address already exists.'
+            });
+        }
+
+        // Update the address
+        const updatedAddress = await Address.findByIdAndUpdate(
+            addressId,
+            {
+                fullName: fullName.trim(),
+                mobileNumber: mobileNumber.trim(),
+                address: address.trim(),
+                city: city.trim(),
+                district: district.trim(),
+                state: state.trim(),
+                landmark: landmark ? landmark.trim() : '',
+                pinCode: parseInt(pinCode),
+                addressType: addressType.charAt(0).toUpperCase() + addressType.slice(1).toLowerCase()
+            },
+            { new: true }
+        );
+
+        res.json({
+            success: true,
+            message: 'Address updated successfully',
+            address: updatedAddress
+        });
+        
+    } catch(error) {
+        console.error('Update address error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error, please try again later'
+        });
+    }
+}
+
+const setDefaultAddress = async(req, res) => {
+    try {
+        const userId = req.session.userId;
+        const addressId = req.params.id;
+
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: 'User not authenticated'
+            });
+        }
+
+        // Check if the address exists and belongs to the user
+        const address = await Address.findOne({ _id: addressId, userId: userId });
+        if (!address) {
+            return res.status(404).json({
+                success: false,
+                message: 'Address not found'
+            });
+        }
+
+        // First, unset all default addresses for this user
+        await Address.updateMany(
+            { userId: userId },
+            { $set: { isDefault: false } }
+        );
+
+        // Then set the selected address as default
+        await Address.findByIdAndUpdate(
+            addressId,
+            { $set: { isDefault: true } }
+        );
+
+        res.json({
+            success: true,
+            message: 'Default address updated successfully'
+        });
+
+    } catch(error) {
+        console.error('Set default address error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error, please try again later'
+        });
+    }
+}
+
 module.exports = {
     showUser,
     loadEditProfile,
@@ -557,5 +745,7 @@ module.exports = {
     verifyEmailOTP,
     chnageEmailValid,
     loadAddress,
-    postAdd
+    postAdd,
+    updateAddress,
+    setDefaultAddress
 };

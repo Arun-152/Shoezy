@@ -43,7 +43,11 @@ const addressSchema =  new Schema({
         type: String,
         enum: ['Home', 'Office', 'Other'],
         default: 'Home'
-  }
+    },
+    isDefault: {
+        type: Boolean,
+        default: false
+    }
 },{
     timestamps:true,
 })
