@@ -1,18 +1,24 @@
 const User=require("../models/userSchema")
 
 
-const userAuth=(req,res,next)=>{
+const userAuth = async (req,res,next)=>{
     try{
-       const user = req.session.userId
-       if(!user){
+       const userId = req.session.userId
+       if(!userId){
         return res.redirect('/login')
        }
-       if(user.isBlocked){
+       
+       // Check if user exists and is not blocked
+       const user = await User.findById(userId)
+       if(!user || user.isBlocked){
+        req.session.destroy()
         return res.redirect('/login')
        }
+       
        next()
     }catch(error){
-
+        console.error('Auth middleware error:', error)
+        return res.redirect('/login')
     }
 }
 

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Shoezy</title>
+    <link rel="stylesheet" href="/css/checkoutPage.css">
+</head>
+<body>
+    <!-- Header -->
+   <%-include("../partials/user/navbar")%>
+
+    <div class="checkout-container">
+        <!-- Left Section -->
+        <div class="checkout-left">
+            <!-- Product Items -->
+            <% if (allItems && allItems.length > 0) { %>
+                <% allItems.forEach(item => { %>
+                    <div class="product-item">
+                        <img src="<%= item.productId.images && item.productId.images.length > 0 ? item.productId.images[0] : 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=80&h=80&fit=crop' %>" alt="<%= item.productId.productName %>" class="product-image">
+                        <div class="product-details">
+                            <h3 class="product-name"><%= item.productId.productName %></h3>
+                            <p class="product-info">Size: <%= item.size %> | Qty: <%= item.quantity %></p>
+                            <p class="product-price">Price: ₹<%= item.price.toLocaleString() %></p>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <div class="product-item">
+                    <p>No items in cart</p>
+                </div>
+            <% } %>
+
+            <!-- Delivery Address -->
+            <div class="section">
+                <h2 class="section-title">📍 Delivery Address</h2>
+                
+                <% if (allAddresses && allAddresses.length > 0) { %>
+                    <% allAddresses.forEach((address, index) => { %>
+                        <div class="address-card <%= address.isDefault ? 'selected-address' : '' %>" 
+                             data-address-id="<%= address._id %>" 
+                             onclick="selectAddress(this, '<%= address._id %>')">
+                            <div class="address-label">
+                                <input type="radio" name="selectedAddress" value="<%= address._id %>" 
+                                       <%= address.isDefault ? 'checked' : '' %> style="margin-right: 8px;">
+                                <%= address.addressType %> 
+                                <span class="default-badge" style="<%= address.isDefault ? '' : 'display: none;' %>">
+                                    (Default)
+                                </span>
+                            </div>
+                            <div class="address-content">
+                                <p><%= address.fullName %></p>
+                                <p><%= address.address %>, <%= address.landmark ? address.landmark + ', ' : '' %><%= address.city %></p>
+                                <p><%= address.district %>, <%= address.state %> - <%= address.pinCode %></p>
+                                <p>Phone: <%= address.mobileNumber %></p>
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <div class="address-card">
+                        <div class="address-label">No Addresses Found</div>
+                        <div class="address-content">
+                            <p>Please add an address to continue</p>
+                        </div>
+                    </div>
+                <% } %>
+
+               <a href="/profile/address"><button class="add-address-btn">+ Add New Address</button></a> 
+            </div>
+
+            <!-- Payment Method -->
+            <div class="section">
+                <h2 class="section-title">💳 Payment Method</h2>
+                
+                <div class="payment-option selected-payment" id="cod-option">
+                    <input type="radio" id="cod" name="payment" class="payment-radio" checked>
+                    <label for="cod" class="payment-label">
+                        <span class="payment-icon">💰</span>
+                        <div>
+                            <div class="payment-title">Cash on Delivery</div>
+                            <div class="payment-note">⚠️ COD is available only for orders up to ₹4000</div>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="payment-option disabled-payment">
+                    <input type="radio" id="online" name="payment" class="payment-radio" disabled>
+                    <label for="online" class="payment-label">
+                        <span class="payment-icon">💳</span>
+                        <div>
+                            <div class="payment-title">Online Payment</div>
+                            <div class="payment-note">Currently unavailable</div>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="payment-option disabled-payment">
+                    <input type="radio" id="wallet" name="payment" class="payment-radio" disabled>
+                    <label for="wallet" class="payment-label">
+                        <span class="payment-icon">📱</span>
+                        <div>
+                            <div class="payment-title">Wallet Payment</div>
+                            <div class="payment-balance">Balance: ₹0 (Insufficient)</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Section - Order Summary -->
+        <div class="checkout-right">
+            <div class="order-summary">
+                <h2 class="summary-title">Order Summary</h2>
+                
+                <div class="summary-section">
+                    <h3 class="summary-subtitle">ITEM DETAILS</h3>
+                    
+                    <% if (allItems && allItems.length > 0) { %>
+                        <% allItems.forEach(item => { %>
+                            <div class="item-row">
+                                <img src="<%= item.productId.images && item.productId.images.length > 0 ? item.productId.images[0] : 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=40&h=40&fit=crop' %>" alt="<%= item.productId.productName %>" class="item-image">
+                                <div class="item-info">
+                                    <div class="item-name"><%= item.productId.productName %></div>
+                                    <div class="item-details">₹<%= item.price.toLocaleString() %> × <%= item.quantity %></div>
+                                </div>
+                                <div class="item-price">₹<%= item.totalPrice.toLocaleString() %></div>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <div class="item-row">
+                            <p>No items in cart</p>
+                        </div>
+                    <% } %>
+                </div>
+
+                <div class="summary-totals">
+                    <div class="total-row">
+                        <span>Subtotal (<%= totalItems %> items)</span>
+                        <span>₹<%= subtotal.toLocaleString() %></span>
+                    </div>
+                    <div class="total-row">
+                        <span>Shipping</span>
+                        <span class="free">FREE</span>
+                    </div>
+                    <div class="total-row final-total">
+                        <span>Final Total</span>
+                        <span>₹<%= finalTotal.toLocaleString() %></span>
+                    </div>
+                </div>
+
+                <button class="place-order-btn">Place Order</button>
+            </div>
+        </div>
+    </div>
+    <%-include("../partials/user/userfooter")%>
+
+    <script>
+        // Address selection functionality
+        function selectAddress(element, addressId) {
+            // Remove selected class from all address cards
+            document.querySelectorAll('.address-card').forEach(card => {
+                card.classList.remove('selected-address');
+            });
+            
+            // Hide all default badges
+            document.querySelectorAll('.default-badge').forEach(badge => {
+                badge.style.display = 'none';
+            });
+            
+            // Uncheck all address radio buttons
+            document.querySelectorAll('input[name="selectedAddress"]').forEach(radio => {
+                radio.checked = false;
+            });
+            
+            // Select the clicked address
+            element.classList.add('selected-address');
+            element.querySelector('input[name="selectedAddress"]').checked = true;
+            element.querySelector('.default-badge').style.display = 'inline';
+        }
+
+        // Ensure COD option is selected by default and remains clickable
+        document.addEventListener('DOMContentLoaded', function() {
+            const codRadio = document.getElementById('cod');
+            if (codRadio) {
+                codRadio.checked = true;
+                // COD radio button now works normally - can be clicked and selected
+            }
+        });
+
+        // Add CSS for styling
+        const style = document.createElement('style');
+        style.textContent = `
+            .selected-address {
+                border: 2px solid #007bff !important;
+                background-color: #f8f9fa !important;
+            }
+            .address-card {
+                cursor: pointer;
+                transition: all 0.3s ease;
+                border: 2px solid transparent;
+                margin-bottom: 10px;
+                padding: 15px;
+                border-radius: 8px;
+                background-color: #fff;
+            }
+            .address-card:hover {
+                border-color: #007bff;
+                box-shadow: 0 2px 8px rgba(0,123,255,0.1);
+            }
+            .default-badge {
+                color: #007bff;
+                font-weight: bold;
+            }
+            .disabled-payment {
+                opacity: 0.5;
+                pointer-events: none;
+                cursor: not-allowed;
+            }
+            .disabled-payment .payment-note {
+                color: #999 !important;
+            }
+            .selected-payment {
+                border: 2px solid #007bff !important;
+                background-color: #f8f9fa !important;
+                box-shadow: 0 2px 8px rgba(0,123,255,0.1);
+            }
+            .payment-option {
+                border: 2px solid transparent;
+                border-radius: 8px;
+                padding: 15px;
+                margin-bottom: 10px;
+                transition: all 0.3s ease;
+                cursor: pointer;
+            }
+            .payment-option:hover:not(.disabled-payment) {
+                border-color: #007bff;
+                box-shadow: 0 2px 8px rgba(0,123,255,0.1);
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

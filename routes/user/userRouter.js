@@ -19,6 +19,8 @@ const wishlistRouter = require("./wishlistRouter")
 
 const profileRouter = require("./profileRouter")
 
+const checkoutRouter = require("./checkoutRouter")
+
 
 router.get("/", userController.landingPage);
 router.get("/login", userController.loginPage);
@@ -54,5 +56,6 @@ router.use("/auth",authRouter)
 router.use("/cart",cartRouter)
 router.use("/wishlist",wishlistRouter)
 router.use("/profile",profileRouter)
+router.use("/checkout",checkoutRouter)
 
 module.exports = router;
