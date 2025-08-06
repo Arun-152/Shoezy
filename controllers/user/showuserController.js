@@ -1,4 +1,5 @@
 const User = require("../../models/userSchema");
+const Address = require("../../models/addressSchema");
 const bcrypt = require("bcrypt")
 const env = require("dotenv").config()
 const session = require("express-session")
@@ -391,20 +392,157 @@ const chnageEmailValid = async(req,res)=>{
 }
 const loadAddress = async(req,res)=>{
     try{
-       
         const userId = req.session.userId
         const userData = await User.findById(userId)
 
         if(!userData){
             return res.redirect("/login")
         }
-         res.render("addressPage", {
-            user: userData
-         })
+
+        // Fetch user's addresses
+        const addresses = await Address.find({ userId: userId }).sort({ createdAt: -1 });
+        
+        res.render("addressPage", {
+            user: userData,
+            addresses: addresses,
+            errors: {},
+            formData: {}
+        })
    
     }catch(error){
-        console.error(error.data)
+        console.error("Load address error:", error)
         res.redirect("/usererrorPage")
+    }
+}
+
+const postAdd = async(req,res)=>{
+    try{
+        const userId = req.session.userId;
+        const {
+            fullName,
+            mobileNumber,
+            address,
+            city,
+            district,
+            state,
+            landmark,
+            pinCode,
+            addressType
+        } = req.body;
+
+        // Validation - Check all required fields are non-empty
+        const errors = {};
+        
+        if (!fullName || fullName.trim() === '') {
+            errors.fullName = "Full name is required";
+        } else if (fullName.trim().length < 2) {
+            errors.fullName = "Full name must be at least 2 characters";
+        }
+        
+        if (!mobileNumber || mobileNumber.trim() === '') {
+            errors.mobileNumber = "Mobile number is required";
+        } else if (!/^[789]\d{9}$/.test(mobileNumber.trim())) {
+            errors.mobileNumber = "Please enter a valid 10-digit mobile number starting with 7, 8, or 9";
+        }
+        
+        if (!address || address.trim() === '') {
+            errors.address = "Address is required";
+        } else if (address.trim().length < 5) {
+            errors.address = "Address must be at least 5 characters";
+        }
+        
+        if (!city || city.trim() === '') {
+            errors.city = "City is required";
+        } else if (city.trim().length < 2) {
+            errors.city = "City must be at least 2 characters";
+        }
+        
+        if (!district || district.trim() === '') {
+            errors.district = "District is required";
+        } else if (district.trim().length < 2) {
+            errors.district = "District must be at least 2 characters";
+        }
+        
+        if (!state || state.trim() === '') {
+            errors.state = "State is required";
+        } else if (state.trim().length < 2) {
+            errors.state = "State must be at least 2 characters";
+        }
+        
+        if (!pinCode || pinCode.trim() === '') {
+            errors.pinCode = "Pin code is required";
+        } else if (!/^\d{6}$/.test(pinCode.trim())) {
+            errors.pinCode = "Please enter a valid 6-digit pin code";
+        }
+        
+        if (!addressType || addressType.trim() === '') {
+            errors.addressType = "Address type is required";
+        } else if (!['home', 'office', 'other'].includes(addressType.toLowerCase())) {
+            errors.addressType = "Please select a valid address type";
+        }
+            if (!landmark || landmark.trim() === '') {
+            errors.landmark = "landmark is required";
+        } else if (landmark.trim().length < 4) {
+            errors.landmark = "Landmark must be at least 4 characters";
+        }
+
+        // If there are validation errors, do not save and render the page with errors
+        if (Object.keys(errors).length > 0) {
+            const userData = await User.findById(userId);
+            const addresses = await Address.find({ userId: userId }).sort({ createdAt: -1 });
+            
+            return res.render("addressPage", {
+                user: userData,
+                addresses: addresses,
+                errors: errors,
+                formData: req.body
+            });
+        }
+
+        // Check if address already exists for the same user
+        const existingAddress = await Address.findOne({
+            userId: userId,
+            address: address.trim(),
+            city: city.trim(),
+            district: district.trim(),
+            state: state.trim(),
+            pinCode: parseInt(pinCode)
+        });
+
+        if (existingAddress) {
+            const userData = await User.findById(userId);
+            const addresses = await Address.find({ userId: userId }).sort({ createdAt: -1 });
+            
+            return res.render("addressPage", {
+                user: userData,
+                addresses: addresses,
+                errors: { address: "This address already exists." },
+                formData: req.body
+            });
+        }
+
+        // Create new address only if validation passes and address doesn't exist
+        const newAddress = new Address({
+            userId: userId,
+            fullName: fullName.trim(),
+            mobileNumber: mobileNumber.trim(),
+            address: address.trim(),
+            city: city.trim(),
+            district: district.trim(),
+            state: state.trim(),
+            landmark: landmark ? landmark.trim() : "",
+            pinCode: parseInt(pinCode),
+            addressType: addressType.charAt(0).toUpperCase() + addressType.slice(1).toLowerCase()
+        });
+
+        await newAddress.save();
+        
+        // Redirect to addressPage with success flag for SweetAlert
+        res.redirect("/profile/address?success=true");
+        
+    }catch(error){
+        console.error("Post add address error:", error);
+        res.redirect("/usererrorPage");
     }
 }
 
@@ -418,5 +556,6 @@ module.exports = {
     resendEmailOTP,
     verifyEmailOTP,
     chnageEmailValid,
-    loadAddress
+    loadAddress,
+    postAdd
 };

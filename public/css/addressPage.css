@@ -208,7 +208,7 @@ body {
     color: #16a34a;
 }
 
-.address-type-badge.work {
+.address-type-badge.office {
     background: rgba(59, 130, 246, 0.1);
     color: #2563eb;
 }
@@ -438,12 +438,41 @@ body {
     margin-bottom: 5px;
 }
 
-.address-form input {
+.address-form input,
+.address-form textarea {
     width: 100%;
     padding: 10px;
     border: 1px solid #e2e8f0;
     border-radius: 6px;
     font-size: 0.9rem;
+    font-family: inherit;
+    transition: border-color 0.3s ease;
+}
+
+.address-form input:focus,
+.address-form textarea:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.address-form input.error,
+.address-form textarea.error {
+    border-color: #dc2626;
+    background-color: #fef2f2;
+}
+
+.address-form textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.error-message {
+    display: block;
+    color: #dc2626;
+    font-size: 0.8rem;
+    margin-top: 5px;
+    font-weight: 500;
 }
 
 .address-type {
