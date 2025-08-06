@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation - Thank You!</title>
+    <link rel="stylesheet" href="/css/orderSuccessPage.css">
+</head>
+<body>
+    <div class="container">
+        <div class="success-card">
+            <div class="success-icon">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="#10B981" stroke-width="2"/>
+                    <path d="m9 12 2 2 4-4" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            
+            <h1>Order Confirmed!</h1>
+            <p class="success-message">Thank you for your purchase. Your order has been successfully placed and is being processed.</p>
+            
+            <div class="order-details">
+                <h2>Order Details</h2>
+                <% if (typeof order !== 'undefined' && order) { %>
+                    <div class="detail-row">
+                        <span class="label">Order Number:</span>
+                        <span class="value">#<%= order.orderNumber %></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Order Date:</span>
+                        <span class="value"><%= new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Total Amount:</span>
+                        <span class="value">₹<%= order.totalAmount.toLocaleString() %></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Payment Method:</span>
+                        <span class="value"><%= order.paymentMethod %></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Shipping Address:</span>
+                        <span class="value">
+                            <%= order.address.fullName %><br>
+                            <%= order.address.address %>, <%= order.address.city %><br>
+                            <%= order.address.district %>, <%= order.address.state %> - <%= order.address.pinCode %><br>
+                            Phone: <%= order.address.mobileNumber %>
+                        </span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Estimated Delivery:</span>
+                        <span class="value">3-5 business days</span>
+                    </div>
+                <% } else { %>
+                    <div class="detail-row">
+                        <span class="label">Order Status:</span>
+                        <span class="value">Order information not available</span>
+                    </div>
+                <% } %>
+            </div>
+            
+           
+            
+            <div class="action-buttons">
+                <a href="/shop"><button class="btn btn-secondary">Continue Shopping</button></a>
+            </div>
+            
+            <div class="contact-info">
+                <p>Questions about your order? <a href="mailto:support@example.com">Contact Support</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Prevent back navigation to checkout page
+        (function() {
+            // Replace current history state
+            if (window.history.replaceState) {
+                window.history.replaceState(null, null, window.location.href);
+            }
+            
+            // Handle back button
+            window.addEventListener('popstate', function(event) {
+                // Redirect to orders page instead of going back to checkout
+                window.location.href = '/order';
+            });
+            
+            // Disable back button functionality
+            window.addEventListener('beforeunload', function(event) {
+                // This will be triggered when user tries to navigate away
+                // But we don't want to show confirmation for normal navigation
+            });
+            
+            // Additional protection - push a new state to prevent back navigation
+            if (window.history.pushState) {
+                window.history.pushState(null, null, window.location.href);
+                window.addEventListener('popstate', function() {
+                    window.location.href = '/order';
+                });
+            }
+        })();
+    </script>
+</body>
+</html>

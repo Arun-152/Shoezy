@@ -22,6 +22,7 @@ const profileRouter = require("./profileRouter")
 const checkoutRouter = require("./checkoutRouter")
 
 
+
 router.get("/", userController.landingPage);
 router.get("/login", userController.loginPage);
 router.get("/signup", userController.signupPage);
@@ -41,6 +42,7 @@ router.post("/resendOtp", userController.resendOTP);
 
 
 router.get("/order",userAuth, orderController.orderPage);
+router.get("/order/:orderId",userAuth, orderController.orderDetails);
 router.get("/userErrorPage", userController.userErrorPage);
 
 // Forgot Password Routes

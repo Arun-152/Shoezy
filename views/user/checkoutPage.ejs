@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout - Shoezy</title>
     <link rel="stylesheet" href="/css/checkoutPage.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <!-- Header -->
@@ -73,18 +75,18 @@
                 <h2 class="section-title">💳 Payment Method</h2>
                 
                 <div class="payment-option selected-payment" id="cod-option">
-                    <input type="radio" id="cod" name="payment" class="payment-radio" checked>
+                    <input type="radio" id="cod" name="payment" class="payment-radio" value="COD" checked>
                     <label for="cod" class="payment-label">
                         <span class="payment-icon">💰</span>
                         <div>
                             <div class="payment-title">Cash on Delivery</div>
-                            <div class="payment-note">⚠️ COD is available only for orders up to ₹4000</div>
+                            <div class="payment-note">⚠️ COD is available only for orders up to ₹6000</div>
                         </div>
                     </label>
                 </div>
 
                 <div class="payment-option disabled-payment">
-                    <input type="radio" id="online" name="payment" class="payment-radio" disabled>
+                    <input type="radio" id="online" name="payment" class="payment-radio" value="Online" disabled>
                     <label for="online" class="payment-label">
                         <span class="payment-icon">💳</span>
                         <div>
@@ -95,7 +97,7 @@
                 </div>
 
                 <div class="payment-option disabled-payment">
-                    <input type="radio" id="wallet" name="payment" class="payment-radio" disabled>
+                    <input type="radio" id="wallet" name="payment" class="payment-radio" value="Wallet" disabled>
                     <label for="wallet" class="payment-label">
                         <span class="payment-icon">📱</span>
                         <div>
@@ -148,7 +150,11 @@
                     </div>
                 </div>
 
-                <button class="place-order-btn">Place Order</button>
+                <form id="checkoutForm" action="/checkout/orderSuccess" method="POST">
+                    <input type="hidden" name="selectedAddress" id="selectedAddressInput">
+                    <input type="hidden" name="payment" value="COD">
+                    <button type="submit" class="place-order-btn">Place Order</button>
+                </form>
             </div>
         </div>
     </div>
@@ -176,6 +182,9 @@
             element.classList.add('selected-address');
             element.querySelector('input[name="selectedAddress"]').checked = true;
             element.querySelector('.default-badge').style.display = 'inline';
+            
+            // Update hidden input for form submission
+            document.getElementById('selectedAddressInput').value = addressId;
         }
 
         // Ensure COD option is selected by default and remains clickable
@@ -185,6 +194,117 @@
                 codRadio.checked = true;
                 // COD radio button now works normally - can be clicked and selected
             }
+            
+            // Set initial selected address
+            const defaultAddress = document.querySelector('input[name="selectedAddress"]:checked');
+            if (defaultAddress) {
+                document.getElementById('selectedAddressInput').value = defaultAddress.value;
+            }
+            
+            // Handle form submission with AJAX
+            document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const selectedAddress = document.getElementById('selectedAddressInput').value;
+                const payment = document.querySelector('input[name="payment"]:checked')?.value;
+                const finalTotal = <%= finalTotal %>;
+                
+                console.log('Selected Address:', selectedAddress);
+                console.log('Selected Payment:', payment);
+                console.log('Final Total:', finalTotal);
+                
+                // Client-side validation
+                if (!selectedAddress) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Address Required',
+                        text: 'Please select a delivery address',
+                        confirmButtonColor: '#007bff'
+                    });
+                    return false;
+                }
+                
+                if (!payment) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Payment Method Required',
+                        text: 'Please select a payment method',
+                        confirmButtonColor: '#007bff'
+                    });
+                    return false;
+                }
+                
+                // COD amount validation
+                if (payment === 'COD' && finalTotal > 6000) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'COD Not Available',
+                        text: 'COD is not available for orders above ₹6000. Please choose another payment method.',
+                        confirmButtonColor: '#007bff'
+                    });
+                    return false;
+                }
+                
+                // Show loading
+                Swal.fire({
+                    title: 'Processing Order...',
+                    text: 'Please wait while we process your order',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                // Submit form via AJAX
+                fetch('/checkout/orderSuccess', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        selectedAddress: selectedAddress,
+                        payment: payment
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Server response:', data);
+                    if (data.success && data.showAlert) {
+                        Swal.fire({
+                            icon: data.alertType,
+                            title: 'Success!',
+                            text: data.alertMessage,
+                            confirmButtonColor: '#007bff',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false
+                        }).then((result) => {
+                            if (result.isConfirmed && data.redirectUrl) {
+                                // Prevent back navigation by replacing history
+                                window.history.replaceState(null, null, data.redirectUrl);
+                                window.location.href = data.redirectUrl;
+                            }
+                        });
+                    } else if (data.showAlert) {
+                        Swal.fire({
+                            icon: data.alertType,
+                            title: 'Error',
+                            text: data.alertMessage,
+                            confirmButtonColor: '#007bff'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Something went wrong. Please try again.',
+                        confirmButtonColor: '#007bff'
+                    });
+                });
+            });
         });
 
         // Add CSS for styling

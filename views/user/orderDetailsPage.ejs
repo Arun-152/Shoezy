@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details - Shoezy</title>
+    <link rel="stylesheet" href="/css/orderDetailsPage.css">
+</head>
+<body>
+    <!-- Header -->
+    <%-include("../partials/user/navbar")%>
+
+    <!-- Order Details Section -->
+    <section class="order-details-section">
+        <div class="container">
+            <div class="back-button">
+                <a href="/order" class="btn-back">← Back to Orders</a>
+            </div>
+
+            <div class="order-details-header">
+                <div class="order-info">
+                    <h1>Order #<%= order.orderNumber %></h1>
+                    <p class="order-date">Placed on <%= new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+                </div>
+                <div class="order-status <%= order.orderStatus.toLowerCase() %>">
+                    <span class="status-badge"><%= order.orderStatus %></span>
+                </div>
+            </div>
+
+            <div class="order-content">
+                <!-- Order Items -->
+                <div class="order-items-section">
+                    <h2>Order Items</h2>
+                    <div class="items-list">
+                        <% order.items.forEach(item => { %>
+                            <div class="item-card">
+                                <div class="item-image">
+                                    <img src="<%= item.productId.images && item.productId.images.length > 0 ? item.productId.images[0] : 'https://via.placeholder.com/120x120/ffffff/cccccc?text=Shoe' %>" alt="<%= item.productId.productName %>">
+                                </div>
+                                <div class="item-details">
+                                    <h3><%= item.productId.productName %></h3>
+                                    <p class="item-description"><%= item.productId.description || 'No description available' %></p>
+                                    <div class="item-specs">
+                                        <span class="spec">Quantity: <%= item.quantity %></span>
+                                        <span class="spec">Price: ₹<%= item.price.toLocaleString() %></span>
+                                    </div>
+                                </div>
+                                <div class="item-total">
+                                    <span class="total-price">₹<%= item.totalPrice.toLocaleString() %></span>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                </div>
+
+                <!-- Order Summary -->
+                <div class="order-summary-section">
+                    <h2>Order Summary</h2>
+                    <div class="summary-card">
+                        <div class="summary-row">
+                            <span>Subtotal</span>
+                            <span>₹<%= order.totalAmount.toLocaleString() %></span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Shipping</span>
+                            <span class="free">FREE</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Total</span>
+                            <span>₹<%= order.totalAmount.toLocaleString() %></span>
+                        </div>
+                        <div class="payment-method">
+                            <span>Payment Method: <%= order.paymentMethod %></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delivery Address -->
+                <div class="delivery-address-section">
+                    <h2>Delivery Address</h2>
+                    <div class="address-card">
+                        <div class="address-header">
+                            <h3><%= order.address.addressType %></h3>
+                        </div>
+                        <div class="address-details">
+                            <p><strong><%= order.address.fullName %></strong></p>
+                            <p><%= order.address.address %></p>
+                            <% if (order.address.landmark) { %>
+                                <p>Landmark: <%= order.address.landmark %></p>
+                            <% } %>
+                            <p><%= order.address.city %>, <%= order.address.district %></p>
+                            <p><%= order.address.state %> - <%= order.address.pinCode %></p>
+                            <p>Phone: <%= order.address.mobileNumber %></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Timeline -->
+                <div class="order-timeline-section">
+                    <h2>Order Timeline</h2>
+                    <div class="timeline">
+                        <div class="timeline-item active">
+                            <div class="timeline-icon">✓</div>
+                            <div class="timeline-content">
+                                <h4>Order Placed</h4>
+                                <p><%= new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %></p>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item <%= order.orderStatus !== 'Pending' ? 'active' : '' %>">
+                            <div class="timeline-icon">📦</div>
+                            <div class="timeline-content">
+                                <h4>Order Confirmed</h4>
+                                <p><%= order.orderStatus !== 'Pending' ? 'Your order has been confirmed' : 'Waiting for confirmation' %></p>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item <%= order.orderStatus === 'Shipped' || order.orderStatus === 'Delivered' ? 'active' : '' %>">
+                            <div class="timeline-icon">🚚</div>
+                            <div class="timeline-content">
+                                <h4>Shipped</h4>
+                                <p><%= order.orderStatus === 'Shipped' || order.orderStatus === 'Delivered' ? 'Your order is on the way' : 'Preparing for shipment' %></p>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item <%= order.orderStatus === 'Delivered' ? 'active' : '' %>">
+                            <div class="timeline-icon">🏠</div>
+                            <div class="timeline-content">
+                                <h4>Delivered</h4>
+                                <p><%= order.orderStatus === 'Delivered' ? 'Order delivered successfully' : 'Estimated delivery in 3-5 days' %></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Actions -->
+                <div class="order-actions-section">
+                    <div class="action-buttons">
+                        <% if (order.orderStatus === 'Pending') { %>
+                            <button class="btn-danger">Cancel Order</button>
+                        <% } %>
+                        <% if (order.orderStatus === 'Shipped') { %>
+                            <button class="btn-primary">Track Package</button>
+                        <% } %>
+                        <% if (order.orderStatus === 'Delivered') { %>
+                            <button class="btn-primary">Buy Again</button>
+                            <button class="btn-secondary">Leave Review</button>
+                        <% } %>
+                        <button class="btn-secondary">Download Invoice</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <%-include("../partials/user/userfooter")%>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .order-details-section {
+            padding: 120px 0 80px;
+            min-height: 80vh;
+        }
+
+        .back-button {
+            margin-bottom: 20px;
+        }
+
+        .btn-back {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 0;
+            transition: color 0.3s ease;
+        }
+
+        .btn-back:hover {
+            color: #1d4ed8;
+        }
+
+        .order-details-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding: 25px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .order-details-header h1 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .order-date {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .status-badge {
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .delivered .status-badge {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .shipped .status-badge {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .pending .status-badge {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .cancelled .status-badge {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .order-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+
+        .order-items-section,
+        .order-summary-section,
+        .delivery-address-section,
+        .order-timeline-section,
+        .order-actions-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .order-items-section {
+            grid-column: 1 / 2;
+        }
+
+        .order-summary-section,
+        .delivery-address-section {
+            grid-column: 2 / 3;
+        }
+
+        .order-timeline-section,
+        .order-actions-section {
+            grid-column: 1 / -1;
+        }
+
+        .order-items-section h2,
+        .order-summary-section h2,
+        .delivery-address-section h2,
+        .order-timeline-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f3f4f6;
+        }
+
+        .item-card {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 20px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .item-card:last-child {
+            border-bottom: none;
+        }
+
+        .item-image img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        .item-details h3 {
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .item-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .item-specs {
+            display: flex;
+            gap: 20px;
+        }
+
+        .spec {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .item-total {
+            text-align: right;
+        }
+
+        .total-price {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2563eb;
+        }
+
+        .summary-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 5px 0;
+        }
+
+        .summary-row.total {
+            border-top: 2px solid #e5e7eb;
+            padding-top: 15px;
+            margin-top: 15px;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .free {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .payment-method {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e5e7eb;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .address-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .address-header h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .address-details p {
+            margin: 5px 0;
+            color: #666;
+        }
+
+        .timeline {
+            position: relative;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e5e7eb;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 60px;
+            margin-bottom: 30px;
+        }
+
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .timeline-icon {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 40px;
+            height: 40px;
+            background: #f3f4f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .timeline-item.active .timeline-icon {
+            background: #2563eb;
+            color: white;
+        }
+
+        .timeline-content h4 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .timeline-content p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary, .btn-secondary, .btn-danger {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        @media (max-width: 768px) {
+            .order-content {
+                grid-template-columns: 1fr;
+            }
+
+            .order-items-section,
+            .order-summary-section,
+            .delivery-address-section,
+            .order-timeline-section,
+            .order-actions-section {
+                grid-column: 1 / -1;
+            }
+
+            .order-details-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .item-card {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .action-buttons {
+                justify-content: center;
+            }
+        }
+    </style>
+</body>
+</html>
