@@ -133,7 +133,9 @@
                                                 data-address-type="<%= address.addressType.toLowerCase() %>">
                                             <span class="material-icons">edit</span>
                                         </button>
-                                        <button class="action-btn delete-btn" title="Delete Address" data-address-id="<%= address._id %>">
+                                        <button class="action-btn delete-btn" title="Delete Address" 
+                                                data-address-id="<%= address._id %>"
+                                                data-is-default="<%= address.isDefault %>">
                                             <span class="material-icons">delete</span>
                                         </button>
                                     </div>
@@ -606,6 +608,118 @@
             });
         });
 
+        // Delete address functionality
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', async function() {
+                const addressId = this.getAttribute('data-address-id');
+                const isDefaultAddress = this.getAttribute('data-is-default') === 'true';
+                const addressCard = this.closest('.address-card');
+                const totalAddresses = document.querySelectorAll('.address-card').length;
+                
+                // Show SweetAlert confirmation
+                const result = await Swal.fire({
+                    title: 'Delete Address',
+                    text: 'Do you want to delete this address?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'OK',
+                    cancelButtonText: 'Cancel'
+                });
+
+                // If user clicked OK, proceed with deletion
+                if (result.isConfirmed) {
+                    try {
+                        const response = await fetch(`/profile/delete/${addressId}`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            }
+                        });
+
+                        const deleteResult = await response.json();
+
+                        if (deleteResult.success) {
+                            // Remove the address card from DOM with animation
+                            addressCard.style.transition = 'all 0.3s ease';
+                            addressCard.style.opacity = '0';
+                            addressCard.style.transform = 'scale(0.9)';
+                            
+                            setTimeout(() => {
+                                addressCard.remove();
+                                
+                                // Check if there are no more addresses left
+                                const remainingAddresses = document.querySelectorAll('.address-card');
+                                if (remainingAddresses.length === 0) {
+                                    // Show empty state
+                                    const addressesGrid = document.querySelector('.addresses-grid');
+                                    if (addressesGrid) {
+                                        addressesGrid.innerHTML = `
+                                            <div class="empty-state">
+                                                <div class="empty-icon">
+                                                    <span class="material-icons">location_off</span>
+                                                </div>
+                                                <h3>No addresses found</h3>
+                                                <p>You haven't added any delivery locations to your account yet.</p>
+                                                <button class="btn btn-large btn-primary" id="openModal">Add Your First Address</button>
+                                            </div>
+                                        `;
+                                        
+                                        // Re-attach event listener for the new "Add Your First Address" button
+                                        document.getElementById('openModal').addEventListener('click', function() {
+                                            clearForm();
+                                            document.getElementById('addressModal').style.display = 'flex';
+                                            document.body.style.overflow = 'hidden';
+                                        });
+                                    }
+                                } else if (isDefaultAddress && totalAddresses > 1) {
+                                    // If a default address was deleted and there are remaining addresses,
+                                    // reload the page to show the new default address in the correct position
+                                    setTimeout(() => {
+                                        window.location.reload();
+                                    }, 1000);
+                                }
+                            }, 300);
+                            
+                            // Show success message with appropriate text
+                            let successMessage = 'Address deleted successfully';
+                            if (isDefaultAddress && totalAddresses > 1) {
+                                successMessage = 'Address deleted successfully. The oldest address has been set as your new default.';
+                            }
+                            
+                            Swal.fire({
+                                title: 'Deleted!',
+                                text: successMessage,
+                                icon: 'success',
+                                confirmButtonText: 'OK',
+                                confirmButtonColor: '#28a745'
+                            });
+                        } else {
+                            // Show error message
+                            Swal.fire({
+                                title: 'Error!',
+                                text: deleteResult.message || 'Failed to delete address',
+                                icon: 'error',
+                                confirmButtonText: 'OK',
+                                confirmButtonColor: '#dc3545'
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Error deleting address:', error);
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Something went wrong. Please try again.',
+                            icon: 'error',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#dc3545'
+                        });
+                    }
+                }
+                // If user clicked Cancel, do nothing (SweetAlert handles this automatically)
+            });
+        });
+
         // Edit form submission
         document.getElementById('editAddressForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -721,17 +835,6 @@
                     confirmButtonColor: '#dc3545'
                 });
             }
-        });
-
-        // Delete address functionality
-        document.querySelectorAll('.delete-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const addressId = this.getAttribute('data-address-id');
-                if (confirm('Are you sure you want to delete this address?')) {
-                    // Add delete functionality here
-                    console.log('Delete address:', addressId);
-                }
-            });
         });
     </script>
 </body>

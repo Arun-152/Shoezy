@@ -390,6 +390,7 @@ const chnageEmailValid = async(req,res)=>{
         return res.redirect("/usererrorPage")
     }
 }
+
 const loadAddress = async(req,res)=>{
     try{
         const userId = req.session.userId
@@ -399,8 +400,11 @@ const loadAddress = async(req,res)=>{
             return res.redirect("/login")
         }
 
-        // Fetch user's addresses
-        const addresses = await Address.find({ userId: userId }).sort({ createdAt: -1 });
+        // Fetch user's addresses with proper sorting: default first, then by creation date (newest first)
+        const addresses = await Address.find({ userId: userId }).sort({ 
+            isDefault: -1,  // Default addresses first (true = 1, false = 0, so -1 puts true first)
+            createdAt: -1   // Then by creation date (newest first)
+        });
         
         res.render("addressPage", {
             user: userData,
@@ -489,7 +493,10 @@ const postAdd = async(req,res)=>{
         // If there are validation errors, do not save and render the page with errors
         if (Object.keys(errors).length > 0) {
             const userData = await User.findById(userId);
-            const addresses = await Address.find({ userId: userId }).sort({ createdAt: -1 });
+            const addresses = await Address.find({ userId: userId }).sort({ 
+                isDefault: -1,
+                createdAt: -1 
+            });
             
             return res.render("addressPage", {
                 user: userData,
@@ -511,7 +518,10 @@ const postAdd = async(req,res)=>{
 
         if (existingAddress) {
             const userData = await User.findById(userId);
-            const addresses = await Address.find({ userId: userId }).sort({ createdAt: -1 });
+            const addresses = await Address.find({ userId: userId }).sort({ 
+                isDefault: -1,
+                createdAt: -1 
+            });
             
             return res.render("addressPage", {
                 user: userData,
@@ -734,6 +744,61 @@ const setDefaultAddress = async(req, res) => {
     }
 }
 
+const deleteAddress = async(req, res) => {
+    try {
+        const userId = req.session.userId;
+        const addressId = req.params.id;
+
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: 'User not authenticated'
+            });
+        }
+
+        // Check if the address exists and belongs to the user
+        const address = await Address.findOne({ _id: addressId, userId: userId });
+        if (!address) {
+            return res.status(404).json({
+                success: false,
+                message: 'Address not found'
+            });
+        }
+
+        // Check if this is a default address
+        const isDefaultAddress = address.isDefault;
+
+        // Delete the address
+        await Address.findByIdAndDelete(addressId);
+
+        // If the deleted address was the default, set the next oldest remaining address as default
+        if (isDefaultAddress) {
+            // Find the oldest remaining address for this user (sorted by createdAt ascending)
+            const oldestAddress = await Address.findOne({ userId: userId }).sort({ createdAt: 1 });
+            
+            if (oldestAddress) {
+                // Set the oldest address as the new default
+                await Address.findByIdAndUpdate(
+                    oldestAddress._id,
+                    { $set: { isDefault: true } }
+                );
+            }
+        }
+
+        res.json({
+            success: true,
+            message: 'Address deleted successfully'
+        });
+
+    } catch(error) {
+        console.error('Delete address error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Server error, please try again later'
+        });
+    }
+}
+
 module.exports = {
     showUser,
     loadEditProfile,
@@ -747,5 +812,6 @@ module.exports = {
     loadAddress,
     postAdd,
     updateAddress,
-    setDefaultAddress
+    setDefaultAddress,
+    deleteAddress
 };

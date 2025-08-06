@@ -34,6 +34,7 @@ router.get("/address", userAuth, showUserController.loadAddress)
 router.post("/add", userAuth, showUserController.postAdd)
 router.patch("/update/:id", userAuth, showUserController.updateAddress)
 router.patch("/set-default/:id", userAuth, showUserController.setDefaultAddress)
+router.patch("/delete/:id", userAuth, showUserController.deleteAddress)
 
 
 module.exports = router
