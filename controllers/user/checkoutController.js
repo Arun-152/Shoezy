@@ -126,6 +126,7 @@ const placeOrder = async (req, res) => {
         totalAmount += item.totalPrice;
         orderItems.push({
           productId: item.productId._id,
+          size: item.size || "Default", // Include size information
           quantity: item.quantity,
           price: item.price,
           totalPrice: item.totalPrice
@@ -184,6 +185,32 @@ const placeOrder = async (req, res) => {
     });
 
     await newOrder.save();
+    
+    // 🔄 Update stock for each product variant
+    try {
+      for (const item of orderItems) {
+        const product = await Product.findById(item.productId);
+        if (product && product.variants) {
+          // Find the specific variant by size
+          const variant = product.variants.find(v => v.size === item.size);
+          if (variant) {
+            // Decrement stock for this specific variant
+            variant.variantQuantity = Math.max(0, variant.variantQuantity - item.quantity);
+            
+            // Update product status if all variants are out of stock
+            const totalStock = product.variants.reduce((sum, v) => sum + v.variantQuantity, 0);
+            if (totalStock === 0) {
+              product.status = "out of stock";
+            }
+            
+            await product.save();
+          }
+        }
+      }
+    } catch (stockError) {
+      console.error("Stock update error:", stockError);
+      // Continue with order even if stock update fails
+    }
     
     // Clear cart after successful order
     await Cart.updateMany({ userId }, { $set: { items: [] } });

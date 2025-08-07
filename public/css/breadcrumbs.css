@@ -6,8 +6,7 @@
     margin: 0;
     width: 100%;
     position: relative;
-    top: 0;
-    z-index: 100;
+    z-index: 50;
     overflow: hidden;
 }
 
@@ -70,6 +69,10 @@
 
 /* Responsive design */
 @media (max-width: 768px) {
+    body {
+        padding-top: 70px; /* Adjust for mobile navbar */
+    }
+    
     .breadcrumb-container {
         padding: 12px 15px;
     }
@@ -89,6 +92,10 @@
 }
 
 @media (max-width: 480px) {
+    body {
+        padding-top: 60px; /* Further adjust for smaller mobile navbar */
+    }
+    
     .breadcrumb-container {
         padding: 10px 15px;
     }
@@ -110,7 +117,7 @@
 
 /* Ensure breadcrumbs don't interfere with navbar */
 body {
-    padding-top: 0;
+    padding-top: 80px; /* Account for fixed navbar */
 }
 
 /* Page content spacing adjustment */
@@ -130,13 +137,6 @@ main,
 
 /* Ensure proper spacing after navbar */
 .breadcrumb-wrapper {
-    margin-top: 80px; /* Adjust based on navbar height */
     position: relative;
     z-index: 50;
-}
-
-@media (max-width: 768px) {
-    .breadcrumb-wrapper {
-        margin-top: 70px; /* Adjust for mobile navbar */
-    }
 }

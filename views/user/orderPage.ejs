@@ -81,7 +81,7 @@
                                     <div class="order-actions">
                                         <a href="/order/<%= order._id %>" class="btn-secondary">View Details</a>
                                         <% if (order.orderStatus === 'Pending') { %>
-                                            <button class="btn-danger">Cancel Order</button>
+                                            <button class="btn-danger" onclick="cancelOrder('<%= order._id %>')">Cancel Order</button>
                                         <% } else if (order.orderStatus === 'Delivered') { %>
                                             <button class="btn-primary">Buy Again</button>
                                         <% } else { %>
@@ -399,6 +399,7 @@
         }
     </style>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // Filter functionality
         document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -432,6 +433,60 @@
                 }
             });
         });
+
+        // Cancel order functionality
+        async function cancelOrder(orderId) {
+            try {
+                const result = await Swal.fire({
+                    title: 'Cancel Order?',
+                    text: 'Are you sure you want to cancel this order? This action cannot be undone.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc2626',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: 'Yes, cancel order',
+                    cancelButtonText: 'No, keep order'
+                });
+
+                if (result.isConfirmed) {
+                    const response = await fetch(`/order/${orderId}/cancel`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Order Cancelled!',
+                            text: data.message,
+                            icon: 'success',
+                            confirmButtonColor: '#2563eb'
+                        }).then(() => {
+                            // Reload the page to show updated status
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: data.message || 'Failed to cancel order',
+                            icon: 'error',
+                            confirmButtonColor: '#dc2626'
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Cancel order error:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Something went wrong. Please try again.',
+                    icon: 'error',
+                    confirmButtonColor: '#dc2626'
+                });
+            }
+        }
     </script>
 </body>
 </html>

@@ -54,7 +54,75 @@ const orderDetails = async (req, res) => {
     }
 };
 
+// Cancel order and restore stock
+const cancelOrder = async (req, res) => {
+    try {
+        const userId = req.session.userId;
+        const orderId = req.params.orderId;
+        
+        if (!userId) {
+            return res.status(401).json({ success: false, message: 'Not authenticated' });
+        }
+
+        const order = await Order.findOne({ _id: orderId, userId }).populate('items.productId');
+        
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Order not found' });
+        }
+
+        if (order.orderStatus === 'Cancelled') {
+            return res.status(400).json({ success: false, message: 'Order already cancelled' });
+        }
+
+        if (order.orderStatus !== 'Pending') {
+            return res.status(400).json({ success: false, message: 'Only pending orders can be cancelled' });
+        }
+
+        // 🔄 Restore stock for each product variant
+        try {
+            for (const item of order.items) {
+                const product = await Product.findById(item.productId);
+                if (product && product.variants) {
+                    // Find the specific variant by size
+                    const variant = product.variants.find(v => v.size === (item.size || "Default"));
+                    if (variant) {
+                        // Restore stock for this specific variant
+                        variant.variantQuantity += item.quantity;
+                        
+                        // Update product status if it was out of stock
+                        if (product.status === "out of stock") {
+                            const totalStock = product.variants.reduce((sum, v) => sum + v.variantQuantity, 0);
+                            if (totalStock > 0) {
+                                product.status = "Available";
+                            }
+                        }
+                        
+                        await product.save();
+                    }
+                }
+            }
+        } catch (stockError) {
+            console.error("Stock restoration error:", stockError);
+            return res.status(500).json({ success: false, message: 'Error restoring stock' });
+        }
+
+        // Update order status to cancelled
+        order.orderStatus = 'Cancelled';
+        await order.save();
+
+        return res.json({ 
+            success: true, 
+            message: 'Order cancelled successfully and stock restored.' 
+        });
+
+    } catch (error) {
+        console.error('Cancel order error:', error);
+        return res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
 module.exports = {
     orderPage,
-    orderDetails
-}
+    orderDetails,
+    cancelOrder
+};

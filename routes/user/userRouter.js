@@ -43,6 +43,7 @@ router.post("/resendOtp", userController.resendOTP);
 
 router.get("/order",userAuth, orderController.orderPage);
 router.get("/order/:orderId",userAuth, orderController.orderDetails);
+router.post("/order/:orderId/cancel",userAuth, orderController.cancelOrder);
 router.get("/userErrorPage", userController.userErrorPage);
 
 // Forgot Password Routes

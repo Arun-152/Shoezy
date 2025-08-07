@@ -10,6 +10,7 @@ body {
     line-height: 1.6;
     color: #333;
     background-color: #f8f9fa;
+    padding-top: 80px; /* Add padding to account for fixed navbar */
 }
 
 .container {
@@ -34,13 +35,12 @@ body {
 
 /* Main Container */
 .main-container {
-    top: 30px;
     display: flex;
     gap: 30px;
     max-width: 1200px;
-    margin: 0px auto;
-    padding: 0 px;
-    min-height: calc(100vh - 70px - 60px);
+    margin: 20px auto; /* Add top margin for spacing */
+    padding: 0 20px;
+    min-height: calc(100vh - 100px - 60px); /* Adjust for navbar and footer */
 }
 
 /* Sidebar Styles */
@@ -49,10 +49,10 @@ body {
     background: white;
     border-radius: 10px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    height: calc(100vh - 130px);
+    height: calc(100vh - 150px); /* Adjust height for navbar */
     overflow-y: auto;
     position: sticky;
-    top: 100px;
+    top: 120px; /* Adjust for navbar height */
     display: flex;
     flex-direction: column;
 }
@@ -404,10 +404,16 @@ body {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+    body {
+        padding-top: 70px; /* Adjust for mobile navbar */
+    }
+    
     .main-container {
         flex-direction: column;
         gap: 20px;
         min-height: auto;
+        margin: 10px auto;
+        padding: 0 15px;
     }
     
     .sidebar {
@@ -415,6 +421,7 @@ body {
         height: auto;
         position: static;
         overflow: visible;
+        top: auto;
     }
     
     .nav-menu {
@@ -444,6 +451,10 @@ body {
 }
 
 @media (max-width: 480px) {
+    body {
+        padding-top: 60px; /* Further adjust for smaller mobile navbar */
+    }
+    
     .header .container {
         height: 60px;
     }
@@ -453,8 +464,8 @@ body {
     }
     
     .main-container {
-        margin: 20px auto;
-        padding: 0 15px;
+        margin: 10px auto;
+        padding: 0 10px;
     }
     
     .profile-section {

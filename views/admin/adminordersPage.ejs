@@ -42,15 +42,67 @@
                         <table class="orders-table">
                             <thead>
                                 <tr>
-                                    <th>Product</th>
-                                    <th>Category</th>
-                                    <th>Brand</th>
-                                    <th>Offer</th>
+                                    <th>SI No</th>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Date</th>
                                     <th>Status</th>
-                                    <th>Action</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
-                           
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>ORD001</td>
+                                    <td>John Doe</td>
+                                    <td>2025-08-05</td>
+                                    <td class="status"><i class="fas fa-clock"></i> Pending</td>
+                                    <td class="action">
+                                        <select class="action-dropdown" onchange="updateStatus(this)">
+                                            <option value="Pending" selected>Pending</option>
+                                            <option value="Processing">Processing</option>
+                                            <option value="Shipped">Shipped</option>
+                                            <option value="Delivered">Delivered</option>
+                                            <option value="Canceled">Canceled</option>
+                                        </select>
+                                        <a href="#" class="view-icon"><i class="fas fa-eye"></i></a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>ORD002</td>
+                                    <td>Jane Smith</td>
+                                    <td>2025-08-04</td>
+                                    <td class="status"><i class="fas fa-spinner"></i> Processing</td>
+                                    <td class="action">
+                                        <select class="action-dropdown" onchange="updateStatus(this)">
+                                            <option value="Pending">Pending</option>
+                                            <option value="Processing" selected>Processing</option>
+                                            <option value="Shipped">Shipped</option>
+                                            <option value="Delivered">Delivered</option>
+                                            <option value="Canceled">Canceled</option>
+                                        </select>
+                                        <a href="#" class="view-icon"><i class="fas fa-eye"></i></a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td>ORD003</td>
+                                    <td>Mike Johnson</td>
+                                    <td>2025-08-03</td>
+                                    <td class="status"><i class="fas fa-truck"></i> Shipped</td>
+                                    <td class="action">
+                                        <select class="action-dropdown" onchange="updateStatus(this)">
+                                            <option value="Pending">Pending</option>
+                                            <option value="Processing">Processing</option>
+                                            <option value="Shipped" selected>Shipped</option>
+                                            <option value="Delivered">Delivered</option>
+                                            <option value="Canceled">Canceled</option>
+                                        </select>
+                                        <a href="#" class="view-icon"><i class="fas fa-eye"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
                         </table>
                     </div>
                     <div class="pagination">
@@ -88,41 +140,27 @@
                     <label>Brand:</label>
                     <input type="text" placeholder="Enter brand">
                 </div>
-                <div class="form-group">
-                    <label>Offer Percentage:</label>
-                    <input type="number" placeholder="Enter offer percentage">
-                </div>
-                <div class="form-group">
-                    <label>Status:</label>
-                    <select>
-                        <option>Listed</option>
-                        <option>Unlisted</option>
-                    </select>
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="action-btn">Save Offer</button>
-                    <button type="button" class="action-btn cancel" onclick="closeModal()">Cancel</button>
-                </div>
             </form>
         </div>
     </div>
 
     <script>
-        // Toggle sidebar
-        const menuToggle = document.querySelector('.menu-toggle');
-        const sidebar = document.querySelector('.sidebar');
-        menuToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('sidebar-open');
-        });
-
-        // Modal functions
-        function openModal() {
-            document.getElementById('offerModal').style.display = 'block';
-        }
-
-        function closeModal() {
-            document.getElementById('offerModal').style.display = 'none';
+        function updateStatus(selectElement) {
+            // Get the selected status value
+            const newStatus = selectElement.value;
+            // Get the parent row of the select element
+            const row = selectElement.closest('tr');
+            // Find the status cell in the same row
+            const statusCell = row.querySelector('.status');
+            // Define icons for each status
+            const statusIcons = {
+                'Pending': '<i class="fas fa-clock"></i>',
+                'Processing': '<i class="fas fa-spinner"></i>',
+                'Shipped': '<i class="fas fa-truck"></i>',
+                'Delivered': '<i class="fas fa-check-circle"></i>',
+                'Canceled': '<i class="fas fa-times-circle"></i>'
+            };
+            // Update the status cell with the new status and corresponding icon
+            statusCell.innerHTML = `${statusIcons[newStatus]} ${newStatus}`;
         }
     </script>
-</body>
-</html>
