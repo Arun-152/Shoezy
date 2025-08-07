@@ -116,43 +116,59 @@
                     </div>
                 </div>
 
-                <!-- Order Timeline -->
-                <div class="order-timeline-section">
-                    <h2>Order Timeline</h2>
-                    <div class="timeline">
-                        <div class="timeline-item active">
-                            <div class="timeline-icon">✓</div>
-                            <div class="timeline-content">
-                                <h4>Order Placed</h4>
-                                <p><%= new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %></p>
-                            </div>
-                        </div>
-                        
-                        <div class="timeline-item <%= order.orderStatus !== 'Pending' ? 'active' : '' %>">
-                            <div class="timeline-icon">📦</div>
-                            <div class="timeline-content">
-                                <h4>Order Confirmed</h4>
-                                <p><%= order.orderStatus !== 'Pending' ? 'Your order has been confirmed' : 'Waiting for confirmation' %></p>
-                            </div>
-                        </div>
-                        
-                        <div class="timeline-item <%= order.orderStatus === 'Shipped' || order.orderStatus === 'Delivered' ? 'active' : '' %>">
-                            <div class="timeline-icon">🚚</div>
-                            <div class="timeline-content">
-                                <h4>Shipped</h4>
-                                <p><%= order.orderStatus === 'Shipped' || order.orderStatus === 'Delivered' ? 'Your order is on the way' : 'Preparing for shipment' %></p>
-                            </div>
-                        </div>
-                        
-                        <div class="timeline-item <%= order.orderStatus === 'Delivered' ? 'active' : '' %>">
-                            <div class="timeline-icon">🏠</div>
-                            <div class="timeline-content">
-                                <h4>Delivered</h4>
-                                <p><%= order.orderStatus === 'Delivered' ? 'Order delivered successfully' : 'Estimated delivery in 3-5 days' %></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+               <!-- Order Timeline -->
+<div class="order-timeline-section">
+    <h2>Order Timeline</h2>
+    <div class="timeline">
+        <!-- Order Placed -->
+        <div class="timeline-item active">
+            <div class="timeline-icon">✓</div>
+            <div class="timeline-content">
+                <h4>Order Placed</h4>
+                <p><%= new Date(order.createdAt).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %></p>
+            </div>
+        </div>
+
+        <!-- Order Confirmed -->
+        <div class="timeline-item <%= ['Processing', 'Shipped', 'Delivered', 'Cancelled'].includes(order.orderStatus) ? 'active' : '' %>">
+            <div class="timeline-icon">📦</div>
+            <div class="timeline-content">
+                <h4>Order Confirmed</h4>
+                <p><%= order.orderStatus !== 'Pending' ? 'Your order has been confirmed' : 'Waiting for confirmation' %></p>
+            </div>
+        </div>
+
+        <!-- Shipped -->
+        <div class="timeline-item <%= ['Shipped', 'Delivered'].includes(order.orderStatus) ? 'active' : '' %>">
+            <div class="timeline-icon">🚚</div>
+            <div class="timeline-content">
+                <h4>Shipped</h4>
+                <p><%= ['Shipped', 'Delivered'].includes(order.orderStatus) ? 'Your order is on the way' : 'Preparing for shipment' %></p>
+            </div>
+        </div>
+
+        <!-- Delivered -->
+        <div class="timeline-item <%= order.orderStatus === 'Delivered' ? 'active' : '' %>">
+            <div class="timeline-icon">🏠</div>
+            <div class="timeline-content">
+                <h4>Delivered</h4>
+                <p><%= order.orderStatus === 'Delivered' ? 'Order delivered successfully' : 'Estimated delivery in 3-5 days' %></p>
+            </div>
+        </div>
+
+        <!-- Cancelled -->
+        <% if (order.orderStatus === 'Cancelled') { %>
+        <div class="timeline-item active cancelled">
+            <div class="timeline-icon">❌</div>
+            <div class="timeline-content">
+                <h4>Cancelled</h4>
+                <p>Order was cancelled. Reason: <%= order.cancellationReason || 'N/A' %></p>
+            </div>
+        </div>
+        <% } %>
+    </div>
+</div>
+
 
                 <!-- Order Actions -->
                 <div class="order-actions-section">
@@ -164,7 +180,7 @@
                             <button class="btn-primary">Track Package</button>
                         <% } %>
                         <% if (order.orderStatus === 'Delivered') { %>
-                            <button class="btn-primary">Buy Again</button>
+                            <button class="btn-primary">Return</button>
                             <button class="btn-secondary">Leave Review</button>
                         <% } %>
                         <button class="btn-secondary">Download Invoice</button>
@@ -504,12 +520,12 @@
         }
 
         .btn-primary {
-            background: #2563eb;
+            background: #eb2525;
             color: white;
         }
 
         .btn-primary:hover {
-            background: #1d4ed8;
+            background: #d81d1d;
         }
 
         .btn-secondary {

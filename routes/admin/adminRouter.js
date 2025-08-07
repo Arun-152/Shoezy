@@ -8,6 +8,8 @@ const multer = require("multer");
 const { upload } = require("../../helpers/multerConfig");
 const { userAuth, adminAuth } = require("../../middlewares/auth");
 
+
+const adminOrderRouter = require("./adminOrderRouter")
 // Admin Login Management
 router.get("/login", adminController.adminLoginPage);
 router.post("/login", adminController.postLogin);
@@ -38,7 +40,7 @@ router.post("/editProducts/:id", adminAuth, upload.array("images", 3), productsC
 router.patch("/deleteProducts/:id", adminAuth, productsController.deleteProducts);
 
 // Orders Management
-router.get("/orders", adminAuth, adminController.ordersPage);
+
 
 // Coupon Management
 router.get("/coupons", adminAuth, adminController.couponPage);
@@ -54,5 +56,9 @@ router.get("/logout", adminAuth, adminController.adminLogout);
 
 // Admin Error Page
 router.get("/adminErrorPage", adminController.adminErrorPage);
+
+router.use("/orders",adminOrderRouter)
+
+
 
 module.exports = router;

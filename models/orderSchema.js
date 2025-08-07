@@ -34,6 +34,11 @@ const orderSchema = new Schema({
         totalPrice: {
             type: Number,
             required: true
+        },
+        status: {
+            type: String,
+            enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned'],
+            default: 'Pending'
         }
     }],
     address: {
@@ -65,11 +70,37 @@ const orderSchema = new Schema({
         type: String,
         enum: ['Pending', 'Paid', 'Failed'],
         default: 'Pending'
+    },
+    statusHistory: [{
+        status: {
+            type: String,
+            enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
+            required: true
+        },
+        date: {
+            type: Date,
+            default: Date.now
+        },
+        description: {
+            type: String,
+            required: false
+        }
+    }],
+    isLocked: {
+        type: Boolean,
+        default: false
+    },
+    cancellationReason: {
+        type: String,
+        required: false
+    },
+    deliveryDate: {
+        type: Date,
+        required: false
     }
 }, {
     timestamps: true
 });
-
 
 const Order = mongoose.model("Order", orderSchema);
 

@@ -214,15 +214,6 @@ const dashboardPage = async (req, res) => {
   }
 };
 
-const ordersPage = (req, res) => {
-  try {
-    res.render("adminordersPage", { title: "Orders" });
-  } catch (error) {
-    console.error("Error rendering orders page:", error.message);
-    res.status(500).send(`Server error: ${error.message}`);
-  }
-};
-
 const couponPage = (req, res) => {
   try {
     res.render("admincoupenPage", { title: "Coupons" });
@@ -275,7 +266,6 @@ module.exports = {
   adminLoginPage,
   postLogin,
   dashboardPage,
-  ordersPage,
   couponPage,
   salesPage,
   offersPage,
