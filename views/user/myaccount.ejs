@@ -5,9 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Account</title>
     <link rel="stylesheet" href="/css/myaccount.css">
+    <link rel="stylesheet" href="/css/breadcrumbs.css">
 </head>
 <body>
     <%- include("../partials/user/navbar") %>
+
+    <!-- Breadcrumbs -->
+    <div class="breadcrumb-wrapper">
+        <div class="breadcrumb-container">
+            <div class="breadcrumbs">
+                <a href="/" class="breadcrumb-item">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-item active">
+                    <i class="fas fa-user"></i> Profile
+                </span>
+            </div>
+        </div>
+    </div>
+
 <div class="main-container">
     <aside class="sidebar">
         <div class="profile-section">

@@ -6,11 +6,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout - Shoezy</title>
     <link rel="stylesheet" href="/css/checkoutPage.css">
+    <link rel="stylesheet" href="/css/breadcrumbs.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <!-- Header -->
    <%-include("../partials/user/navbar")%>
+
+    <!-- Breadcrumbs -->
+    <div class="breadcrumb-wrapper">
+        <div class="breadcrumb-container">
+            <div class="breadcrumbs">
+                <a href="/" class="breadcrumb-item">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="/cart" class="breadcrumb-item">
+                    <i class="fas fa-shopping-cart"></i> Cart
+                </a>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-item active">
+                    <i class="fas fa-credit-card"></i> Checkout
+                </span>
+            </div>
+        </div>
+    </div>
 
     <div class="checkout-container">
         <!-- Left Section -->

@@ -75,9 +75,8 @@ const loadAddToCart= async (req, res) => {
         }
 
         // Calculate totals
-        const tax = subtotal * 0.08; // 8% tax
         const shipping = subtotal > 500 ? 0 : 50; // Free shipping over ₹500
-        const total = subtotal + tax + shipping;
+        const total = subtotal + shipping;
 
         return res.render("addToCartPage", {
             user: user,
@@ -85,7 +84,6 @@ const loadAddToCart= async (req, res) => {
             cartCount: cartCount,
             wishlistCount: wishlistCount,
             subtotal: subtotal,
-            tax: tax,
             shipping: shipping,
             total: total
         });
@@ -255,16 +253,14 @@ const updateQuantity = async(req,res)=>{
             subtotal += cartItem.totalPrice
         })
 
-        const tax = subtotal * 0.08
         const shipping = subtotal > 500 ? 0 : 50
-        const total = subtotal + tax + shipping
+        const total = subtotal + shipping
 
         return res.status(200).json({
             success: true, 
             message: "Quantity updated",
             itemTotal: item.totalPrice,
             subtotal: subtotal,
-            tax: tax,
             shipping: shipping,
             total: total,
             cartCount: cart.items.length
@@ -301,15 +297,13 @@ const removeCart = async(req,res)=>{
             subtotal += cartItem.totalPrice
         })
 
-        const tax = subtotal * 0.08
         const shipping = subtotal > 500 ? 0 : 50
-        const total = subtotal + tax + shipping
+        const total = subtotal + shipping
 
         return res.status(200).json({
             success: true, 
             message: "Product removed successfully",
             subtotal: subtotal,
-            tax: tax,
             shipping: shipping,
             total: total,
             cartCount: cart.items.length

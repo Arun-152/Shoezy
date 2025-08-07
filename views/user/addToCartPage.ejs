@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shopping Cart - ShopHub</title>
     <link rel="stylesheet" href="css/addToCartPage.css">
+    <link rel="stylesheet" href="/css/breadcrumbs.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         /* Empty cart styling */
@@ -82,20 +83,24 @@
     <!-- Navigation Bar -->
     <%-include("../partials/user/navbar")%>
 
-    <!-- Header with Breadcrumbs -->
-    <header class="header">
-        <div class="container">
+    <!-- Breadcrumbs -->
+    <div class="breadcrumb-wrapper">
+        <div class="breadcrumb-container">
             <div class="breadcrumbs">
-                <a href="#" class="breadcrumb-item">
+                <a href="/" class="breadcrumb-item">
                     <i class="fas fa-home"></i> Home
                 </a>
                 <span class="breadcrumb-separator">/</span>
-                <a href="#" class="breadcrumb-item">Shop</a>
-                <span class="breadcrumb-separator">/</span>
                 <span class="breadcrumb-item active">
-                    <i class="fas fa-shopping-cart"></i> Shopping Cart
+                    <i class="fas fa-shopping-cart"></i> Cart
                 </span>
             </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
             <h1><i class="fas fa-shopping-cart"></i> Shopping Cart</h1>
             <p class="header-subtitle">Review your items and proceed to checkout</p>
         </div>
@@ -195,10 +200,6 @@
                             <span class="<%= shipping === 0 ? 'free-shipping' : '' %>" id="shipping">
                                 <%= shipping === 0 ? 'FREE' : '₹' + shipping.toFixed(2) %>
                             </span>
-                        </div>
-                        <div class="summary-row">
-                            <span>Tax (8%)</span>
-                            <span id="tax">₹<%= tax.toFixed(2) %></span>
                         </div>
                         
                         <hr class="summary-divider">
@@ -457,7 +458,6 @@
         function updateSummaryDisplay(data) {
             // Update summary values
             document.getElementById('subtotal').textContent = `₹${data.subtotal.toFixed(2)}`;
-            document.getElementById('tax').textContent = `₹${data.tax.toFixed(2)}`;
             document.getElementById('total').textContent = `₹${data.total.toFixed(2)}`;
             
             // Update shipping

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Wishlist</title>
     <link rel="stylesheet" href="/css/wishlistPage.css">
-    
+    <link rel="stylesheet" href="/css/breadcrumbs.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
 <style>
@@ -32,20 +32,24 @@
     <!-- Navigation Bar -->
    <%-include("../partials/user/navbar")%>
 
-    <!-- Header with Breadcrumbs -->
-    <header class="header">
-        <div class="container">
+    <!-- Breadcrumbs -->
+    <div class="breadcrumb-wrapper">
+        <div class="breadcrumb-container">
             <div class="breadcrumbs">
-                <a href="#" class="breadcrumb-item">
+                <a href="/" class="breadcrumb-item">
                     <i class="fas fa-home"></i> Home
                 </a>
-                <span class="breadcrumb-separator">/</span>
-                <a href="#" class="breadcrumb-item">Account</a>
                 <span class="breadcrumb-separator">/</span>
                 <span class="breadcrumb-item active">
                     <i class="fas fa-heart"></i> Wishlist
                 </span>
             </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
             <h1><i class="fas fa-heart"></i> My Wishlist</h1>
             <p class="header-subtitle">Save your favorite items for later</p>
         </div>

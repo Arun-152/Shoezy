@@ -6,6 +6,7 @@
     <title>DeliveryApp - My Addresses</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="/css/addressPage.css">
+    <link rel="stylesheet" href="/css/breadcrumbs.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         /* Ensure SweetAlert appears above modal */
@@ -82,6 +83,25 @@
 </head>
 <body>
      <%- include("../partials/user/navbar") %>
+
+    <!-- Breadcrumbs -->
+    <div class="breadcrumb-wrapper">
+        <div class="breadcrumb-container">
+            <div class="breadcrumbs">
+                <a href="/" class="breadcrumb-item">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="/profile" class="breadcrumb-item">
+                    <i class="fas fa-user"></i> Profile
+                </a>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-item active">
+                    <i class="fas fa-map-marker-alt"></i> Address
+                </span>
+            </div>
+        </div>
+    </div>
 
     <main class="main-content">
         <div class="container">

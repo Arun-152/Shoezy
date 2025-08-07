@@ -1,0 +1,142 @@
+/* Breadcrumb Styles - Universal for all user pages */
+.breadcrumb-wrapper {
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    position: relative;
+    top: 0;
+    z-index: 100;
+    overflow: hidden;
+}
+
+.breadcrumb-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 15px 20px;
+    box-sizing: border-box;
+}
+
+.breadcrumbs {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.breadcrumb-item {
+    color: #6c757d;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.breadcrumb-item:hover {
+    color: #007bff;
+    background-color: #e3f2fd;
+}
+
+.breadcrumb-item.active {
+    color: #495057;
+    font-weight: 600;
+    background-color: #e9ecef;
+    cursor: default;
+}
+
+.breadcrumb-item.active:hover {
+    color: #495057;
+    background-color: #e9ecef;
+}
+
+.breadcrumb-separator {
+    color: #adb5bd;
+    font-size: 12px;
+    margin: 0 2px;
+    user-select: none;
+}
+
+.breadcrumb-item i {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .breadcrumb-container {
+        padding: 12px 15px;
+    }
+    
+    .breadcrumbs {
+        font-size: 13px;
+        gap: 6px;
+    }
+    
+    .breadcrumb-item {
+        padding: 3px 6px;
+    }
+    
+    .breadcrumb-separator {
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 480px) {
+    .breadcrumb-container {
+        padding: 10px 15px;
+    }
+    
+    .breadcrumbs {
+        font-size: 12px;
+        gap: 4px;
+    }
+    
+    .breadcrumb-item {
+        padding: 2px 4px;
+        gap: 3px;
+    }
+    
+    .breadcrumb-item i {
+        font-size: 11px;
+    }
+}
+
+/* Ensure breadcrumbs don't interfere with navbar */
+body {
+    padding-top: 0;
+}
+
+/* Page content spacing adjustment */
+.main-content,
+.main,
+main,
+.checkout-container,
+.orders-section {
+    padding-top: 20px;
+}
+
+/* Special handling for pages with headers */
+.header + .main,
+.header + main {
+    padding-top: 0;
+}
+
+/* Ensure proper spacing after navbar */
+.breadcrumb-wrapper {
+    margin-top: 80px; /* Adjust based on navbar height */
+    position: relative;
+    z-index: 50;
+}
+
+@media (max-width: 768px) {
+    .breadcrumb-wrapper {
+        margin-top: 70px; /* Adjust for mobile navbar */
+    }
+}

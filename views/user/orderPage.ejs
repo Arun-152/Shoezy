@@ -5,10 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Orders - Shoezy</title>
     <link rel="stylesheet" href="/css/orderPage.css">
+    <link rel="stylesheet" href="/css/breadcrumbs.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <!-- Header -->
     <%-include("../partials/user/navbar")%>
+
+    <!-- Breadcrumbs -->
+    <div class="breadcrumb-wrapper">
+        <div class="breadcrumb-container">
+            <div class="breadcrumbs">
+                <a href="/" class="breadcrumb-item">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-item active">
+                    <i class="fas fa-box"></i> Orders
+                </span>
+            </div>
+        </div>
+    </div>
 
     <!-- Orders Section -->
     <section class="orders-section">
@@ -94,11 +111,32 @@
     <%-include("../partials/user/userfooter")%>
 
     <style>
+        /* Fix navbar overflow issue for order page */
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100vw;
+        }
+
         body {
             margin: 0;
             padding: 0;
             font-family: 'Arial', sans-serif;
             background-color: #f8f9fa;
+        }
+
+        /* Ensure navbar wrapper doesn't overflow */
+        .navbar-wrapper {
+            width: 100%;
+            max-width: 100vw;
+            overflow: hidden;
+        }
+
+        /* Override navbar positioning for this page - maintain original max-width */
+        .navbar {
+            left: 0 !important;
+            right: 0 !important;
+            box-sizing: border-box !important;
         }
 
         .container {
