@@ -37,7 +37,7 @@ const orderSchema = new Schema({
         },
         status: {
             type: String,
-            enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned'],
+            enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned', 'ReturnRequested','ReturnApproved'], 
             default: 'Pending'
         }
     }],
@@ -63,7 +63,7 @@ const orderSchema = new Schema({
     },
     orderStatus: {
         type: String,
-        enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
+        enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'ReturnRequested'], // ✅ added
         default: 'Pending'
     },
     paymentStatus: {
@@ -74,7 +74,7 @@ const orderSchema = new Schema({
     statusHistory: [{
         status: {
             type: String,
-            enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
+            enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'ReturnRequested'], // ✅ added
             required: true
         },
         date: {
@@ -94,6 +94,10 @@ const orderSchema = new Schema({
         type: String,
         required: false
     },
+    orderReturnReason: {
+    type: String,
+    default: null
+    },
     deliveryDate: {
         type: Date,
         required: false
@@ -103,5 +107,4 @@ const orderSchema = new Schema({
 });
 
 const Order = mongoose.model("Order", orderSchema);
-
 module.exports = Order;

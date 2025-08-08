@@ -119,10 +119,55 @@ const cancelOrder = async (req, res) => {
         console.error('Cancel order error:', error);
         return res.status(500).json({ success: false, message: 'Server error' });
     }
+}
+
+const returnOrder = async (req, res) => {
+    try {
+        const userId = req.session.userId;
+        const { orderId, productId, reason } = req.body;
+    
+
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "User not authenticated" });
+        }
+
+        const order = await Order.findOne({ _id: orderId, userId });
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+
+        let itemFound = false;
+
+        order.items = order.items.map(item => {
+            if (item.productId.toString() === productId && item.status === 'Delivered') {
+                item.status = 'Returned';
+                item.returnReason = reason;  // ✅ This will now be saved
+                item.returnDate = new Date();
+                itemFound = true;
+            }
+            return item;
+        });
+        order.orderReturnReason = reason
+        if (!itemFound) {
+            return res.status(400).json({ success: false, message: "Product not eligible for return" });
+        }
+
+        await order.save();  // ✅ Saves the returnReason and returnDate
+
+        return res.status(200).json({ success: true, message: "Return request submitted successfully" });
+    } catch (error) {
+        console.error("Return Order Error:", error);
+        return res.status(500).json({ success: false, message: "Server Error" });
+    }
 };
+
+
 
 module.exports = {
     orderPage,
     orderDetails,
-    cancelOrder
+    cancelOrder,
+    returnOrder,
+   
 };

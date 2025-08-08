@@ -20,7 +20,7 @@ const ordersPage = async (req, res) => {
       .skip(skip)
       .limit(limit);
 
-    res.render("adminordersPage", {
+    res.render("admin/adminordersPage", {
       orders,
       currentPage: page,
       totalPages,
@@ -83,7 +83,7 @@ const updateOrderStatus = async (req, res) => {
     }
 
     // Validate status
-    const validStatuses = ["pending", "processing", "shipped", "delivered", "cancelled","Paid"];
+    const validStatuses = ["pending", "processing", "shipped", "delivered", "cancelled", "Paid"];
     if (!validStatuses.includes(status.toLowerCase())) {
       return res.status(400).json({ success: false, message: "Invalid status" });
     }
@@ -129,9 +129,122 @@ const updateOrderStatus = async (req, res) => {
     console.error("Error updating order status:", error.message);
     res.status(500).json({ success: false, message: "Server error updating status" });
   }
+}
+
+const orderDetails = async (req, res) => {
+  const { orderId } = req.params
+
+  try {
+    const order = await Order.findById(orderId)
+      .populate('items.productId')
+      .populate('userId')
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    res.render('adminOrderDetailsPage', {
+      order
+    });
+  } catch (error) {
+    console.error('Error loading admin order details:', error);
+    res.status(500).render('admin/500', { message: 'Server error' });
+  }
+}
+const viewReturnRequests = async (req, res) => {
+  try {
+    // Fetch orders that contain at least one returned product
+    const returnedOrders = await Order.find({ "items.status": "Returned" })
+      .populate("userId")
+      .populate("items.productId")
+      .sort({ updatedAt: -1 });
+
+    res.render("viewRequestPage", {
+      title: "Return Requests",
+      returnedOrders,
+    });
+  } catch (error) {
+    console.error("Error loading return requests:", error);
+    res.status(500).render("error/admin500", {
+      title: "Server Error",
+      message: "Failed to load return requests.",
+    });
+  }
+};
+const approveReturnRequest = async (req, res) => {
+  try {
+    const { orderId, productId } = req.params;
+
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    let itemFound = false;
+
+    order.items = order.items.map(item => {
+      if (item.productId.toString() === productId && item.status === 'Returned') {
+        item.status = 'ReturnApproved';
+        itemFound = true;
+      }
+      return item;
+    });
+
+    if (!itemFound) {
+      return res.status(400).json({ success: false, message: "Return request not found or already processed" });
+    }
+
+    await order.save();
+    res.status(200).json({ success: true, message: "Return request approved" });
+
+  } catch (error) {
+    console.error("Approve Return Error:", error);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+const rejectReturnRequest = async (req, res) => {
+  try {
+    const { orderId, productId } = req.params;
+
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    let itemFound = false;
+
+    order.items = order.items.map(item => {
+      const itemProductId = item.productId._id?.toString?.() || item.productId?.toString?.();
+      if (itemProductId === productId && item.status === 'Returned') {
+
+        item.status = 'Delivered'; // revert back
+        item.returnReason = null;
+        item.returnDate = null;
+        itemFound = true;
+      }
+      return item;
+    });
+
+    if (!itemFound) {
+      return res.status(400).json({ success: false, message: "Return request not found or already processed" });
+    }
+
+    await order.save();
+    res.status(200).json({ success: true, message: "Return request rejected" });
+
+  } catch (error) {
+    console.error("Reject Return Error:", error);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
 };
 
 module.exports = {
   ordersPage,
   updateOrderStatus,
+  orderDetails,
+  viewReturnRequests,
+  approveReturnRequest,
+  rejectReturnRequest,
 };

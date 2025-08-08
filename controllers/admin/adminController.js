@@ -253,14 +253,15 @@ const settingsPage = (req, res) => {
 };
 
 const adminLogout = (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      console.error("Logout error:", err.message);
-      return res.status(500).send("Logout failed");
-    }
+  try {
+    delete req.session.adminId; // Only remove admin session ID
     res.redirect("/admin/login");
-  });
+  } catch (err) {
+    console.error("Admin Logout error:", err.message);
+    res.status(500).send("Logout failed");
+  }
 };
+
 
 module.exports = {
   adminLoginPage,

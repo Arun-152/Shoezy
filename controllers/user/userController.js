@@ -77,38 +77,22 @@ const loginPage = async (req, res) => {
 };
 
 const logout = (req, res) => {
-    // Check if session exists before attempting logout
-    if (req.session) {
-        // Clear passport session if it exists
-        if (req.logout && typeof req.logout === 'function') {
-            req.logout((err) => {
-                if (err) {
-                    console.error('Passport logout error:', err);
-                }
-                // After passport logout, destroy the session
-                destroySession();
-            });
-        } else {
-            // If no passport logout needed, just destroy session
-            destroySession();
-        }
-    } else {
-        // No session exists, just redirect
-        res.clearCookie('connect.sid');
-        res.redirect("/login");
-    }
+    // Check if user session exists
+    if (req.session && req.session.userId) {
+        // Destroy only the user session key
+        delete req.session.userId;
 
-    function destroySession() {
-        req.session.destroy((err) => {
-            if (err) {
-                console.error('Session destroy error:', err);
-                return res.status(500).json({ message: "Server error" });
-            } else {
-                // Clear the session cookie
-                res.clearCookie('connect.sid');
-                res.redirect("/login");
-            }
-        });
+        // Optionally, clear any other user-specific data
+        delete req.session.userName; // if stored
+        delete req.session.isUserAuthenticated; // if using flag
+
+        // Clear session cookie if needed
+        res.clearCookie('connect.sid');
+
+        return res.redirect('/login');
+    } else {
+        // If user session doesn't exist, redirect anyway
+        return res.redirect('/login');
     }
 };
 

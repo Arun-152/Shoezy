@@ -8,73 +8,74 @@ const bcrypt = require("bcrypt")
 const env = require("dotenv").config()
 const session = require("express-session")
 
-const loadCheckout = async(req,res)=>{
-
+const loadCheckout = async (req, res) => {
   try {
-    // Get user ID from session (set by userAuth middleware)
     const userId = req.session.userId;
-    
-    // Fetch user data
+
     const user = await User.findById(userId);
-    if (!user) {
-      return res.redirect('/login');
-    }
-    
-    // Fetch user's cart items
-    const cartItems = await Cart.find({ userId: userId }).populate('items.productId');
-    
-    // Fetch user's default address
-    const defaultAddress = await Address.findOne({ userId: userId, isDefault: true });
-    
-    // Fetch all user addresses
-    const allAddresses = await Address.find({ userId: userId });
-    
-    // Calculate totals
+    if (!user) return res.redirect('/login');
+
+    const cartItems = await Cart.find({ userId }).populate('items.productId');
+
+    const defaultAddress = await Address.findOne({ userId, isDefault: true });
+    const allAddresses = await Address.find({ userId });
+
     let subtotal = 0;
     let totalItems = 0;
     let allItems = [];
-    
+
     cartItems.forEach(cart => {
-      cart.items.forEach(item => {
+      const filteredItems = cart.items.filter(item => {
+        const product = item.productId;
+        return product && !product.isBlocked && !product.isDeleted;
+      });
+
+      cart.items = filteredItems;
+
+      filteredItems.forEach(item => {
         subtotal += item.totalPrice;
         totalItems += item.quantity;
         allItems.push(item);
       });
     });
-    
-    // Shipping is free
+
+    if (allItems.length === 0) {
+      req.flash('error', 'Your cart is empty or contains unavailable products.');
+      return res.redirect('/cart');
+    }
+
     const shipping = 0;
     const finalTotal = subtotal + shipping;
 
     res.render('checkoutPage', {
-      user: user,
-      cartItems: cartItems,
-      allItems: allItems,
-      subtotal: subtotal,
-      totalItems: totalItems,
-      shipping: shipping,
-      finalTotal: finalTotal,
-      defaultAddress: defaultAddress,
-      allAddresses: allAddresses
+      user,
+      cartItems,
+      allItems,
+      subtotal,
+      totalItems,
+      shipping,
+      finalTotal,
+      defaultAddress,
+      allAddresses
     });
 
   } catch (error) {
     console.error('Error loading checkout page:', error);
     res.status(500).send('Server Error');
   }
-}
+};
+
 const placeOrder = async (req, res) => {
   try {
     const userId = req.session.userId;
     const { selectedAddress, payment } = req.body;
 
-    // 🔒 Validation
     if (!userId) {
-      return res.status(401).json({ success:false,message: "User not authenticated" });
+      return res.status(401).json({ success: false, message: "User not authenticated" });
     }
 
     if (!selectedAddress || !payment) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
         showAlert: true,
         alertType: "warning",
@@ -83,7 +84,7 @@ const placeOrder = async (req, res) => {
     }
 
     if (!['COD'].includes(payment)) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
         showAlert: true,
         alertType: "error",
@@ -91,52 +92,60 @@ const placeOrder = async (req, res) => {
       });
     }
 
-    // 🛒 Get cart items
-    const cartItems = await Cart.find({ userId }).populate('items.productId');
-    
-    if (!cartItems || cartItems.length === 0) {
-      return res.status(400).json({ success:false,message: "Cart is empty" });
+    const cart = await Cart.findOne({ userId }).populate('items.productId');
+    if (!cart || !cart.items || cart.items.length === 0) {
+      return res.status(400).json({ success: false, message: "Cart is empty" });
     }
 
-    // Check if cart has items
-    let hasItems = false;
-    cartItems.forEach(cart => {
-      if (cart.items && cart.items.length > 0) {
-        hasItems = true;
-      }
-    });
-
-    if (!hasItems) {
-      return res.status(400).json({ success:false,message: "No items in cart" });
-    }
-
-    // 🏠 Get Address
-    const address = await Address.findOne({ _id: selectedAddress, userId });
-    
-    if (!address) {
-      return res.status(404).json({ error: "Address not found" });
-    }
-
-    // 💰 Calculate total and prepare items
-    let totalAmount = 0;
+    // ✅ Filter valid products (not blocked or deleted)
+    const blockedProducts = [];
     const orderItems = [];
-    
-    cartItems.forEach(cart => {
-      cart.items.forEach(item => {
-        totalAmount += item.totalPrice;
-        orderItems.push({
-          productId: item.productId._id,
-          size: item.size || "Default", // Include size information
-          quantity: item.quantity,
-          price: item.price,
-          totalPrice: item.totalPrice
-        });
-      });
+    let totalAmount = 0;
+
+    const filteredItems = cart.items.filter(item => {
+      const product = item.productId;
+      const isValid = product && !product.isBlocked && !product.isDeleted;
+      if (!isValid) {
+        blockedProducts.push(product?.productName || "Unknown Product");
+      }
+      return isValid;
     });
 
-    // COD amount validation - server side
+    if (filteredItems.length === 0) {
+      return res.status(400).json({
+        success: false,
+        showAlert: true,
+        alertType: "error",
+        alertMessage: "This product is unavailable. Please try again later."
+      });
+    }
+
+    // Process valid items
+    for (const item of filteredItems) {
+      const product = item.productId;
+
+      totalAmount += item.totalPrice;
+      orderItems.push({
+        productId: product._id,
+        size: item.size || "Default",
+        quantity: item.quantity,
+        price: item.price,
+        totalPrice: item.totalPrice
+      });
+    }
+
+    // Show blocked product message if any
+    if (blockedProducts.length > 0) {
+      return res.status(400).json({
+        success: false,
+        showAlert: true,
+        alertType: "error",
+        alertMessage: `The following product(s) are currently unavailable: ${blockedProducts.join(", ")}`
+      });
+    }
+
     if (payment === 'COD' && totalAmount > 6000) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
         showAlert: true,
         alertType: "error",
@@ -144,7 +153,12 @@ const placeOrder = async (req, res) => {
       });
     }
 
-    // 📦 Generate unique order number
+    const address = await Address.findOne({ _id: selectedAddress, userId });
+    if (!address) {
+      return res.status(404).json({ error: "Address not found" });
+    }
+
+ 
     const generateOrderNumber = () => {
       const prefix = 'ORD';
       const timestamp = Date.now().toString().slice(-6);
@@ -152,19 +166,14 @@ const placeOrder = async (req, res) => {
       return `${prefix}${timestamp}${random}`;
     };
 
-    let orderNumber;
-    let isUnique = false;
-    
-    // Keep generating until we get a unique order number
+    let orderNumber, isUnique = false;
     while (!isUnique) {
       orderNumber = generateOrderNumber();
       const existingOrder = await Order.findOne({ orderNumber });
-      if (!existingOrder) {
-        isUnique = true;
-      }
+      if (!existingOrder) isUnique = true;
     }
 
-    // Create order with generated order number
+
     const newOrder = new Order({
       orderNumber,
       userId,
@@ -185,37 +194,28 @@ const placeOrder = async (req, res) => {
     });
 
     await newOrder.save();
-    
-    // 🔄 Update stock for each product variant
     try {
       for (const item of orderItems) {
         const product = await Product.findById(item.productId);
         if (product && product.variants) {
-          // Find the specific variant by size
           const variant = product.variants.find(v => v.size === item.size);
           if (variant) {
-            // Decrement stock for this specific variant
             variant.variantQuantity = Math.max(0, variant.variantQuantity - item.quantity);
-            
-            // Update product status if all variants are out of stock
             const totalStock = product.variants.reduce((sum, v) => sum + v.variantQuantity, 0);
             if (totalStock === 0) {
               product.status = "out of stock";
             }
-            
             await product.save();
           }
         }
       }
     } catch (stockError) {
       console.error("Stock update error:", stockError);
-      // Continue with order even if stock update fails
     }
-    
-    // Clear cart after successful order
-    await Cart.updateMany({ userId }, { $set: { items: [] } });
 
-    // Return success response for SweetAlert
+    await Cart.updateOne({ userId }, { $set: { items: [] } });
+
+  
     res.status(200).json({
       success: true,
       showAlert: true,
@@ -228,7 +228,8 @@ const placeOrder = async (req, res) => {
     console.error("Place Order Error:", error);
     res.status(500).json({ error: "Internal Server Error", details: error.message });
   }
-}
+};
+
 
 
 const orderSuccess = async (req, res) => {
