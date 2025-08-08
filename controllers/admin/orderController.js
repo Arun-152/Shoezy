@@ -3,6 +3,7 @@ const User = require("../../models/userSchema");
 const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
 const Order = require("../../models/orderSchema");
+const Wallet = require("../../models/walletSchema")
 require("dotenv").config();
 
 const ordersPage = async (req, res) => {
@@ -175,18 +176,29 @@ const approveReturnRequest = async (req, res) => {
   try {
     const { orderId, productId } = req.params;
 
-    const order = await Order.findById(orderId);
+    // Validate order and product IDs
+    if (!mongoose.Types.ObjectId.isValid(orderId) || !mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({ success: false, message: "Invalid order or product ID" });
+    }
 
+    // Find the order
+    const order = await Order.findById(orderId).populate('items.productId');
     if (!order) {
       return res.status(404).json({ success: false, message: "Order not found" });
     }
 
+    // Find the specific item in the order
     let itemFound = false;
+    let refundAmount = 0;
+    let productName = '';
 
     order.items = order.items.map(item => {
-      if (item.productId.toString() === productId && item.status === 'Returned') {
+      const itemProductId = item.productId._id?.toString?.() || item.productId?.toString?.();
+      if (itemProductId === productId && item.status === 'Returned') {
         item.status = 'ReturnApproved';
         itemFound = true;
+        refundAmount = item.price || item.productId.price || 0; // Assuming price is stored in item or productId
+        productName = item.productId.name || 'Unknown Product';
       }
       return item;
     });
@@ -195,9 +207,41 @@ const approveReturnRequest = async (req, res) => {
       return res.status(400).json({ success: false, message: "Return request not found or already processed" });
     }
 
-    await order.save();
-    res.status(200).json({ success: true, message: "Return request approved" });
+    // Update wallet
+    const wallet = await Wallet.findOne({ userId: order.userId });
+    if (!wallet) {
+      return res.status(404).json({ success: false, message: "Wallet not found for user" });
+    }
 
+    // Calculate new balance
+    const newBalance = wallet.balance + refundAmount;
+
+    // Create a new transaction
+    const transaction = {
+      transactionId: 'TXN' + Date.now() + Math.random().toString(36).substr(2, 5).toUpperCase(),
+      type: 'credit',
+      amount: refundAmount,
+      description: `Refund for returned item: ${productName}`,
+      balanceAfter: newBalance,
+      orderId: orderId,
+      status: 'completed',
+      source: 'return_refund',
+      metadata: {
+        orderNumber: order.orderNumber || order._id.toString(),
+        productName: productName,
+        refundReason: order.items.find(item => item.productId.toString() === productId)?.returnReason || 'Return approved'
+      }
+    };
+
+    // Update wallet with new transaction and balance
+    wallet.transactions.push(transaction);
+    wallet.balance = newBalance;
+    await wallet.save();
+
+    // Save the updated order
+    await order.save();
+
+    res.status(200).json({ success: true, message: "Return request approved and refund processed to wallet" });
   } catch (error) {
     console.error("Approve Return Error:", error);
     res.status(500).json({ success: false, message: "Server Error" });
