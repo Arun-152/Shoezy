@@ -1,109 +1,420 @@
+/* Enhanced Body and Layout with Teal-Blue Gradient */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #e6f0fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #4ecdc4 0%, #2c9aa0 50%, #17a2b8 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 10s ease-in-out infinite;
     margin: 0;
     padding: 0;
+    height: 100vh;
+    overflow: hidden; /* No page scroll */
 }
 
-header {
+/* Calm teal-blue gradient animation */
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Main container - no scroll */
+main {
+    height: 100vh;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 20px;
-}
-
-header h1 {
-    font-size: 36px;
-    font-weight: bold;
-    color: #000;
-}
-
-.language-selector {
-    font-size: 14px;
-    color: #666;
+    justify-content: center;
+    padding: 0;
+    overflow: hidden; /* Ensure no scroll */
 }
 
 .signup-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 80vh;
+    height: 100%;
+    width: 100%;
     position: relative;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
-.shoe-image {
-    position: absolute;
-    left: 20%;
-    top: 50%;
-    transform: translateY(-50%);
-}
-
-.shoe-image img {
-    width: 300px;
-    rotate: -15deg;
-}
-
+/* FIXED HEIGHT FORM - No layout shifting */
 .signup-form {
-    background-color: #fff;
-    padding: 40px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    padding: 16px 28px;
     border-radius: 20px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    width: 400px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    width: 480px;
+    height: 750px; /* FIXED HEIGHT - accommodates all elements + errors */
     text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    z-index: 10;
+    position: relative;
+    overflow: hidden; /* No internal scroll */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Distribute elements evenly */
 }
 
 .signup-form h2 {
-    font-size: 24px;
-    margin-bottom: 20px;
+    color: #2c9aa0;
+    font-size: 20px;
+    margin: 0 0 8px 0;
+    font-weight: 600;
+    flex-shrink: 0;
 }
 
+/* INPUT GROUP - Fixed height containers to prevent layout shift */
+.input-group {
+    height: 78px; /* FIXED HEIGHT: 48px input + 30px for error message */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    margin-bottom: 0;
+}
+
+/* FIXED DIMENSIONS - Input fields */
+input {
+    padding: 14px 18px;
+    border: 2px solid #e0e6ed;
+    border-radius: 12px;
+    font-size: 15px;
+    width: 100%;
+    height: 48px; /* FIXED HEIGHT */
+    box-sizing: border-box;
+    background-color: #fff;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    color: #333;
+    outline: none;
+    box-shadow: 0 2px 4px rgba(44, 154, 160, 0.08);
+    line-height: 20px;
+    overflow: hidden;
+}
+
+input:focus {
+    border-color: #4ecdc4;
+    box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.15), 0 4px 8px rgba(44, 154, 160, 0.1);
+    transform: translateY(-1px);
+}
+
+/* Password container with toggle */
+.password-container {
+    position: relative;
+    width: 100%;
+    height: 48px; /* Match input height */
+}
+
+.password-container input {
+    padding-right: 50px;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #2c9aa0;
+    font-size: 18px;
+    z-index: 10;
+    background: rgba(44, 154, 160, 0.1);
+    border: none;
+    padding: 6px;
+    height: 32px;
+    width: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.password-toggle:hover {
+    color: #4ecdc4;
+    background-color: rgba(78, 205, 196, 0.2);
+}
+
+/* FIXED HEIGHT ERROR MESSAGES - No layout shift */
+.error-message {
+    color: #dc3545;
+    font-size: 11px;
+    margin-top: 3px;
+    display: none; /* Hidden by default */
+    text-align: left;
+    padding-left: 4px;
+    height: 28px; /* FIXED HEIGHT for error space */
+    line-height: 14px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+/* Google signup button */
 .google-signup {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    height: 48px;
+    padding: 14px 18px;
+    border: 2px solid #e0e6ed;
+    border-radius: 12px;
     background-color: #fff;
     cursor: pointer;
-    margin-bottom: 20px;
+    margin-bottom: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #333;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(44, 154, 160, 0.08);
+    flex-shrink: 0;
+}
+
+.google-signup:hover {
+    border-color: #4ecdc4;
+    box-shadow: 0 4px 12px rgba(78, 205, 196, 0.2);
+    transform: translateY(-1px);
 }
 
 .google-signup img {
     width: 20px;
-    margin-right: 10px;
+    height: 20px;
+    margin-right: 12px;
 }
 
+/* Form container - no layout shift */
 form {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    flex: 1;
+    overflow: hidden;
+    justify-content: space-between;
 }
 
-input {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 16px;
-}
-
+/* ALWAYS VISIBLE Create Account button */
 .create-account-btn {
-    background-color: #00c4cc;
+    background: linear-gradient(135deg, #4ecdc4 0%, #2c9aa0 100%);
     color: #fff;
-    padding: 15px;
+    padding: 14px 18px;
     border: none;
-    border-radius: 5px;
+    border-radius: 12px;
     font-size: 16px;
+    font-weight: 600;
     cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    height: 52px; /* FIXED HEIGHT */
+    box-shadow: 0 4px 12px rgba(78, 205, 196, 0.25);
+    flex-shrink: 0;
+    margin-top: 5px;
 }
 
+.create-account-btn:hover {
+    background: linear-gradient(135deg, #2c9aa0 0%, #17a2b8 100%);
+    box-shadow: 0 8px 24px rgba(78, 205, 196, 0.35);
+    transform: translateY(-2px);
+}
+
+.create-account-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(78, 205, 196, 0.25);
+}
+
+/* Login link - always visible at bottom */
 .login-link {
-    margin-top: 20px;
-    font-size: 14px;
+    margin-top: 6px;
+    font-size: 13px;
+    color: #666;
+    flex-shrink: 0;
+    height: 18px; /* Fixed height */
 }
 
 .login-link a {
-    color: #00c4cc;
+    color: #2c9aa0;
     text-decoration: none;
+    font-weight: 500;
+}
+
+.login-link a:hover {
+    color: #4ecdc4;
+    text-decoration: underline;
+}
+
+/* Enhanced shoe image */
+.shoe-image {
+    position: absolute;
+    left: 6%;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+}
+
+.shoe-image img {
+    width: 300px;
+    filter: drop-shadow(0 15px 30px rgba(44, 154, 160, 0.2));
+    rotate: -15deg;
+    transition: transform 0.5s ease;
+}
+
+.shoe-image img:hover {
+    transform: scale(1.05) rotate(-12deg);
+}
+
+/* Compact flash messages */
+.alert {
+    padding: 6px 10px;
+    margin-bottom: 6px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    font-size: 11px;
+    line-height: 1.3;
+    font-weight: 500;
+    animation: slideInFromTop 0.3s ease-out;
+    flex-shrink: 0;
+    max-height: 30px;
+}
+
+.alert p {
+    margin: 0;
+    padding: 1px 0;
+}
+
+.alert-success {
+    color: #0f5132;
+    background-color: rgba(78, 205, 196, 0.15);
+    border-color: rgba(78, 205, 196, 0.3);
+}
+
+.alert-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+/* Error states */
+.form-error {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1) !important;
+    animation: shake 0.3s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+@keyframes slideInFromTop {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive design */
+@media (max-width: 580px) {
+    .signup-container {
+        padding: 15px;
+    }
+
+    .shoe-image {
+        display: none;
+    }
+
+    .signup-form {
+        width: 100%;
+        max-width: 420px;
+        height: 700px; /* Adjusted for mobile */
+        margin: 0 10px;
+        padding: 14px 24px;
+    }
+
+    .input-group {
+        height: 72px; /* Slightly smaller for mobile */
+    }
+
+    input, .google-signup {
+        height: 44px;
+        padding: 12px 16px;
+    }
+
+    .password-container {
+        height: 44px;
+    }
+
+    .password-container input {
+        padding-right: 45px;
+    }
+
+    .password-toggle {
+        right: 12px;
+    }
+
+    .create-account-btn {
+        height: 48px;
+    }
+}
+
+@media (max-height: 750px) {
+    .signup-form {
+        height: 680px; /* Reduced for shorter screens */
+        padding: 12px 24px;
+    }
+
+    .signup-form h2 {
+        font-size: 18px;
+        margin-bottom: 6px;
+    }
+
+    .input-group {
+        height: 70px;
+    }
+
+    input, .google-signup {
+        height: 42px;
+        padding: 10px 14px;
+    }
+
+    .password-container {
+        height: 42px;
+    }
+
+    .create-account-btn {
+        height: 46px;
+    }
+
+    .error-message {
+        font-size: 10px;
+        height: 24px;
+    }
+}
+
+/* Extra short screens */
+@media (max-height: 650px) {
+    .signup-form {
+        height: 620px;
+        padding: 10px 22px;
+    }
+
+    .input-group {
+        height: 65px;
+    }
+
+    input, .google-signup {
+        height: 40px;
+        padding: 8px 12px;
+    }
+
+    .password-container {
+        height: 40px;
+    }
+
+    .create-account-btn {
+        height: 44px;
+    }
 }

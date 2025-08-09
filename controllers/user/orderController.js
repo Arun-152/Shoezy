@@ -171,7 +171,7 @@ const getInvoice = async (req, res) => {
     const order = await Order.findById(orderId).populate("items.productId");
     console.log(order)
     if (!order) {
-      return res.status(404).send("Order not found");
+      return res.status(404).json({success:false,message:"Order not found"});
     }
 
     generateInvoice(order, res);

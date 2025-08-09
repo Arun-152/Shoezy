@@ -20,8 +20,7 @@ const productsPage = async (req, res) => {
             .populate("category")
             .limit(limit);
         const totalProducts = await Products.countDocuments({ ...searchFilter, isDeleted: false });
-        const totalPages = Math.ceil(totalProducts / limit);
-
+        const totalPages = Math.ceil(totalProducts / limit)
         return res.render("productsPage", {
             products: productsData,
             currentPage: page,
@@ -455,6 +454,7 @@ const deleteProducts =async (req,res)=>{
         res.status(500).json({success:false,message:" Internal server Error "})
     }
 }
+
 module.exports = {
     productsPage,
     loadAddProductPage,

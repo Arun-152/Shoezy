@@ -6,91 +6,8 @@
     <title>Shoezy - Create Account</title>
     <link rel="stylesheet" href="/css/signupPage.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
-        /* Flash Message Styles */
-        .alert {
-            padding: 12px 16px;
-            margin-bottom: 20px;
-            border: 1px solid transparent;
-            border-radius: 6px;
-            font-size: 14px;
-            line-height: 1.4;
-        }
-        
-        .alert-danger {
-            color: #721c24;
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
-        }
-        
-        .alert-success {
-            color: #155724;
-            background-color: #d4edda;
-            border-color: #c3e6cb;
-        }
-        
-        .alert p {
-            margin: 0;
-            padding: 2px 0;
-        }
-        
-        .alert p:last-child {
-            margin-bottom: 0;
-        }
-        
-        /* Form validation styles */
-        .form-error {
-            border-color: #dc3545 !important;
-            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
-        }
-        
-        .error-message {
-            color: #dc3545;
-            font-size: 12px;
-            margin-top: 5px;
-            display: block;
-        }
-        
-        /* Frontend Flash Message Animation */
-        #frontendFlashMessage {
-            transition: all 0.3s ease-in-out;
-            transform: translateY(-10px);
-            opacity: 0;
-        }
-        
-        #frontendFlashMessage.show {
-            transform: translateY(0);
-            opacity: 1;
-        }
-        
-        /* Close button for flash message */
-        .alert-close {
-            float: right;
-            font-size: 18px;
-            font-weight: bold;
-            line-height: 1;
-            color: inherit;
-            text-shadow: none;
-            opacity: 0.5;
-            cursor: pointer;
-            background: none;
-            border: none;
-            padding: 0;
-            margin-left: 10px;
-        }
-        
-        .alert-close:hover {
-            opacity: 0.8;
-        }
-    </style>
 </head>
 <body>
-    <header>
-        <h1>Shoezy</h1>
-        <div class="language-selector">
-            <span>English (UK)</span>
-        </div>
-    </header>
     <main>
         <div class="signup-container">
             <div class="shoe-image">
@@ -124,50 +41,84 @@
                     </div>
                 <% } %>
                 
-                <!-- Frontend Flash Message (Above the form, hidden by default) -->
-                <div id="frontendFlashMessage" class="alert alert-danger" style="display: none;">
-                    <p id="frontendFlashText">All fields are required</p>
-                </div>
-                
                 <button class="google-signup" onclick="window.location.href='/auth/google'">
                     <img src="https://www.google.com/favicon.ico" alt="Google Icon">
                     Sign up with Google
                 </button>
-                <form id="signform" action="/signup" method="post" novalidate> 
-                    <input type="text" placeholder="Full Name" name="fullname">
-                    <p id="error1" class="error-message"></p>
-                    <input type="email" placeholder="Email Address" name="email">
-                    <p id="error2" class="error-message"></p>
-                    <input type="tel" placeholder="Phone Number" name="phone">
-                    <p id="error3" class="error-message"></p>
-                    <input type="password" placeholder="Password" name="password">
-                    <p id="error4" class="error-message"></p>
-                    <input type="password" placeholder="Confirm Password" name="confirmPassword">
-                    <p id="error5" class="error-message"></p>
-                    <input type="text" placeholder="Referral Code (Optional)">
+                
+                <form id="signform" action="/signup" method="post" novalidate>
+                    <div class="input-group">
+                        <input type="text" placeholder="Full Name" name="fullname" id="fullname">
+                        <span id="error1" class="error-message"></span>
+                    </div>
+                    
+                    <div class="input-group">
+                        <input type="email" placeholder="Email Address" name="email" id="email">
+                        <span id="error2" class="error-message"></span>
+                    </div>
+                    
+                    <div class="input-group">
+                        <input type="tel" placeholder="Phone Number" name="phone" id="phone">
+                        <span id="error3" class="error-message"></span>
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="password-container">
+                            <input type="password" placeholder="Password" name="password" id="password">
+                            <button type="button" class="password-toggle" onclick="togglePassword('password')">👁️</button>
+                        </div>
+                        <span id="error4" class="error-message"></span>
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="password-container">
+                            <input type="password" placeholder="Confirm Password" name="confirmPassword" id="confirmPassword">
+                            <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword')">👁️</button>
+                        </div>
+                        <span id="error5" class="error-message"></span>
+                    </div>
+                    
+                    <div class="input-group">
+                        <input type="text" placeholder="Referral Code (Optional)" name="referralCode">
+                    </div>
+                    
                     <button type="submit" class="create-account-btn">Create Account</button>
                 </form>
+                
                 <p class="login-link">Already have an account? <a href="/login">Login</a></p>
             </div>
         </div>
     </main>
 
     <script>
+        // Password toggle functionality (unchanged)
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const toggleBtn = input.nextElementSibling;
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                toggleBtn.textContent = '🔒';
+                toggleBtn.style.color = '#17a2b8';
+            } else {
+                input.type = 'password';
+                toggleBtn.textContent = '👁️';
+                toggleBtn.style.color = '#2c9aa0';
+            }
+        }
+
         // Client-side validation
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('signform');
-            const fullnameInput = document.querySelector('input[name="fullname"]');
-            const emailInput = document.querySelector('input[name="email"]');
-            const phoneInput = document.querySelector('input[name="phone"]');
-            const passwordInput = document.querySelector('input[name="password"]');
-            const confirmPasswordInput = document.querySelector('input[name="confirmPassword"]');
+            const fullnameInput = document.getElementById('fullname');
+            const emailInput = document.getElementById('email');
+            const phoneInput = document.getElementById('phone');
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
 
             // Check for backend success message and trigger SweetAlert
             const backendSuccessMessage = document.getElementById('backendSuccessMessage');
             if (backendSuccessMessage) {
-                const successText = backendSuccessMessage.textContent.trim();
-                
-                // Show SweetAlert popup
                 Swal.fire({
                     icon: 'success',
                     title: 'Success!',
@@ -177,89 +128,80 @@
                 });
             }
 
-            // Real-time validation functions
+            // Helper function for setting individual field errors
+            function setError(element, errorId, message) {
+                const errorElement = document.getElementById(errorId);
+                errorElement.textContent = message || '';
+                if (message) {
+                    element.classList.add('form-error');
+                    errorElement.style.display = 'block';
+                } else {
+                    element.classList.remove('form-error');
+                    errorElement.style.display = 'none';
+                }
+            }
+
+            // Individual validation functions
             function validateFullname() {
                 const fullname = fullnameInput.value.trim();
-                const errorElement = document.getElementById('error1');
-                
                 if (!fullname) {
-                    errorElement.textContent = 'Full name is required';
-                    fullnameInput.classList.add('form-error');
+                    setError(fullnameInput, 'error1', 'Full name is required');
                     return false;
                 } else if (fullname.length < 2) {
-                    errorElement.textContent = 'Full name must be at least 2 characters long';
-                    fullnameInput.classList.add('form-error');
+                    setError(fullnameInput, 'error1', 'Full name must be at least 2 characters');
                     return false;
                 } else if (!/^[a-zA-Z\s]+$/.test(fullname)) {
-                    errorElement.textContent = 'Full name should only contain letters and spaces';
-                    fullnameInput.classList.add('form-error');
+                    setError(fullnameInput, 'error1', 'Only letters and spaces allowed');
                     return false;
                 } else {
-                    errorElement.textContent = '';
-                    fullnameInput.classList.remove('form-error');
+                    setError(fullnameInput, 'error1', '');
                     return true;
                 }
             }
 
             function validateEmail() {
                 const email = emailInput.value.trim();
-                const errorElement = document.getElementById('error2');
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                
                 if (!email) {
-                    errorElement.textContent = 'Email is required';
-                    emailInput.classList.add('form-error');
+                    setError(emailInput, 'error2', 'Email is required');
                     return false;
                 } else if (!emailRegex.test(email)) {
-                    errorElement.textContent = 'Please enter a valid email address';
-                    emailInput.classList.add('form-error');
+                    setError(emailInput, 'error2', 'Please enter a valid email address');
                     return false;
                 } else {
-                    errorElement.textContent = '';
-                    emailInput.classList.remove('form-error');
+                    setError(emailInput, 'error2', '');
                     return true;
                 }
             }
 
             function validatePhone() {
                 const phone = phoneInput.value.trim();
-                const errorElement = document.getElementById('error3');
                 const phoneRegex = /^[6-9]\d{9}$/;
-                
                 if (!phone) {
-                    errorElement.textContent = 'Phone number is required';
-                    phoneInput.classList.add('form-error');
+                    setError(phoneInput, 'error3', 'Phone number is required');
                     return false;
                 } else if (!phoneRegex.test(phone)) {
-                    errorElement.textContent = 'Please enter a valid 10-digit phone number starting with 6, 7, 8, or 9';
-                    phoneInput.classList.add('form-error');
+                    setError(phoneInput, 'error3', 'Enter valid 10-digit phone starting with 6-9');
                     return false;
                 } else {
-                    errorElement.textContent = '';
-                    phoneInput.classList.remove('form-error');
+                    setError(phoneInput, 'error3', '');
                     return true;
                 }
             }
 
             function validatePassword() {
                 const password = passwordInput.value;
-                const errorElement = document.getElementById('error4');
-                
                 if (!password) {
-                    errorElement.textContent = 'Password is required';
-                    passwordInput.classList.add('form-error');
+                    setError(passwordInput, 'error4', 'Password is required');
                     return false;
                 } else if (password.length < 6) {
-                    errorElement.textContent = 'Password must be at least 6 characters long';
-                    passwordInput.classList.add('form-error');
+                    setError(passwordInput, 'error4', 'Password must be at least 6 characters');
                     return false;
                 } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
-                    errorElement.textContent = 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
-                    passwordInput.classList.add('form-error');
+                    setError(passwordInput, 'error4', 'Must include uppercase, lowercase, and number');
                     return false;
                 } else {
-                    errorElement.textContent = '';
-                    passwordInput.classList.remove('form-error');
+                    setError(passwordInput, 'error4', '');
                     return true;
                 }
             }
@@ -267,142 +209,73 @@
             function validateConfirmPassword() {
                 const password = passwordInput.value;
                 const confirmPassword = confirmPasswordInput.value;
-                const errorElement = document.getElementById('error5');
-                
                 if (!confirmPassword) {
-                    errorElement.textContent = 'Please confirm your password';
-                    confirmPasswordInput.classList.add('form-error');
+                    setError(confirmPasswordInput, 'error5', 'Please confirm your password');
                     return false;
                 } else if (password !== confirmPassword) {
-                    errorElement.textContent = 'Passwords do not match';
-                    confirmPasswordInput.classList.add('form-error');
+                    setError(confirmPasswordInput, 'error5', 'Passwords do not match');
                     return false;
                 } else {
-                    errorElement.textContent = '';
-                    confirmPasswordInput.classList.remove('form-error');
+                    setError(confirmPasswordInput, 'error5', '');
                     return true;
                 }
             }
 
-            // Add event listeners for real-time validation
+            // Real-time validation on blur
             fullnameInput.addEventListener('blur', validateFullname);
             emailInput.addEventListener('blur', validateEmail);
             phoneInput.addEventListener('blur', validatePhone);
             passwordInput.addEventListener('blur', validatePassword);
             confirmPasswordInput.addEventListener('blur', validateConfirmPassword);
             
-            // Also validate confirm password when password changes
+            // Validate confirm password when password changes
             passwordInput.addEventListener('input', function() {
                 if (confirmPasswordInput.value) {
                     validateConfirmPassword();
                 }
             });
 
-            // Variable to track if frontend flash message is currently shown
-            let frontendFlashVisible = false;
-
-            // Function to show frontend flash message (IMPROVED - PERSISTENT)
-            function showFrontendFlash(message, type = 'danger') {
-                const flashDiv = document.getElementById('frontendFlashMessage');
-                const flashText = document.getElementById('frontendFlashText');
-                
-                // Update message and type
-                flashText.textContent = message;
-                flashDiv.className = `alert alert-${type}`;
-                
-                // Show the message with smooth animation
-                flashDiv.style.display = 'block';
-                setTimeout(() => {
-                    flashDiv.classList.add('show');
-                    frontendFlashVisible = true;
-                }, 10);
-                
-                // Scroll to top to ensure message is visible
-                flashDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                
-                // NO AUTO-HIDE - Message persists until user interaction
-            }
-
-            // Function to hide frontend flash message (IMPROVED)
-            function hideFrontendFlash() {
-                const flashDiv = document.getElementById('frontendFlashMessage');
-                if (frontendFlashVisible) {
-                    flashDiv.classList.remove('show');
-                    setTimeout(() => {
-                        flashDiv.style.display = 'none';
-                        frontendFlashVisible = false;
-                    }, 300);
-                }
-            }
-
-            // Function to check if any required field is empty
-            function checkEmptyFields() {
-                const emptyFields = [];
-                
-                if (!fullnameInput.value.trim()) emptyFields.push('Full Name');
-                if (!emailInput.value.trim()) emptyFields.push('Email');
-                if (!phoneInput.value.trim()) emptyFields.push('Phone Number');
-                if (!passwordInput.value) emptyFields.push('Password');
-                if (!confirmPasswordInput.value) emptyFields.push('Confirm Password');
-                
-                return emptyFields;
-            }
-
-            // Form submission validation
+            // Form submission validation - prevents submission and shows individual errors
             form.addEventListener('submit', function(e) {
-                // Always prevent default submission first
-                e.preventDefault();
-
-                // Hide any existing frontend flash message when new validation starts
-                hideFrontendFlash();
-
-                // Trigger all individual field validations to show specific error messages
+                e.preventDefault(); // Always prevent default submission first
+                
+                // Run all validations
                 const isFullnameValid = validateFullname();
                 const isEmailValid = validateEmail();
                 const isPhoneValid = validatePhone();
                 const isPasswordValid = validatePassword();
                 const isConfirmPasswordValid = validateConfirmPassword();
 
-                // Check if all validations passed
+                // Check if all fields are valid
                 const allValid = isFullnameValid && isEmailValid && isPhoneValid && isPasswordValid && isConfirmPasswordValid;
 
-                if (!allValid) {
-                    // Show general error message at top if any validation failed
-                    showFrontendFlash('Please fix the errors below before submitting');
-
-                    // Scroll to first error field for better UX
+                if (allValid) {
+                    // All validation passed - submit form
+                    form.submit();
+                } else {
+                    // Focus on first error field
                     const firstErrorField = document.querySelector('.form-error');
                     if (firstErrorField) {
-                        firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         firstErrorField.focus();
                     }
-
-                    return false;
                 }
-
-                // All validation passed - hide any frontend flash message and submit form
-                hideFrontendFlash();
-
-                // Submit the form programmatically
-                form.submit();
-                return true;
             });
 
-            // IMPROVED: Clear frontend flash message when user starts typing in any field
+            // Clear errors when user starts typing
             [fullnameInput, emailInput, phoneInput, passwordInput, confirmPasswordInput].forEach(input => {
                 input.addEventListener('input', function() {
-                    // Hide frontend flash message when user starts typing
-                    hideFrontendFlash();
-                    // Remove error styling when user starts typing
                     this.classList.remove('form-error');
+                    // Find and hide corresponding error message
+                    const inputGroup = this.closest('.input-group');
+                    if (inputGroup) {
+                        const errorSpan = inputGroup.querySelector('.error-message');
+                        if (errorSpan) {
+                            errorSpan.style.display = 'none';
+                            errorSpan.textContent = '';
+                        }
+                    }
                 });
             });
-
-            // Hide frontend flash message when backend flash messages are shown
-            const backendFlashMessages = document.querySelectorAll('.alert:not(#frontendFlashMessage)');
-            if (backendFlashMessages.length > 0) {
-                hideFrontendFlash();
-            }
         });
     </script>
 </body>
