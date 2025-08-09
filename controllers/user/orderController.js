@@ -2,6 +2,7 @@ const User = require("../../models/userSchema");
 const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
 const Order = require("../../models/orderSchema");
+const generateInvoice = require("../../helpers/generateInvoice")
 
 const orderPage = async (req, res) => {
     try {
@@ -142,7 +143,7 @@ const returnOrder = async (req, res) => {
         order.items = order.items.map(item => {
             if (item.productId.toString() === productId && item.status === 'Delivered') {
                 item.status = 'Returned';
-                item.returnReason = reason;  // ✅ This will now be saved
+                item.returnReason = reason; 
                 item.returnDate = new Date();
                 itemFound = true;
             }
@@ -153,21 +154,37 @@ const returnOrder = async (req, res) => {
             return res.status(400).json({ success: false, message: "Product not eligible for return" });
         }
 
-        await order.save();  // ✅ Saves the returnReason and returnDate
+        await order.save(); 
 
         return res.status(200).json({ success: true, message: "Return request submitted successfully" });
     } catch (error) {
         console.error("Return Order Error:", error);
-        return res.status(500).json({ success: false, message: "Server Error" });
+        return res.redirect("/usererrorPage");
     }
 };
 
 
+const getInvoice = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    console.log(orderId)
+    const order = await Order.findById(orderId).populate("items.productId");
+    console.log(order)
+    if (!order) {
+      return res.status(404).send("Order not found");
+    }
 
+    generateInvoice(order, res);
+  } catch (error) {
+    console.error("Invoice Generation Error:", error);
+    res.status(500).json({success:false,message:"Internal server error"});
+  }
+}
 module.exports = {
     orderPage,
     orderDetails,
     cancelOrder,
     returnOrder,
+    getInvoice
    
 };
