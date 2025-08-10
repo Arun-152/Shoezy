@@ -315,14 +315,27 @@
                     <p>Exclusive luxury footwear</p>
                 </div>
                 <div class="section-controls">
-                    <a href="#" class="view-all-btn" onclick="redirectToLogin(); return false;">View All</a>
+                    <a href="/login" class="view-all-btn" onclick="redirectToLogin(); return false;">View All</a>
                 </div>
             </div>
             
             <div class="products-slider" id="premium-slider">
                 <% if (products && products.length > 0) { %>
-                    <% products.slice(4, 10).forEach(product => { %>
-                        <div class="product-card modern premium-card" onclick="redirectToLogin()" style="cursor: pointer;">
+                    <%
+                        // Sort products by highest price (using maximum sale price from variants)
+                        const sortedProducts = products.slice().sort((a, b) => {
+                            const getMaxPrice = (product) => {
+                                if (product.variants && product.variants.length > 0) {
+                                    const prices = product.variants.map(v => v.salePrice);
+                                    return Math.max(...prices);
+                                }
+                                return 0;
+                            };
+                            return getMaxPrice(b) - getMaxPrice(a);
+                        });
+                    %>
+                    <% sortedProducts.slice(0, 6).forEach(product => { %>
+                        <div class="product-card modern premium-card" onclick="<%= typeof user !== 'undefined' && user ? `window.location.href='/product/${product._id}'` : 'redirectToLogin()' %>" style="cursor: pointer;">
                             <div class="product-image-container">
                                 <div class="product-image">
                                     <% if (product.images && product.images.length > 0) { %>
@@ -344,17 +357,17 @@
                                     <%= product.status === 'Available' ? 'Available' : 'Out of Stock' %>
                                 </div>
 
-                                <div class="wishlist-btn" onclick="event.stopPropagation(); redirectToLogin()">
-                                    <i class="far fa-heart"></i>
-                                </div>
+                     
 
                                 <div class="quick-actions">
-                                    <button class="quick-action-btn" onclick="event.stopPropagation(); redirectToLogin()" title="Add to Cart">
+                                    <button class="quick-action-btn" onclick="event.stopPropagation(); addToCart('<%= product._id %>')" title="Add to Cart">
                                         <i class="fas fa-shopping-cart"></i>
                                     </button>
-                                    <button class="quick-action-btn" onclick="event.stopPropagation(); redirectToLogin()" title="Quick View">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
+                                    <% if (typeof user !== 'undefined' && user) { %>
+                                        <button class="quick-action-btn" onclick="event.stopPropagation(); window.location.href='/product/<%= product._id %>'" title="Quick View">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    <% } %>
                                 </div>
                             </div>
 
