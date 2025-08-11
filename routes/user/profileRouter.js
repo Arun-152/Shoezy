@@ -3,6 +3,7 @@ const router = express.Router()
 const {userAuth} = require("../../middlewares/auth")
 const showUserController = require("../../controllers/user/showUserController") 
 const { profileUpload } = require("../../helpers/multerConfig")
+const navbarCount = require('../../middlewares/navbarCount')
 
 // Multer error handling middleware
 const handleMulterError = (err, req, res, next) => {
@@ -21,7 +22,7 @@ const handleMulterError = (err, req, res, next) => {
     next();
 };
 
-router.get("/", userAuth, showUserController.showUser)
+router.get("/",navbarCount, userAuth, showUserController.showUser)
 router.get("/edit", userAuth, showUserController.loadEditProfile)
 router.patch("/updateProfile", userAuth, profileUpload.single('profilePicture'), handleMulterError, showUserController.updateProfile)
 router.get("/changePassword", userAuth, showUserController.loadChangePassword)

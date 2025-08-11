@@ -6,94 +6,344 @@
   <title>Shoezy - OTP Verification</title>
   <link rel="stylesheet" href="/css/otpverification.css" />
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
   <div class="container">
     <div class="left-section">
       <div class="brand-logo">
-        <div class="gradient-circle"></div>
-        <div class="shoe-container">
-          <img src="shoe.svg" alt="Shoe" class="shoe-image" />
+        <div class="gradient-circle">
+          <!-- Enhanced Interactive Shoe SVG -->
+          <svg class="shoe-image interactive-shoe" viewBox="0 0 280 160" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <!-- Enhanced Gradients -->
+              <linearGradient id="shoeBodyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+                <stop offset="50%" style="stop-color:#f8f9fa;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#e9ecef;stop-opacity:1" />
+              </linearGradient>
+              
+              <linearGradient id="soleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#495057;stop-opacity:1" />
+                <stop offset="50%" style="stop-color:#343a40;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#212529;stop-opacity:1" />
+              </linearGradient>
+              
+              <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#ff6b6b;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#ee5a24;stop-opacity:1" />
+              </linearGradient>
+              
+              <linearGradient id="laceGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#6c757d;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#495057;stop-opacity:1" />
+              </linearGradient>
+
+              <!-- Shadow Filter -->
+              <filter id="dropShadow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
+                <feOffset dx="2" dy="6" result="offset"/>
+                <feComponentTransfer>
+                  <feFuncA type="linear" slope="0.3"/>
+                </feComponentTransfer>
+                <feMerge> 
+                  <feMergeNode/>
+                  <feMergeNode in="SourceGraphic"/> 
+                </feMerge>
+              </filter>
+            </defs>
+            
+            <!-- Background Circle for Shoe -->
+            <circle cx="140" cy="80" r="70" fill="rgba(255,255,255,0.1)" class="bg-circle"/>
+            
+            <!-- Shoe Shadow -->
+            <ellipse cx="145" cy="135" rx="95" ry="18" fill="rgba(0,0,0,0.2)" opacity="0.6" class="shoe-shadow"/>
+            
+            <!-- Main Shoe Sole -->
+            <path d="M45 110 Q50 90 80 85 Q140 80 200 85 Q230 90 235 110 Q235 125 225 130 L45 130 Q35 125 45 110 Z" 
+                  fill="url(#soleGradient)" 
+                  stroke="#212529" 
+                  stroke-width="2"
+                  filter="url(#dropShadow)"
+                  class="shoe-sole"/>
+            
+            <!-- Main Shoe Body -->
+            <path d="M50 100 Q55 70 85 60 Q140 55 200 65 Q230 75 235 100 Q235 110 225 115 L50 115 Q40 110 50 100 Z" 
+                  fill="url(#shoeBodyGradient)" 
+                  stroke="#dee2e6" 
+                  stroke-width="2"
+                  class="shoe-body"/>
+            
+            <!-- Shoe Toe Cap -->
+            <ellipse cx="225" cy="90" rx="18" ry="30" 
+                     fill="url(#shoeBodyGradient)" 
+                     stroke="#dee2e6" 
+                     stroke-width="2"
+                     class="toe-cap"/>
+            
+            <!-- Shoe Tongue -->
+            <path d="M85 75 Q95 65 105 70 Q115 65 125 75 L125 95 Q115 100 105 95 Q95 100 85 95 Z" 
+                  fill="url(#shoeBodyGradient)" 
+                  stroke="#dee2e6" 
+                  stroke-width="1"
+                  class="shoe-tongue"/>
+            
+            <!-- Eyelets for Laces -->
+            <circle cx="85" cy="80" r="4" fill="#6c757d" class="eyelet eyelet-1"/>
+            <circle cx="105" cy="75" r="4" fill="#6c757d" class="eyelet eyelet-2"/>
+            <circle cx="125" cy="75" r="4" fill="#6c757d" class="eyelet eyelet-3"/>
+            <circle cx="145" cy="80" r="4" fill="#6c757d" class="eyelet eyelet-4"/>
+            <circle cx="165" cy="85" r="4" fill="#6c757d" class="eyelet eyelet-5"/>
+            
+            <!-- Shoe Laces -->
+            <path d="M85 80 Q95 72 105 75" stroke="url(#laceGradient)" stroke-width="3" fill="none" class="lace lace-1"/>
+            <path d="M105 75 Q115 72 125 75" stroke="url(#laceGradient)" stroke-width="3" fill="none" class="lace lace-2"/>
+            <path d="M125 75 Q135 72 145 80" stroke="url(#laceGradient)" stroke-width="3" fill="none" class="lace lace-3"/>
+            <path d="M145 80 Q155 77 165 85" stroke="url(#laceGradient)" stroke-width="3" fill="none" class="lace lace-4"/>
+            
+            <!-- Brand Logo/Swoosh -->
+            <path d="M70 95 Q120 80 170 95" 
+                  stroke="url(#accentGradient)" 
+                  stroke-width="6" 
+                  fill="none" 
+                  opacity="0.9"
+                  class="brand-swoosh"/>
+            
+            <!-- Heel Details -->
+            <path d="M45 105 Q55 95 65 105" 
+                  stroke="url(#accentGradient)" 
+                  stroke-width="3" 
+                  fill="none"
+                  class="heel-detail"/>
+            
+            <!-- Side Vent Details -->
+            <circle cx="160" cy="95" r="2" fill="#adb5bd" class="vent-hole vent-1"/>
+            <circle cx="170" cy="98" r="2" fill="#adb5bd" class="vent-hole vent-2"/>
+            <circle cx="180" cy="100" r="2" fill="#adb5bd" class="vent-hole vent-3"/>
+            
+            <!-- Interactive Elements -->
+            <g class="interactive-elements">
+              <!-- Sparkle Effect -->
+              <circle cx="90" cy="70" r="1.5" fill="#ffd700" opacity="0" class="sparkle sparkle-1">
+                <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite" begin="0s"/>
+              </circle>
+              <circle cx="150" cy="65" r="1.5" fill="#ffd700" opacity="0" class="sparkle sparkle-2">
+                <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite" begin="0.7s"/>
+              </circle>
+              <circle cx="200" cy="85" r="1.5" fill="#ffd700" opacity="0" class="sparkle sparkle-3">
+                <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite" begin="1.4s"/>
+              </circle>
+            </g>
+          </svg>
+        </div>
+        
+        <!-- Enhanced Floating Elements -->
+        <div class="floating-elements">
+          <div class="floating-dot dot-1">
+            <i class="fas fa-star"></i>
+          </div>
+          <div class="floating-dot dot-2">
+            <i class="fas fa-heart"></i>
+          </div>
+          <div class="floating-dot dot-3">
+            <i class="fas fa-gem"></i>
+          </div>
+          <div class="floating-badge">
+            <span>Premium</span>
+          </div>
+        </div>
+        
+        <!-- Interactive Stats -->
+        <div class="interactive-stats">
+          <div class="stat-item">
+            <i class="fas fa-shield-check"></i>
+            <span>Verified</span>
+          </div>
+          <div class="stat-item">
+            <i class="fas fa-lightning-bolt"></i>
+            <span>Fast</span>
+          </div>
         </div>
       </div>
+      
       <h1 class="brand-name">Shoezy</h1>
+      <p class="brand-tagline">Premium Sneaker Collection</p>
     </div>
 
     <div class="right-section">
-      <form class="otp-form">
-        <h2>OTP Verification</h2>
-        <p class="otp-instruction">Enter OTP sent to your email</p>
-
-        <div class="timer">5:00</div>
-
-        <div class="otp-inputs">
-          <input type="text" maxlength="1" class="otp-input" required />
-          <input type="text" maxlength="1" class="otp-input" required />
-          <input type="text" maxlength="1" class="otp-input" required />
-          <input type="text" maxlength="1" class="otp-input" required />
-          <input type="text" maxlength="1" class="otp-input" required />
-          <input type="text" maxlength="1" class="otp-input" required />
-        </div>
-
-        <button type="submit" class="confirm-btn">Confirm</button>
-
-        <div class="resend-section">
-          <button type="button" id="resendOtpBtn" class="resend-btn">Resend OTP</button>
-          <div id="resendCooldown" style="display: none; color: #666; font-size: 14px; margin-top: 10px; padding: 8px 12px; background-color: #f8f9fa; border-radius: 4px; border: 1px solid #dee2e6;">
-            Resend available in: <span id="cooldownTimer" style="font-weight: bold; color: #007bff;">60</span> seconds
+      <div class="otp-form-container">
+        <form class="otp-form" id="otpForm">
+          <div class="form-header">
+            <i class="fas fa-shield-alt security-icon"></i>
+            <h2>OTP Verification</h2>
+            <p class="otp-instruction">Enter the 6-digit code sent to your email</p>
           </div>
-        </div>
-      </form>
+
+          <div class="timer-container">
+            <i class="fas fa-clock"></i>
+            <div class="timer">5:00</div>
+          </div>
+
+          <div class="otp-inputs-container">
+            <div class="otp-inputs">
+              <input type="text" maxlength="1" class="otp-input" required data-index="0" />
+              <input type="text" maxlength="1" class="otp-input" required data-index="1" />
+              <input type="text" maxlength="1" class="otp-input" required data-index="2" />
+              <input type="text" maxlength="1" class="otp-input" required data-index="3" />
+              <input type="text" maxlength="1" class="otp-input" required data-index="4" />
+              <input type="text" maxlength="1" class="otp-input" required data-index="5" />
+            </div>
+            <div class="otp-error" id="otpError" style="display: none;">
+              <i class="fas fa-exclamation-circle"></i>
+              <span id="otpErrorMessage">Please enter all 6 digits of the OTP</span>
+            </div>
+          </div>
+
+          <button type="submit" class="confirm-btn">
+            <i class="fas fa-check"></i>
+            <span>Verify OTP</span>
+          </button>
+
+          <div class="resend-section">
+            <button type="button" id="resendOtpBtn" class="resend-btn">
+              <i class="fas fa-redo"></i>
+              <span>Resend OTP</span>
+            </button>
+            <div id="resendCooldown" style="display: none;">
+              <i class="fas fa-hourglass-half"></i>
+              <span>Resend available in: <strong id="cooldownTimer">60</strong> seconds</span>
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 
 <script>
   const otpInputs = document.querySelectorAll('.otp-input');
-  const form = document.querySelector('.otp-form');
+  const form = document.getElementById('otpForm');
   const timerElement = document.querySelector('.timer');
+  const otpError = document.getElementById('otpError');
+  const otpErrorMessage = document.getElementById('otpErrorMessage');
   let timeLeft = 60; // 60 seconds OTP validity
 
-  // Auto-focus handling
+  // Enhanced auto-focus handling with validation
   otpInputs.forEach((input, index) => {
-    input.addEventListener('input', () => {
-      if (input.value.length === 1 && index < otpInputs.length - 1) {
+    // Input event for moving to next field
+    input.addEventListener('input', (e) => {
+      // Remove any non-numeric characters
+      e.target.value = e.target.value.replace(/[^0-9]/g, '');
+      
+      // Clear validation error when user starts typing
+      clearOtpError();
+      
+      if (e.target.value.length === 1 && index < otpInputs.length - 1) {
         otpInputs[index + 1].focus();
       }
     });
 
+    // Keydown event for backspace handling
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Backspace' && input.value === '' && index > 0) {
         otpInputs[index - 1].focus();
       }
     });
+
+    // Paste handling
+    input.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const pastedData = e.clipboardData.getData('text').replace(/[^0-9]/g, '');
+      
+      if (pastedData.length >= 6) {
+        for (let i = 0; i < 6; i++) {
+          if (otpInputs[i]) {
+            otpInputs[i].value = pastedData[i] || '';
+          }
+        }
+        clearOtpError();
+        otpInputs[5].focus();
+      }
+    });
+
+    // Focus and blur effects
+    input.addEventListener('focus', () => {
+      input.classList.add('focused');
+    });
+
+    input.addEventListener('blur', () => {
+      input.classList.remove('focused');
+    });
   });
+
+  // Enhanced OTP validation functions
+  function showOtpError(message = 'Please enter all 6 digits of the OTP') {
+    otpErrorMessage.textContent = message;
+    otpError.style.display = 'flex';
+    otpInputs.forEach(input => input.classList.add('error'));
+  }
+
+  function clearOtpError() {
+    otpError.style.display = 'none';
+    otpInputs.forEach(input => input.classList.remove('error'));
+  }
+
+  function validateOtp() {
+    const otp = Array.from(otpInputs).map(input => input.value).join('');
+    
+    // Check if no OTP is entered at all
+    if (otp.length === 0) {
+      showOtpError('Enter the OTP');
+      otpInputs[0].focus();
+      return false;
+    }
+    
+    // Check if partial OTP is entered
+    if (otp.length < 6) {
+      showOtpError('Please enter all 6 digits of the OTP');
+      // Focus on first empty field
+      const firstEmpty = Array.from(otpInputs).find(input => input.value === '');
+      if (firstEmpty) {
+        firstEmpty.focus();
+      }
+      return false;
+    }
+    
+    clearOtpError();
+    return otp;
+  }
 
   // Timer function
   function updateTimer() {
     const minutes = Math.floor(timeLeft / 60);
     const seconds = timeLeft % 60;
     timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-    if (timeLeft > 0) {
+    
+    if (timeLeft <= 0) {
+      timerElement.style.color = '#dc3545';
+      timerElement.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Expired';
+    } else {
       timeLeft--;
       setTimeout(updateTimer, 1000);
     }
   }
   updateTimer();
 
-  // Submit OTP via fetch
+  // Enhanced form submission with proper error handling
   form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const otp = Array.from(otpInputs).map(input => input.value).join('');
-
-    if (otp.length !== 6) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Incomplete OTP',
-        text: 'Please enter all 6 digits of the OTP.'
-      });
-      return;
+    e.preventDefault(); // Always prevent default first
+    e.stopPropagation(); // Stop event bubbling
+    
+    const otp = validateOtp();
+    
+    if (!otp) {
+      return; // Stop here if validation fails
     }
+
+    // Disable form during submission
+    const submitBtn = form.querySelector('.confirm-btn');
+    const originalContent = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Verifying...</span>';
 
     try {
       const response = await fetch('/verifyOtp', {
@@ -108,11 +358,14 @@
         Swal.fire({
           icon: 'success',
           title: 'Success!',
-          text: 'OTP verified successfully.'
+          text: 'OTP verified successfully.',
+          allowOutsideClick: false,
+          allowEscapeKey: false
         }).then(() => {
           window.location.href = '/home';
         });
       } else {
+        showOtpError('Invalid OTP. Please try again.');
         Swal.fire({
           icon: 'error',
           title: 'Invalid OTP',
@@ -120,31 +373,34 @@
         });
       }
     } catch (err) {
+      showOtpError('Error occurred. Please try again.');
       Swal.fire({
         icon: 'error',
         title: 'Error',
         text: 'Error verifying OTP. Please try again.'
       });
+    } finally {
+      // Re-enable form
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalContent;
     }
   });
 
-  // Resend OTP functionality
-  let resendCooldownActive = true; // Start with cooldown active
-  let resendCooldownTime = 60; // 60 seconds resend OTP cooldown
+  // Resend OTP functionality (unchanged from original)
+  let resendCooldownActive = true;
+  let resendCooldownTime = 60;
   let resendCooldownInterval;
 
-  // Function to start resend cooldown
   function startResendCooldown() {
     resendCooldownActive = true;
-    resendCooldownTime = 60; // 60 seconds resend OTP cooldown
+    resendCooldownTime = 60;
 
     const resendBtn = document.getElementById('resendOtpBtn');
     const resendCooldown = document.getElementById('resendCooldown');
     const cooldownTimer = document.getElementById('cooldownTimer');
 
-    // Hide button and show cooldown
     resendBtn.style.display = 'none';
-    resendCooldown.style.display = 'block';
+    resendCooldown.style.display = 'flex';
 
     resendCooldownInterval = setInterval(() => {
       cooldownTimer.textContent = resendCooldownTime;
@@ -154,30 +410,25 @@
         clearInterval(resendCooldownInterval);
         resendCooldownActive = false;
 
-        // Show button and hide cooldown
-        resendBtn.style.display = 'inline-block';
+        resendBtn.style.display = 'flex';
         resendBtn.disabled = false;
-        resendBtn.textContent = 'Resend OTP';
         resendCooldown.style.display = 'none';
       }
     }, 1000);
   }
 
-  // Start initial cooldown when page loads
   startResendCooldown();
 
   document.getElementById('resendOtpBtn').addEventListener('click', async function() {
     if (resendCooldownActive) {
-      return; // Prevent multiple clicks during cooldown
+      return;
     }
 
-    const resendBtn = document.getElementById('resendOtpBtn');
-    const resendCooldown = document.getElementById('resendCooldown');
-    const cooldownTimer = document.getElementById('cooldownTimer');
-
-    // Disable button and show loading
+    const resendBtn = this;
+    const originalContent = resendBtn.innerHTML;
+    
     resendBtn.disabled = true;
-    resendBtn.textContent = 'Sending...';
+    resendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Sending...</span>';
 
     try {
       const response = await fetch('/resendotp', {
@@ -190,7 +441,6 @@
       const data = await response.json();
 
       if (data.success) {
-        // Show success message
         Swal.fire({
           icon: 'success',
           title: 'OTP Resent!',
@@ -199,15 +449,12 @@
           showConfirmButton: false
         });
 
-        // Clear the OTP input fields
         otpInputs.forEach(input => input.value = '');
         otpInputs[0].focus();
+        clearOtpError();
 
-        // Reset the main timer to 60 seconds
-        timeLeft = 60; // 60 seconds OTP validity
+        timeLeft = 60;
         updateTimer();
-
-        // Start cooldown
         startResendCooldown();
 
       } else {
@@ -226,56 +473,25 @@
         confirmButtonText: 'OK'
       });
     } finally {
-      // Re-enable button if no cooldown started
       if (!resendCooldownActive) {
         resendBtn.disabled = false;
-        resendBtn.textContent = 'Resend OTP';
+        resendBtn.innerHTML = originalContent;
       }
     }
   });
 
-
+  // Interactive shoe hover effect
+  const interactiveShoe = document.querySelector('.interactive-shoe');
+  const gradientCircle = document.querySelector('.gradient-circle');
+  
+  gradientCircle.addEventListener('mouseenter', () => {
+    interactiveShoe.style.transform = 'scale(1.1) rotateY(15deg)';
+  });
+  
+  gradientCircle.addEventListener('mouseleave', () => {
+    interactiveShoe.style.transform = 'scale(1) rotateY(0deg)';
+  });
 </script>
-
-<style>
-  .resend-btn {
-    background-color: #6c757d;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 4px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .resend-btn:hover:not(:disabled) {
-    background-color: #5a6268;
-  }
-  
-  .resend-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    background-color: #adb5bd;
-  }
-
-  #resendCooldown {
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.7; }
-    100% { opacity: 1; }
-  }
-  
-  #resendCooldown {
-    background-color: #f8f9fa;
-    padding: 8px 12px;
-    border-radius: 4px;
-    border: 1px solid #dee2e6;
-  }
-</style>
 
 </body>
 </html>

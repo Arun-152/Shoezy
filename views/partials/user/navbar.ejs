@@ -14,89 +14,111 @@
           <li><a href="/shop">Shop</a></li>
           <li><a href="/#">Contact</a></li>
           <li><a href="/#">About</a></li>
-          <li><a href="/profile"><%= user.fullName %></a></li>
+          <li><a href="/profile">
+              <%= user.fullName %>
+            </a></li>
         </ul>
         <div class="nav-icons">
           <span class="nav-icon wishlist-icon">
             <a href="/wishlist">
               <i class="fas fa-heart"></i>
-              <span class="wishlist-count" id="wishlistCount"><%= typeof wishlistCount !== 'undefined' ? wishlistCount : 0 %></span>
+              <span class="wishlist-count" id="wishlistCount">
+                <%= typeof wishlistCount !=='undefined' ? wishlistCount : 0 %>
+              </span>
             </a>
           </span>
           <span class="nav-icon cart-icon">
             <a href="/cart">
               <i class="fas fa-shopping-cart"></i>
-              <span class="cart-count" id="cartCount"><%= typeof cartCount !== 'undefined' ? cartCount : 0 %></span>
+              <span class="cart-count" id="cartCount">
+                <%= typeof cartCount !=='undefined' ? cartCount : 0 %>
+              </span>
             </a>
           </span>
           <span class="nav-icon profile-icon">
             <i class="fas fa-user"></i>
+            <span class="profile-name">
+              <%= user.fullname %>
+            </span>
+
             <div class="dropdown-menu">
               <a onclick="window.location.href = '/profile'">My Account</a>
               <a onclick="window.location.href = '/order'">My Orders</a>
               <a onclick="logout()" style="color: #dc3545;">Logout</a>
             </div>
           </span>
+
         </div>
       </nav>
     </header>
-  <% } else { %>
-    <header class="navbar-wrapper">
-      <nav class="navbar">
-        <div class="logo">
-          <h1>Shoezy</h1>
-        </div>
-        <ul class="nav-links">
-          <li><a href="/">Home</a></li>
-          <li><a href="/shop">Shop</a></li>
-          <li><a href="/#">Contact</a></li>
-          <li><a href="/#">About</a></li>
-          <li class="nav-icon login-icon">
-            <a href="/login"><i class="fas fa-sign-in-alt"></i></a>
-            <div class="dropdown-menu">
-              <a onclick="logout()">Login</a>
-              <a onclick="signup()">Register</a>
-            </div>
-          </li>
-        </ul>
-        <div class="nav-icons">
-          <span class="nav-icon wishlist-icon"><i class="fas fa-heart"></i></span>
-          <span class="nav-icon cart-icon"><i class="fas fa-shopping-cart"></i></span>
-        </div>
-      </nav>
-    </header>
-  <% } %>
+    <% } else { %>
+      <header class="navbar-wrapper">
+        <nav class="navbar">
+          <div class="logo">
+            <h1>Shoezy</h1>
+          </div>
+          <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/shop">Shop</a></li>
+            <li><a href="/#">Contact</a></li>
+            <li><a href="/#">About</a></li>
+            <li class="nav-icon login-icon">
+              <a href="/login"><i class="fas fa-sign-in-alt"></i></a>
+              <div class="dropdown-menu">
+                <a onclick="logout()">Login</a>
+                <a onclick="signup()">Register</a>
+              </div>
+            </li>
+          </ul>
+          <div class="nav-icons">
+            <a href="/wishlist" class="nav-icon wishlist-icon">
+              <i class="fas fa-heart"></i>
+              <span class="cart-count">
+                <%= cartCount %>
+              </span>
+              <span class="wishlist-count">
+                <%= wishlistCount %>
+              </span>
 
-  <script>
-    function logout() {
-      window.location.href = '/logout';
-    }
+            </a>
 
-    function signup() {
-      window.location.href = '/signup';
-    }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const icons = document.querySelectorAll('.login-icon, .profile-icon');
-      icons.forEach(icon => {
-        icon.addEventListener('click', (e) => {
-          e.preventDefault();
-          const dropdown = icon.querySelector('.dropdown-menu');
-          document.querySelectorAll('.dropdown-menu').forEach(other => {
-            if (other !== dropdown) other.classList.remove('show');
+          </div>
+        </nav>
+      </header>
+      <% } %>
+
+        <script>
+          function logout() {
+            window.location.href = '/logout';
+          }
+
+          function signup() {
+            window.location.href = '/signup';
+          }
+
+          document.addEventListener('DOMContentLoaded', () => {
+            const icons = document.querySelectorAll('.login-icon, .profile-icon');
+            icons.forEach(icon => {
+              icon.addEventListener('click', (e) => {
+                e.preventDefault();
+                const dropdown = icon.querySelector('.dropdown-menu');
+                document.querySelectorAll('.dropdown-menu').forEach(other => {
+                  if (other !== dropdown) other.classList.remove('show');
+                });
+                dropdown.classList.toggle('show');
+              });
+            });
+
+            document.addEventListener('click', (e) => {
+              if (!e.target.closest('.login-icon') && !e.target.closest('.profile-icon')) {
+                document.querySelectorAll('.dropdown-menu').forEach(dropdown => {
+                  dropdown.classList.remove('show');
+                });
+              }
+            });
           });
-          dropdown.classList.toggle('show');
-        });
-      });
-
-      document.addEventListener('click', (e) => {
-        if (!e.target.closest('.login-icon') && !e.target.closest('.profile-icon')) {
-          document.querySelectorAll('.dropdown-menu').forEach(dropdown => {
-            dropdown.classList.remove('show');
-          });
-        }
-      });
-    });
-  </script>
+        </script>
 </body>
+
 </html>

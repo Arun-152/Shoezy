@@ -8,6 +8,7 @@ const flash = require("connect-flash")
 const passport = require("./config/passport")
 const {registerRoutes} = require("./routes/index")
 const db = require("./config/db")
+const navbarCount =require("./middlewares/navbarCount")
 db()
 
 
@@ -25,7 +26,7 @@ app.use(session({
     name: 'connect.sid',  // Explicit session name
     rolling: false  // Don't reset expiry on every request
 }))
-
+app.use(navbarCount)
 app.use(flash())
 
 app.use(passport.initialize())

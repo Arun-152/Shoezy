@@ -452,6 +452,31 @@ body {
     color: #6b7280;
     font-weight: 500;
 }
+/* Notification styles for error messages */
+.notification.error {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+}
+
+.notification.error i {
+    color: white;
+}
+
+/* Cart bounce animation */
+@keyframes cartBounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* Ensure wishlist buttons maintain proper styling */
+.wishlist-btn[data-in-wishlist="true"] i {
+    color: #ef4444 !important;
+}
+
+.wishlist-btn[data-in-wishlist="false"] i {
+    color: inherit;
+}
+
 
 /* Main Products Area */
 .products-main {

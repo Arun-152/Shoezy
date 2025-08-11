@@ -529,7 +529,7 @@
 
                 if (data.success) {
                     // Update cart count in navbar
-                    updateCartCount(1);
+                    updateCartCount(data.cartCount);
                     showNotification('Product added to cart successfully!');
                 } else {
                     showNotification(data.message || 'Error adding product to cart');
@@ -545,7 +545,7 @@
             const cartCountElem = document.getElementById('cartCount');
             if (cartCountElem) {
                 const currentCount = parseInt(cartCountElem.textContent) || 0;
-                const newCount = Math.max(0, currentCount + change);
+                const newCount = Math.max(0,change);
                 cartCountElem.textContent = newCount;
                 
                 // Add animation to cart icon

@@ -25,11 +25,11 @@
                     <p class="hero-description">Discover our premium collection of modern sneakers designed for style, comfort, and performance. Elevate your footwear game with Shoezy.</p>
                     
                     <div class="hero-buttons">
-                        <button class="btn-primary shop-btn">
+                        <button class="btn-primary shop-btn" onclick="redirectToLogin()">
                             <span>Shop Collection</span>
                             <i class="fas fa-arrow-right"></i>
                         </button>
-                        <button class="btn-secondary">
+                        <button class="btn-secondary" onclick="redirectToLogin()">
                             <i class="fas fa-play"></i>
                             <span>Watch Story</span>
                         </button>
@@ -52,17 +52,17 @@
                 </div>
 
                 <div class="hero-visual">
-                    <div class="hero-image-container">
+                    <div class="hero-image-container" onclick="redirectToLogin()" style="cursor: pointer;">
                         <div class="hero-image-bg"></div>
                         <img src="/images/aijo1rehiogpabr_photo1.png" alt="Featured Sneaker" class="hero-sneaker">
                         
                         <!-- Floating Elements -->
                         <div class="floating-elements">
-                            <div class="floating-card price-card">
+                            <div class="floating-card price-card" onclick="event.stopPropagation(); redirectToLogin()" style="cursor: pointer;">
                                 <span class="price">₹8,999</span>
                                 <span class="price-label">Starting from</span>
                             </div>
-                            <div class="floating-card rating-card">
+                            <div class="floating-card rating-card" onclick="event.stopPropagation(); redirectToLogin()" style="cursor: pointer;">
                                 <div class="stars">
                                     <i class="fas fa-star"></i>
                                     <i class="fas fa-star"></i>
@@ -74,8 +74,6 @@
                             </div>
                         </div>
                     </div>
-                    
-                   
                 </div>
             </div>
         </div>
@@ -84,11 +82,11 @@
     <!-- Featured Categories - FULL WIDTH AIR JORDAN SECTION -->
     <section class="featured-categories">
         <div class="full-width-air-jordan">
-            <div class="category-card large air-jordan-card">
+            <div class="category-card large air-jordan-card" onclick="redirectToLogin()" style="cursor: pointer;">
                 <div class="category-content">
                     <h3>AIR JORDAN</h3>
                     <p>Iconic basketball sneakers with legendary performance and style</p>
-                    <button class="category-btn shop-btn">
+                    <button class="category-btn shop-btn" onclick="event.stopPropagation(); redirectToLogin()">
                         <span>Explore Collection</span>
                         <i class="fas fa-arrow-right"></i>
                     </button>
@@ -109,7 +107,7 @@
                     <p>Fresh styles just dropped</p>
                 </div>
                 <div class="section-controls">
-                    <a href="#" class="view-all-btn" onclick="redirectToLogin(); return false;">View All</a>
+                    <a href="/login" class="view-all-btn">View All</a>
                 </div>
             </div>
             
@@ -216,7 +214,7 @@
                     <p>Most popular this week</p>
                 </div>
                 <div class="section-controls">
-                    <a href="#" class="view-all-btn" onclick="redirectToLogin(); return false;">View All</a>
+                    <a href="/login" class="view-all-btn">View All</a>
                 </div>
             </div>
             
@@ -315,7 +313,7 @@
                     <p>Exclusive luxury footwear</p>
                 </div>
                 <div class="section-controls">
-                    <a href="/login" class="view-all-btn" onclick="redirectToLogin(); return false;">View All</a>
+                    <a href="/login" class="view-all-btn">View All</a>
                 </div>
             </div>
             
@@ -335,7 +333,7 @@
                         });
                     %>
                     <% sortedProducts.slice(0, 6).forEach(product => { %>
-                        <div class="product-card modern premium-card" onclick="<%= typeof user !== 'undefined' && user ? `window.location.href='/product/${product._id}'` : 'redirectToLogin()' %>" style="cursor: pointer;">
+                        <div class="product-card modern premium-card" onclick="redirectToLogin()" style="cursor: pointer;">
                             <div class="product-image-container">
                                 <div class="product-image">
                                     <% if (product.images && product.images.length > 0) { %>
@@ -357,17 +355,13 @@
                                     <%= product.status === 'Available' ? 'Available' : 'Out of Stock' %>
                                 </div>
 
-                     
-
                                 <div class="quick-actions">
-                                    <button class="quick-action-btn" onclick="event.stopPropagation(); addToCart('<%= product._id %>')" title="Add to Cart">
+                                    <button class="quick-action-btn" onclick="event.stopPropagation(); redirectToLogin()" title="Add to Cart">
                                         <i class="fas fa-shopping-cart"></i>
                                     </button>
-                                    <% if (typeof user !== 'undefined' && user) { %>
-                                        <button class="quick-action-btn" onclick="event.stopPropagation(); window.location.href='/product/<%= product._id %>'" title="Quick View">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    <% } %>
+                                    <button class="quick-action-btn" onclick="event.stopPropagation(); redirectToLogin()" title="Quick View">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
                                 </div>
                             </div>
 
@@ -429,7 +423,7 @@
             </div>
             
             <div class="testimonials-grid">
-                <div class="testimonial-card">
+                <div class="testimonial-card" onclick="redirectToLogin()" style="cursor: pointer;">
                     <div class="testimonial-rating">
                         <i class="fas fa-star"></i>
                         <i class="fas fa-star"></i>
@@ -449,7 +443,7 @@
                     </div>
                 </div>
                 
-                <div class="testimonial-card">
+                <div class="testimonial-card" onclick="redirectToLogin()" style="cursor: pointer;">
                     <div class="testimonial-rating">
                         <i class="fas fa-star"></i>
                         <i class="fas fa-star"></i>
@@ -469,7 +463,7 @@
                     </div>
                 </div>
                 
-                <div class="testimonial-card">
+                <div class="testimonial-card" onclick="redirectToLogin()" style="cursor: pointer;">
                     <div class="testimonial-rating">
                         <i class="fas fa-star"></i>
                         <i class="fas fa-star"></i>
@@ -491,8 +485,6 @@
             </div>
         </div>
     </section>
-
-
 
     <!-- Footer -->
     <%-include("../partials/user/userfooter")%>
@@ -516,11 +508,9 @@
             }, 2700);
         }
 
-        // Redirect to login page for non-authenticated users
+        // Redirect to login page for non-authenticated users (NO ALERT)
         function redirectToLogin() {
-            alert('Please login to access this feature');
             window.location.href = '/login';
-            return false;
         }
 
         // Enhanced functionality for landing page
@@ -539,6 +529,10 @@
                 dot.addEventListener('click', function() {
                     colorDots.forEach(d => d.classList.remove('active'));
                     this.classList.add('active');
+                    // Redirect to login after color selection
+                    setTimeout(() => {
+                        redirectToLogin();
+                    }, 200);
                 });
             });
 

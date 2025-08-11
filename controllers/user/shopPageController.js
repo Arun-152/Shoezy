@@ -39,15 +39,18 @@ const shopPage = async (req, res) => {
             }
         }
 
+        const user  = await User.findById(userData)
+
         return res.render("shopPage", {
             products: filteredProducts,
             categories: categories,
-            user: userData,
+            user: user,
             wishlistItems: wishlistItems,
             cartItems: cartItems,
             wishlistCount: wishlistItems.length,
             cartCount: cartItems.length,
             isLandingPage: false,
+            
         });
     } catch (error) {
         console.error("Shop page error:", error);

@@ -205,8 +205,7 @@
         </div>
     </main>
 
-    <%- include("../partials/user/userfooter") %>
-
+    <!-- Add Address Modal -->
     <div class="modal" id="addressModal">
         <div class="modal-content">
             <span class="modal-close" id="closeModal">&times;</span>
@@ -228,10 +227,29 @@
                 
                 <div class="form-group">
                     <label for="mobileNumber">Mobile Number</label>
-                    <input type="tel" id="mobileNumber" name="mobileNumber" 
-                           placeholder="Enter mobile number" 
-                           value="<%= formData.mobileNumber || '' %>"
-                           class="<%= errors.mobileNumber ? 'error' : '' %>">
+                    <div class="phone-input-container">
+                        <select id="countryCode" name="countryCode" class="country-code-select <%= errors.mobileNumber ? 'error' : '' %>">
+                            <option value="+91" data-flag="🇮🇳">🇮🇳 +91</option>
+                            <option value="+1" data-flag="🇺🇸">🇺🇸 +1</option>
+                            <option value="+44" data-flag="🇬🇧">🇬🇧 +44</option>
+                            <option value="+61" data-flag="🇦🇺">🇦🇺 +61</option>
+                            <option value="+81" data-flag="🇯🇵">🇯🇵 +81</option>
+                            <option value="+86" data-flag="🇨🇳">🇨🇳 +86</option>
+                            <option value="+33" data-flag="🇫🇷">🇫🇷 +33</option>
+                            <option value="+49" data-flag="🇩🇪">🇩🇪 +49</option>
+                            <option value="+7" data-flag="🇷🇺">🇷🇺 +7</option>
+                            <option value="+55" data-flag="🇧🇷">🇧🇷 +55</option>
+                            <option value="+82" data-flag="🇰🇷">🇰🇷 +82</option>
+                            <option value="+34" data-flag="🇪🇸">🇪🇸 +34</option>
+                            <option value="+39" data-flag="🇮🇹">🇮🇹 +39</option>
+                            <option value="+31" data-flag="🇳🇱">🇳🇱 +31</option>
+                            <option value="+41" data-flag="🇨🇭">🇨🇭 +41</option>
+                        </select>
+                        <input type="tel" id="mobileNumber" name="mobileNumber" 
+                               placeholder="Enter mobile number" 
+                               value="<%= formData.mobileNumber || '' %>"
+                               class="phone-number-input <%= errors.mobileNumber ? 'error' : '' %>">
+                    </div>
                     <% if (errors.mobileNumber) { %>
                         <span class="error-message"><%= errors.mobileNumber %></span>
                     <% } %>
@@ -343,8 +361,28 @@
                 
                 <div class="form-group">
                     <label for="editMobileNumber">Mobile Number</label>
-                    <input type="tel" id="editMobileNumber" name="mobileNumber" 
-                           placeholder="Enter mobile number">
+                    <div class="phone-input-container">
+                        <select id="editCountryCode" name="countryCode" class="country-code-select">
+                            <option value="+91" data-flag="🇮🇳">🇮🇳 +91</option>
+                            <option value="+1" data-flag="🇺🇸">🇺🇸 +1</option>
+                            <option value="+44" data-flag="🇬🇧">🇬🇧 +44</option>
+                            <option value="+61" data-flag="🇦🇺">🇦🇺 +61</option>
+                            <option value="+81" data-flag="🇯🇵">🇯🇵 +81</option>
+                            <option value="+86" data-flag="🇨🇳">🇨🇳 +86</option>
+                            <option value="+33" data-flag="🇫🇷">🇫🇷 +33</option>
+                            <option value="+49" data-flag="🇩🇪">🇩🇪 +49</option>
+                            <option value="+7" data-flag="🇷🇺">🇷🇺 +7</option>
+                            <option value="+55" data-flag="🇧🇷">🇧🇷 +55</option>
+                            <option value="+82" data-flag="🇰🇷">🇰🇷 +82</option>
+                            <option value="+34" data-flag="🇪🇸">🇪🇸 +34</option>
+                            <option value="+39" data-flag="🇮🇹">🇮🇹 +39</option>
+                            <option value="+31" data-flag="🇳🇱">🇳🇱 +31</option>
+                            <option value="+41" data-flag="🇨🇭">🇨🇭 +41</option>
+                        </select>
+                        <input type="tel" id="editMobileNumber" name="mobileNumber" 
+                               placeholder="Enter mobile number" 
+                               class="phone-number-input">
+                    </div>
                     <span class="error-message" id="editMobileNumberError" style="display: none;"></span>
                 </div>
                 
@@ -448,9 +486,10 @@
             document.getElementById('pinCode').value = '';
             document.getElementById('landmark').value = '';
             document.getElementById('addressType').value = 'home';
+            document.getElementById('countryCode').value = '+91';
             
             // Remove error classes from all inputs
-            document.querySelectorAll('.form-group input, .form-group textarea').forEach(input => {
+            document.querySelectorAll('.form-group input, .form-group textarea, .form-group select').forEach(input => {
                 input.classList.remove('error');
             });
             
@@ -462,6 +501,27 @@
             // Reset address type buttons to default (home)
             document.querySelectorAll('.address-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelector('.address-btn[data-type="home"]').classList.add('active');
+        }
+
+        // Function to parse mobile number and set country code
+        function parseMobileNumber(fullNumber) {
+            // Common country codes to check
+            const countryCodes = ['+91', '+1', '+44', '+61', '+81', '+86', '+33', '+49', '+7', '+55', '+82', '+34', '+39', '+31', '+41'];
+            
+            for (let code of countryCodes) {
+                if (fullNumber.startsWith(code)) {
+                    return {
+                        countryCode: code,
+                        number: fullNumber.substring(code.length)
+                    };
+                }
+            }
+            
+            // Default to +91 if no code found
+            return {
+                countryCode: '+91',
+                number: fullNumber
+            };
         }
 
         // Modal controls
@@ -493,9 +553,20 @@
             });
         });
 
-        // Form submission - remove preventDefault to allow normal form submission
+        // Form submission - Combine country code and mobile number
         document.querySelector('.address-form').addEventListener('submit', function(e) {
-            // Let the form submit normally to the backend
+            const countryCode = document.getElementById('countryCode').value;
+            const mobileNumber = document.getElementById('mobileNumber').value;
+            
+            // Combine country code and mobile number
+            const fullMobileNumber = countryCode + mobileNumber;
+            
+            // Create a hidden input with the full mobile number
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'fullMobileNumber';
+            hiddenInput.value = fullMobileNumber;
+            this.appendChild(hiddenInput);
         });
 
         // Edit address functionality
@@ -511,6 +582,9 @@
                 const pinCode = this.getAttribute('data-pin-code');
                 const landmark = this.getAttribute('data-landmark');
                 const addressType = this.getAttribute('data-address-type');
+
+                // Parse mobile number to separate country code and number
+                const parsedMobile = parseMobileNumber(mobileNumber);
 
                 // Store original data for comparison
                 originalAddressData = {
@@ -528,7 +602,8 @@
                 // Populate edit form with existing data
                 document.getElementById('editAddressId').value = addressId;
                 document.getElementById('editFullName').value = fullName;
-                document.getElementById('editMobileNumber').value = mobileNumber;
+                document.getElementById('editCountryCode').value = parsedMobile.countryCode;
+                document.getElementById('editMobileNumber').value = parsedMobile.number;
                 document.getElementById('editAddress').value = address;
                 document.getElementById('editCity').value = city;
                 document.getElementById('editDistrict').value = district;
@@ -747,10 +822,15 @@
             const formData = new FormData(this);
             const addressId = formData.get('addressId');
             
+            // Combine country code and mobile number for edit form
+            const countryCode = document.getElementById('editCountryCode').value;
+            const mobileNumber = document.getElementById('editMobileNumber').value;
+            const fullMobileNumber = countryCode + mobileNumber;
+            
             // Get current form data
             const currentData = {
                 fullName: formData.get('fullName').trim(),
-                mobileNumber: formData.get('mobileNumber').trim(),
+                mobileNumber: fullMobileNumber,
                 address: formData.get('address').trim(),
                 city: formData.get('city').trim(),
                 district: formData.get('district').trim(),
@@ -791,7 +871,7 @@
             });
             
             // Remove error classes
-            document.querySelectorAll('#editAddressModal input, #editAddressModal textarea').forEach(input => {
+            document.querySelectorAll('#editAddressModal input, #editAddressModal textarea, #editAddressModal select').forEach(input => {
                 input.classList.remove('error');
             });
 

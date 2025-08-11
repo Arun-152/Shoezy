@@ -439,7 +439,8 @@ body {
 }
 
 .address-form input,
-.address-form textarea {
+.address-form textarea,
+.address-form select {
     width: 100%;
     padding: 10px;
     border: 1px solid #e2e8f0;
@@ -450,14 +451,16 @@ body {
 }
 
 .address-form input:focus,
-.address-form textarea:focus {
+.address-form textarea:focus,
+.address-form select:focus {
     outline: none;
     border-color: #6366f1;
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 .address-form input.error,
-.address-form textarea.error {
+.address-form textarea.error,
+.address-form select.error {
     border-color: #dc2626;
     background-color: #fef2f2;
 }
@@ -465,6 +468,59 @@ body {
 .address-form textarea {
     resize: vertical;
     min-height: 80px;
+}
+
+/* Phone Input Container Styles */
+.phone-input-container {
+    display: flex;
+    gap: 0;
+    width: 100%;
+}
+
+.country-code-select {
+    width: 120px;
+    min-width: 120px;
+    border-right: none;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    background-color: #f8f9fa;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 10px 8px;
+    cursor: pointer;
+}
+
+.country-code-select:focus {
+    border-color: #6366f1;
+    border-right: 1px solid #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.phone-number-input {
+    flex: 1;
+    border-left: none;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    padding-left: 15px;
+}
+
+.phone-number-input:focus {
+    border-color: #6366f1;
+    border-left: 1px solid #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* Error state for phone input container */
+.phone-input-container .country-code-select.error,
+.phone-input-container .phone-number-input.error {
+    border-color: #dc2626;
+    background-color: #fef2f2;
+}
+
+.phone-input-container .country-code-select.error:focus,
+.phone-input-container .phone-number-input.error:focus {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
 }
 
 .error-message {
@@ -548,57 +604,75 @@ body {
     .main-content {
         padding-top: 100px;
     }
-    
+
     .page-header {
         flex-direction: column;
         text-align: center;
     }
-    
+
     .section-header {
         flex-direction: column;
         gap: 15px;
     }
-    
+
     .addresses-grid {
         grid-template-columns: 1fr;
         gap: 15px;
     }
-    
+
     .address-card {
         padding: 15px;
     }
-    
+
     .address-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
     }
-    
+
     .address-actions {
         align-self: flex-end;
     }
-    
+
     .address-options {
         flex-direction: column;
     }
-    
+
     .modal {
         padding: 10px;
     }
-    
+
     .modal-content {
         width: 100%;
         max-width: none;
         margin: 0;
         border-radius: 8px;
     }
-    
+
     .modal-actions {
         flex-direction: column;
     }
-    
+
     .modal-actions .btn {
         width: 100%;
+    }
+
+    /* Mobile phone input adjustments */
+    .phone-input-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .country-code-select {
+        width: 100%;
+        border-radius: 6px;
+        border-right: 1px solid #e2e8f0;
+    }
+
+    .phone-number-input {
+        border-radius: 6px;
+        border-left: 1px solid #e2e8f0;
+        padding-left: 10px;
     }
 }
 
@@ -606,37 +680,42 @@ body {
     .main-content {
         padding-top: 90px;
     }
-    
+
     .container {
         padding: 0 15px;
     }
-    
+
     .addresses-section {
         padding: 15px;
     }
-    
+
     .addresses-grid {
         grid-template-columns: 1fr;
         gap: 12px;
     }
-    
+
     .address-card {
         padding: 12px;
     }
-    
+
     .address-name,
     .address-phone,
     .address-location {
         gap: 8px;
     }
-    
+
     .address-name .material-icons,
     .address-phone .material-icons,
     .address-location .material-icons {
         font-size: 18px;
     }
-    
+
     .modal-content {
         padding: 15px;
+    }
+
+    .country-code-select {
+        font-size: 0.8rem;
+        min-width: 100px;
     }
 }

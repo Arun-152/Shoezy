@@ -13,6 +13,45 @@
   top: 0;
   z-index: 1000;
 }
+.nav-icon a {
+    color: white; /* Makes icon and text white */
+    text-decoration: none; /* Removes underline from link */
+}
+
+.nav-icon a:hover {
+    color: #f1f1f1; /* Slightly lighter white on hover */
+}
+
+.wishlist-count,
+.cart-count {
+    color: white; /* Ensures the count text is also white */
+}
+
+
+.profile-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+
+.profile-icon i {
+  font-size: 20px;
+  color: #ffffff; /* icon color */
+}
+
+.profile-name {
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 4px;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.profile-icon:hover .profile-name {
+  color: #bdbdbd; /* dark on hover */
+}
+
 
 .navbar-wrapper {
   background-color: black;
@@ -136,6 +175,9 @@
   top: 100%;
   right: 0;
   min-width: 120px;
+}
+.wishlist-icon{
+  color: white;
 }
 
 .dropdown-menu.show {
