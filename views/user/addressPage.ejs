@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DeliveryApp - My Addresses</title>
+    <title>Shoezy- My Addresses</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="/css/addressPage.css">
     <link rel="stylesheet" href="/css/breadcrumbs.css">
@@ -82,128 +82,121 @@
     </style>
 </head>
 <body>
-     <%- include("../partials/user/navbar") %>
+    <%- include("../partials/user/navbar") %>
 
-    <!-- Breadcrumbs -->
-    <div class="breadcrumb-wrapper">
-        <div class="breadcrumb-container">
-            <div class="breadcrumbs">
-                <a href="/" class="breadcrumb-item">
-                    <i class="fas fa-home"></i> Home
-                </a>
-                <span class="breadcrumb-separator">/</span>
-                <a href="/profile" class="breadcrumb-item">
-                    <i class="fas fa-user"></i> Profile
-                </a>
-                <span class="breadcrumb-separator">/</span>
-                <span class="breadcrumb-item active">
-                    <i class="fas fa-map-marker-alt"></i> Address
-                </span>
-            </div>
-        </div>
-    </div>
+    <!-- Main Layout Container -->
+    <div class="page-container">
+        <!-- Main Layout with Sidebar -->
+        <div class="page-layout">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <%- include("../partials/user/profileSidebar") %>
+            </aside>
 
-    <main class="main-content">
-        <div class="container">
-            <div class="page-header">
-                <div class="header-icon">
-                    <span class="material-icons">location_on</span>
-                </div>
-                <div class="header-text">
-                    <h1>My Addresses</h1>
-                    <p>Manage your delivery locations</p>
-                </div>
-            </div>
-
-            <div class="addresses-section">
-                <div class="section-header">
-                    <div class="section-title">
-                        <h2>Saved Addresses</h2>
-                        <p>Choose from your saved delivery locations</p>
+            <!-- Main Content -->
+            <main class="main-content">
+                <div class="container">
+                    <div class="page-header">
+                        <div class="header-icon">
+                            <span class="material-icons">location_on</span>
+                        </div>
+                        <div class="header-text">
+                            <h1>My Addresses</h1>
+                            <p>Manage your delivery locations</p>
+                        </div>
                     </div>
-                    <button class="btn btn-primary" id="openModal">Add New Address</button>
-                </div>
-                <% if (addresses && addresses.length > 0) { %>
-                    <div class="addresses-grid">
-                        <% addresses.forEach(function(address) { %>
-                            <div class="address-card <%= address.isDefault ? 'default-address' : '' %>">
-                                <div class="address-header">
-                                    <div class="address-type-badge <%= address.addressType.toLowerCase() %>">
-                                        <span class="material-icons">
-                                            <% if (address.addressType.toLowerCase() === 'home') { %>home<% } 
-                                               else if (address.addressType.toLowerCase() === 'office') { %>work<% } 
-                                               else { %>location_on<% } %>
-                                        </span>
-                                        <span><%= address.addressType %></span>
-                                        <% if (address.isDefault) { %>
-                                            <span class="material-icons" style="margin-left: 5px; font-size: 16px;">check_circle</span>
-                                        <% } %>
-                                    </div>
-                                    <div class="address-actions">
-                                        <button class="action-btn edit-btn" title="Edit Address" 
-                                                data-address-id="<%= address._id %>"
-                                                data-full-name="<%= address.fullName %>"
-                                                data-mobile-number="<%= address.mobileNumber %>"
-                                                data-address="<%= address.address %>"
-                                                data-city="<%= address.city %>"
-                                                data-district="<%= address.district %>"
-                                                data-state="<%= address.state %>"
-                                                data-pin-code="<%= address.pinCode %>"
-                                                data-landmark="<%= address.landmark || '' %>"
-                                                data-address-type="<%= address.addressType.toLowerCase() %>">
-                                            <span class="material-icons">edit</span>
-                                        </button>
-                                        <button class="action-btn delete-btn" title="Delete Address" 
-                                                data-address-id="<%= address._id %>"
-                                                data-is-default="<%= address.isDefault %>">
-                                            <span class="material-icons">delete</span>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="address-content">
-                                    <div class="address-name">
-                                        <span class="material-icons">person</span>
-                                        <strong><%= address.fullName %></strong>
-                                    </div>
-                                    <div class="address-phone">
-                                        <span class="material-icons">phone</span>
-                                        <span><%= address.mobileNumber %></span>
-                                    </div>
-                                    <div class="address-location">
-                                        <span class="material-icons">location_on</span>
-                                        <div class="address-details">
-                                            <p><%= address.address %></p>
-                                            <p><%= address.city %>, <%= address.district %></p>
-                                            <p><%= address.state %> - <%= address.pinCode %></p>
-                                            <% if (address.landmark) { %>
-                                                <p class="landmark">Near <%= address.landmark %></p>
-                                            <% } %>
+
+                    <div class="addresses-section">
+                        <div class="section-header">
+                            <div class="section-title">
+                                <h2>Saved Addresses</h2>
+                                <p>Choose from your saved delivery locations</p>
+                            </div>
+                            <button class="btn btn-primary" id="openModal">Add New Address</button>
+                        </div>
+                        <% if (addresses && addresses.length > 0) { %>
+                            <div class="addresses-grid">
+                                <% addresses.forEach(function(address) { %>
+                                    <div class="address-card <%= address.isDefault ? 'default-address' : '' %>">
+                                        <div class="address-header">
+                                            <div class="address-type-badge <%= address.addressType.toLowerCase() %>">
+                                                <span class="material-icons">
+                                                    <% if (address.addressType.toLowerCase() === 'home') { %>home<% } 
+                                                       else if (address.addressType.toLowerCase() === 'office') { %>work<% } 
+                                                       else { %>location_on<% } %>
+                                                </span>
+                                                <span><%= address.addressType %></span>
+                                                <% if (address.isDefault) { %>
+                                                    <span class="material-icons" style="margin-left: 5px; font-size: 16px;">check_circle</span>
+                                                <% } %>
+                                            </div>
+                                            <div class="address-actions">
+                                                <button class="action-btn edit-btn" title="Edit Address" 
+                                                        data-address-id="<%= address._id %>"
+                                                        data-full-name="<%= address.fullName %>"
+                                                        data-mobile-number="<%= address.mobileNumber %>"
+                                                        data-address="<%= address.address %>"
+                                                        data-city="<%= address.city %>"
+                                                        data-district="<%= address.district %>"
+                                                        data-state="<%= address.state %>"
+                                                        data-pin-code="<%= address.pinCode %>"
+                                                        data-landmark="<%= address.landmark || '' %>"
+                                                        data-address-type="<%= address.addressType.toLowerCase() %>">
+                                                    <span class="material-icons">edit</span>
+                                                </button>
+                                                <button class="action-btn delete-btn" title="Delete Address" 
+                                                        data-address-id="<%= address._id %>"
+                                                        data-is-default="<%= address.isDefault %>">
+                                                    <span class="material-icons">delete</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="address-content">
+                                            <div class="address-name">
+                                                <span class="material-icons">person</span>
+                                                <strong><%= address.fullName %></strong>
+                                            </div>
+                                            <div class="address-phone">
+                                                <span class="material-icons">phone</span>
+                                                <span><%= address.mobileNumber %></span>
+                                            </div>
+                                            <div class="address-location">
+                                                <span class="material-icons">location_on</span>
+                                                <div class="address-details">
+                                                    <p><%= address.address %></p>
+                                                    <p><%= address.city %>, <%= address.district %></p>
+                                                    <p><%= address.state %> - <%= address.pinCode %></p>
+                                                    <% if (address.landmark) { %>
+                                                        <p class="landmark">Near <%= address.landmark %></p>
+                                                    <% } %>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="address-footer">
+                                            <button class="btn <%= address.isDefault ? 'btn-success' : 'btn-primary' %> select-address" 
+                                                    data-address-id="<%= address._id %>"
+                                                    <%= address.isDefault ? 'disabled' : '' %>>
+                                                <%= address.isDefault ? 'Default Address' : 'Select This Address' %>
+                                            </button>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="address-footer">
-                                    <button class="btn <%= address.isDefault ? 'btn-success' : 'btn-primary' %> select-address" 
-                                            data-address-id="<%= address._id %>"
-                                            <%= address.isDefault ? 'disabled' : '' %>>
-                                        <%= address.isDefault ? 'Default Address' : 'Select This Address' %>
-                                    </button>
-                                </div>
+                                <% }); %>
                             </div>
-                        <% }); %>
+                        <% } else { %>
+                            <div class="empty-state">
+                                <div class="empty-icon">
+                                    <span class="material-icons">location_off</span>
+                                </div>
+                                <h3>No addresses found</h3>
+                                <p>You haven't added any delivery locations to your account yet.</p>
+                                <button class="btn btn-large btn-primary" id="openModal">Add Your First Address</button>
+                            </div>
+                        <% } %>
                     </div>
-                <% } else { %>
-                    <div class="empty-state">
-                        <div class="empty-icon">
-                            <span class="material-icons">location_off</span>
-                        </div>
-                        <h3>No addresses found</h3>
-                        <p>You haven't added any delivery locations to your account yet.</p>
-                        <button class="btn btn-large btn-primary" id="openModal">Add Your First Address</button>
-                    </div>
-                <% } %>
-            </div>
+                </div>
+            </main>
         </div>
-    </main>
+    </div>
 
     <!-- Add Address Modal -->
     <div class="modal" id="addressModal">
@@ -447,6 +440,8 @@
             </form>
         </div>
     </div>
+
+    <%- include("../partials/user/userfooter") %>
 
     <script>
         // Store original address data for comparison

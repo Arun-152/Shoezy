@@ -4,402 +4,119 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Orders - Shoezy</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="/css/orderPage.css">
     <link rel="stylesheet" href="/css/breadcrumbs.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
-    <!-- Header -->
-    <%-include("../partials/user/navbar")%>
+    <%- include("../partials/user/navbar") %>
 
-    <!-- Breadcrumbs -->
-    <div class="breadcrumb-wrapper">
-        <div class="breadcrumb-container">
-            <div class="breadcrumbs">
-                <a href="/" class="breadcrumb-item">
-                    <i class="fas fa-home"></i> Home
-                </a>
-                <span class="breadcrumb-separator">/</span>
-                <span class="breadcrumb-item active">
-                    <i class="fas fa-box"></i> Orders
-                </span>
-            </div>
+    <!-- Main Layout Container -->
+    <div class="page-container">
+        <!-- Main Layout with Sidebar -->
+        <div class="page-layout">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <%- include("../partials/user/profileSidebar") %>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <div class="container">
+                    <div class="page-header">
+                        <div class="header-icon">
+                            <span class="material-icons">shopping_bag</span>
+                        </div>
+                        <div class="header-text">
+                            <h1>My Orders</h1>
+                            <p>Track and manage your orders</p>
+                        </div>
+                    </div>
+
+                    <div class="orders-section">
+                        <div class="section-header">
+                            <div class="section-title">
+                                <h2>Order History</h2>
+                                <p>View all your placed orders</p>
+                            </div>
+                            <!-- Order Filters -->
+                            <div class="order-filters">
+                                <button class="filter-btn active" data-filter="all">All Orders</button>
+                                <button class="filter-btn" data-filter="pending">Pending</button>
+                                <button class="filter-btn" data-filter="shipped">Shipped</button>
+                                <button class="filter-btn" data-filter="delivered">Delivered</button>
+                                <button class="filter-btn" data-filter="cancelled">Cancelled</button>
+                            </div>
+                        </div>
+
+                        <!-- Orders List -->
+                        <div class="orders-list">
+                            <% if (orders && orders.length > 0) { %>
+                                <% orders.forEach(order => { %>
+                                    <div class="order-card" data-status="<%= order.orderStatus.toLowerCase() %>">
+                                        <div class="order-header">
+                                            <div class="order-info">
+                                                <h3>Order #<%= order.orderNumber %></h3>
+                                                <p class="order-date">Placed on <%= new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+                                            </div>
+                                            <div class="order-status <%= order.orderStatus.toLowerCase() %>">
+                                                <span class="status-badge"><%= order.orderStatus %></span>
+                                            </div>
+                                        </div>
+                                        <div class="order-items">
+                                            <% order.items.slice(0, 2).forEach(item => { %>
+                                                <div class="order-item">
+                                                    <img src="<%= item.productId.images && item.productId.images.length > 0 ? item.productId.images[0] : 'https://via.placeholder.com/80x80/ffffff/cccccc?text=Shoe' %>" alt="<%= item.productId.productName %>">
+                                                    <div class="item-details">
+                                                        <h4><%= item.productId.productName %></h4>
+                                                        <p class="item-price">Price: ₹<%= item.price.toLocaleString() %></p>
+                                                    </div>
+                                                    <div class="item-quantity">Qty: <%= item.quantity %></div>
+                                                </div>
+                                            <% }); %>
+                                            <% if (order.items.length > 2) { %>
+                                                <p class="more-items">+ <%= order.items.length - 2 %> more item(s)</p>
+                                            <% } %>
+                                        </div>
+                                        <div class="order-footer">
+                                            <div class="order-total">
+                                                <strong>Total: ₹<%= order.totalAmount.toLocaleString() %></strong>
+                                            </div>
+                                            <div class="order-actions">
+                                                <a href="/order/<%= order._id %>" class="btn btn-secondary">View Details</a>
+                                                <% if (order.orderStatus === 'Pending') { %>
+                                                    <button class="btn btn-danger" onclick="cancelOrder('<%= order._id %>')">Cancel Order</button>
+                                                <% } else if (order.orderStatus === 'Delivered') { %>
+                                                    <button class="btn btn-primary">Return</button>
+                                                <% } else { %>
+                                                    <button class="btn btn-secondary">Track Order</button>
+                                                <% } %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <% }); %>
+                            <% } else { %>
+                                <!-- Empty State -->
+                                <div class="empty-state">
+                                    <div class="empty-icon">
+                                        <span class="material-icons">shopping_bag</span>
+                                    </div>
+                                    <h3>No orders found</h3>
+                                    <p>You haven't placed any orders yet. Start shopping to see your orders here!</p>
+                                    <a href="/shop" class="btn btn-large btn-primary">Start Shopping</a>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </main>
         </div>
     </div>
 
-    <!-- Orders Section -->
-    <section class="orders-section">
-        <div class="container">
-            <div class="orders-header">
-                <h1>My Orders</h1>
-                <p>Track and manage your orders</p>
-            </div>
+    <%- include("../partials/user/userfooter") %>
 
-            <div class="orders-content">
-                <!-- Order Filters -->
-                <div class="order-filters">
-                    <button class="filter-btn active" data-filter="all">All Orders</button>
-                    <button class="filter-btn" data-filter="pending">Pending</button>
-                    <button class="filter-btn" data-filter="shipped">Shipped</button>
-                    <button class="filter-btn" data-filter="delivered">Delivered</button>
-                    <button class="filter-btn" data-filter="cancelled">Cancelled</button>
-                </div>
-
-                <!-- Orders List -->
-                <div class="orders-list">
-                    <% if (orders && orders.length > 0) { %>
-                        <% orders.forEach(order => { %>
-                            <div class="order-card" data-status="<%= order.orderStatus.toLowerCase() %>">
-                                <div class="order-header">
-                                    <div class="order-info">
-                                        <h3>Order #<%= order.orderNumber %></h3>
-                                        <p class="order-date">Placed on <%= new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
-                                    </div>
-                                    <div class="order-status <%= order.orderStatus.toLowerCase() %>">
-                                        <span class="status-badge"><%= order.orderStatus %></span>
-                                    </div>
-                                </div>
-                                <div class="order-items">
-                                    <% order.items.slice(0, 2).forEach(item => { %>
-                                        <div class="order-item">
-                                            <img src="<%= item.productId.images && item.productId.images.length > 0 ? item.productId.images[0] : 'https://via.placeholder.com/80x80/ffffff/cccccc?text=Shoe' %>" alt="<%= item.productId.productName %>">
-                                            <div class="item-details">
-                                                <h4><%= item.productId.productName %></h4>
-                                                <p>Price: ₹<%= item.price.toLocaleString() %></p>
-                                            </div>
-                                            <div class="item-quantity">Qty: <%= item.quantity %></div>
-                                        </div>
-                                    <% }); %>
-                                    <% if (order.items.length > 2) { %>
-                                        <p class="more-items">+ <%= order.items.length - 2 %> more item(s)</p>
-                                    <% } %>
-                                </div>
-                                <div class="order-footer">
-                                    <div class="order-total">
-                                        <strong>Total: ₹<%= order.totalAmount.toLocaleString() %></strong>
-                                    </div>
-                                    <div class="order-actions">
-                                        <a href="/order/<%= order._id %>" class="btn-secondary">View Details</a>
-                                        <% if (order.orderStatus === 'Pending') { %>
-                                            <button class="btn-danger" onclick="cancelOrder('<%= order._id %>')">Cancel Order</button>
-                                        <% } else if (order.orderStatus === 'Delivered') { %>
-                                            <button class="btn-primary">Return</button>
-                                        <% } else { %>
-                                            <button class="btn-secondary">Track Order</button>
-                                        <% } %>
-                                    </div>
-                                </div>
-                            </div>
-                        <% }); %>
-                    <% } else { %>
-                        <!-- Empty State -->
-                        <div class="empty-orders">
-                            <div class="empty-icon">
-                                <i class="fas fa-shopping-bag"></i>
-                            </div>
-                            <h3>No orders found</h3>
-                            <p>You haven't placed any orders yet. Start shopping to see your orders here!</p>
-                            <a href="/shop" class="btn-primary">Start Shopping</a>
-                        </div>
-                    <% } %>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <%-include("../partials/user/userfooter")%>
-
-    <style>
-        /* Fix navbar overflow issue for order page */
-        html, body {
-            overflow-x: hidden;
-            width: 100%;
-            max-width: 100vw;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Arial', sans-serif;
-            background-color: #f8f9fa;
-        }
-
-        /* Ensure navbar wrapper doesn't overflow */
-        .navbar-wrapper {
-            width: 100%;
-            max-width: 100vw;
-            overflow: hidden;
-        }
-
-        /* Override navbar positioning for this page - maintain original max-width */
-        .navbar {
-            left: 0 !important;
-            right: 0 !important;
-            box-sizing: border-box !important;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        .orders-section {
-            padding: 120px 0 80px;
-            min-height: 80vh;
-        }
-
-        .orders-header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .orders-header h1 {
-            font-size: 2.5rem;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .orders-header p {
-            color: #666;
-            font-size: 1.1rem;
-        }
-
-        .order-filters {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-
-        .filter-btn {
-            padding: 10px 20px;
-            border: 2px solid #e5e7eb;
-            background: white;
-            color: #666;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-
-        .filter-btn.active,
-        .filter-btn:hover {
-            background: #2563eb;
-            color: white;
-            border-color: #2563eb;
-        }
-
-        .orders-list {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .order-card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .order-card:hover {
-            transform: translateY(-2px);
-        }
-
-        .order-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .order-info h3 {
-            color: #333;
-            margin-bottom: 5px;
-        }
-
-        .order-date {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .status-badge {
-            padding: 6px 15px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .delivered .status-badge {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .shipped .status-badge {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-
-        .pending .status-badge {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .cancelled .status-badge {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .order-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .order-item img {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-
-        .item-details {
-            flex: 1;
-        }
-
-        .item-details h4 {
-            color: #333;
-            margin-bottom: 5px;
-        }
-
-        .item-details p {
-            color: #666;
-            font-size: 14px;
-            margin: 2px 0;
-        }
-
-        .item-price {
-            color: #2563eb;
-            font-weight: 600;
-        }
-
-        .item-quantity {
-            color: #666;
-            font-weight: 500;
-        }
-
-        .order-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 1px solid #e5e7eb;
-        }
-
-        .order-total {
-            font-size: 1.2rem;
-            color: #333;
-        }
-
-        .order-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-primary, .btn-secondary, .btn-danger {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-primary {
-            background: #eb2525;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #1d4ed8;
-        }
-
-        .btn-secondary {
-            background: #f3f4f6;
-            color: #374151;
-            border: 1px solid #d1d5db;
-        }
-
-        .btn-secondary:hover {
-            background: #e5e7eb;
-        }
-
-        .btn-danger {
-            background: #dc2626;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #b91c1c;
-        }
-
-        .empty-orders {
-            text-align: center;
-            padding: 60px 20px;
-        }
-
-        .empty-icon {
-            font-size: 4rem;
-            color: #d1d5db;
-            margin-bottom: 20px;
-        }
-
-        .empty-orders h3 {
-            color: #374151;
-            margin-bottom: 10px;
-        }
-
-        .empty-orders p {
-            color: #6b7280;
-            margin-bottom: 30px;
-        }
-
-        @media (max-width: 768px) {
-            .order-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-
-            .order-footer {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-
-            .order-actions {
-                width: 100%;
-                justify-content: space-between;
-            }
-
-            .filter-btn {
-                font-size: 14px;
-                padding: 8px 16px;
-            }
-        }
-    </style>
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // Filter functionality
         document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -424,12 +141,12 @@
                 
                 // Check if any orders are visible
                 const visibleOrders = document.querySelectorAll('.order-card[style="display: block;"], .order-card:not([style])').length;
-                const emptyState = document.querySelector('.empty-orders');
+                const emptyState = document.querySelector('.empty-state');
                 
                 if (visibleOrders === 0 && filter !== 'all') {
-                    emptyState.style.display = 'block';
+                    if (emptyState) emptyState.style.display = 'block';
                 } else {
-                    emptyState.style.display = 'none';
+                    if (emptyState) emptyState.style.display = 'none';
                 }
             });
         });

@@ -13,131 +13,11 @@
     <div class="left-section">
       <div class="brand-logo">
         <div class="gradient-circle">
-          <!-- Enhanced Interactive Shoe SVG -->
-          <svg class="shoe-image interactive-shoe" viewBox="0 0 280 160" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <!-- Enhanced Gradients -->
-              <linearGradient id="shoeBodyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
-                <stop offset="50%" style="stop-color:#f8f9fa;stop-opacity:1" />
-                <stop offset="100%" style="stop-color:#e9ecef;stop-opacity:1" />
-              </linearGradient>
-              
-              <linearGradient id="soleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#495057;stop-opacity:1" />
-                <stop offset="50%" style="stop-color:#343a40;stop-opacity:1" />
-                <stop offset="100%" style="stop-color:#212529;stop-opacity:1" />
-              </linearGradient>
-              
-              <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#ff6b6b;stop-opacity:1" />
-                <stop offset="100%" style="stop-color:#ee5a24;stop-opacity:1" />
-              </linearGradient>
-              
-              <linearGradient id="laceGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:#6c757d;stop-opacity:1" />
-                <stop offset="100%" style="stop-color:#495057;stop-opacity:1" />
-              </linearGradient>
-
-              <!-- Shadow Filter -->
-              <filter id="dropShadow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
-                <feOffset dx="2" dy="6" result="offset"/>
-                <feComponentTransfer>
-                  <feFuncA type="linear" slope="0.3"/>
-                </feComponentTransfer>
-                <feMerge> 
-                  <feMergeNode/>
-                  <feMergeNode in="SourceGraphic"/> 
-                </feMerge>
-              </filter>
-            </defs>
-            
-            <!-- Background Circle for Shoe -->
-            <circle cx="140" cy="80" r="70" fill="rgba(255,255,255,0.1)" class="bg-circle"/>
-            
-            <!-- Shoe Shadow -->
-            <ellipse cx="145" cy="135" rx="95" ry="18" fill="rgba(0,0,0,0.2)" opacity="0.6" class="shoe-shadow"/>
-            
-            <!-- Main Shoe Sole -->
-            <path d="M45 110 Q50 90 80 85 Q140 80 200 85 Q230 90 235 110 Q235 125 225 130 L45 130 Q35 125 45 110 Z" 
-                  fill="url(#soleGradient)" 
-                  stroke="#212529" 
-                  stroke-width="2"
-                  filter="url(#dropShadow)"
-                  class="shoe-sole"/>
-            
-            <!-- Main Shoe Body -->
-            <path d="M50 100 Q55 70 85 60 Q140 55 200 65 Q230 75 235 100 Q235 110 225 115 L50 115 Q40 110 50 100 Z" 
-                  fill="url(#shoeBodyGradient)" 
-                  stroke="#dee2e6" 
-                  stroke-width="2"
-                  class="shoe-body"/>
-            
-            <!-- Shoe Toe Cap -->
-            <ellipse cx="225" cy="90" rx="18" ry="30" 
-                     fill="url(#shoeBodyGradient)" 
-                     stroke="#dee2e6" 
-                     stroke-width="2"
-                     class="toe-cap"/>
-            
-            <!-- Shoe Tongue -->
-            <path d="M85 75 Q95 65 105 70 Q115 65 125 75 L125 95 Q115 100 105 95 Q95 100 85 95 Z" 
-                  fill="url(#shoeBodyGradient)" 
-                  stroke="#dee2e6" 
-                  stroke-width="1"
-                  class="shoe-tongue"/>
-            
-            <!-- Eyelets for Laces -->
-            <circle cx="85" cy="80" r="4" fill="#6c757d" class="eyelet eyelet-1"/>
-            <circle cx="105" cy="75" r="4" fill="#6c757d" class="eyelet eyelet-2"/>
-            <circle cx="125" cy="75" r="4" fill="#6c757d" class="eyelet eyelet-3"/>
-            <circle cx="145" cy="80" r="4" fill="#6c757d" class="eyelet eyelet-4"/>
-            <circle cx="165" cy="85" r="4" fill="#6c757d" class="eyelet eyelet-5"/>
-            
-            <!-- Shoe Laces -->
-            <path d="M85 80 Q95 72 105 75" stroke="url(#laceGradient)" stroke-width="3" fill="none" class="lace lace-1"/>
-            <path d="M105 75 Q115 72 125 75" stroke="url(#laceGradient)" stroke-width="3" fill="none" class="lace lace-2"/>
-            <path d="M125 75 Q135 72 145 80" stroke="url(#laceGradient)" stroke-width="3" fill="none" class="lace lace-3"/>
-            <path d="M145 80 Q155 77 165 85" stroke="url(#laceGradient)" stroke-width="3" fill="none" class="lace lace-4"/>
-            
-            <!-- Brand Logo/Swoosh -->
-            <path d="M70 95 Q120 80 170 95" 
-                  stroke="url(#accentGradient)" 
-                  stroke-width="6" 
-                  fill="none" 
-                  opacity="0.9"
-                  class="brand-swoosh"/>
-            
-            <!-- Heel Details -->
-            <path d="M45 105 Q55 95 65 105" 
-                  stroke="url(#accentGradient)" 
-                  stroke-width="3" 
-                  fill="none"
-                  class="heel-detail"/>
-            
-            <!-- Side Vent Details -->
-            <circle cx="160" cy="95" r="2" fill="#adb5bd" class="vent-hole vent-1"/>
-            <circle cx="170" cy="98" r="2" fill="#adb5bd" class="vent-hole vent-2"/>
-            <circle cx="180" cy="100" r="2" fill="#adb5bd" class="vent-hole vent-3"/>
-            
-            <!-- Interactive Elements -->
-            <g class="interactive-elements">
-              <!-- Sparkle Effect -->
-              <circle cx="90" cy="70" r="1.5" fill="#ffd700" opacity="0" class="sparkle sparkle-1">
-                <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite" begin="0s"/>
-              </circle>
-              <circle cx="150" cy="65" r="1.5" fill="#ffd700" opacity="0" class="sparkle sparkle-2">
-                <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite" begin="0.7s"/>
-              </circle>
-              <circle cx="200" cy="85" r="1.5" fill="#ffd700" opacity="0" class="sparkle sparkle-3">
-                <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite" begin="1.4s"/>
-              </circle>
-            </g>
-          </svg>
+          <!-- Static Shoe Image -->
+          <img src="/images/AIR+JORDAN+1+RETRO+HIGH+OG.avif" alt="Shoe Image" class="shoe-image static-shoe" />
         </div>
         
-        <!-- Enhanced Floating Elements -->
+        <!-- Floating Elements -->
         <div class="floating-elements">
           <div class="floating-dot dot-1">
             <i class="fas fa-star"></i>
@@ -186,12 +66,12 @@
 
           <div class="otp-inputs-container">
             <div class="otp-inputs">
-              <input type="text" maxlength="1" class="otp-input" required data-index="0" />
-              <input type="text" maxlength="1" class="otp-input" required data-index="1" />
-              <input type="text" maxlength="1" class="otp-input" required data-index="2" />
-              <input type="text" maxlength="1" class="otp-input" required data-index="3" />
-              <input type="text" maxlength="1" class="otp-input" required data-index="4" />
-              <input type="text" maxlength="1" class="otp-input" required data-index="5" />
+              <input type="text" maxlength="1" class="otp-input" data-index="0" />
+              <input type="text" maxlength="1" class="otp-input" data-index="1" />
+              <input type="text" maxlength="1" class="otp-input" data-index="2" />
+              <input type="text" maxlength="1" class="otp-input" data-index="3" />
+              <input type="text" maxlength="1" class="otp-input" data-index="4" />
+              <input type="text" maxlength="1" class="otp-input" data-index="5" />
             </div>
             <div class="otp-error" id="otpError" style="display: none;">
               <i class="fas fa-exclamation-circle"></i>
@@ -227,7 +107,7 @@
   const otpErrorMessage = document.getElementById('otpErrorMessage');
   let timeLeft = 60; // 60 seconds OTP validity
 
-  // Enhanced auto-focus handling with validation
+  // Auto-focus handling with validation
   otpInputs.forEach((input, index) => {
     // Input event for moving to next field
     input.addEventListener('input', (e) => {
@@ -275,7 +155,7 @@
     });
   });
 
-  // Enhanced OTP validation functions
+  // OTP validation functions
   function showOtpError(message = 'Please enter all 6 digits of the OTP') {
     otpErrorMessage.textContent = message;
     otpError.style.display = 'flex';
@@ -292,7 +172,7 @@
     
     // Check if no OTP is entered at all
     if (otp.length === 0) {
-      showOtpError('Enter the OTP');
+      showOtpError('Please enter the OTP');
       otpInputs[0].focus();
       return false;
     }
@@ -328,15 +208,15 @@
   }
   updateTimer();
 
-  // Enhanced form submission with proper error handling
+  // Form submission with error handling
   form.addEventListener('submit', async (e) => {
-    e.preventDefault(); // Always prevent default first
-    e.stopPropagation(); // Stop event bubbling
+    e.preventDefault();
+    e.stopPropagation();
     
     const otp = validateOtp();
     
     if (!otp) {
-      return; // Stop here if validation fails
+      return; // Error is already shown in the OTP input field area
     }
 
     // Disable form during submission
@@ -386,7 +266,7 @@
     }
   });
 
-  // Resend OTP functionality (unchanged from original)
+  // Resend OTP functionality
   let resendCooldownActive = true;
   let resendCooldownTime = 60;
   let resendCooldownInterval;
@@ -478,18 +358,6 @@
         resendBtn.innerHTML = originalContent;
       }
     }
-  });
-
-  // Interactive shoe hover effect
-  const interactiveShoe = document.querySelector('.interactive-shoe');
-  const gradientCircle = document.querySelector('.gradient-circle');
-  
-  gradientCircle.addEventListener('mouseenter', () => {
-    interactiveShoe.style.transform = 'scale(1.1) rotateY(15deg)';
-  });
-  
-  gradientCircle.addEventListener('mouseleave', () => {
-    interactiveShoe.style.transform = 'scale(1) rotateY(0deg)';
   });
 </script>
 

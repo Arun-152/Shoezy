@@ -4,158 +4,128 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Wishlist</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="/css/wishlistPage.css">
     <link rel="stylesheet" href="/css/breadcrumbs.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-
-<style>
-    .quick-view-btn {
-            background: #ffffff;
-            color: #1a1a1a;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-</style>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
-    <!-- Navigation Bar -->
-   <%-include("../partials/user/navbar")%>
+    <%- include("../partials/user/navbar") %>
 
-    <!-- Breadcrumbs -->
-    <div class="breadcrumb-wrapper">
-        <div class="breadcrumb-container">
-            <div class="breadcrumbs">
-                <a href="/" class="breadcrumb-item">
-                    <i class="fas fa-home"></i> Home
-                </a>
-                <span class="breadcrumb-separator">/</span>
-                <span class="breadcrumb-item active">
-                    <i class="fas fa-heart"></i> Wishlist
-                </span>
-            </div>
+    <!-- Main Layout Container -->
+    <div class="page-container">
+        <!-- Main Layout with Sidebar -->
+        <div class="page-layout">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <%- include("../partials/user/profileSidebar") %>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <div class="container">
+                    <div class="page-header">
+                        <div class="header-icon">
+                            <span class="material-icons">favorite</span>
+                        </div>
+                        <div class="header-text">
+                            <h1>My Wishlist</h1>
+                            <p>Items you've saved for later</p>
+                        </div>
+                    </div>
+
+                    <div class="wishlist-section">
+                        <div class="section-header">
+                            <div class="section-title">
+                                <h2>Saved Items</h2>
+                                <p><span id="item-count"><%=wishlist.length%></span> items in your wishlist</p>
+                            </div>
+                            <% if (wishlist.length > 0) { %>
+                                <button class="btn btn-danger clear-all-btn" onclick="clearWishlist()">
+                                    <span class="material-icons">delete</span>
+                                    Empty Wishlist
+                                </button>
+                            <% } %>
+                        </div>
+
+                        <% if (wishlist.length > 0) { %>
+                            <div class="wishlist-grid" id="wishlistGrid">
+                                <% for(let product of wishlist) { %>
+                                    <div class="product-card" data-product-id="<%= product._id %>">
+                                        <div class="product-image">
+                                            <img src="<%= product.images && product.images.length > 0 ? product.images[0] : 'https://via.placeholder.com/200x200/f8f9fa/dee2e6?text=No+Image' %>" alt="<%= product.productName %>">
+                                            <button class="remove-btn" onclick="removeFromWishlist('<%= product._id %>')">
+                                                <span class="material-icons">close</span>
+                                            </button>
+                                        </div>
+                                        <div class="product-info">
+                                            <h3 class="product-title"><%= product.productName %></h3>
+                                            <div class="price-section">
+                                                <% if (product.variants && product.variants.length > 0) { %>
+                                                    <% 
+                                                        const sortedVariants = product.variants.sort((a, b) => {
+                                                            const aNum = parseFloat(a.size);
+                                                            const bNum = parseFloat(b.size);
+                                                            if (!isNaN(aNum) && !isNaN(bNum)) {
+                                                                return aNum - bNum;
+                                                            }
+                                                            return a.size.localeCompare(b.size);
+                                                        });
+                                                        const firstVariant = sortedVariants[0];
+                                                        const minPrice = Math.min(...product.variants.map(v => v.salePrice));
+                                                    %>
+                                                    <span class="current-price">₹<%= minPrice %></span>
+                                                    <div class="size-selector">
+                                                        <label>Select Size:</label>
+                                                        <select class="size-select" data-product-id="<%= product._id %>" onchange="updateWishlistPrice(this)">
+                                                            <option value="">Choose a size</option>
+                                                            <% sortedVariants.forEach(variant => { %>
+                                                                <% if (variant.variantQuantity > 0) { %>
+                                                                    <option value="<%= variant.size %>" data-price="<%= variant.salePrice %>"><%= variant.size %></option>
+                                                                <% } %>
+                                                            <% }); %>
+                                                        </select>
+                                                    </div>
+                                                <% } else { %>
+                                                    <span class="current-price">Price not available</span>
+                                                <% } %>
+                                            </div>
+                                            <div class="product-actions">
+                                                <button class="add-to-cart-btn" onclick="addToCartFromWishlist('<%= product._id %>')">
+                                                    <span class="material-icons">shopping_cart</span>
+                                                    Add to Cart
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <% } %>
+                            </div>
+                        <% } else { %>
+                            <div class="empty-state" id="emptyState">
+                                <div class="empty-icon">
+                                    <span class="material-icons">favorite_border</span>
+                                </div>
+                                <h3>Your wishlist is empty</h3>
+                                <p>Start adding items you love to see them here!</p>
+                                <button class="btn btn-large btn-primary" onclick="window.location.href='/shop'">Continue Shopping</button>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            </main>
         </div>
     </div>
 
-    <!-- Header -->
-    <header class="header">
-        <div class="container">
-            <h1><i class="fas fa-heart"></i> My Wishlist</h1>
-            <p class="header-subtitle">Save your favorite items for later</p>
-        </div>
-    </header>
-
-    <main class="main">
-        <div class="container">
-            <div class="wishlist-stats">
-                <p><span id="item-count"><%=wishlist.length%></span> items in your wishlist</p>
-                <button class="clear-all-btn" onclick="clearWishlist()">
-                    <i class="fas fa-trash"></i> Clear All
-                </button>
-            </div>
-
-            <div class="wishlist-grid" id="wishlistGrid">
-                <% if(wishlist.length > 0) { %>
-                    <% for(let product of wishlist) { %>
-                        <div class="product-card" data-product-id="<%= product._id %>">
-                            <div class="product-image">
-                                <img src="<%= product.images && product.images.length > 0 ? product.images[0] : 'https://via.placeholder.com/300x300/f8f9fa/dee2e6?text=No+Image' %>" alt="<%= product.productName %>">
-                                <button class="remove-btn" onclick="removeFromWishlist('<%= product._id %>')">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                                 <div class="product-overlay">
-                                    <button class="quick-view-btn"
-                                        data-id="<%= product._id %>"
-                                        onclick="event.stopPropagation(); quickView('<%= product._id %>')">
-                                        <i class="fas fa-eye"></i> Quick View
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="product-info">
-                                <h3 class="product-title"><%= product.productName %></h3>
-                                <div class="price-section">
-                                    <% if (product.variants && product.variants.length > 0) { %>
-                                        <% 
-                                            const sortedVariants = product.variants.sort((a, b) => {
-                                                const aNum = parseFloat(a.size);
-                                                const bNum = parseFloat(b.size);
-                                                if (!isNaN(aNum) && !isNaN(bNum)) {
-                                                    return aNum - bNum;
-                                                }
-                                                return a.size.localeCompare(b.size);
-                                            });
-                                            const firstVariant = sortedVariants[0];
-                                            const minPrice = Math.min(...product.variants.map(v => v.salePrice));
-                                            const maxPrice = Math.max(...product.variants.map(v => v.variantPrice));
-                                        %>
-                                        <span class="current-price">₹<%= minPrice %></span>
-                                        <% if (maxPrice > minPrice) { %>
-                                            <span class="original-price">₹<%= maxPrice %></span>
-                                        <% } %>
-                                        <% if (product.productOffer && product.productOffer > 0) { %>
-                                            <span class="discount"><%= product.productOffer %>% OFF</span>
-                                        <% } %>
-                                        <div class="size-selector">
-                                            <label>Select Size:</label>
-                                            <select class="size-select" data-product-id="<%= product._id %>" onchange="updateWishlistPrice(this)">
-                                                <option value="">Choose a size</option>
-                                                <% sortedVariants.forEach(variant => { %>
-                                                    <% if (variant.variantQuantity > 0) { %>
-                                                        <option value="<%= variant.size %>" data-price="<%= variant.salePrice %>"><%= variant.size %></option>
-                                                    <% } %>
-                                                <% }); %>
-                                            </select>
-                                        </div>
-                                    <% } else { %>
-                                        <span class="current-price">Price not available</span>
-                                    <% } %>
-                                </div>
-                                <div class="product-actions">
-                                    <button class="add-to-cart-btn" onclick="addToCartFromWishlist('<%= product._id %>')">
-                                        <i class="fas fa-shopping-cart"></i> Add to Cart
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    <% } %>
-                <% } else { %>
-                    <div class="empty-state" id="emptyState">
-                        <i class="fas fa-heart"></i>
-                        <h3>Your wishlist is empty</h3>
-                        <p>Start adding items you love to see them here!</p>
-                        <button class="continue-shopping-btn" onclick="window.location.href='/shop'">Continue Shopping</button>
-                    </div>
-                <% } %>
-            </div>
-        </div>
-    </main>
-
-    <!-- Footer -->
-     <%-include("../partials/user/userfooter")%>
+    <%- include("../partials/user/userfooter") %>
 
     
 
-    <!-- Success Toast -->
-    <div class="toast" id="toast">
-        <i class="fas fa-check-circle"></i>
-        <span id="toastMessage"></span>
-    </div>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         let cartCount = 0;
         let currentModalProductId = null;
 
-         function addToCart(productId) {
+        function addToCart(productId) {
             cartCount++;
             document.querySelector('.cart-count').textContent = cartCount;
             showToast(`Added ${productData[productId].title} to cart!`);
@@ -163,12 +133,10 @@
 
         async function addToCartFromWishlist(productId) {
             try {
-                // Get the product card
                 const productCard = document.querySelector(`[data-product-id="${productId}"]`);
                 const sizeSelect = productCard.querySelector('.size-select');
                 const selectedSize = sizeSelect.value;
 
-                // Check if size is selected
                 if (!selectedSize) {
                     Swal.fire({
                         title: 'Size Required!',
@@ -179,10 +147,9 @@
                     return;
                 }
 
-                // Show loading state
                 const addToCartBtn = productCard.querySelector('.add-to-cart-btn');
                 const originalText = addToCartBtn.innerHTML;
-                addToCartBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+                addToCartBtn.innerHTML = '<span class="material-icons">hourglass_empty</span> Adding...';
                 addToCartBtn.disabled = true;
 
                 const response = await fetch('/wishlist/add-to-cart', {
@@ -201,14 +168,12 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    // Animate product card removal
                     productCard.style.animation = 'slideOut 0.3s ease-in';
                     
                     setTimeout(() => {
                         productCard.remove();
                         updateItemCount();
                         
-                        // Update navbar counts
                         const wishlistCountElem = document.getElementById('wishlistCount');
                         if (wishlistCountElem) {
                             const currentWishlistCount = parseInt(wishlistCountElem.textContent) || 0;
@@ -221,20 +186,20 @@
                             cartCountElem.textContent = data.cartCount;
                         }
                         
-                        // Check if wishlist is empty and show empty state
                         const remainingCards = document.querySelectorAll('.product-card');
                         if (remainingCards.length === 0) {
                             document.getElementById('wishlistGrid').innerHTML = `
                                 <div class="empty-state" id="emptyState">
-                                    <i class="fas fa-heart"></i>
+                                    <div class="empty-icon">
+                                        <span class="material-icons">favorite_border</span>
+                                    </div>
                                     <h3>Your wishlist is empty</h3>
                                     <p>Start adding items you love to see them here!</p>
-                                    <button class="continue-shopping-btn" onclick="window.location.href='/shop'">Continue Shopping</button>
+                                    <button class="btn btn-large btn-primary" onclick="window.location.href='/shop'">Continue Shopping</button>
                                 </div>
                             `;
                         }
                         
-                        // Show success message
                         Swal.fire({
                             title: 'Added to Cart!',
                             text: 'Product has been moved to your cart successfully.',
@@ -244,11 +209,9 @@
                         });
                     }, 300);
                 } else {
-                    // Reset button state
                     addToCartBtn.innerHTML = originalText;
                     addToCartBtn.disabled = false;
                     
-                    // Check if it's an out of stock error
                     if (data.isOutOfStock || data.message === 'Out of Stock') {
                         Swal.fire({
                             title: 'Out of Stock!',
@@ -269,10 +232,9 @@
             } catch (error) {
                 console.error('Error adding to cart from wishlist:', error);
                 
-                // Reset button state
                 const productCard = document.querySelector(`[data-product-id="${productId}"]`);
                 const addToCartBtn = productCard.querySelector('.add-to-cart-btn');
-                addToCartBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Add to Cart';
+                addToCartBtn.innerHTML = '<span class="material-icons">shopping_cart</span> Add to Cart';
                 addToCartBtn.disabled = false;
                 
                 Swal.fire({
@@ -285,7 +247,6 @@
         }
 
         async function removeFromWishlist(productId) {
-            // Show SweetAlert confirmation dialog
             const result = await Swal.fire({
                 title: 'Remove from Wishlist?',
                 text: 'Are you sure you want to remove this item from your wishlist?',
@@ -320,7 +281,6 @@
                                 productCard.remove();
                                 updateItemCount();
                                 
-                                // Update navbar wishlist count
                                 const wishlistCountElem = document.getElementById('wishlistCount');
                                 if (wishlistCountElem) {
                                     const currentCount = parseInt(wishlistCountElem.textContent) || 0;
@@ -328,20 +288,20 @@
                                     wishlistCountElem.textContent = newCount;
                                 }
                                 
-                                // Check if wishlist is empty and show empty state
                                 const remainingCards = document.querySelectorAll('.product-card');
                                 if (remainingCards.length === 0) {
-                                    document.getElementById('wishlistGrid').innerHTML = `
+                                    document.querySelector('.wishlist-section').innerHTML = `
                                         <div class="empty-state" id="emptyState">
-                                            <i class="fas fa-heart"></i>
+                                            <div class="empty-icon">
+                                                <span class="material-icons">favorite_border</span>
+                                            </div>
                                             <h3>Your wishlist is empty</h3>
                                             <p>Start adding items you love to see them here!</p>
-                                            <button class="continue-shopping-btn" onclick="window.location.href='/shop'">Continue Shopping</button>
+                                            <button class="btn btn-large btn-primary" onclick="window.location.href='/shop'">Continue Shopping</button>
                                         </div>
                                     `;
                                 }
                                 
-                                // Show success message with SweetAlert
                                 Swal.fire({
                                     title: 'Removed!',
                                     text: 'Item has been removed from your wishlist.',
@@ -371,106 +331,74 @@
             }
         }
 
-       
+        async function clearWishlist() {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'Do you really want to clear your entire wishlist?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, clear it!',
+                cancelButtonText: 'Cancel'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const response = await fetch('/wishlist/clear', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        });
 
-        function quickView(productId) {
-            // Navigate to product detail page
-            window.location.href = `/product/${productId}`;
-        }
+                        const data = await response.json();
 
-      
-      
+                        if (data.success) {
+                            const productCards = document.querySelectorAll('.product-card');
+                            productCards.forEach((card, index) => {
+                                setTimeout(() => {
+                                    card.style.animation = 'slideOut 0.3s ease-in';
+                                    setTimeout(() => card.remove(), 300);
+                                }, index * 100);
+                            });
 
-      async function clearWishlist() {
-    Swal.fire({
-      title: 'Are you sure?',
-      text: 'Do you really want to clear your entire wishlist?',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, clear it!',
-      cancelButtonText: 'Cancel'
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          const response = await fetch('/wishlist/clear', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-              'X-Requested-With': 'XMLHttpRequest'
-            }
-          });
+                            setTimeout(() => {
+                                updateItemCount();
 
-          const data = await response.json();
+                                const wishlistCountElem = document.getElementById('wishlistCount');
+                                if (wishlistCountElem) {
+                                    wishlistCountElem.textContent = '0';
+                                }
 
-          if (data.success) {
-            const productCards = document.querySelectorAll('.product-card');
-            productCards.forEach((card, index) => {
-              setTimeout(() => {
-                card.style.animation = 'slideOut 0.3s ease-in';
-                setTimeout(() => card.remove(), 300);
-              }, index * 100);
+                                document.querySelector('.wishlist-section').innerHTML = `
+                                    <div class="empty-state" id="emptyState">
+                                        <div class="empty-icon">
+                                            <span class="material-icons">favorite_border</span>
+                                        </div>
+                                        <h3>Your wishlist is empty</h3>
+                                        <p>Start adding items you love to see them here!</p>
+                                        <button class="btn btn-large btn-primary" onclick="window.location.href='/shop'">Continue Shopping</button>
+                                    </div>
+                                `;
+
+                                showToast('Wishlist cleared successfully');
+                            }, productCards.length * 100 + 300);
+                        } else {
+                            showToast(data.message || 'Error clearing wishlist');
+                        }
+                    } catch (error) {
+                        console.error('Error clearing wishlist:', error);
+                        showToast('Error clearing wishlist. Please try again.');
+                    }
+                }
             });
-
-            setTimeout(() => {
-              updateItemCount();
-
-              // Update navbar wishlist count to 0
-              const wishlistCountElem = document.getElementById('wishlistCount');
-              if (wishlistCountElem) {
-                wishlistCountElem.textContent = '0';
-              }
-
-              // Show empty state
-              document.getElementById('wishlistGrid').innerHTML = `
-                <div class="empty-state" id="emptyState">
-                  <i class="fas fa-heart"></i>
-                  <h3>Your wishlist is empty</h3>
-                  <p>Start adding items you love to see them here!</p>
-                  <button class="continue-shopping-btn" onclick="window.location.href='/shop'">Continue Shopping</button>
-                </div>
-              `;
-
-              showToast('Wishlist cleared successfully');
-            }, productCards.length * 100 + 300);
-          } else {
-            showToast(data.message || 'Error clearing wishlist');
-          }
-        } catch (error) {
-          console.error('Error clearing wishlist:', error);
-          showToast('Error clearing wishlist. Please try again.');
         }
-      }
-    });
-  }
-
 
         function updateItemCount() {
             const count = document.querySelectorAll('.product-card').length;
             document.getElementById('item-count').textContent = count;
-        }
-
-        function generateStars(rating) {
-            let starsHTML = '';
-            const fullStars = Math.floor(rating);
-            const hasHalfStar = rating % 1 !== 0;
-            
-            for (let i = 0; i < fullStars; i++) {
-                starsHTML += '<i class="fas fa-star"></i>';
-            }
-            
-            if (hasHalfStar) {
-                starsHTML += '<i class="fas fa-star-half-alt"></i>';
-            }
-            
-            const emptyStars = 5 - Math.ceil(rating);
-            for (let i = 0; i < emptyStars; i++) {
-                starsHTML += '<i class="far fa-star"></i>';
-            }
-            
-            return starsHTML;
         }
 
         function showToast(message) {
@@ -485,55 +413,11 @@
             }, 3000);
         }
 
-        // Close modal when clicking outside
-       
-
-        // Mobile Navigation Toggle
-        const navToggle = document.getElementById('navToggle');
-        const navMenu = document.getElementById('navMenu');
-
-        navToggle.addEventListener('click', function() {
-            navMenu.classList.toggle('nav-menu-active');
-            navToggle.classList.toggle('nav-toggle-active');
-        });
-
-        // Close mobile menu when clicking on a link
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', () => {
-                navMenu.classList.remove('nav-menu-active');
-                navToggle.classList.remove('nav-toggle-active');
-            });
-        });
-
-        // Newsletter subscription
-        document.querySelector('.newsletter-btn').addEventListener('click', function() {
-            const email = document.querySelector('.newsletter-input').value;
-            if (email) {
-                showToast('Successfully subscribed to newsletter!');
-                document.querySelector('.newsletter-input').value = '';
-            } else {
-                showToast('Please enter a valid email address');
-            }
-        });
-
-        // Search functionality
-        document.querySelector('.search-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                const searchTerm = this.value;
-                if (searchTerm) {
-                    showToast(`Searching for "${searchTerm}"`);
-                    this.value = '';
-                }
-            }
-        });
-
         function updateWishlistPrice(selectElement) {
             try {
                 const productId = selectElement.getAttribute('data-product-id');
                 const selectedSize = selectElement.value;
 
-
-                // For now, just update the price based on the selected option
                 const selectedOption = selectElement.options[selectElement.selectedIndex];
                 if (selectedOption && selectedOption.dataset.price) {
                     const price = selectedOption.dataset.price;
@@ -542,15 +426,10 @@
                         priceElement.textContent = `₹${price}`;
                     }
                 }
-
             } catch (error) {
                 console.error('Error updating wishlist price:', error);
             }
         }
-
-        // Keyboard navigation
-        
     </script>
-    
 </body>
 </html>

@@ -107,6 +107,7 @@ const productDetailPage = async (req, res) => {
             wishlistCount: wishlistItems.length,
             cartCount: cartItems.length,
             isLandingPage: false,
+            isBlocked:false
         });
 
     } catch (error) {

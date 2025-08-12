@@ -19,9 +19,12 @@ body {
 .navbar {
     background: #fff;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 1000;
+    height: 70px;
 }
 
 .nav-container {
@@ -58,18 +61,118 @@ body {
     color: #6366f1;
 }
 
-/* Main Content */
+/* Page Container - This wraps everything except navbar */
+.page-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    margin-top: 70px; /* Account for fixed navbar */
+}
+
+/* Page Layout with Sidebar */
+.page-layout {
+    display: flex;
+    flex: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    gap: 30px;
+    padding: 20px;
+    align-items: flex-start;
+    min-height: calc(100vh - 70px); /* Full height minus navbar */
+}
+
+/* Sidebar - FIXED: Better positioning to prevent overlap */
+.sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 90px; /* Below navbar with some spacing */
+    max-height: calc(100vh - 110px); /* Proper max height to prevent footer overlap */
+    overflow-y: auto;
+    z-index: 100;
+    border-right: 1px solid #ddd;
+    padding: 20px 0;
+}
+
+/* Profile Section in Sidebar */
+.profile-section {
+    text-align: center;
+    padding: 20px;
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 10px;
+}
+
+.profile-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #6366f1;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 auto 10px;
+}
+
+.profile-section h3 {
+    color: #1e293b;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+/* Sidebar Menu */
+.sidebar-menu {
+    padding: 0 10px;
+}
+
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    text-decoration: none;
+    color: #64748b;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.sidebar-item:hover {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.sidebar-item.active {
+    background: rgba(99, 102, 241, 0.1);
+    color: #6366f1;
+    border-left: 3px solid #6366f1;
+}
+
+.sidebar-item .material-icons {
+    font-size: 20px;
+}
+
+/* Main Content - NO LONGER FIXED MARGIN */
 .main-content {
     flex: 1;
-    padding: 40px 0;
-    /* Add top padding to account for fixed navbar */
-    padding-top: 120px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
 }
 
 .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    flex: 1;
 }
 
 /* Page Header */
@@ -113,6 +216,8 @@ body {
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     padding: 20px;
+    flex: 1;
+    margin-bottom: 20px; /* Add margin to separate from footer */
 }
 
 .section-header {
@@ -331,7 +436,7 @@ body {
     transform: translateY(-1px);
 }
 
-/* Empty State (keeping for fallback) */
+/* Empty State */
 .empty-state {
     text-align: center;
     padding: 40px 0;
@@ -470,7 +575,7 @@ body {
     min-height: 80px;
 }
 
-/* Phone Input Container Styles */
+/* Enhanced Phone Input Container Styles */
 .phone-input-container {
     display: flex;
     gap: 0;
@@ -478,15 +583,15 @@ body {
 }
 
 .country-code-select {
-    width: 120px;
-    min-width: 120px;
+    width: 160px;
+    min-width: 160px;
     border-right: none;
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
     background-color: #f8f9fa;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: 500;
-    padding: 10px 8px;
+    padding: 10px 12px;
     cursor: pointer;
 }
 
@@ -502,6 +607,7 @@ body {
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
     padding-left: 15px;
+    width: calc(100% - 160px);
 }
 
 .phone-number-input:focus {
@@ -580,19 +686,87 @@ body {
     background: #d1d9e6;
 }
 
-/* Footer Styles */
+/* Footer Styles - FIXED: Better spacing and positioning */
 .footer {
     background: #1e293b;
     color: #e2e8f0;
-    padding: 20px 0;
-    margin-top: auto;
+    padding: 40px 0 20px;
+    margin-top: 40px; /* Add proper margin from content */
+    flex-shrink: 0;
+    position: relative;
+    z-index: 50;
 }
 
 .footer-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.footer-section h3 {
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.footer-section ul {
+    list-style: none;
+}
+
+.footer-section ul li {
+    margin-bottom: 8px;
+}
+
+.footer-section ul li a {
+    color: #94a3b8;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-section ul li a:hover {
+    color: #e2e8f0;
+}
+
+.footer-section p {
+    color: #94a3b8;
+    margin-bottom: 8px;
+}
+
+.social-links {
+    display: flex;
+    gap: 10px;
+}
+
+.social-links a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: #334155;
+    border-radius: 50%;
+    color: #94a3b8;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.social-links a:hover {
+    background: #475569;
+    color: #e2e8f0;
+}
+
+.footer-bottom {
     text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid #334155;
 }
 
 .footer-bottom p {
@@ -600,122 +774,151 @@ body {
 }
 
 /* Responsive Design */
-@media screen and (max-width: 768px) {
-    .main-content {
-        padding-top: 100px;
+@media screen and (max-width: 1024px) {
+    .page-layout {
+        gap: 20px;
+        padding: 15px;
     }
+    
+    .sidebar {
+        width: 250px;
+    }
+}
 
+@media screen and (max-width: 768px) {
+    .page-layout {
+        flex-direction: column;
+        padding: 15px;
+        align-items: stretch;
+    }
+    
+    .sidebar {
+        position: static;
+        width: 100%;
+        max-height: none;
+        margin-bottom: 20px;
+        border-radius: 12px;
+    }
+    
+    .main-content {
+        margin-left: 0;
+        overflow-y: visible;
+    }
+    
     .page-header {
         flex-direction: column;
         text-align: center;
     }
-
+    
     .section-header {
         flex-direction: column;
         gap: 15px;
     }
-
+    
     .addresses-grid {
         grid-template-columns: 1fr;
         gap: 15px;
     }
-
+    
     .address-card {
         padding: 15px;
     }
-
+    
     .address-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
     }
-
+    
     .address-actions {
         align-self: flex-end;
     }
-
+    
     .address-options {
         flex-direction: column;
     }
-
+    
     .modal {
         padding: 10px;
     }
-
+    
     .modal-content {
         width: 100%;
         max-width: none;
         margin: 0;
         border-radius: 8px;
     }
-
+    
     .modal-actions {
         flex-direction: column;
     }
-
+    
     .modal-actions .btn {
         width: 100%;
     }
-
+    
     /* Mobile phone input adjustments */
     .phone-input-container {
         flex-direction: column;
         gap: 10px;
     }
-
+    
     .country-code-select {
         width: 100%;
         border-radius: 6px;
         border-right: 1px solid #e2e8f0;
     }
-
+    
     .phone-number-input {
+        width: 100%;
         border-radius: 6px;
         border-left: 1px solid #e2e8f0;
         padding-left: 10px;
     }
+    
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        text-align: center;
+    }
 }
 
 @media screen and (max-width: 480px) {
-    .main-content {
-        padding-top: 90px;
+    .page-layout {
+        padding: 10px;
     }
-
-    .container {
-        padding: 0 15px;
-    }
-
+    
     .addresses-section {
         padding: 15px;
     }
-
+    
     .addresses-grid {
         grid-template-columns: 1fr;
         gap: 12px;
     }
-
+    
     .address-card {
         padding: 12px;
     }
-
+    
     .address-name,
     .address-phone,
     .address-location {
         gap: 8px;
     }
-
+    
     .address-name .material-icons,
     .address-phone .material-icons,
     .address-location .material-icons {
         font-size: 18px;
     }
-
+    
     .modal-content {
         padding: 15px;
     }
-
+    
     .country-code-select {
-        font-size: 0.8rem;
+        font-size: 0.85rem;
         min-width: 100px;
     }
 }

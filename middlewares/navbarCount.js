@@ -14,7 +14,6 @@ const navbarCount = async(req,res,next)=>{
             const wishlist = await Wishlist.findOne({userId:req.session.userId}).populate("products.productId")
             if(wishlist && wishlist.products){
                 wishlistCount = wishlist.products.length
-                console.log(wishlist.products.length)
             }
         }
         res.locals.cartCount = cartCount

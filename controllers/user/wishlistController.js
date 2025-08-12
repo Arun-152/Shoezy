@@ -155,8 +155,6 @@ const removeWishlist = async(req,res)=>{
 // Toggle wishlist - Add if not present, remove if present
 const toggleWishlist = async(req,res)=>{
     try {
-       
-        
         const { productId } = req.body
         const userId = req.session.userId
     
@@ -213,7 +211,7 @@ const toggleWishlist = async(req,res)=>{
         })
         
     } catch (error) {
-        console.error('💥 Error toggling wishlist:', error)
+        console.error('Error toggling wishlist:', error)
         return res.status(500).json({success: false, message: "Server error"})
     }
 }

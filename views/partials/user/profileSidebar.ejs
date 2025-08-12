@@ -10,26 +10,29 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            height: fit-content;
         }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f5f5f5;
             display: flex;
+            
         }
 
         .sidebar {
             width: 280px;
             background-color: #2c3e50;
             color: white;
-            height: 100vh;
+            height: 110vh;
             padding: 0;
             box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            
         }
 
         .profile-header {
             background-color: #34495e;
-            padding: 25px 20px;
+            padding: 10px;
             text-align: center;
             border-bottom: 1px solid #3d4f63;
         }
@@ -127,43 +130,43 @@
         
         <ul class="menu-list">
             <li class="menu-item">
-                <a href="#" class="menu-link">
+                <a href="/profile" class="menu-link">
                     <i class="fas fa-user menu-icon"></i>
                     My Profile
                 </a>
             </li>
             <li class="menu-item">
-                <a href="#" class="menu-link">
+                <a href="/profile/address" class="menu-link">
                     <i class="fas fa-map-marker-alt menu-icon"></i>
                     My Address
                 </a>
             </li>
             <li class="menu-item">
-                <a href="#" class="menu-link">
+                <a href="/order" class="menu-link">
                     <i class="fas fa-shopping-bag menu-icon"></i>
                     My Orders
                 </a>
             </li>
             <li class="menu-item">
-                <a href="#" class="menu-link">
+                <a href="/wallet" class="menu-link">
                     <i class="fas fa-wallet menu-icon"></i>
                     My Wallet
                 </a>
             </li>
             <li class="menu-item">
-                <a href="#" class="menu-link">
+                <a href="/profile/changePassword" class="menu-link">
                     <i class="fas fa-lock menu-icon"></i>
                     Change Password
                 </a>
             </li>
             <li class="menu-item">
-                <a href="#" class="menu-link">
+                <a href="/wishlist" class="menu-link">
                     <i class="fas fa-heart menu-icon"></i>
                     Wishlist
                 </a>
             </li>
             <li class="menu-item">
-                <a href="#" class="menu-link">
+                <a href="/coupen" class="menu-link">
                     <i class="fas fa-ticket-alt menu-icon"></i>
                     My Coupon
                 </a>
@@ -175,24 +178,18 @@
                 </a>
             </li>
             <li class="menu-item">
-                <a href="#" class="menu-link">
+                <a href="/home" class="menu-link">
                     <i class="fas fa-home menu-icon"></i>
                     Home
                 </a>
             </li>
             <li class="menu-item">
-                <a href="#" class="menu-link logout">
+                <a href="/login" class="menu-link logout">
                     <i class="fas fa-sign-out-alt menu-icon"></i>
                     Log Out
                 </a>
             </li>
         </ul>
-    </div>
-    
-    <!-- Optional main content area -->
-    <div class="main-content">
-        <h1>Main Content Area</h1>
-        <p>Your page content goes here...</p>
     </div>
 </body>
 </html>

@@ -29,36 +29,36 @@ const signupPage = async (req, res) => {
     }
 };
 
-const landingPage = async (req, res) => {
-     if(req.session.userId)return res.redirect("/home")
-    try {
-        // Fetch featured products for landing page (same logic as home page)
-        const featuredProducts = await Product.find({ isDeleted: false, isBlocked: false })
-            .populate({
-                path: "category",
-                match: { isListed: true, isDeleted: false }
-            })
-            .sort({ createdAt: -1 })
-            .limit(6);
+// const landingPage = async (req, res) => {
+//      if(req.session.userId)return res.redirect("/home")
+//     try {
+//         // Fetch featured products for landing page (same logic as home page)
+//         const featuredProducts = await Product.find({ isDeleted: false, isBlocked: false })
+//             .populate({
+//                 path: "category",
+//                 match: { isListed: true, isDeleted: false }
+//             })
+//             .sort({ createdAt: -1 })
+//             .limit(6);
 
-        // Filter out products with unlisted categories
-        const filteredProducts = featuredProducts.filter(product => product.category !== null);
+//         // Filter out products with unlisted categories
+//         const filteredProducts = featuredProducts.filter(product => product.category !== null);
 
-        // Check if user is logged in for navbar display
-        let userData = null;
-        if (req.session.userId) {
-            userData = await User.findById(req.session.userId);
-        }
+//         // Check if user is logged in for navbar display
+//         let userData = null;
+//         if (req.session.userId) {
+//             userData = await User.findById(req.session.userId);
+//         }
 
-        return res.render("landingPage", {
-            products: filteredProducts,
-            user: userData,
-            isLandingPage: true,
-        });
-    } catch (error) {
-        res.status(500).send("Server error");
-    }
-};
+//         return res.render("landingPage", {
+//             products: filteredProducts,
+//             user: userData,
+//             isLandingPage: true,
+//         });
+//     } catch (error) {
+//         res.status(500).send("Server error");
+//     }
+// };
 
 const loginPage = async (req, res) => {
     try {
@@ -727,10 +727,23 @@ const postResetPassword = async (req, res) => {
         res.status(500).json({ success: false, message: "Server error. Please try again." });
     }
 };
+const loadCoupen = async (req, res) => {
+    try {
+        const userId= req.body.userId
+        const user = await User.find(userId)
+        if (user) {
+        return res.render("coupenPage",{
+            user
+        })
+        }
+    } catch (error) {
+        console.error("Error loading verify OTP page:", error);
+        return res.redirect("/usererrorPage");
+    }
+};
 
 module.exports = {
     signupPage,
-    landingPage,
     loginPage,
     postSignup,
     otpVerification,
@@ -746,4 +759,5 @@ module.exports = {
     resendResetOTP,
     resetPasswordPage,
     postResetPassword,
+    loadCoupen
 };

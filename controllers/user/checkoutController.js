@@ -96,8 +96,7 @@ const placeOrder = async (req, res) => {
     if (!cart || !cart.items || cart.items.length === 0) {
       return res.status(400).json({ success: false, message: "Cart is empty" });
     }
-
-    // ✅ Filter valid products (not blocked or deleted)
+    
     const blockedProducts = [];
     const orderItems = [];
     let totalAmount = 0;

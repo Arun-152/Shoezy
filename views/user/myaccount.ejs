@@ -10,109 +10,57 @@
 <body>
     <%- include("../partials/user/navbar") %>
 
-    <!-- Breadcrumbs -->
-    <div class="breadcrumb-wrapper">
-        <div class="breadcrumb-container">
-            <div class="breadcrumbs">
-                <a href="/" class="breadcrumb-item">
-                    <i class="fas fa-home"></i> Home
-                </a>
-                <span class="breadcrumb-separator">/</span>
-                <span class="breadcrumb-item active">
-                    <i class="fas fa-user"></i> Profile
-                </span>
-            </div>
+    <!-- Main Layout Container -->
+    <div class="page-container">
+        <!-- Main Layout with Sidebar -->
+        <div class="page-layout">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <%- include("../partials/user/profileSidebar") %>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <div class="container">
+                    <div class="content-header">
+                        <h2>Account Settings</h2>
+                        <a href="/profile/edit"><button class="save-changes-btn edit-profile-btn">Edit Profile</button></a>
+                    </div>
+
+                    <div class="settings-container">
+                        <div class="settings-section profile-card">
+                            <div class="profile-info">
+                                <div class="profile-details">
+                                    <h4>Full Name</h4>
+                                    <p><%=user.fullname%></p>
+                                    <h4>Email</h4>
+                                    <p><%=user.email%></p>
+                                    <h4>Phone</h4>
+                                    <p><%=user.phone%></p>
+                                </div>
+                                <div class="profile-image">
+                                    <% if (user.profilePicture) { %>
+                                        <img src="/uploads<%= user.profilePicture %>?t=<%= Date.now() %>" alt="Profile Image">
+                                    <% } else { %>
+                                        <div class="default-profile-image"><%= user.fullname.charAt(0).toUpperCase() %></div>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>Account Management</h3>
+                            <div class="account-management-buttons">
+                               <a href="/profile/address"><button class="save-changes-btn">Manage Addresses</button></a>
+                                <a href="/profile/changePassword"><button class="save-changes-btn">Change Password</button></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
         </div>
     </div>
 
-<div class="main-container">
-    <aside class="sidebar">
-        <div class="profile-section">
-            <div class="profile-avatar">
-                <% if (user.profilePicture) { %>
-                    <img src="<%=user.profilePicture%>" alt="Profile Avatar">
-                <% } else { %>
-                    <div class="default-avatar"><%= user.fullname.charAt(0).toUpperCase() %></div>
-                <% } %>
-            </div>
-            <h3><%=user.fullname%></h3>
-        </div>
-        <nav class="sidebar-nav">
-            <a href="/profile" class="sidebar-link active">
-                <i class="fas fa-user"></i>
-                Account Overview
-            </a>
-            <a href="/order" class="sidebar-link">
-                <i class="fas fa-box"></i>
-                My Orders
-            </a>
-            <a href="/profile/address" class="sidebar-link">
-                <i class="fas fa-map-marker-alt"></i>
-                Manage Addresses
-            </a>
-            <a href="/wallet" class="sidebar-link">
-                <i class="fas fa-wallet"></i>
-                Wallet
-            </a>
-            <a href="/wishlist" class="sidebar-link">
-                <i class="fas fa-heart"></i>
-                Wishlist
-            </a>
-            <a href="#" class="sidebar-link">
-                <i class="fas fa-question-circle"></i>
-                Account Security
-            </a>
-            <a href="#" class="sidebar-link">
-                <i class="fas fa-wallet"></i>
-                Refferal
-            </a>
-            <a href="/logout" class="sidebar-link">
-                <i class="fas fa-sign-out-alt"></i>
-                Logout
-            </a>
-        </nav>
-    </aside>
-
-    <main class="main-content">
-        <div class="content-header">
-            <h2>Account Settings</h2>
-            <a href="/profile/edit"><button class="save-changes-btn edit-profile-btn">Edit Profile</button></a>
-        </div>
-
-        <div class="settings-container">
-            <div class="settings-section profile-card">
-                <div class="profile-info">
-                    <div class="profile-details">
-                        <h4>Full Name</h4>
-                        <p><%=user.fullname%></p>
-                        <h4>Email</h4>
-                        <p><%=user.email%></p>
-                        <h4>Phone</h4>
-                        <p><%=user.phone%></p>
-                    </div>
-                    <div class="profile-image">
-                        <% if (user.profilePicture) { %>
-                            <img src="/uploads<%= user.profilePicture %>?t=<%= Date.now() %>" alt="Profile Image">
-                        <% } else { %>
-                            <div class="default-profile-image"><%= user.fullname.charAt(0).toUpperCase() %></div>
-                        <% } %>
-                    </div>
-                </div>
-             
-            </div>
-
-            <div class="settings-section">
-                <h3>Account Management</h3>
-                <div class="account-management-buttons">
-                   <a href="/profile/address"><button class="save-changes-btn">Manage Addresses</button></a>
-                    <a href="/profile/changePassword"><button class="save-changes-btn">Change Password</button></a>
-                </div>
-            </div>
-        </div>
-    </main>
-</div>
-  <%- include("../partials/user/userfooter") %>
-  
-
+    <%- include("../partials/user/userfooter") %>
 </body>
 </html>

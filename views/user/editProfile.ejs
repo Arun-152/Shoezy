@@ -1,76 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Profile</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="/css/editProfile.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-
 <body>
-    <!-- Navigation Bar -->
     <%- include("../partials/user/navbar") %>
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <div class="container">
-            <div class="header">
-                <h2>Edit Profile</h2>
-                <button class="back-btn" onclick="goBack()">Back to Profile</button>
-            </div>
+    <!-- Main Layout Container -->
+    <div class="page-container">
+        <!-- Main Layout with Sidebar -->
+        <div class="page-layout">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <%- include("../partials/user/profileSidebar") %>
+            </aside>
 
-            <div class="profile-pic-section">
-                <div class="profile-pic-container">
-                    <div class="profile-pic" onclick="triggerFileUpload()"
-                         style="background-image: url('<%= user.profilePicture ? '/uploads' + user.profilePicture + '?t=' + Date.now() : '' %>');">
-                        <% if (!user.profilePicture) { %>A<% } %>
-                        <div class="camera-overlay">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <path
-                                    d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z">
-                                </path>
-                                <circle cx="12" cy="13" r="4"></circle>
-                            </svg>
+            <!-- Main Content -->
+            <main class="main-content">
+                <div class="container">
+                    <div class="page-header">
+                        <div class="header-icon">
+                            <span class="material-icons">edit</span>
+                        </div>
+                        <div class="header-text">
+                            <h1>Edit Profile</h1>
+                            <p>Update your personal information and profile picture</p>
                         </div>
                     </div>
-                    <input type="file" id="profilePicInput" accept=".jpg,.jpeg,.png,.gif,.webp"
-                        style="display: none;" onchange="handleFileUpload(event)">
+
+                    <div class="profile-section">
+                        <!-- Profile Picture Section -->
+                        <div class="profile-pic-section">
+                            <div class="section-header">
+                                <div class="section-title">
+                                    <h2>Profile Picture</h2>
+                                    <p>Click on the image to update your profile picture</p>
+                                </div>
+                            </div>
+                            
+                            <div class="profile-pic-container">
+                                <div class="profile-pic" onclick="triggerFileUpload()"
+                                     style="background-image: url('<%= user.profilePicture ? '/uploads' + user.profilePicture + '?t=' + Date.now() : '' %>');">
+                                    <% if (!user.profilePicture) { %>
+                                        <%= user.fullname.charAt(0).toUpperCase() %>
+                                    <% } %>
+                                    <div class="camera-overlay">
+                                        <span class="material-icons">camera_alt</span>
+                                    </div>
+                                </div>
+                                <input type="file" id="profilePicInput" accept=".jpg,.jpeg,.png,.gif,.webp"
+                                    style="display: none;" onchange="handleFileUpload(event)">
+                            </div>
+                            <div class="pic-info">
+                                <p class="pic-instruction">Maximum file size: 5MB</p>
+                                <p class="pic-formats">Supported formats: JPEG, PNG, GIF, WebP</p>
+                            </div>
+                        </div>
+
+                        <!-- Personal Information Section -->
+                        <div class="personal-info-section">
+                            <div class="section-header">
+                                <div class="section-title">
+                                    <h2>Personal Information</h2>
+                                    <p>Update your basic profile details</p>
+                                </div>
+                            </div>
+                            
+                            <div class="info-card">
+                                <form id="profileForm" enctype="multipart/form-data">
+                                    <div class="form-group">
+                                        <label for="fullName">
+                                            <span class="material-icons">person</span>
+                                            Full Name *
+                                        </label>
+                                        <input type="text" id="fullName" name="fullName" value="<%= user.fullname %>" 
+                                               placeholder="Enter your full name">
+                                        <div id="fullName-error" class="validationError" style="display: none;"></div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="phoneNumber">
+                                            <span class="material-icons">phone</span>
+                                            Phone Number *
+                                        </label>
+                                        <input type="text" id="phoneNumber" name="phoneNumber" value="<%= user.phone %>"
+                                               placeholder="Enter your phone number">
+                                        <div id="phoneNumber-error" class="validationError" style="display: none;"></div>
+                                    </div>
+                                    
+                                    <!-- Hidden file input for form submission -->
+                                    <input type="file" id="profilePictureFile" name="profilePicture" 
+                                           accept=".jpg,.jpeg,.png,.gif,.webp" style="display: none;">
+                                    
+                                    <div class="form-actions">
+                                        <button type="button" class="btn btn-secondary" onclick="cancelChanges()">
+                                            <span class="material-icons">close</span>
+                                            Cancel
+                                        </button>
+                                        <button type="submit" class="btn btn-primary">
+                                            <span class="material-icons">save</span>
+                                            Save Changes
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <p class="pic-instruction">Click the profile picture to change it</p>
-                <p class="pic-info">Maximum file size: 5MB. Supported formats: JPEG, PNG, GIF, WebP</p>
-            </div>
-
-            <div class="personal-info">
-                <h3>Personal Information</h3>
-                <form id="profileForm" enctype="multipart/form-data">
-                    <div class="form-group">
-                        <label for="fullName">Full Name *</label>
-                        <input type="text" id="fullName" name="fullName" value="<%= user.fullname %>" >
-                        <div id="fullName-error" class="validationError" style="display: none;"></div>
-                    </div>
-                    <div class="form-group">
-                        <label for="phoneNumber">Phone Number</label>
-                        <input type="text" id="phoneNumber" name="phoneNumber" value="<%= user.phone %>">
-                        <div id="phoneNumber-error" class="validationError" style="display: none;"></div>
-                    </div>
-                    <!-- Hidden file input for form submission -->
-                    <input type="file" id="profilePictureFile" name="profilePicture" accept=".jpg,.jpeg,.png,.gif,.webp" style="display: none;">
-                    <div class="buttons">
-                        <button type="button" class="cancel-btn" onclick="cancelChanges()">Cancel</button>
-                        <button type="submit" class="save-btn">Save Changes</button>
-                    </div>
-                </form>
-            </div>
+            </main>
         </div>
-    </main>
+    </div>
 
-    <!-- Footer -->
     <%- include("../partials/user/userfooter") %>
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         function triggerFileUpload() {
@@ -122,10 +169,6 @@
             }
         }
 
-        function goBack() {
-            window.history.back();
-        }
-
         function cancelChanges() {
             Swal.fire({
                 title: 'Are you sure?',
@@ -136,7 +179,7 @@
                 cancelButtonText: 'No, keep editing'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    window.history.back();
+                    window.location.href = '/profile';
                 }
             });
         }
@@ -175,8 +218,9 @@
                 showFormError('fullName-error', 'Full name must be at least 3 characters');
                 hasErrors = true;
             }
+            
             if(!phoneNumber){
-                  showFormError('phoneNumber-error', 'Phonenumber is required');
+                showFormError('phoneNumber-error', 'Phone number is required');
                 hasErrors = true;
             }
 
@@ -237,5 +281,4 @@
         });
     </script>
 </body>
-
 </html>

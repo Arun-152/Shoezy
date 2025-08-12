@@ -4,206 +4,222 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Wallet</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 1000px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        h1, h2 {
-            color: #333;
-            text-align: center;
-        }
-        .balance-section {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .balance-display {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            font-size: 24px;
-            color: #333;
-            padding: 15px;
-            background-color: #e7f3fe;
-            border-radius: 8px;
-            border: 1px solid #b3d4fc;
-        }
-        .balance-display span:nth-child(3) {
-            font-weight: bold;
-            color: #007bff;
-        }
-        .action-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 30px;
-        }
-        .action-buttons button {
-            padding: 10px 20px;
-            font-size: 16px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        .action-buttons button:nth-child(1) {
-            background-color: #28a745;
-            color: white;
-        }
-        .action-buttons button:nth-child(1):hover {
-            background-color: #218838;
-        }
-        .action-buttons button:nth-child(2) {
-            background-color: #dc3545;
-            color: white;
-        }
-        .action-buttons button:nth-child(2):hover {
-            background-color: #c82333;
-        }
-        .action-buttons button:nth-child(3), .action-buttons button:nth-child(4) {
-            background-color: #007bff;
-            color: white;
-        }
-        .action-buttons button:nth-child(3):hover, .action-buttons button:nth-child(4):hover {
-            background-color: #0056b3;
-        }
-        .transaction-section {
-            margin-top: 20px;
-        }
-        .filters {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-        .filters select {
-            padding: 8px;
-            font-size: 16px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background-color: #007bff;
-            color: white;
-        }
-        tr:hover {
-            background-color: #f5f5f5;
-        }
-        .pagination {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            align-items: center;
-        }
-        .pagination a, .pagination span {
-            padding: 8px 12px;
-            text-decoration: none;
-            color: #007bff;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        .pagination a:hover {
-            background-color: #007bff;
-            color: white;
-        }
-        .pagination span {
-            background-color: #f4f4f9;
-            color: #333;
-        }
-    </style>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="/css/wallet.css">
+    <link rel="stylesheet" href="/css/breadcrumbs.css">
 </head>
 <body>
-        <%- include('../partials/user/navbar') %>
-    <div class="container">
-        <h1>My Wallet</h1>
-        
-        <div class="balance-section">
-            <h2>Current Balance</h2>
-            <div class="balance-display">
-                <span>₹</span>
-                <span>💳</span>
-                <span>
-                    <% if (wallet.balance >= 0) { %>
-                        +₹<%= wallet.balance.toFixed(2) %>
-                    <% } else { %>
-                        -₹<%= Math.abs(wallet.balance).toFixed(2) %>
-                    <% } %>
-                </span>
-            </div>
-        </div>
+    <%- include('../partials/user/navbar') %>
 
-        <div class="action-buttons">
-            <button>➕ Add Funds</button>
-            <button>➖ Withdraw Funds</button>
-            <button>📊 CSV</button>
-            <button>📄 PDF</button>
-        </div>
+    <!-- Main Layout Container -->
+    <div class="page-container">
+        <!-- Main Layout with Sidebar -->
+        <div class="page-layout">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <%- include('../partials/user/profileSidebar') %>
+            </aside>
 
-        <div class="transaction-section">
-            <h2>Transaction History</h2>
-            <div class="filters">
-                <select name="typeFilter">
-                    <option value="all" <%= typeFilter === 'all' ? 'selected' : '' %>>All Types</option>
-                    <option value="credit" <%= typeFilter === 'credit' ? 'selected' : '' %>>Credit</option>
-                    <option value="debit" <%= typeFilter === 'debit' ? 'selected' : '' %>>Debit</option>
-                </select>
-                <select name="sort">
-                    <option value="newest" <%= sort === 'newest' ? 'selected' : '' %>>Date (Newest)</option>
-                    <option value="oldest" <%= sort === 'oldest' ? 'selected' : '' %>>Date (Oldest)</option>
-                </select>
-            </div>
+            <!-- Main Content -->
+            <main class="main-content">
+                <div class="container">
+                    <div class="page-header">
+                        <div class="header-icon">
+                            <span class="material-icons">account_balance_wallet</span>
+                        </div>
+                        <div class="header-text">
+                            <h1>My Wallet</h1>
+                            <p>Manage your finances and track your spending</p>
+                        </div>
+                    </div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Type</th>
-                        <th>Amount</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% transactions.forEach(tx => { %>
-                        <tr>
-                            <td><%= new Date(tx.createdAt).toLocaleDateString() %></td>
-                            <td><%= tx.type.charAt(0).toUpperCase() + tx.type.slice(1) %></td>
-                            <td>₹<%= tx.amount.toFixed(2) %></td>
-                            <td><%= tx.description %></td>
-                        </tr>
-                    <% }) %>
-                </tbody>
-            </table>
+                    <div class="wallet-section">
+                        <!-- Stats Grid -->
+                        <div class="stats-grid">
+                            <!-- Total Balance Card -->
+                            <div class="balance-card">
+                                <div class="balance-label">Total Balance</div>
+                                <div class="balance-amount">
+                                    <% if (wallet.balance >= 0) { %>
+                                        ₹<%= wallet.balance.toFixed(0) %>
+                                    <% } else { %>
+                                        -₹<%= Math.abs(wallet.balance).toFixed(0) %>
+                                    <% } %>
+                                </div>
+                                <div class="balance-status">Ready to use</div>
+                            </div>
 
-            <div class="pagination">
-                <% if (currentPage > 1) { %>
-                    <a href="?page=<%= currentPage - 1 %>&typeFilter=<%= typeFilter %>&sort=<%= sort %>">← Previous</a>
-                <% } %>
-                <span><%= currentPage %></span>
-                <% if (currentPage < totalPages) { %>
-                    <a href="?page=<%= currentPage + 1 %>&typeFilter=<%= typeFilter %>&sort=<%= sort %>">Next →</a>
-                <% } %>
-            </div>
+                            <!-- Total Spent Card -->
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <div class="stat-label">Total Spent</div>
+                                    <div class="stat-icon spent">↓</div>
+                                </div>
+                                <div class="stat-amount">₹0</div>
+                            </div>
+
+                            <!-- Total Added Card -->
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <div class="stat-label">Total Added</div>
+                                    <div class="stat-icon added">↑</div>
+                                </div>
+                                <div class="stat-amount">₹0</div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="action-buttons">
+                            <button class="action-btn primary" onclick="handleAddFunds()">
+                                <span class="material-icons">add</span>
+                                Add Funds
+                            </button>
+                            <button class="action-btn primary" onclick="handleWithdraw()">
+                                <span class="material-icons">remove</span>
+                                Withdraw Funds
+                            </button>
+                            <button class="action-btn secondary" onclick="handleCSVExport()">
+                                <span class="material-icons">file_download</span>
+                                Export CSV
+                            </button>
+                            <button class="action-btn secondary" onclick="handlePDFExport()">
+                                <span class="material-icons">picture_as_pdf</span>
+                                Export PDF
+                            </button>
+                        </div>
+
+                        <!-- Transactions Section -->
+                        <div class="transactions-section">
+                            <div class="section-header">
+                                <div class="section-title">
+                                    <h2>Recent Transactions</h2>
+                                    <p>View your wallet transaction history</p>
+                                </div>
+                            </div>
+
+                            <!-- Filters -->
+                            <div class="filters-container">
+                                <select name="typeFilter" class="filter-select" onchange="handleFilterChange()">
+                                    <option value="all" <%= typeFilter === 'all' ? 'selected' : '' %>>All Types</option>
+                                    <option value="credit" <%= typeFilter === 'credit' ? 'selected' : '' %>>Credit</option>
+                                    <option value="debit" <%= typeFilter === 'debit' ? 'selected' : '' %>>Debit</option>
+                                </select>
+                                <select name="sort" class="filter-select" onchange="handleSortChange()">
+                                    <option value="newest" <%= sort === 'newest' ? 'selected' : '' %>>Date (Newest)</option>
+                                    <option value="oldest" <%= sort === 'oldest' ? 'selected' : '' %>>Date (Oldest)</option>
+                                </select>
+                            </div>
+
+                            <!-- Transactions Content -->
+                            <% if (transactions && transactions.length > 0) { %>
+                                <div class="transactions-table-container">
+                                    <table class="transaction-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Type</th>
+                                                <th>Amount</th>
+                                                <th>Description</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% transactions.forEach(tx => { %>
+                                                <tr>
+                                                    <td><%= new Date(tx.createdAt).toLocaleDateString() %></td>
+                                                    <td>
+                                                        <span class="transaction-type <%= tx.type %>">
+                                                            <%= tx.type.charAt(0).toUpperCase() + tx.type.slice(1) %>
+                                                        </span>
+                                                    </td>
+                                                    <td>₹<%= tx.amount.toFixed(2) %></td>
+                                                    <td><%= tx.description %></td>
+                                                </tr>
+                                            <% }) %>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Pagination -->
+                                <div class="pagination">
+                                    <% if (currentPage > 1) { %>
+                                        <a href="?page=<%= currentPage - 1 %>&typeFilter=<%= typeFilter %>&sort=<%= sort %>">← Previous</a>
+                                    <% } %>
+                                    <span><%= currentPage %></span>
+                                    <% if (currentPage < totalPages) { %>
+                                        <a href="?page=<%= currentPage + 1 %>&typeFilter=<%= typeFilter %>&sort=<%= sort %>">Next →</a>
+                                    <% } %>
+                                </div>
+                            <% } else { %>
+                                <!-- Empty State -->
+                                <div class="empty-state">
+                                    <div class="empty-icon">
+                                        <span class="material-icons">receipt_long</span>
+                                    </div>
+                                    <h3>No transactions yet</h3>
+                                    <p>Your wallet transactions will appear here</p>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </main>
         </div>
     </div>
+
+    <%- include('../partials/user/userfooter') %>
+
+    <script>
+        function handleAddFunds() {
+            const button = event.target.closest('.action-btn');
+            button.classList.add('loading');
+            console.log('Add funds clicked');
+            setTimeout(() => button.classList.remove('loading'), 1000);
+        }
+
+        function handleWithdraw() {
+            const button = event.target.closest('.action-btn');
+            button.classList.add('loading');
+            console.log('Withdraw funds clicked');
+            setTimeout(() => button.classList.remove('loading'), 1000);
+        }
+
+        function handleCSVExport() {
+            const button = event.target.closest('.action-btn');
+            button.classList.add('loading');
+            console.log('CSV export clicked');
+            setTimeout(() => button.classList.remove('loading'), 1000);
+        }
+
+        function handlePDFExport() {
+            const button = event.target.closest('.action-btn');
+            button.classList.add('loading');
+            console.log('PDF export clicked');
+            setTimeout(() => button.classList.remove('loading'), 1000);
+        }
+
+        function handleFilterChange() {
+            const select = event.target;
+            const typeFilter = select.value;
+            const currentSort = document.querySelector('select[name="sort"]').value;
+            window.location.href = `?page=1&typeFilter=${typeFilter}&sort=${currentSort}`;
+        }
+
+        function handleSortChange() {
+            const select = event.target;
+            const sort = select.value;
+            const currentTypeFilter = document.querySelector('select[name="typeFilter"]').value;
+            window.location.href = `?page=1&typeFilter=${currentTypeFilter}&sort=${sort}`;
+        }
+
+        // Add entrance animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const elements = document.querySelectorAll('.fade-in');
+            elements.forEach((element, index) => {
+                setTimeout(() => {
+                    element.style.animation = `fadeIn 0.5s ease-out ${index * 0.1}s both`;
+                }, 100);
+            });
+        });
+    </script>
 </body>
 </html>
