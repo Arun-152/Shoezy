@@ -319,7 +319,6 @@ body {
 
 .status-badge {
     padding: 6px 15px;
-    border-radius: 20px;
     font-size: 0.85rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -327,23 +326,23 @@ body {
 }
 
 .order-status.delivered .status-badge {
-    background: rgba(34, 197, 94, 0.1);
-    color: #16a34a;
+    background: rgba(14, 218, 89, 0.1);
+    color: #ffffff;
 }
 
 .order-status.shipped .status-badge {
     background: rgba(59, 130, 246, 0.1);
-    color: #2563eb;
+    color: #ffffff;
 }
 
 .order-status.pending .status-badge {
-    background: rgba(251, 191, 36, 0.1);
-    color: #d97706;
+    background:rgb(65, 62, 62);
+    color: #f3ba01;
 }
 
 .order-status.cancelled .status-badge {
     background: rgba(239, 68, 68, 0.1);
-    color: #dc2626;
+    color: #fafafa;
 }
 
 /* Order Items */

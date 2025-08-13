@@ -46,7 +46,7 @@ router.get("/order",userAuth, orderController.orderPage);
 router.get("/order/:orderId",userAuth, orderController.orderDetails);
 router.post("/order/:orderId/cancel",userAuth, orderController.cancelOrder);
 router.get("/userErrorPage", userController.userErrorPage)
-router.post("/order/return", userAuth, orderController.returnOrder);
+router.post("/order/:orderId/return", userAuth, orderController.returnOrder);
 router.get("/order/:orderId/invoice",userAuth,orderController.getInvoice)
 
 

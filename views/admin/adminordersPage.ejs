@@ -125,7 +125,7 @@
                                                     <td class="action">
                                           <select class="action-dropdown"
                                               onchange="updateOrderStatus('<%= orders[i]._id %>', this)"
-                                              <%= orders[i].orderStatus === 'Delivered' ? 'disabled' : '' %>>
+                                              <%= orders[i].orderStatus === 'Delivered' || orders[i].orderStatus === 'Cancelled' ? 'disabled' : '' %>>
                                               <option value="" disabled selected>Select Status</option>
                                               <option value="Pending" <%= orders[i].orderStatus === 'Pending' ? 'selected' : '' %>>Pending</option>
                                               <option value="Processing" <%= orders[i].orderStatus === 'Processing' ? 'selected' : '' %>>Processing</option>

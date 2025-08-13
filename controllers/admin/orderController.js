@@ -154,8 +154,8 @@ const orderDetails = async (req, res) => {
 }
 const viewReturnRequests = async (req, res) => {
   try {
-    // Fetch orders that contain at least one returned product
-    const returnedOrders = await Order.find({ "items.status": "Returned" })
+    // Fetch orders that contain at least one item with return requested
+    const returnedOrders = await Order.find({ "items.status": "ReturnRequested" })
       .populate("userId")
       .populate("items.productId")
       .sort({ updatedAt: -1 });
@@ -172,98 +172,83 @@ const viewReturnRequests = async (req, res) => {
     });
   }
 };
+
 const approveReturnRequest = async (req, res) => {
   try {
-    const { orderId, productId } = req.params;
+    const { orderId } = req.params; // remove productId from params for bulk approval
 
-    // Validate IDs
-    if (!mongoose.Types.ObjectId.isValid(orderId) || !mongoose.Types.ObjectId.isValid(productId)) {
-      return res.status(400).json({ success: false, message: "Invalid order or product ID" });
+    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+      return res.status(400).json({ success: false, message: "Invalid order ID" });
     }
 
-    // Find order with product populated
     const order = await Order.findById(orderId).populate("items.productId");
     if (!order) {
       return res.status(404).json({ success: false, message: "Order not found" });
     }
 
-    let itemFound = false;
     let refundAmount = 0;
-    let productName = "";
-    let returnQuantity = 0;
-    let returnSize = "";
-    let returnReason = "";
+    let updatedProducts = [];
 
-    // Update item status
-    order.items = order.items.map((item) => {
-      const itemProductId = item.productId?._id?.toString();
-      if (itemProductId === productId && item.status === "Returned") {
-        item.status = "ReturnApproved";
-        itemFound = true;
-        refundAmount = item.price || item.productId.price || 0;
-        productName = item.productId.productName || "Unknown Product";
-        returnQuantity = item.quantity || 1;
-        returnSize = item.size; // 
-        returnReason = item.returnReason || "Return approved";
+    // Loop over all ReturnRequested items
+    order.items = order.items.map(item => {
+      if (item.status === "ReturnRequested") {
+        item.status = "Returned"; // directly set Returned for user clarity
+        refundAmount += item.price || item.productId.price || 0;
+        updatedProducts.push({
+          name: item.productId.productName || "Unknown Product",
+          quantity: item.quantity || 1,
+          size: item.size
+        });
       }
       return item;
     });
 
-    if (!itemFound) {
-      return res.status(400).json({ success: false, message: "Return request not found or already processed" });
+    if (updatedProducts.length === 0) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "No return requests found or already processed" 
+      });
     }
 
-    // Find product
-    const product = await Product.findById(productId);
-    if (!product) {
-      return res.status(404).json({ success: false, message: "Product not found" });
+    // Update product quantities for all returned items
+    for (let prod of updatedProducts) {
+      const productDoc = await Product.findOne({ "productName": prod.name });
+      if (productDoc) {
+        const variant = productDoc.variants.find(v => v.size === prod.size);
+        if (variant) {
+          variant.variantQuantity += prod.quantity;
+          await productDoc.save();
+        }
+      }
     }
 
-  
-    const variant = product.variants.find(v => v.size === returnSize);
-    if (!variant) {
-      return res.status(404).json({ success: false, message: `Variant with size ${returnSize} not found` });
-    }
-
-    variant.variantQuantity += returnQuantity;
-    await product.save();
-
-    // Find wallet
+    // Wallet refund
     const wallet = await Wallet.findOne({ userId: order.userId });
     if (!wallet) {
       return res.status(404).json({ success: false, message: "Wallet not found for user" });
     }
 
-    // Create transaction
     const newBalance = wallet.balance + refundAmount;
     const transaction = {
       transactionId: "TXN" + Date.now() + Math.random().toString(36).substr(2, 5).toUpperCase(),
       type: "credit",
       amount: refundAmount,
-      description: `Refund for returned item: ${productName} (${returnQuantity} units, size ${returnSize})`,
+      description: `Refund for returned items: ${updatedProducts.map(p => `${p.name} (${p.quantity} units, size ${p.size})`).join(", ")}`,
       balanceAfter: newBalance,
       orderId: orderId,
       status: "completed",
-      source: "return_refund",
-      metadata: {
-        orderNumber: order.orderNumber || order._id.toString(),
-        productName,
-        returnQuantity,
-        size: returnSize,
-        refundReason: returnReason
-      }
+      source: "return_refund"
     };
 
     wallet.transactions.push(transaction);
     wallet.balance = newBalance;
     await wallet.save();
-
     await order.save();
 
     res.status(200).json({
       success: true,
-      message: "Return request approved, refund processed, and variant stock updated",
-      updatedVariantQuantity: variant.variantQuantity
+      message: "All return requests approved and refund processed",
+      updatedProducts
     });
 
   } catch (error) {
@@ -273,13 +258,11 @@ const approveReturnRequest = async (req, res) => {
 };
 
 
-
 const rejectReturnRequest = async (req, res) => {
   try {
     const { orderId, productId } = req.params;
 
     const order = await Order.findById(orderId);
-
     if (!order) {
       return res.status(404).json({ success: false, message: "Order not found" });
     }
@@ -288,8 +271,7 @@ const rejectReturnRequest = async (req, res) => {
 
     order.items = order.items.map(item => {
       const itemProductId = item.productId._id?.toString?.() || item.productId?.toString?.();
-      if (itemProductId === productId && item.status === 'Returned') {
-
+      if (itemProductId === productId && item.status === 'ReturnRequested') {
         item.status = 'Delivered'; 
         item.returnReason = null;
         item.returnDate = null;
@@ -299,7 +281,10 @@ const rejectReturnRequest = async (req, res) => {
     });
 
     if (!itemFound) {
-      return res.status(400).json({ success: false, message: "Return request not found or already processed" });
+      return res.status(400).json({ 
+        success: false, 
+        message: "Return request not found or already processed" 
+      });
     }
 
     await order.save();

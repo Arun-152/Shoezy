@@ -578,21 +578,15 @@ body {
 /* Enhanced Phone Input Container Styles */
 .phone-input-container {
     display: flex;
-    gap: 0;
+      align-items: center;
+    gap: 8px;
     width: 100%;
 }
 
 .country-code-select {
-    width: 160px;
-    min-width: 160px;
-    border-right: none;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-    background-color: #f8f9fa;
-    font-size: 0.9rem;
-    font-weight: 500;
-    padding: 10px 12px;
-    cursor: pointer;
+      flex: 0 0 100px; /* fixed width for country code */
+  padding: 8px;
+  font-size: 14px;
 }
 
 .country-code-select:focus {
@@ -602,12 +596,9 @@ body {
 }
 
 .phone-number-input {
-    flex: 1;
-    border-left: none;
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-    padding-left: 15px;
-    width: calc(100% - 160px);
+    flex: 1; /* fill remaining space */
+  padding: 8px;
+  font-size: 14px;
 }
 
 .phone-number-input:focus {

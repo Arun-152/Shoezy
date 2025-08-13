@@ -515,7 +515,7 @@ body {
 
 .section-header.centered {
     justify-content: center;
-    text-align: center;
+    align-items: flex-start;
     flex-direction: column;
     gap: 16px;
 }

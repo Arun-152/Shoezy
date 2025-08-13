@@ -13,7 +13,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
@@ -23,34 +23,104 @@
             margin-bottom: 20px;
         }
 
+        .no-requests {
+            text-align: center;
+            color: #666;
+            font-size: 18px;
+            margin: 40px 0;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
             background-color: #fff;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
         }
 
         th, td {
             padding: 12px;
             text-align: left;
             border-bottom: 1px solid #ddd;
+            vertical-align: top;
         }
 
         th {
             background-color: #e9ecef;
             font-weight: bold;
+            color: #495057;
         }
 
         tr:hover {
             background-color: #f8f9fa;
         }
 
-        .actions button {
-            padding: 6px 12px;
-            margin-right: 5px;
-            border: none;
+        .order-info {
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .customer-name {
+            color: #007bff;
+            font-weight: 500;
+        }
+
+        .products-container {
+            max-width: 400px;
+        }
+
+        .product-item {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
             border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .product-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .product-name {
+            font-weight: 500;
+            color: #28a745;
+            margin-bottom: 4px;
+        }
+
+        .product-details {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 6px;
+        }
+
+        .return-reason {
+            font-size: 13px;
+            color: #495057;
+            background-color: #fff3cd;
+            padding: 4px 6px;
+            border-radius: 3px;
+            border-left: 3px solid #ffc107;
+            margin-bottom: 8px;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .product-actions button {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 3px;
             cursor: pointer;
+            font-size: 11px;
+            font-weight: 500;
         }
 
         .approve-btn {
@@ -63,9 +133,27 @@
             color: white;
         }
 
-        .approve-btn:hover,
+        .approve-btn:hover {
+            background-color: #218838;
+        }
+
         .reject-btn:hover {
-            opacity: 0.9;
+            background-color: #c82333;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .order-date {
+            color: #666;
+            font-size: 13px;
         }
 
         footer {
@@ -74,133 +162,242 @@
             color: #666;
             font-size: 12px;
         }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            table {
+                font-size: 12px;
+            }
+            
+            th, td {
+                padding: 8px;
+            }
+
+            .products-container {
+                max-width: 300px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Manage Cancellation/Return Requests</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Order ID</th>
-                    <th>Customer</th>
-                    <th>Product</th>
-                    <th>Action</th>
-                    <th>Reason</th>
-                    <th>Request Date</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% returnedOrders.forEach(order => {
-                    order.items.forEach(item => {
-                        if (item.status === 'Returned') { %>
-                            <tr>
-                                <td><%= order.orderNumber %></td>
-                                <td><%= order.userId.fullname %></td>
-                                <td><%= item.productId.name %></td>
-                                <td>Return</td>
-                                <td><%= order.orderReturnReason || 'No reason provided' %></td>
-                                <td><%= item.returnDate ? item.returnDate.toDateString() : 'N/A' %></td>
-                                <td class="actions">
-                                    <button class="approve-btn"
-                                            onclick="handleApprove('<%= order._id %>', '<%= item.productId._id %>')">Approve</button>
-                                    <button class="reject-btn"
-                                            onclick="handleReject('<%= order._id %>', '<%= item.productId._id %>')">Reject</button>
-                                </td>
-                            </tr>
-                        <% }
+        <h2>Manage Return Requests</h2>
+        
+        <% 
+        // Group orders that have return requests
+        let ordersWithReturnRequests = [];
+        
+        if (returnedOrders && returnedOrders.length > 0) {
+            returnedOrders.forEach(order => {
+                let returnRequestedItems = order.items.filter(item => item.status === 'ReturnRequested');
+                if (returnRequestedItems.length > 0) {
+                    ordersWithReturnRequests.push({
+                        ...order.toObject(),
+                        returnRequestedItems: returnRequestedItems
                     });
-                }); %>
-            </tbody>
-        </table>
+                }
+            });
+        }
+        %>
+        
+        <% if (ordersWithReturnRequests.length > 0) { %>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Order Date</th>
+                        <th>Return Requests</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% ordersWithReturnRequests.forEach(order => { %>
+                        <tr>
+                            <td class="order-info">
+                                #<%= order.orderNumber || order._id.toString().slice(-6) %>
+                            </td>
+                            <td class="customer-name">
+                                <%= order.userId?.fullname || 
+                                    order.userId?.name || 
+                                    (order.userId?.firstName ? order.userId.firstName + ' ' + (order.userId.lastName || '') : '') ||
+                                    'Unknown Customer' %>
+                            </td>
+                            <td class="order-date">
+                                <%= order.createdAt ? 
+                                    new Date(order.createdAt).toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'short',
+                                        day: 'numeric'
+                                    }) : 'N/A' %>
+                            </td>
+                            <td class="products-container">
+                                <% order.returnRequestedItems.forEach((item, index) => { %>
+                                    <div class="product-item">
+                                       
+                                        <div class="return-reason">
+                                            <strong>Reason:</strong> 
+                                            <%= item.returnReason || 
+                                                order.orderReturnReason || 
+                                                'No reason provided' %>
+                                        </div>
+                                        <div class="product-actions">
+                                            <button class="approve-btn"
+                                                    onclick="handleApprove('<%= order._id %>', '<%= item.productId._id %>', '<%= item.productId?.productName || item.productId?.name || "Unknown" %>')">
+                                                Approve
+                                            </button>
+                                            <button class="reject-btn"
+                                                    onclick="handleReject('<%= order._id %>', '<%= item.productId._id %>', '<%= item.productId?.productName || item.productId?.name || "Unknown" %>')">
+                                                Reject
+                                            </button>
+                                        </div>
+                                    </div>
+                                <% }); %>
+                            </td>
+                            <td>
+                                <span class="status-badge">
+                                    <%= order.returnRequestedItems.length %> Return Request<%= order.returnRequestedItems.length > 1 ? 's' : '' %>
+                                </span>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        <% } else { %>
+            <div class="no-requests">
+                <h3>No Return Requests Found</h3>
+                <p>There are no pending return requests at the moment.</p>
+            </div>
+        <% } %>
+        
         <footer>&copy; 2025 Tmz Admin Panel. All rights reserved.</footer>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        async function handleApprove(orderId, productId) {
-            Swal.fire({
+        async function handleApprove(orderId, productId, productName) {
+            const result = await Swal.fire({
                 title: 'Are you sure?',
-                text: 'Do you want to approve this return request?',
+                html: `Do you want to approve the return request for:<br><strong>${productName}</strong><br><br>This will process a refund to the customer.`,
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Yes, approve it!',
-                cancelButtonText: 'Cancel'
-            }).then(async (result) => {
-                if (result.isConfirmed) {
-                    try {
-                        const response = await fetch(`/admin/orders/approve-return/${orderId}/${productId}`, {
-                            method: 'PATCH'
-                        });
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d'
+            });
 
-                        const data = await response.json();
-
-                        if (data.success) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Approved!',
-                                text: data.message
-                            }).then(() => location.reload());
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error!',
-                                text: data.message
-                            });
+            if (result.isConfirmed) {
+                try {
+                    // Show loading
+                    Swal.fire({
+                        title: 'Processing...',
+                        text: 'Please wait while we process the return request.',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
                         }
-                    } catch (error) {
-                        console.error('Approve Error:', error);
-                        Swal.fire({
+                    });
+
+                    const response = await fetch(`/admin/orders/approve-return/${orderId}/${productId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        await Swal.fire({
+                            icon: 'success',
+                            title: 'Approved!',
+                            html: `Return request for <strong>${productName}</strong> has been approved successfully.<br>Refund has been processed.`,
+                            confirmButtonColor: '#28a745'
+                        });
+                        location.reload();
+                    } else {
+                        await Swal.fire({
                             icon: 'error',
-                            title: 'Server Error!',
-                            text: 'Please try again later.'
+                            title: 'Error!',
+                            text: data.message || 'Failed to approve return request.',
+                            confirmButtonColor: '#dc3545'
                         });
                     }
+                } catch (error) {
+                    console.error('Approve Error:', error);
+                    await Swal.fire({
+                        icon: 'error',
+                        title: 'Server Error!',
+                        text: 'Please try again later.',
+                        confirmButtonColor: '#dc3545'
+                    });
                 }
-            });
+            }
         }
 
-        async function handleReject(orderId, productId) {
-            Swal.fire({
+        async function handleReject(orderId, productId, productName) {
+            const result = await Swal.fire({
                 title: 'Are you sure?',
-                text: 'Do you want to reject this return request?',
+                html: `Do you want to reject the return request for:<br><strong>${productName}</strong>`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Yes, reject it!',
-                cancelButtonText: 'Cancel'
-            }).then(async (result) => {
-                if (result.isConfirmed) {
-                    try {
-                        const response = await fetch(`/admin/orders/reject-return/${orderId}/${productId}`, {
-                            method: 'PATCH'
-                        });
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d'
+            });
 
-                        const data = await response.json();
-
-                        if (data.success) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Rejected!',
-                                text: data.message
-                            }).then(() => location.reload());
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error!',
-                                text: data.message
-                            });
+            if (result.isConfirmed) {
+                try {
+                    // Show loading
+                    Swal.fire({
+                        title: 'Processing...',
+                        text: 'Please wait while we process the rejection.',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
                         }
-                    } catch (error) {
-                        console.error('Reject Error:', error);
-                        Swal.fire({
+                    });
+
+                    const response = await fetch(`/admin/orders/reject-return/${orderId}/${productId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        await Swal.fire({
+                            icon: 'success',
+                            title: 'Rejected!',
+                            html: `Return request for <strong>${productName}</strong> has been rejected.`,
+                            confirmButtonColor: '#dc3545'
+                        });
+                        location.reload();
+                    } else {
+                        await Swal.fire({
                             icon: 'error',
-                            title: 'Server Error!',
-                            text: 'Please try again later.'
+                            title: 'Error!',
+                            text: data.message || 'Failed to reject return request.',
+                            confirmButtonColor: '#dc3545'
                         });
                     }
+                } catch (error) {
+                    console.error('Reject Error:', error);
+                    await Swal.fire({
+                        icon: 'error',
+                        title: 'Server Error!',
+                        text: 'Please try again later.',
+                        confirmButtonColor: '#dc3545'
+                    });
                 }
-            });
+            }
         }
     </script>
 </body>

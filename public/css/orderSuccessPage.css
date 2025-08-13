@@ -157,7 +157,7 @@ h3 {
     gap: 15px;
     margin-bottom: 30px;
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: space-around;
     animation: slideInUp 0.6s ease-out 1s both;
 }
 
