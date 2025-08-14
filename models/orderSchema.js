@@ -74,7 +74,7 @@ const orderSchema = new Schema({
     statusHistory: [{
         status: {
             type: String,
-            enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'ReturnRequested'], // ✅ added
+            enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned','ReturnRequested'], // ✅ added
             required: true
         },
         date: {

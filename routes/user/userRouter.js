@@ -40,7 +40,7 @@ router.get("/product/:id", productController.productDetailPage);
 router.post("/resendOtp", userController.resendOTP);
 
 
-
+// oredr router
 
 router.get("/order",userAuth, orderController.orderPage);
 router.get("/order/:orderId",userAuth, orderController.orderDetails);
@@ -48,6 +48,8 @@ router.post("/order/:orderId/cancel",userAuth, orderController.cancelOrder);
 router.get("/userErrorPage", userController.userErrorPage)
 router.post("/order/:orderId/return", userAuth, orderController.returnOrder);
 router.get("/order/:orderId/invoice",userAuth,orderController.getInvoice)
+router.post('/order/individualOrderReturn',userAuth,orderController.returnSingleOrder)
+router.post('/order/cancelSingleItem', userAuth, orderController.cancelSingleOrder);
 
 
 // Forgot Password Routes

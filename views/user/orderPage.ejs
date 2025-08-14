@@ -33,23 +33,6 @@
                         </div>
                     </div>
                     <div class="orders-section">
-                        <div class="section-header">
-                            <div class="section-title">
-                                <h2>Order History</h2>
-                                <p>View all your placed orders</p>
-                            </div>
-                            <!-- Order Filters -->
-                            <div class="order-filters">
-                                <button class="filter-btn active" data-filter="all">All Orders</button>
-                                <button class="filter-btn" data-filter="pending">Pending</button>
-                                <button class="filter-btn" data-filter="processing">Processing</button>
-                                <button class="filter-btn" data-filter="shipped">Shipped</button>
-                                <button class="filter-btn" data-filter="delivered">Delivered</button>
-                                <button class="filter-btn" data-filter="cancelled">Cancelled</button>
-                                <button class="filter-btn" data-filter="returned">Returned</button>
-                                <button class="filter-btn" data-filter="returnrequested">Return Requested</button>
-                            </div>
-                        </div>
                         <!-- Orders List -->
                         <div class="orders-list">
                             <% if (orders && orders.length > 0) { %>
@@ -621,91 +604,75 @@
 }
 
         // Confirm Return Order - FIXED to work with existing controller
-        async function confirmReturnOrder() {
-            if (!currentOrderId || !currentProductIds.length) return;
-            
-            const reason = document.getElementById('returnReason').value;
-            
-            // Validation: Check if reason is selected
-            if (!reason || reason.trim() === '') {
-                Swal.fire({
-                    title: 'Error!',
-                    text: 'Please select a reason for return.',
-                    icon: 'error',
-                    confirmButtonColor: '#dc2626'
-                });
-                return;
-            }
-            
-            // Store values before closing modal
-            const orderIdToReturn = currentOrderId;
-            const productIdsToReturn = [...currentProductIds];
-            
-            // Close modal first
-            closeReturnModal();
-            
-            // Show SweetAlert confirmation
+        // Confirm Return Order - FIXED to send all products in single request
+async function confirmReturnOrder() {
+    if (!currentOrderId || !currentProductIds.length) return;
+    
+    const reason = document.getElementById('returnReason').value;
+    
+    // Validation: Check if reason is selected
+    if (!reason || reason.trim() === '') {
+        Swal.fire({
+            title: 'Error!',
+            text: 'Please select a reason for return.',
+            icon: 'error',
+            confirmButtonColor: '#dc2626'
+        });
+        return;
+    }
+    
+    // Store values before closing modal
+    const orderIdToReturn = currentOrderId;
+    const productIdsToReturn = [...currentProductIds];
+    
+    // Close modal first
+    closeReturnModal();
+    
+    // Show SweetAlert confirmation
+    try {
+        const result = await Swal.fire({
+            title: 'Submit Return Request?',
+            text: `Are you sure you want to return all delivered items in this order? ${productIdsToReturn.length} item(s) will be returned. Reason: ${reason}`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#2563eb',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, submit request',
+            cancelButtonText: 'No, cancel'
+        });
+        
+        if (result.isConfirmed) {
+            // Send single request with all productIds
             try {
-                const result = await Swal.fire({
-                    title: 'Submit Return Request?',
-                    text: `Are you sure you want to return all delivered items in this order? ${productIdsToReturn.length} item(s) will be returned. Reason: ${reason}`,
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#2563eb',
-                    cancelButtonColor: '#6b7280',
-                    confirmButtonText: 'Yes, submit request',
-                    cancelButtonText: 'No, cancel'
+                const response = await fetch(`/order/${orderIdToReturn}/return`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json' 
+                    },
+                    body: JSON.stringify({
+                        productId: productIdsToReturn, // Send all productIds as array
+                        reason: reason
+                    })
                 });
                 
-                if (result.isConfirmed) {
-                    // Submit return requests for each product individually
-                    let successCount = 0;
-                    let errorCount = 0;
-                    
-                    for (const productId of productIdsToReturn) {
-                        try {
-                            const response = await fetch(`/order/${orderIdToReturn}/return`, {
-                                method: 'POST',
-                                headers: { 
-                                    'Content-Type': 'application/json' 
-                                },
-                                body: JSON.stringify({
-                                    productId: productId, // Send single productId as expected by controller
-                                    reason: reason
-                                })
-                            });
-                            
-                            const data = await response.json();
-                            
-                            if (data.success) {
-                                successCount++;
-                            } else {
-                                errorCount++;
-                                console.error(`Failed to return product ${productId}:`, data.message);
-                            }
-                        } catch (error) {
-                            errorCount++;
-                            console.error(`Error returning product ${productId}:`, error);
-                        }
-                    }
-                    
-                    if (successCount > 0) {
-                        Swal.fire({
-                            title: 'Return Request Submitted!',
-                            text: `${successCount} item(s) submitted for return successfully.${errorCount > 0 ? ` ${errorCount} item(s) failed.` : ''}`,
-                            icon: successCount === productIdsToReturn.length ? 'success' : 'warning',
-                            confirmButtonColor: '#2563eb'
-                        }).then(() => {
-                            window.location.reload();
-                        });
-                    } else {
-                        Swal.fire({
-                            title: 'Error!',
-                            text: 'Failed to submit return request for all items.',
-                            icon: 'error',
-                            confirmButtonColor: '#dc2626'
-                        });
-                    }
+                const data = await response.json();
+                
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Return Request Submitted!',
+                        text: data.message,
+                        icon: 'success',
+                        confirmButtonColor: '#2563eb'
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: data.message || 'Failed to submit return request.',
+                        icon: 'error',
+                        confirmButtonColor: '#dc2626'
+                    });
                 }
             } catch (error) {
                 console.error('Return order error:', error);
@@ -717,7 +684,17 @@
                 });
             }
         }
-        
+    } catch (error) {
+        console.error('Return order error:', error);
+        Swal.fire({
+            title: 'Error!',
+            text: 'Something went wrong. Please try again.',
+            icon: 'error',
+            confirmButtonColor: '#dc2626'
+        });
+    }
+}
+
         // Legacy cancel function (keeping for compatibility) - UPDATED
         async function cancelOrder(orderId) {
             // Find the order card to get the button element
