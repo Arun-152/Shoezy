@@ -536,8 +536,7 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    // Update cart count in navbar
-                    updateCartCount(data.cartCount);
+                    updateCartCount(data.cartCount) 
                     showNotification('Product added to cart successfully!');
                 } else {
                     if(data.message==="User not authenticated"){
@@ -591,13 +590,13 @@
                         heartIcon.classList.remove('far');
                         heartIcon.classList.add('fas');
                         heartIcon.style.color = '#ff4757';
-                        updateWishlistCount(1);
+                         updateWishlistCount(1)
                         showNotification('Added to wishlist!');
                     } else if (data.action === 'removed') {
                         heartIcon.classList.remove('fas');
                         heartIcon.classList.add('far');
                         heartIcon.style.color = '';
-                        updateWishlistCount(-1);
+                        updateWishlistCount(-1)
                         showNotification('Removed from wishlist!');
                     } 
                 } else {

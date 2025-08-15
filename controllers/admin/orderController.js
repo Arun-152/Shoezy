@@ -176,52 +176,52 @@ const viewReturnRequests = async (req, res) => {
 
 const approveReturnRequest = async (req, res) => {
   try {
-    const { orderId ,productId} = req.params; 
-    console.log(orderId)
-
- 
-
-    const order = await Order.findById(orderId).populate("items.productId");
+    const { orderId, productId } = req.params; 
+    const order = await Order.findOne({ orderNumber: orderId }).populate("items.productId");
+    
     if (!order) {
       return res.status(404).json({ success: false, message: "Order not found" });
     }
-
+    
     let refundAmount = 0;
     let updatedProducts = [];
-
-    // Loop over all ReturnRequested items
-    let allOrderReturn = true
+    let productFound = false;
+    
+    // Process only the specific product return request
     order.items = order.items.map(item => {
-       if(item.status !== "ReturnedRequest"){
-          allOrderReturn = false
-        }
-      if (item.status === "ReturnRequested") {
+      if (item.productId._id.toString() === productId && item.status === "ReturnRequested") {
         item.status = "Returned";
-         // directly set Returned for user clarity
         refundAmount += item.price || item.productId.price || 0;
         updatedProducts.push({
           name: item.productId.productName || "Unknown Product",
           quantity: item.quantity || 1,
           size: item.size
         });
-       
+        productFound = true;
       }
       return item;
     });
-
-    if(allOrderReturn){
-      order.status = "Returned"
-    }
-      
-
-    if (updatedProducts.length === 0) {
+    
+    if (!productFound) {
       return res.status(400).json({ 
         success: false, 
-        message: "No return requests found or already processed" 
+        message: "Product return request not found or already processed" 
       });
     }
-
-    // Update product quantities for all returned items
+    
+    // Check if all items in the order are returned
+    let allOrderReturn = true;
+    order.items.forEach(item => {
+      if (item.status !== "Returned" && item.status !== "Cancelled") {
+        allOrderReturn = false;
+      }
+    });
+    
+    if (allOrderReturn) {
+      order.orderStatus = "Returned";
+    }
+    
+    // Update product quantities for the returned item
     for (let prod of updatedProducts) {
       const productDoc = await Product.findOne({ "productName": prod.name });
       if (productDoc) {
@@ -232,13 +232,13 @@ const approveReturnRequest = async (req, res) => {
         }
       }
     }
-
+    
     // Wallet refund
     const wallet = await Wallet.findOne({ userId: order.userId });
     if (!wallet) {
       return res.status(404).json({ success: false, message: "Wallet not found for user" });
     }
-
+    
     const newBalance = wallet.balance + refundAmount;
     const transaction = {
       transactionId: "TXN" + Date.now() + Math.random().toString(36).substr(2, 5).toUpperCase(),
@@ -246,22 +246,22 @@ const approveReturnRequest = async (req, res) => {
       amount: refundAmount,
       description: `Refund for returned items: ${updatedProducts.map(p => `${p.name} (${p.quantity} units, size ${p.size})`).join(", ")}`,
       balanceAfter: newBalance,
-      orderId: orderId,
+      orderId: order._id,  // ✅ FIX: Use order._id (ObjectId) instead of orderId (string)
       status: "completed",
       source: "return_refund"
     };
-
+    
     wallet.transactions.push(transaction);
     wallet.balance = newBalance;
     await wallet.save();
     await order.save();
-
+    
     res.status(200).json({
       success: true,
-      message: "All return requests approved and refund processed",
+      message: "Return request approved and refund processed",
       updatedProducts
     });
-
+    
   } catch (error) {
     console.error("Approve Return Error:", error);
     res.status(500).json({ success: false, message: "Server Error", error: error.message });
@@ -272,16 +272,18 @@ const approveReturnRequest = async (req, res) => {
 const rejectReturnRequest = async (req, res) => {
   try {
     const { orderId, productId } = req.params;
-
-    const order = await Order.findById(orderId);
+    
+    // Fix: Use findOne with orderNumber instead of findById
+    const order = await Order.findOne({ orderNumber: orderId });
+    
     if (!order) {
       return res.status(404).json({ success: false, message: "Order not found" });
     }
-
+    
     let itemFound = false;
-
     order.items = order.items.map(item => {
       const itemProductId = item.productId._id?.toString?.() || item.productId?.toString?.();
+      // Fix: Use === instead of = for comparison
       if (itemProductId === productId && item.status === 'ReturnRequested') {
         item.status = 'Delivered'; 
         item.returnReason = null;
@@ -290,22 +292,26 @@ const rejectReturnRequest = async (req, res) => {
       }
       return item;
     });
-
+    
     if (!itemFound) {
       return res.status(400).json({ 
         success: false, 
         message: "Return request not found or already processed" 
       });
     }
-
+    const hasReturnRequested = order.items.some(item => item.status === 'ReturnRequested');
+    if (!hasReturnRequested) {
+        order.orderStatus = 'Delivered'; 
+    }
     await order.save();
     res.status(200).json({ success: true, message: "Return request rejected" });
-
+    
   } catch (error) {
     console.error("Reject Return Error:", error);
     res.status(500).json({ success: false, message: "Server Error" });
   }
 };
+
 
 module.exports = {
   ordersPage,

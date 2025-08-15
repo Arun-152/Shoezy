@@ -173,6 +173,7 @@ const loadAddToCart= async (req, res) => {
         });
 
         await userCart.save()
+        const cartCount = userCart.items.length
 
         // Calculate total quantity for cart count (sum of all item quantities)
         const totalQuantity = userCart.items.reduce((total, item) => total + item.quantity, 0);
@@ -186,7 +187,8 @@ const loadAddToCart= async (req, res) => {
             return res.status(200).json({
                 success: true, 
                 message: "Product added to cart successfully",
-                totalQuantity: totalQuantity // Total quantity of all items
+                totalQuantity: totalQuantity ,
+                cartCount,
             })
         }
 

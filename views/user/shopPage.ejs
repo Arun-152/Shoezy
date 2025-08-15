@@ -205,11 +205,10 @@
                                         <%= product.status === 'Available' || totalQuantity > 0 ? 'Available' : 'Out of Stock' %>
                                     </div>
 
-                                    <!-- FIXED: Wishlist Button with Proper Default State -->
+                                    <!-- Enhanced Wishlist Button with Proper Toggle -->
                                     <div class="wishlist-btn" 
                                          onclick="event.stopPropagation(); toggleWishlist('<%= product._id %>', this)" 
-                                         data-product-id="<%= product._id %>" 
-                                         data-in-wishlist="false">
+                                         data-product-id="<%= product._id %>">
                                         <i class="far fa-heart"></i>
                                     </div>
 
@@ -325,9 +324,53 @@
     <!-- Footer -->
     <%- include("../partials/user/userfooter") %>
 
-
     <script>
-            async function addToCart(productId, size = null) {
+        // Initialize wishlist state on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeWishlistState();
+        });
+
+        // Function to initialize wishlist state
+        async function initializeWishlistState() {
+            try {
+                const response = await fetch('/wishlist/status');
+                const data = await response.json();
+                
+                if (data.success && data.wishlistItems) {
+                    data.wishlistItems.forEach(productId => {
+                        const wishlistBtn = document.querySelector(`.wishlist-btn[data-product-id="${productId}"]`);
+                        if (wishlistBtn) {
+                            const heartIcon = wishlistBtn.querySelector('i');
+                            heartIcon.classList.remove('far');
+                            heartIcon.classList.add('fas');
+                            wishlistBtn.classList.add('wishlist-active');
+                        }
+                    });
+                }
+            } catch (error) {
+                console.log('Could not load wishlist state:', error);
+            }
+        }
+
+        function updateCartCount(change) {
+            const cartCountElem = document.getElementById('cartCount');
+            if (cartCountElem) {
+                const currentCount = parseInt(cartCountElem.textContent) || 0;
+                const newCount = Math.max(0, change);
+                cartCountElem.textContent = newCount;
+                
+                // Add animation to cart icon
+                const cartIcon = cartCountElem.closest('.cart-icon');
+                if (cartIcon) {
+                    cartIcon.style.animation = 'cartBounce 0.5s ease';
+                    setTimeout(() => {
+                        cartIcon.style.animation = '';
+                    }, 500);
+                }
+            }
+        }
+
+        async function addToCart(productId, size = null) {
             try {
                 const response = await fetch('/cart/add', {
                     method: 'POST',
@@ -343,13 +386,15 @@
 
                 const data = await response.json();
 
-                if (data.success) {
-                    // Update cart count in navbar
-                    updateCartCount(data.cartCount);
+                if (response.ok && data.success) {
                     showNotification('Product added to cart successfully!');
+                    if (data.cartCount !== undefined) {
+                        updateCartCount(data.cartCount);
+                    }
                 } else {
-                    if(data.message==="User not authenticated"){
-                        window.location.href="/login"
+                    if (data.message === "User not authenticated") {
+                        window.location.href = "/login";
+                        return;
                     }
                     showNotification(data.message || 'Error adding product to cart');
                 }
@@ -359,13 +404,19 @@
             }
         }
 
-        // Update cart count in navbar
-       
+        function updateWishlistCount(change) {
+            const wishlistCountElem = document.getElementById('wishlistCount');
+            if (wishlistCountElem) {
+                const currentCount = parseInt(wishlistCountElem.textContent) || 0;
+                const newCount = Math.max(0, currentCount + change);
+                wishlistCountElem.textContent = newCount;
+            }
+        }
 
-        // Enhanced wishlist functionality
+        // Enhanced wishlist toggle functionality with proper state management
         async function toggleWishlist(productId, element) {
             const heartIcon = element.querySelector('i');
-            const isInWishlist = heartIcon.classList.contains('fas');
+            const isCurrentlyInWishlist = element.classList.contains('wishlist-active');
 
             try {
                 const response = await fetch('/wishlist/toggle', {
@@ -380,23 +431,25 @@
 
                 if (data.success) {
                     if (data.action === 'added') {
+                        // First click: Add to wishlist - turn red
                         heartIcon.classList.remove('far');
                         heartIcon.classList.add('fas');
-                        heartIcon.style.color = '#ff4757';
-                     
+                        element.classList.add('wishlist-active');
+                        updateWishlistCount(1);
                         showNotification('Added to wishlist!');
                     } else if (data.action === 'removed') {
+                        // Second click: Remove from wishlist - back to default
                         heartIcon.classList.remove('fas');
                         heartIcon.classList.add('far');
-                        heartIcon.style.color = '';
-                  
+                        element.classList.remove('wishlist-active');
+                        updateWishlistCount(-1);
                         showNotification('Removed from wishlist!');
                     }
                 } else {
-                    if(data.message==="User not authenticated"){
-                        window.location.href="/login"
+                    if (data.message === "User not authenticated") {
+                        window.location.href = "/login";
+                        return;
                     }
-                    
                     showNotification(data.message || 'Error updating wishlist');
                 }
             } catch (error) {
@@ -405,16 +458,7 @@
             }
         }
 
-        
-    </script>
-
-    <!-- COMPLETELY REWRITTEN JavaScript for Proper State Management -->
-    <script>
-        // ROBUST localStorage Manager with Debugging
-       
-
-
-        // Product filtering and sorting functions (unchanged)
+        // Product filtering and sorting functions
         const allProductCards = document.querySelectorAll('.product-card');
 
         function filterProducts() {
@@ -586,51 +630,39 @@
         }
 
         function redirectToLogin() {
-          
             window.location.href = '/login';
             return false;
         }
 
-       
+        // Set up filter event listeners
+        const searchInput = document.getElementById('searchInput');
+        const categorySelect = document.getElementById('category');
+        const minPriceInput = document.getElementById('minPrice');
+        const maxPriceInput = document.getElementById('maxPrice');
 
-            // Set up filter event listeners
-            const searchInput = document.getElementById('searchInput');
-            const categorySelect = document.getElementById('category');
-            const minPriceInput = document.getElementById('minPrice');
-            const maxPriceInput = document.getElementById('maxPrice');
+        if (searchInput) {
+            searchInput.addEventListener('input', filterProducts);
+        }
+        if (categorySelect) {
+            categorySelect.addEventListener('change', filterProducts);
+        }
+        if (minPriceInput) {
+            minPriceInput.addEventListener('input', filterProducts);
+        }
+        if (maxPriceInput) {
+            maxPriceInput.addEventListener('input', filterProducts);
+        }
 
-            if (searchInput) {
-                searchInput.addEventListener('input', filterProducts);
-            }
-            if (categorySelect) {
-                categorySelect.addEventListener('change', filterProducts);
-            }
-            if (minPriceInput) {
-                minPriceInput.addEventListener('input', filterProducts);
-            }
-            if (maxPriceInput) {
-                maxPriceInput.addEventListener('input', filterProducts);
-            }
+        updateFilterHighlighting();
 
-            updateFilterHighlighting();
-
-           
-
-            // Periodic system check every 15 seconds
-           
         // Handle page visibility changes
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden) {
                 console.log('Page visible again, syncing state...');
                 setTimeout(() => {
-                    initializeSystem();
+                    initializeWishlistState();
                 }, 200);
             }
-        });
-
-        // Handle page unload to save state
-        window.addEventListener('beforeunload', function() {
-            console.log('Page unloading, final state check...');
         });
     </script>
 </body>

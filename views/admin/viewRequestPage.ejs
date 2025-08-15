@@ -498,138 +498,137 @@
         <footer>&copy; 2025 Tmz Admin Panel. All rights reserved.</footer>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        async function handleApprove(orderId, productId, productName) {
-            const result = await Swal.fire({
-                title: 'Are you sure?',
-                html: `Do you want to approve the return request for:<br><strong>${productName}</strong><br><br>This will process a refund to the customer.`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, approve it!',
-                cancelButtonText: 'Cancel',
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#6c757d'
-            });
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    async function handleApprove(orderId, productId, productName) {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            html: `Do you want to approve the return request for:<br><strong>${productName}</strong><br><br>This will process a refund to the customer.`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, approve it!',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d'
+        });
 
-            if (result.isConfirmed) {
-                try {
-                    // Show loading
-                    Swal.fire({
-                        title: 'Processing...',
-                        text: 'Please wait while we process the return request.',
-                        allowOutsideClick: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        }
-                    });
-
-                    const response = await fetch(`/admin/orders/approve-return/${orderId}/${productId}`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        await Swal.fire({
-                            icon: 'success',
-                            title: 'Approved!',
-                            html: `Return request for <strong>${productName}</strong> has been approved successfully.<br>Refund has been processed.`,
-                            confirmButtonColor: '#28a745'
-                        });
-                        location.reload();
-                    } else {
-                        await Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: data.message || 'Failed to approve return request.',
-                            confirmButtonColor: '#dc3545'
-                        });
+        if (result.isConfirmed) {
+            try {
+                Swal.fire({
+                    title: 'Processing...',
+                    text: 'Please wait while we process the return request.',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
                     }
-                } catch (error) {
-                    console.error('Approve Error:', error);
+                });
+
+                const response = await fetch(`/admin/orders/approve-return/${orderId}/${productId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Approved!',
+                        html: `Return request for <strong>${productName}</strong> has been approved successfully.<br>Refund has been processed.`,
+                        confirmButtonColor: '#28a745'
+                    });
+                    location.reload();
+                } else {
                     await Swal.fire({
                         icon: 'error',
-                        title: 'Server Error!',
-                        text: 'Please try again later.',
+                        title: 'Error!',
+                        text: data.message || 'Failed to approve return request.',
                         confirmButtonColor: '#dc3545'
                     });
                 }
+            } catch (error) {
+                console.error('Approve Error:', error);
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Server Error!',
+                    text: 'Please try again later.',
+                    confirmButtonColor: '#dc3545'
+                });
             }
         }
+    }
 
-        async function handleReject(orderId, productId, productName) {
-            const result = await Swal.fire({
-                title: 'Are you sure?',
-                html: `Do you want to reject the return request for:<br><strong>${productName}</strong>`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, reject it!',
-                cancelButtonText: 'Cancel',
-                confirmButtonColor: '#dc3545',
-                cancelButtonColor: '#6c757d'
-            });
+    async function handleReject(orderId, productId, productName) {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            html: `Do you want to reject the return request for:<br><strong>${productName}</strong>`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, reject it!',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d'
+        });
 
-            if (result.isConfirmed) {
-                try {
-                    // Show loading
-                    Swal.fire({
-                        title: 'Processing...',
-                        text: 'Please wait while we process the rejection.',
-                        allowOutsideClick: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        }
-                    });
-
-                    const response = await fetch(`/admin/orders/reject-return/${orderId}/${productId}`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        await Swal.fire({
-                            icon: 'success',
-                            title: 'Rejected!',
-                            html: `Return request for <strong>${productName}</strong> has been rejected.`,
-                            confirmButtonColor: '#dc3545'
-                        });
-                        location.reload();
-                    } else {
-                        await Swal.fire({
-                            icon: 'error',
-                            title: 'Error!',
-                            text: data.message || 'Failed to reject return request.',
-                            confirmButtonColor: '#dc3545'
-                        });
+        if (result.isConfirmed) {
+            try {
+                Swal.fire({
+                    title: 'Processing...',
+                    text: 'Please wait while we process the rejection.',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
                     }
-                } catch (error) {
-                    console.error('Reject Error:', error);
+                });
+
+                const response = await fetch(`/admin/orders/reject-return/${orderId}/${productId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Rejected!',
+                        html: `Return request for <strong>${productName}</strong> has been rejected.`,
+                        confirmButtonColor: '#dc3545'
+                    });
+                    location.reload();
+                } else {
                     await Swal.fire({
                         icon: 'error',
-                        title: 'Server Error!',
-                        text: 'Please try again later.',
+                        title: 'Error!',
+                        text: data.message || 'Failed to reject return request.',
                         confirmButtonColor: '#dc3545'
                     });
                 }
+            } catch (error) {
+                console.error('Reject Error:', error);
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Server Error!',
+                    text: 'Please try again later.',
+                    confirmButtonColor: '#dc3545'
+                });
             }
         }
+    }
 
-        // Pagination function
-        function goToPage(page) {
-            if (page < 1 || page > <%= totalPages %>) return;
-            
-            const url = new URL(window.location);
-            url.searchParams.set('page', page);
-            window.location.href = url.toString();
-        }
-    </script>
+    function goToPage(page) {
+        if (page < 1 || page > <%= totalPages %>) return;
+        
+        const url = new URL(window.location);
+        url.searchParams.set('page', page);
+        window.location.href = url.toString();
+    }
+</script>
+
+
 </body>
 </html>

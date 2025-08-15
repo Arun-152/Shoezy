@@ -11,26 +11,28 @@
 </head>
 
 <body>
-   
-<style>.button-wrapper {
-    display: flex;
-    justify-content: flex-end;
-}
 
-.view-request-btn {
-    background-color: #007bff;
-    color: white;
-    padding: 6px 12px;
-    border: none;
-    border-radius: 4px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
+    <style>
+        .button-wrapper {
+            display: flex;
+            justify-content: flex-end;
+        }
 
-.view-request-btn:hover {
-    background-color: #0056b3;
-}</style>
+        .view-request-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .view-request-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
     <div class="dashboard-container">
         <!-- Sidebar -->
         <%- include('../partials/admin/sidebar') %>
@@ -61,10 +63,10 @@
                         <!-- Orders Section -->
                         <div class="orders-section">
                             <h3>Orders Management</h3>
-                           <div class="button-wrapper">
-                            <a href="/admin/orders/returnRequests"><button class="view-request-btn">View Request</button></a>
+                            <div class="button-wrapper">
+                                <a href="/admin/orders/returnRequests"><button class="view-request-btn">View
+                                        Request</button></a>
                             </div>
-
 
                             <div class="table-container">
                                 <table class="orders-table">
@@ -113,9 +115,9 @@
                                                             : '<i class="fas fa-spinner"></i>' , 'Shipped'
                                                             : '<i class="fas fa-truck"></i>' , 'Delivered'
                                                             : '<i class="fas fa-check-circle"></i>' , 'Cancelled'
-                                                            : '<i class="fas fa-times-circle"></i>','Returned'  
-                                                            : '<i class="fas fa-undo"></i>'
-                                                         }; const statusIcon=statusIcons[orders[i].orderStatus]
+                                                            : '<i class="fas fa-times-circle"></i>' ,'Returned'
+                                                            : '<i class="fas fa-undo"></i>' }; const
+                                                            statusIcon=statusIcons[orders[i].orderStatus]
                                                             || '<i class="fas fa-clock"></i>' ; %>
                                                             <%- statusIcon %>
                                                                 <%= orders[i].orderStatus %>
@@ -124,23 +126,32 @@
                                                         <%= orders[i].paymentMethod %>
                                                     </td>
                                                     <td class="action">
-                                          <select class="action-dropdown"
-                                              onchange="updateOrderStatus('<%= orders[i]._id %>', this)"
-                                              <%= orders[i].orderStatus === 'Delivered' || orders[i].orderStatus === 'Cancelled' ? 'disabled' : '' %>>
-                                              <option value="" disabled selected>Select Status</option>
-                                              <option value="Pending" <%= orders[i].orderStatus === 'Pending' ? 'selected' : '' %>>Pending</option>
-                                              <option value="Processing" <%= orders[i].orderStatus === 'Processing' ? 'selected' : '' %>>Processing</option>
-                                              <option value="Shipped" <%= orders[i].orderStatus === 'Shipped' ? 'selected' : '' %>>Shipped</option>
-                                              <option value="Delivered" <%= orders[i].orderStatus === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-                                              <option value="Cancelled" <%= orders[i].orderStatus === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
-                                          </select>
-                                      
-                                          <!-- ✅ Fixed link with order ID -->
-                                          <a href="/admin/orders/orderDetails/<%= orders[i]._id %>" class="view-icon" title="View Details">
-                                              <i class="fas fa-eye"></i>
-                                          </a>
-                                       </td>
+                                                        <select class="action-dropdown"
+                                                            onchange="updateOrderStatus('<%= orders[i]._id %>', this)"
+                                                            <%=['Delivered', 'Cancelled' , 'Returned'
+                                                            ].includes(orders[i].orderStatus) ? 'disabled' : '' %>>
+                                                            <option value="" disabled selected>Select Status</option>
+                                                            <option value="Pending" <%=orders[i].orderStatus==='Pending'
+                                                                ? 'selected' : '' %>>Pending</option>
+                                                            <option value="Processing"
+                                                                <%=orders[i].orderStatus==='Processing' ? 'selected'
+                                                                : '' %>>Processing</option>
+                                                            <option value="Shipped" <%=orders[i].orderStatus==='Shipped'
+                                                                ? 'selected' : '' %>>Shipped</option>
+                                                            <option value="Delivered"
+                                                                <%=orders[i].orderStatus==='Delivered' ? 'selected' : ''
+                                                                %>>Delivered</option>
+                                                            <option value="Cancelled"
+                                                                <%=orders[i].orderStatus==='Cancelled' ? 'selected' : ''
+                                                                %>>Cancelled</option>
+                                                        </select>
 
+                                                        <!-- ✅ Fixed link with order ID -->
+                                                        <a href="/admin/orders/orderDetails/<%= orders[i]._id %>"
+                                                            class="view-icon" title="View Details">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                    </td>
 
                                                 </tr>
                                                 <% } %>
