@@ -115,7 +115,7 @@
                     <span class="cart-total-amount" id="cartTotalAmount">₹<%= total.toFixed(2) %></span>
                 </div>
                 <div class="cart-actions-quick">
-                    
+                   
                     <button class="clear-cart-btn" onclick="clearCart()">
                         <i class="fas fa-trash"></i> Clear Cart
                     </button>
@@ -135,7 +135,7 @@
                     <div class="cart-items" id="cartItems">
                         <% if (cartItems && cartItems.length > 0) { %>
                             <% cartItems.forEach((item, index) => { %>
-                                <div class="cart-item" data-id="<%= item._id %>" data-product-id="<%= item.productId._id %>" data-price="<%= item.price %>">                             
+                                <div class="cart-item" data-id="<%= item._id %>" data-product-id="<%= item.productId._id %>" data-price="<%= item.price %>">                            
                                     <div class="item-image">
                                         <% if (item.productId.images && item.productId.images.length > 0) { %>
                                             <img src="<%= item.productId.images[0] %>" alt="<%= item.productId.productName %>">
@@ -190,7 +190,7 @@
                 <div class="order-summary-section">
                     <div class="summary-card">
                         <h3><i class="fas fa-receipt"></i> Order Summary</h3>
-                        
+                       
                         <div class="summary-row">
                             <span>Subtotal (<%= cartCount %> item<%= cartCount !== 1 ? 's' : '' %>)</span>
                             <span id="subtotal">₹<%= subtotal.toFixed(2) %></span>
@@ -201,23 +201,23 @@
                                 <%= shipping === 0 ? 'FREE' : '₹' + shipping.toFixed(2) %>
                             </span>
                         </div>
-                        
+                       
                         <hr class="summary-divider">
-                        
+                       
                         <div class="summary-row total-row">
                             <span>Total</span>
                             <span class="total-amount" id="total">₹<%= total.toFixed(2) %></span>
                         </div>
-                        
+                       
                         <div class="promo-section">
                             <input type="text" placeholder="Enter promo code" class="promo-input" id="promoInput">
                             <button class="apply-promo-btn" onclick="applyPromoCode()">Apply</button>
                         </div>
-                        
+                       
                        <a href="/checkout"><button class="checkout-btn" onclick="proceedToCheckout()">
                             <i class="fas fa-lock"></i> Proceed to Checkout
-                        </button></a> 
-                        
+                        </button></a>
+                       
                         <div class="payment-methods">
                             <p>We accept:</p>
                             <div class="payment-icons">
@@ -227,7 +227,7 @@
                                 <i class="fab fa-cc-apple-pay"></i>
                             </div>
                         </div>
-                        
+                       
                         <div class="security-badges">
                             <div class="security-item">
                                 <i class="fas fa-shield-alt"></i>
@@ -266,10 +266,10 @@
                 const cartItem = document.querySelector(`[data-product-id="${productId}"]`);
                 const qtyInput = cartItem.querySelector('.qty-input');
                 let newQty = parseInt(qtyInput.value) + change;
-                
+               
                 if (newQty < 1) newQty = 1;
                 if (newQty > 10) newQty = 10;
-                
+               
                 const response = await fetch('/cart/update-quantity', {
                     method: 'POST',
                     headers: {
@@ -286,17 +286,17 @@
 
                 if (data.success) {
                     qtyInput.value = newQty;
-                    
+                   
                     // Update item total
                     const itemTotal = cartItem.querySelector('.item-total small');
                     itemTotal.textContent = `Total: ₹${data.itemTotal.toFixed(2)}`;
-                    
+                   
                     // Update summary
                     updateSummaryDisplay(data);
-                    
+                   
                     showToast(`Quantity updated to ${newQty}`);
                 } else {
-                    showToast(data.message || 'Error updating quantity');
+                    errorToast(data.message || 'Error updating quantity');
                 }
             } catch (error) {
                 console.error('Error updating quantity:', error);
@@ -308,13 +308,13 @@
             let qty = parseInt(value);
             if (qty < 1) qty = 1;
             if (qty > 10) qty = 10;
-            
+           
             if (qty !== parseInt(value)) {
                 const cartItem = document.querySelector(`[data-product-id="${productId}"]`);
                 const qtyInput = cartItem.querySelector('.qty-input');
                 qtyInput.value = qty;
             }
-            
+           
             await updateQuantity(productId, size, 0); // Update with current quantity
         }
 
@@ -349,18 +349,18 @@
                     if (data.success) {
                         const item = document.querySelector(`[data-product-id="${productId}"]`);
                         item.style.animation = 'slideOut 0.3s ease-in';
-                        
+                       
                         setTimeout(() => {
                             item.remove();
-                            
+                           
                             // Update summary
                             updateSummaryDisplay(data);
-                            
+                           
                             // Check if cart is empty
                             if (data.cartCount === 0) {
                                 location.reload(); // Reload to show empty cart message
                             }
-                            
+                           
                             // Show success message with SweetAlert
                             Swal.fire({
                                 title: 'Removed!',
@@ -422,11 +422,11 @@
                                 setTimeout(() => item.remove(), 300);
                             }, index * 100);
                         });
-                        
+                       
                         setTimeout(() => {
                             location.reload(); // Reload to show empty cart message
                         }, items.length * 100 + 300);
-                        
+                       
                         // Show success message with SweetAlert
                         Swal.fire({
                             title: 'Cart Cleared!',
@@ -459,7 +459,7 @@
             // Update summary values
             document.getElementById('subtotal').textContent = `₹${data.subtotal.toFixed(2)}`;
             document.getElementById('total').textContent = `₹${data.total.toFixed(2)}`;
-            
+           
             // Update shipping
             const shippingElement = document.getElementById('shipping');
             if (data.shipping === 0) {
@@ -469,11 +469,11 @@
                 shippingElement.textContent = `₹${data.shipping.toFixed(2)}`;
                 shippingElement.className = '';
             }
-            
+           
             // Update cart count
             document.getElementById('cartItemsCount').textContent = `${data.cartCount} item${data.cartCount !== 1 ? 's' : ''}`;
             document.getElementById('cartTotalAmount').textContent = `₹${data.total.toFixed(2)}`;
-            
+           
             // Update navbar cart count
             const navCartCount = document.getElementById('cartCount');
             if (navCartCount) {
@@ -501,15 +501,62 @@
             }
         }
 
-        function proceedToCheckout() {
+        async function proceedToCheckout() {
             const cartItems = document.querySelectorAll('.cart-item');
             if (cartItems.length === 0) {
                 showToast('Your cart is empty');
                 return;
             }
-            showToast('Proceeding to checkout...');
-            // Add checkout navigation logic here
-            window.location.href = '/checkout';
+
+            try {
+                // Validate cart before proceeding to checkout
+                const response = await fetch('/cart/validate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    if (data.blockedOrDeletedProducts && data.blockedOrDeletedProducts.length > 0) {
+                        // Show SweetAlert error for blocked/deleted products
+                        Swal.fire({
+                            title: 'Products Unavailable',
+                            text: 'Some products are unavailable. Please remove them before checkout.',
+                            icon: 'error',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#d33'
+                        });
+                        return;
+                    }
+                    
+                    // If validation passes, proceed to checkout
+                    showToast('Proceeding to checkout...');
+                    setTimeout(() => {
+                        window.location.href = '/checkout';
+                    }, 1000);
+                } else {
+                    // Show error message from server
+                    Swal.fire({
+                        title: 'Error',
+                        text: data.message || 'Error validating cart',
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#d33'
+                    });
+                }
+            } catch (error) {
+                console.error('Error validating cart:', error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Error validating cart. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#d33'
+                });
+            }
         }
 
         function showToast(message) {
@@ -517,6 +564,18 @@
                 toast: true,
                 position: 'top-end',
                 icon: 'success',
+                title: message,
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true
+            });
+        }
+        
+        function errorToast(message) {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'error',
                 title: message,
                 showConfirmButton: false,
                 timer: 2000,

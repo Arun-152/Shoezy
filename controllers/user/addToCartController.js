@@ -19,7 +19,7 @@ const loadAddToCart= async (req, res) => {
         // Get user's cart with populated product details
         const userCart = await Cart.findOne({ userId }).populate({
             path: 'items.productId',
-            match: { isDeleted: false, isBlocked: false },
+           
             populate: {
                 path: 'category',
                 match: { isListed: true, isDeleted: false }
@@ -27,7 +27,6 @@ const loadAddToCart= async (req, res) => {
         });
 
         let cartItems = [];
-        let cartCount = 0;
         let subtotal = 0;
 
         if (userCart && userCart.items.length > 0) {
@@ -55,7 +54,7 @@ const loadAddToCart= async (req, res) => {
                         itemTotal: itemTotal
                     };
                 });
-            cartCount = cartItems.length;
+            
         }
 
         // Get wishlist count for navbar
@@ -68,11 +67,8 @@ const loadAddToCart= async (req, res) => {
             }
         });
 
-        let wishlistCount = 0;
-        if (userWishlist && userWishlist.products.length > 0) {
-            const validWishlistItems = userWishlist.products.filter(item => item.productId && item.productId.category);
-            wishlistCount = validWishlistItems.length;
-        }
+        
+      
 
         // Calculate totals
         const shipping = subtotal > 500 ? 0 : 50; // Free shipping over ₹500
@@ -81,8 +77,6 @@ const loadAddToCart= async (req, res) => {
         return res.render("addToCartPage", {
             user: user,
             cartItems: cartItems,
-            cartCount: cartCount,
-            wishlistCount: wishlistCount,
             subtotal: subtotal,
             shipping: shipping,
             total: total
@@ -192,7 +186,6 @@ const loadAddToCart= async (req, res) => {
             return res.status(200).json({
                 success: true, 
                 message: "Product added to cart successfully",
-                cartCount: userCart.items.length, // Number of unique items
                 totalQuantity: totalQuantity // Total quantity of all items
             })
         }
@@ -218,6 +211,8 @@ const updateQuantity = async(req,res)=>{
     try {
         const userId = req.session.userId
         const {productId, size, quantity} = req.body
+        
+        
 
         if (!userId) {
             return res.status(401).json({success: false, message: "User not authenticated"})
@@ -228,11 +223,19 @@ const updateQuantity = async(req,res)=>{
             return res.status(404).json({success: false, message: "Cart not found"})
         }
 
+
         const item = cart.items.find(item => 
             item.productId.toString() === productId && (item.size || "Default") === (size || "Default")
         )
         if (!item) {
             return res.status(404).json({success: false, message: "Item not in cart"})
+        }
+
+        const product = await Product.findById({_id:productId})
+
+        const specificProduct = product.variants.find((item)=>item.size===size)
+        if(specificProduct.variantQuantity<quantity){
+            return res.status(404).json({success:false,message:`Only ${specificProduct.variantQuantity} stock left`})
         }
 
         // Validate quantity
@@ -263,7 +266,6 @@ const updateQuantity = async(req,res)=>{
             subtotal: subtotal,
             shipping: shipping,
             total: total,
-            cartCount: cart.items.length
         })
     } catch (error) {
         console.error(error)
@@ -306,7 +308,6 @@ const removeCart = async(req,res)=>{
             subtotal: subtotal,
             shipping: shipping,
             total: total,
-            cartCount: cart.items.length
         })
     } catch (error) {
         console.error(error)

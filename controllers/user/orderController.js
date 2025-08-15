@@ -233,6 +233,9 @@ const getInvoice = async (req, res) => {
         }
 
         generateInvoice(order, res);
+        if (order.orderStatus === "Cancelled") {
+            res.redirect("/usererrorPage")
+        }
     } catch (error) {
         console.error("Invoice Generation Error:", error);
         res.status(500).json({ success: false, message: "Internal server error" });

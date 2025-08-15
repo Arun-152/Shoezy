@@ -15,7 +15,6 @@ const loadWishlist = async(req,res)=>{
         // Find user's wishlist
         const userWishlist = await Wishlist.findOne({ userId }).populate({
             path: 'products.productId',
-            match: { isDeleted: false, isBlocked: false },
             populate: {
                 path: 'category',
                 match: { isListed: true, isDeleted: false }
@@ -23,13 +22,13 @@ const loadWishlist = async(req,res)=>{
         });
         
         let wishlistProducts = [];
-        let wishlistCount = 0;
+        
         
         if (userWishlist && userWishlist.products) {
             wishlistProducts = userWishlist.products
                 .map(item => item.productId)
                 .filter(product => product !== null && product.category !== null);
-            wishlistCount = wishlistProducts.length;
+           
         }
 
         // Also get cart count for navbar
@@ -43,17 +42,13 @@ const loadWishlist = async(req,res)=>{
             }
         });
         
-        let cartCount = 0;
-        if (userCart && userCart.items.length > 0) {
-            const validCartItems = userCart.items.filter(item => item.productId && item.productId.category);
-            cartCount = validCartItems.length;
-        }
+        
+      
 
         return res.render("wishlistPage",{
             user,
             wishlist: wishlistProducts,
-            wishlistCount: wishlistCount,
-            cartCount: cartCount
+            
         })
     }catch(error){
         console.error(error)
@@ -344,7 +339,7 @@ const addToCartFromWishlist = async(req,res)=>{
         return res.status(200).json({
             success: true, 
             message: "Product moved to cart successfully",
-            cartCount: userCart.items.length
+            
         })
 
     } catch (error) {

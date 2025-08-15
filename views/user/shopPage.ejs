@@ -348,6 +348,9 @@
                     updateCartCount(data.cartCount);
                     showNotification('Product added to cart successfully!');
                 } else {
+                    if(data.message==="User not authenticated"){
+                        window.location.href="/login"
+                    }
                     showNotification(data.message || 'Error adding product to cart');
                 }
             } catch (error) {
@@ -357,23 +360,7 @@
         }
 
         // Update cart count in navbar
-        function updateCartCount(change) {
-            const cartCountElem = document.getElementById('cartCount');
-            if (cartCountElem) {
-                const currentCount = parseInt(cartCountElem.textContent) || 0;
-                const newCount = Math.max(0, change);
-                cartCountElem.textContent = newCount;
-                
-                // Add animation to cart icon
-                const cartIcon = cartCountElem.closest('.cart-icon');
-                if (cartIcon) {
-                    cartIcon.style.animation = 'cartBounce 0.5s ease';
-                    setTimeout(() => {
-                        cartIcon.style.animation = '';
-                    }, 500);
-                }
-            }
-        }
+       
 
         // Enhanced wishlist functionality
         async function toggleWishlist(productId, element) {
@@ -396,16 +383,20 @@
                         heartIcon.classList.remove('far');
                         heartIcon.classList.add('fas');
                         heartIcon.style.color = '#ff4757';
-                        updateWishlistCount(1);
+                     
                         showNotification('Added to wishlist!');
                     } else if (data.action === 'removed') {
                         heartIcon.classList.remove('fas');
                         heartIcon.classList.add('far');
                         heartIcon.style.color = '';
-                        updateWishlistCount(-1);
+                  
                         showNotification('Removed from wishlist!');
                     }
                 } else {
+                    if(data.message==="User not authenticated"){
+                        window.location.href="/login"
+                    }
+                    
                     showNotification(data.message || 'Error updating wishlist');
                 }
             } catch (error) {
@@ -414,14 +405,7 @@
             }
         }
 
-        function updateWishlistCount(change) {
-            const wishlistCountElem = document.getElementById('wishlistCount');
-            if (wishlistCountElem) {
-                const currentCount = parseInt(wishlistCountElem.textContent) || 0;
-                const newCount = Math.max(0, currentCount + change);
-                wishlistCountElem.textContent = newCount;
-            }
-        }
+        
     </script>
 
     <!-- COMPLETELY REWRITTEN JavaScript for Proper State Management -->
@@ -602,7 +586,7 @@
         }
 
         function redirectToLogin() {
-            alert('Please login to access this feature');
+          
             window.location.href = '/login';
             return false;
         }
@@ -630,19 +614,7 @@
 
             updateFilterHighlighting();
 
-            // Enhanced storage change listener
-            window.addEventListener('storage', function(e) {
-                console.log('Storage changed:', e.key, e.newValue);
-                
-                if (e.key === 'shoezy_wishlist') {
-                    setTimeout(() => {
-                        WishlistManager.initializeAll();
-                    }, 100);
-                }
-                if (e.key === 'shoezy_cart_count') {
-                    NavbarCounters.updateCartCount(StorageManager.getCartCount());
-                }
-            });
+           
 
             // Periodic system check every 15 seconds
            

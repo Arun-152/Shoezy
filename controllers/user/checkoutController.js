@@ -8,6 +8,7 @@ const bcrypt = require("bcrypt")
 const env = require("dotenv").config()
 const session = require("express-session")
 
+
 const loadCheckout = async (req, res) => {
   try {
     const userId = req.session.userId;
@@ -23,10 +24,14 @@ const loadCheckout = async (req, res) => {
     let subtotal = 0;
     let totalItems = 0;
     let allItems = [];
+    let blockedOrDeletedProducts = []; 
 
     cartItems.forEach(cart => {
       const filteredItems = cart.items.filter(item => {
         const product = item.productId;
+        if (product && (product.isBlocked || product.isDeleted)) {
+          blockedOrDeletedProducts.push(product.name); 
+        }
         return product && !product.isBlocked && !product.isDeleted;
       });
 
@@ -38,6 +43,10 @@ const loadCheckout = async (req, res) => {
         allItems.push(item);
       });
     });
+     if (blockedOrDeletedProducts.length > 0) {
+       req.flash('error',`These products are blocked or deleted : ${blockedOrDeletedProducts.join(', ')}`)
+       return res.redirect("/cart")
+     } 
 
     if (allItems.length === 0) {
       req.flash('error', 'Your cart is empty or contains unavailable products.');
@@ -132,8 +141,7 @@ const placeOrder = async (req, res) => {
         totalPrice: item.totalPrice
       });
     }
-
-    // Show blocked product message if any
+    
     if (blockedProducts.length > 0) {
       return res.status(400).json({
         success: false,
@@ -258,5 +266,5 @@ const orderSuccess = async (req, res) => {
 module.exports ={
     loadCheckout,
     placeOrder,
-    orderSuccess
+    orderSuccess,
 }

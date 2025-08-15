@@ -36,7 +36,7 @@ router.get("/", homepageController.homePage);
 router.get("/home", homepageController.homePage);
 router.get("/logout", userController.logout);
 router.get("/shop", shopPageController.shopPage);
-router.get("/product/:id", productController.productDetailPage);
+router.get("/product/:id", userAuth,productController.productDetailPage);
 router.post("/resendOtp", userController.resendOTP);
 
 

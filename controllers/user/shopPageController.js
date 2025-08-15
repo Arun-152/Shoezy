@@ -47,8 +47,6 @@ const shopPage = async (req, res) => {
             user: user,
             wishlistItems: wishlistItems,
             cartItems: cartItems,
-            wishlistCount: wishlistItems.length,
-            cartCount: cartItems.length,
             isLandingPage: false,
             
         });

@@ -113,8 +113,9 @@
                                                             : '<i class="fas fa-spinner"></i>' , 'Shipped'
                                                             : '<i class="fas fa-truck"></i>' , 'Delivered'
                                                             : '<i class="fas fa-check-circle"></i>' , 'Cancelled'
-                                                            : '<i class="fas fa-times-circle"></i>' }; const
-                                                            statusIcon=statusIcons[orders[i].orderStatus]
+                                                            : '<i class="fas fa-times-circle"></i>','Returned'  
+                                                            : '<i class="fas fa-undo"></i>'
+                                                         }; const statusIcon=statusIcons[orders[i].orderStatus]
                                                             || '<i class="fas fa-clock"></i>' ; %>
                                                             <%- statusIcon %>
                                                                 <%= orders[i].orderStatus %>

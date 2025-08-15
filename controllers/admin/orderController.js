@@ -109,6 +109,7 @@ const updateOrderStatus = async (req, res) => {
       order.paymentStatus = "Paid";
       order.deliveryDate = new Date();
     }
+    
 
     // Handle cancellation
     if (status.toLowerCase() === "cancelled") {
@@ -175,11 +176,10 @@ const viewReturnRequests = async (req, res) => {
 
 const approveReturnRequest = async (req, res) => {
   try {
-    const { orderId } = req.params; // remove productId from params for bulk approval
+    const { orderId ,productId} = req.params; 
+    console.log(orderId)
 
-    if (!mongoose.Types.ObjectId.isValid(orderId)) {
-      return res.status(400).json({ success: false, message: "Invalid order ID" });
-    }
+ 
 
     const order = await Order.findById(orderId).populate("items.productId");
     if (!order) {
@@ -190,18 +190,29 @@ const approveReturnRequest = async (req, res) => {
     let updatedProducts = [];
 
     // Loop over all ReturnRequested items
+    let allOrderReturn = true
     order.items = order.items.map(item => {
+       if(item.status !== "ReturnedRequest"){
+          allOrderReturn = false
+        }
       if (item.status === "ReturnRequested") {
-        item.status = "Returned"; // directly set Returned for user clarity
+        item.status = "Returned";
+         // directly set Returned for user clarity
         refundAmount += item.price || item.productId.price || 0;
         updatedProducts.push({
           name: item.productId.productName || "Unknown Product",
           quantity: item.quantity || 1,
           size: item.size
         });
+       
       }
       return item;
     });
+
+    if(allOrderReturn){
+      order.status = "Returned"
+    }
+      
 
     if (updatedProducts.length === 0) {
       return res.status(400).json({ 
