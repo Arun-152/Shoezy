@@ -106,32 +106,63 @@ const placeOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: "Cart is empty" });
     }
     
+    // Check for blocked, deleted, or unavailable products FIRST
     const blockedProducts = [];
-    const orderItems = [];
-    let totalAmount = 0;
-
-    const filteredItems = cart.items.filter(item => {
+    const unavailableProducts = [];
+    
+    for (const item of cart.items) {
       const product = item.productId;
-      const isValid = product && !product.isBlocked && !product.isDeleted;
-      if (!isValid) {
-        blockedProducts.push(product?.productName || "Unknown Product");
+      
+      if (!product) {
+        unavailableProducts.push("Unknown Product");
+        continue;
       }
-      return isValid;
-    });
+      
+      if (product.isBlocked) {
+        blockedProducts.push(product.productName);
+        continue;
+      }
+      
+      if (product.isDeleted) {
+        unavailableProducts.push(product.productName);
+        continue;
+      }
+      
+      // Check stock availability for the specific size/variant
+      if (product.variants) {
+        const variant = product.variants.find(v => v.size === item.size);
+        if (!variant || variant.variantQuantity < item.quantity) {
+          unavailableProducts.push(`${product.productName} (Size: ${item.size})`);
+        }
+      }
+    }
 
-    if (filteredItems.length === 0) {
+    // If ANY products are blocked or unavailable, stop the order process immediately
+    if (blockedProducts.length > 0) {
       return res.status(400).json({
         success: false,
         showAlert: true,
         alertType: "error",
-        alertMessage: "This product is unavailable. Please try again later."
+        alertMessage: `The following product(s) are currently blocked and unavailable: ${blockedProducts.join(", ")}. Please remove them from your cart and try again.`
+      });
+    }
+    
+    if (unavailableProducts.length > 0) {
+      return res.status(400).json({
+        success: false,
+        showAlert: true,
+        alertType: "error",
+        alertMessage: `The following product(s) are currently unavailable: ${unavailableProducts.join(", ")}. Please remove them from your cart and try again.`
       });
     }
 
-    // Process valid items
-    for (const item of filteredItems) {
-      const product = item.productId;
+    // Only process valid items after confirming ALL items are available
+    const orderItems = [];
+    let totalAmount = 0;
 
+    for (const item of cart.items) {
+      const product = item.productId;
+      
       totalAmount += item.totalPrice;
       orderItems.push({
         productId: product._id,
@@ -139,15 +170,6 @@ const placeOrder = async (req, res) => {
         quantity: item.quantity,
         price: item.price,
         totalPrice: item.totalPrice
-      });
-    }
-    
-    if (blockedProducts.length > 0) {
-      return res.status(400).json({
-        success: false,
-        showAlert: true,
-        alertType: "error",
-        alertMessage: `The following product(s) are currently unavailable: ${blockedProducts.join(", ")}`
       });
     }
 
@@ -165,7 +187,6 @@ const placeOrder = async (req, res) => {
       return res.status(404).json({ error: "Address not found" });
     }
 
- 
     const generateOrderNumber = () => {
       const prefix = 'ORD';
       const timestamp = Date.now().toString().slice(-6);
@@ -179,7 +200,6 @@ const placeOrder = async (req, res) => {
       const existingOrder = await Order.findOne({ orderNumber });
       if (!existingOrder) isUnique = true;
     }
-
 
     const newOrder = new Order({
       orderNumber,
@@ -201,6 +221,8 @@ const placeOrder = async (req, res) => {
     });
 
     await newOrder.save();
+    
+    // Update stock levels
     try {
       for (const item of orderItems) {
         const product = await Product.findById(item.productId);
@@ -220,9 +242,9 @@ const placeOrder = async (req, res) => {
       console.error("Stock update error:", stockError);
     }
 
+    // Clear cart
     await Cart.updateOne({ userId }, { $set: { items: [] } });
 
-  
     res.status(200).json({
       success: true,
       showAlert: true,
@@ -236,6 +258,7 @@ const placeOrder = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error", details: error.message });
   }
 };
+
 
 
 
