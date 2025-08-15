@@ -214,7 +214,7 @@ const updateQuantity = async(req,res)=>{
         const userId = req.session.userId
         const {productId, size, quantity} = req.body
         
-        
+    
 
         if (!userId) {
             return res.status(401).json({success: false, message: "User not authenticated"})
@@ -242,8 +242,8 @@ const updateQuantity = async(req,res)=>{
 
         // Validate quantity
         const newQuantity = parseInt(quantity)
-        if (newQuantity < 1 || newQuantity > 10) {
-            return res.status(400).json({success: false, message: "Invalid quantity"})
+        if (newQuantity <= 0 || newQuantity > 10) {
+            return res.status(400).json({success: false, message: "Invalid quantity only 1-10 is limit"})
         }
 
         // Update quantity and total price

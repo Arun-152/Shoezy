@@ -267,8 +267,7 @@
                 const qtyInput = cartItem.querySelector('.qty-input');
                 let newQty = parseInt(qtyInput.value) + change;
                
-                if (newQty < 1) newQty = 1;
-                if (newQty > 10) newQty = 10;
+                
                
                 const response = await fetch('/cart/update-quantity', {
                     method: 'POST',
@@ -293,7 +292,7 @@
                    
                     // Update summary
                     updateSummaryDisplay(data);
-                   
+                    
                     showToast(`Quantity updated to ${newQty}`);
                 } else {
                     errorToast(data.message || 'Error updating quantity');
@@ -536,7 +535,7 @@
                     showToast('Proceeding to checkout...');
                     setTimeout(() => {
                         window.location.href = '/checkout';
-                    }, 1000);
+                    },1000);
                 } else {
                     // Show error message from server
                     Swal.fire({
@@ -555,6 +554,7 @@
                     confirmButtonText: 'OK',
                     confirmButtonColor: '#d33'
                 });
+                console.log('hey error',error)
             }
         }
 
