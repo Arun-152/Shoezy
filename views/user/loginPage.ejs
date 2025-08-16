@@ -354,7 +354,7 @@
 
  window.addEventListener('pageshow', function(event) {
   if (event.persisted || !document.referrer || !document.referrer.includes('/login')) {
-    clearAllFormData(false); // ✅ only clear form, not server errors
+    clearAllFormData(false); 
   }
 });
 

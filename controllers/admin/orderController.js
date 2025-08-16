@@ -246,7 +246,7 @@ const approveReturnRequest = async (req, res) => {
       amount: refundAmount,
       description: `Refund for returned items: ${updatedProducts.map(p => `${p.name} (${p.quantity} units, size ${p.size})`).join(", ")}`,
       balanceAfter: newBalance,
-      orderId: order._id,  // ✅ FIX: Use order._id (ObjectId) instead of orderId (string)
+      orderId: order._id,  
       status: "completed",
       source: "return_refund"
     };

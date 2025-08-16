@@ -359,7 +359,7 @@ const returnSingleOrder = async (req, res) => {
             description: `Return requested for ${item.productId.productName}. Reason: ${reason}`
         });
         
-        // ✅ COMPLETELY FIXED: Robust order status determination logic
+       
         const totalItems = order.items.length;
         
         // Get all unique statuses in the order
@@ -369,7 +369,7 @@ const returnSingleOrder = async (req, res) => {
         let newOrderStatus = order.orderStatus;
         let statusDescription = '';
         
-        // ✅ PRIORITY-BASED STATUS DETERMINATION
+      
         if (uniqueStatuses.length === 1) {
             // All items have the same status
             const singleStatus = uniqueStatuses[0];
@@ -520,7 +520,7 @@ const cancelSingleOrder = async (req, res) => {
             });
         }
 
-        // ✅ FIXED: Only restore inventory for the specific cancelled item
+      
         const product = await Product.findById(itemToCancel.productId);
         if (product && product.variants) {
             const variant = product.variants.find(v => v.size === (itemToCancel.size || "Default"));
