@@ -3,6 +3,7 @@ const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
+const Wallet = require("../../models/walletSchema")
 const { validateEmailConfig, createEmailTransporter, sendEmail } = require("../../config/emailConfig");
 require("dotenv").config();
 
@@ -221,7 +222,7 @@ const postSignup = async (req, res) => {
         try {
             await sendVerificationEmail(email.trim(), otp);
         } catch (emailError) {
-            // Email error handled silently
+          
         }
 
         req.session.user = {
@@ -232,7 +233,7 @@ const postSignup = async (req, res) => {
         };
         req.session.userOtp = {
             code: otp,
-            expiresAt: Date.now() + 60 * 1000, // 60 seconds OTP validity
+            expiresAt: Date.now() + 60 * 1000, 
         };
         res.render("otpverification")
     } catch (error) {
@@ -284,6 +285,14 @@ const verifyOTP = async (req, res) => {
             password: hashedPassword,
         });
         await newUser.save();
+
+        const wallet = new Wallet({
+            userId: newUser._id,
+            balance:0  
+            });
+
+        await wallet.save();        
+
 
         req.session.userOtp = null;
         req.session.user = null;

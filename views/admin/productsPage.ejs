@@ -8,182 +8,182 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="/css/adminproductsPage.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-
 </head>
-
 
 <body>
     <div class="dashboard-container">
         <!-- Sidebar -->
         <%- include('../partials/admin/sidebar') %>
 
-
-            <!-- Main Content -->
-            <main class="main-content">
-                <header class="header">
-                    <div class="header-left">
-                        <button class="menu-toggle" id="menuToggle">
-                            <i class="fas fa-bars"></i>
-                        </button>
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+                <div class="header-right">
+                    <div class="notification">
+                        <i class="fas fa-bell"></i>
                     </div>
-                    <div class="header-right">
-                        <div class="notification">
-                            <i class="fas fa-bell"></i>
-                        </div>
-                        <div class="admin-profile">
-                            <i class="fas fa-user-circle"></i>
-                            <span>ADMIN</span>
-                        </div>
+                    <div class="admin-profile">
+                        <i class="fas fa-user-circle"></i>
+                        <span>ADMIN</span>
                     </div>
-                </header>
+                </div>
+            </header>
 
-                <!-- Breadcrumb Navigation -->
-                <%- include('../partials/admin/breadcrumb', { currentPath: '/admin/products' }) %>
+            <!-- Breadcrumb Navigation -->
+            <%- include('../partials/admin/breadcrumb', { currentPath: '/admin/products' }) %>
 
-                <div class="page-content">
-                    <div class="page-header">
-                        <h1>Product Management</h1>
+            <div class="page-content">
+                <div class="page-header">
+                    <h1>Product Management</h1>
+                </div>
+
+                <!-- Search Section -->
+                <form id="searchForm" class="search-section" method="GET" action="/admin/products">
+                    <div class="search-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="searchInput" name="search" class="search-input"
+                            placeholder="Search products..." value="<%= search %>">
                     </div>
 
-                    <!-- Search Section -->
-                    <form id="searchForm" class="search-section" method="GET" action="/admin/products">
-                        <div class="search-container">
-                            <i class="fas fa-search search-icon"></i>
-                            <input type="text" id="searchInput" name="search" class="search-input"
-                                placeholder="Search products..." value="<%= search %>">
-                        </div>
+                    <div class="search-buttons">
+                        <button type="submit" name="search" class="search-btn">Search</button>
+                        <button type="button" class="clear-btn">Clear</button>
+                    </div>
 
-                        <div class="search-buttons">
-                            <button type="submit" name="search" class="search-btn">Search</button>
-                            <button type="button" class="clear-btn">Clear</button>
-                        </div>
+                    <div class="right-controls">
+                        <a href="/admin/addproduct" class="btn-primary" type="button">
+                            <i class="fas fa-plus"></i>Add New Product
+                        </a>
+                    </div>
+                </form>
 
-                        <div class="right-controls">
-                            <a href="/admin/addproduct" class="btn-primary" type="button">
-                                <i class="fas fa-plus"></i>Add New Product
-                            </a>
-                        </div>
-                    </form>
-
-
-                    <!-- Table Section -->
-                    <div class="table-section">
-                        <div class="table-container">
-                            <table class="customers-table">
-                                <thead>
-                                    <tr>
-                                        <th class="table-header">S No</th>
-                                        <th class="table-header">Product Name</th>
-                                        <th class="table-header">Category</th>
-                                        <th class="table-header">Price</th>
-                                        <th class="table-header">Stock</th>
-                                        <th class="table-header">Status</th>
-                                        <th class="table-header">Update</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <% if (products && products.length > 0) { %>
-                                        <% for(let i=0;i<products.length;i++){ %>
-                                            <tr class="table-row">
-                                                <td>
-                                                    <%= i + 1 %>
-                                                </td>
-                                                <td>
-                                                    <%= products[i].productName %>
-                                                </td>
-                                                <td>
-                                                    <%= products[i].category ? products[i].category.name : 'No category' %>
-                                                </td>
-                                                <td>
-                                                    <%= products[i].variants[0].variantPrice %>
-                                                </td>
-                                                <td>
-                                                    <%= products[i].variants[0].variantQuantity %>
-                                                </td>
-                                                <td>
+                <!-- Table Section -->
+                <div class="table-section">
+                    <div class="table-container">
+                        <table class="customers-table">
+                            <thead>
+                                <tr>
+                                    <th class="table-header">S No</th>
+                                    <th class="table-header">Product Name</th>
+                                    <th class="table-header">Category</th>
+                                    <th class="table-header">Price</th>
+                                    <th class="table-header">Stock</th>
+                                    <th class="table-header">Status</th>
+                                    <th class="table-header">Update</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (products && products.length > 0) { %>
+                                    <% for(let i=0;i<products.length;i++){ %>
+                                        <tr class="table-row">
+                                            <td>
+                                                <%= i + 1 %>
+                                            </td>
+                                            <td>
+                                                <%= products[i].productName %>
+                                            </td>
+                                            <td>
+                                                <%= products[i].category ? products[i].category.name : 'No category' %>
+                                            </td>
+                                            <td>
+                                                <%= products[i].variants[0].variantPrice %>
+                                            </td>
+                                            <td>
+                                                <% let totalQuantity = 0; %>
+                                                <% for(let j = 0; j < products[i].variants.length; j++) { %>
+                                                    <% totalQuantity += products[i].variants[j].variantQuantity; %>
+                                                <% } %>
+                                                <%= totalQuantity %>
+                                            </td>
+                                            <td>
+                                                <%if(products[i].isBlocked){%>
+                                                    <span class="status-inactive">InActive</span>
+                                                    <%}else{%>
+                                                        <span class="status-active">Active</span>
+                                                        <%}%>
+                                            </td>
+                                            <td>
+                                                <div class="action-buttons-row">
+                                                    <a href="/admin/editProducts?id=<%= products[i]._id %>"
+                                                        class="action-btn edit-btn">EDIT</a>
                                                     <%if(products[i].isBlocked){%>
-                                                        <span class="status-inactive">InActive</span>
+                                                        <button onclick="unblockProduct('<%= products[i]._id %>', '<%= products[i].productName %>')"
+                                                            class="action-btn unblock-btn">UnBlock</button>
                                                         <%}else{%>
-                                                            <span class="status-active">Active</span>
+                                                            <button onclick="blockProduct('<%= products[i]._id %>', '<%= products[i].productName %>')"
+                                                                class="action-btn block-btn">Block</button>
                                                             <%}%>
-                                                </td>
-                                                <td>
-                                                    <div class="action-buttons-row">
-                                                        <a href="/admin/editProducts?id=<%= products[i]._id %>"
-                                                            class="action-btn edit-btn">EDIT</a>
-                                                        <%if(products[i].isBlocked){%>
-                                                            <button onclick="unblockProduct('<%= products[i]._id %>', '<%= products[i].productName %>')"
-                                                                class="action-btn unblock-btn">UnBlock</button>
-                                                            <%}else{%>
-                                                                <button onclick="blockProduct('<%= products[i]._id %>', '<%= products[i].productName %>')"
-                                                                    class="action-btn block-btn">Block</button>
-                                                                <%}%>
-                                                                    <button onclick="deleteproduct('<%=products[i]._id %>')"
-                                                                        class="action-btn delete-btn">DELETE</button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        <%}%>
-                                    <% } else { %>
-                                        <tr class="no-results-row">
-                                            <td colspan="7" class="no-results-cell">
-                                                <div class="no-results-message">
-                                                    <i class="fas fa-search"></i>
-                                                    <h3>No products found</h3>
-                                                    <% if (search && search.trim() !== '') { %>
-                                                        <p>No products match your search for "<strong><%= search %></strong>"</p>
-                                                        <a href="/admin/products" class="clear-search-btn">Clear Search</a>
-                                                    <% } else { %>
-                                                        <p>No products available at the moment</p>
-                                                    <% } %>
+                                                                <button onclick="deleteproduct('<%=products[i]._id %>')"
+                                                                    class="action-btn delete-btn">DELETE</button>
                                                 </div>
                                             </td>
                                         </tr>
-                                    <% } %>
-                                </tbody>
-                            </table>
-                            <!-- pagination -->
-                            <% if (products && products.length > 0 && totalPages > 1) { %>
-                                <div class="pagination-section">
-                                    <div class="pagination-info">
-                                        Page <%= currentPage %> of <%= totalPages %> Pages
-                                        <% if (search && search.trim() !== '') { %>
-                                            (Showing results for "<%= search %>")
-                                        <% } %>
-                                    </div>
-                                    <div class="pagination-controls">
-                                        <button class="pagination-btn" <%=currentPage <=1 ? "disabled" : "" %>
-                                            onclick="window.location.href='/admin/products?page=<%= currentPage - 1 %><%= search ? '&search=' + encodeURIComponent(search) : '' %>'">
-                                                <i class="fas fa-chevron-left"></i>
-                                        </button>
-
-                                        <div class="page-numbers">
-                                            <% for(let i=1; i <=totalPages; i++) { %>
-                                                <button class="page-btn <%= i === currentPage ? 'active' : '' %>"
-                                                    onclick="window.location.href='/admin/products?page=<%= i %><%= search ? '&search=' + encodeURIComponent(search) : '' %>'">
-                                                    <%= i %>
-                                                </button>
+                                    <%}%>
+                                <% } else { %>
+                                    <tr class="no-results-row">
+                                        <td colspan="7" class="no-results-cell">
+                                            <div class="no-results-message">
+                                                <i class="fas fa-search"></i>
+                                                <h3>No products found</h3>
+                                                <% if (search && search.trim() !== '') { %>
+                                                    <p>No products match your search for "<strong><%= search %></strong>"</p>
+                                                    <a href="/admin/products" class="clear-search-btn">Clear Search</a>
+                                                <% } else { %>
+                                                    <p>No products available at the moment</p>
                                                 <% } %>
-                                        </div>
-                                        <button class="pagination-btn" <%=currentPage>= totalPages ? "disabled" : "" %>
-                                            onclick="window.location.href='/admin/products?page=<%= currentPage + 1 %><%= search ? '&search=' + encodeURIComponent(search) : '' %>'">
-                                                <i class="fas fa-chevron-right"></i>
-                                        </button>
-                                    </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                        <!-- pagination -->
+                        <% if (products && products.length > 0 && totalPages > 1) { %>
+                            <div class="pagination-section">
+                                <div class="pagination-info">
+                                    Page <%= currentPage %> of <%= totalPages %> Pages
+                                    <% if (search && search.trim() !== '') { %>
+                                        (Showing results for "<%= search %>")
+                                    <% } %>
                                 </div>
-                            <% } else if (products && products.length > 0) { %>
-                                <div class="pagination-section">
-                                    <div class="pagination-info">
-                                        Showing <%= products.length %> product<%= products.length !== 1 ? 's' : '' %>
-                                        <% if (search && search.trim() !== '') { %>
-                                            for "<%= search %>"
-                                        <% } %>
+                                <div class="pagination-controls">
+                                    <button class="pagination-btn" <%=currentPage <=1 ? "disabled" : "" %>
+                                        onclick="window.location.href='/admin/products?page=<%= currentPage - 1 %><%= search ? '&search=' + encodeURIComponent(search) : '' %>'">
+                                            <i class="fas fa-chevron-left"></i>
+                                    </button>
+
+                                    <div class="page-numbers">
+                                        <% for(let i=1; i <=totalPages; i++) { %>
+                                            <button class="page-btn <%= i === currentPage ? 'active' : '' %>"
+                                                onclick="window.location.href='/admin/products?page=<%= i %><%= search ? '&search=' + encodeURIComponent(search) : '' %>'">
+                                                <%= i %>
+                                            </button>
+                                            <% } %>
                                     </div>
+                                    <button class="pagination-btn" <%=currentPage>= totalPages ? "disabled" : "" %>
+                                        onclick="window.location.href='/admin/products?page=<%= currentPage + 1 %><%= search ? '&search=' + encodeURIComponent(search) : '' %>'">
+                                            <i class="fas fa-chevron-right"></i>
+                                    </button>
                                 </div>
-                            <% } %>
-                        </div>
-                </section>
-            </main>
+                            </div>
+                        <% } else if (products && products.length > 0) { %>
+                            <div class="pagination-section">
+                                <div class="pagination-info">
+                                    Showing <%= products.length %> product<%= products.length !== 1 ? 's' : '' %>
+                                    <% if (search && search.trim() !== '') { %>
+                                        for "<%= search %>"
+                                    <% } %>
+                                </div>
+                            </div>
+                        <% } %>
+                    </div>
+            </section>
+        </main>
     </div>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
@@ -256,93 +256,94 @@
                 }
             });
         });
+
         function deleteproduct(productId) {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "Do you really want to delete this product? This action cannot be undone.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes, delete it!',
-        cancelButtonText: 'Cancel'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            fetch(`/admin/deleteProducts/${productId}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    Swal.fire(
-                        'Deleted',
-                        'The product has been deleted.',
-                        'success'
-                    ).then(() => {
-                        location.reload();
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Do you really want to delete this product? This action cannot be undone.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/admin/deleteProducts/${productId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire(
+                                'Deleted',
+                                'The product has been deleted.',
+                                'success'
+                            ).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire(
+                                'Failed!',
+                                'Failed to delete product: ' + data.message,
+                                'error'
+                            );
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire(
+                            'Error!',
+                            'An error occurred while deleting the product',
+                            'error'
+                        );
                     });
-                } else {
-                    Swal.fire(
-                        'Failed!',
-                        'Failed to delete product: ' + data.message,
-                        'error'
-                    );
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire(
-                    'Error!',
-                    'An error occurred while deleting the product',
-                    'error'
-                );
             });
         }
-    });
-}
 
-// Block Product Confirmation
-function blockProduct(productId, productName) {
-    Swal.fire({
-        title: 'Are you sure you want to block this product?',
-        text: `Product: ${productName}`,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes, Block it',
-        cancelButtonText: 'Cancel'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Proceed with the block action
-            window.location.href = `/admin/blockedProduct?id=${productId}`;
+        // Block Product Confirmation
+        function blockProduct(productId, productName) {
+            Swal.fire({
+                title: 'Are you sure you want to block this product?',
+                text: `Product: ${productName}`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, Block it',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Proceed with the block action
+                    window.location.href = `/admin/blockedProduct?id=${productId}`;
+                }
+                // If canceled, do nothing (stay on the page)
+            });
         }
-        // If canceled, do nothing (stay on the page)
-    });
-}
 
-// Unblock Product Confirmation
-function unblockProduct(productId, productName) {
-    Swal.fire({
-        title: 'Are you sure you want to unblock this product?',
-        text: `Product: ${productName}`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#28a745',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: ' Yes, Unblock it',
-        cancelButtonText: ' Cancel'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Proceed with the unblock action
-            window.location.href = `/admin/unblockedProduct?id=${productId}`;
+        // Unblock Product Confirmation
+        function unblockProduct(productId, productName) {
+            Swal.fire({
+                title: 'Are you sure you want to unblock this product?',
+                text: `Product: ${productName}`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: ' Yes, Unblock it',
+                cancelButtonText: ' Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Proceed with the unblock action
+                    window.location.href = `/admin/unblockedProduct?id=${productId}`;
+                }
+                // If canceled, do nothing (stay on the page)
+            });
         }
-        // If canceled, do nothing (stay on the page)
-    });
-}
     </script>
 </body>
 

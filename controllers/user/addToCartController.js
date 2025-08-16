@@ -16,7 +16,6 @@ const loadAddToCart= async (req, res) => {
             return res.redirect("/login");
         }
 
-        // Get user's cart with populated product details
         const userCart = await Cart.findOne({ userId }).populate({
             path: 'items.productId',
            
@@ -30,7 +29,6 @@ const loadAddToCart= async (req, res) => {
         let subtotal = 0;
 
         if (userCart && userCart.items.length > 0) {
-            // Ensure all cart items have a size field for legacy compatibility
             let cartUpdated = false;
             userCart.items.forEach(item => {
                 if (!item.size) {
@@ -38,8 +36,7 @@ const loadAddToCart= async (req, res) => {
                     cartUpdated = true;
                 }
             });
-            
-            // Save cart if we updated any items
+
             if (cartUpdated) {
                 await userCart.save();
             }
@@ -56,8 +53,6 @@ const loadAddToCart= async (req, res) => {
                 });
             
         }
-
-        // Get wishlist count for navbar
         const userWishlist = await Wishlist.findOne({ userId }).populate({
             path: 'products.productId',
             match: { isDeleted: false, isBlocked: false },
@@ -67,11 +62,7 @@ const loadAddToCart= async (req, res) => {
             }
         });
 
-        
-      
-
-        // Calculate totals
-        const shipping = subtotal > 500 ? 0 : 50; // Free shipping over ₹500
+        const shipping = subtotal > 500 ? 0 : 50;
         const total = subtotal + shipping;
 
         return res.render("addToCartPage", {
@@ -97,7 +88,6 @@ const loadAddToCart= async (req, res) => {
             return res.status(401).json({success: false, message: "User not authenticated"})
         }
 
-        // Validate required fields - size is optional for shop page quick add
         if (!productId) {
             return res.status(400).json({success: false, message: "Product ID is required"})
         }
@@ -289,13 +279,11 @@ const removeCart = async(req,res)=>{
             return res.status(404).json({success: false, message: "Cart not found"})
         }
 
-        // Remove item from cart (filter by both productId and size)
         cart.items = cart.items.filter(item => 
             !(item.productId.toString() === productId && (item.size || "Default") === (size || "Default"))
         )
         await cart.save()
 
-        // Calculate new totals
         let subtotal = 0
         cart.items.forEach(cartItem => {
             subtotal += cartItem.totalPrice

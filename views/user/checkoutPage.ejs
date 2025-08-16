@@ -100,7 +100,7 @@
                         <span class="payment-icon">💰</span>
                         <div>
                             <div class="payment-title">Cash on Delivery</div>
-                            <div class="payment-note">⚠️ COD is available only for orders up to ₹6000</div>
+                            <div class="payment-note">COD is available</div>
                         </div>
                     </label>
                 </div>
@@ -251,16 +251,7 @@
                     return false;
                 }
                 
-                // COD amount validation
-                if (payment === 'COD' && finalTotal > 6000) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'COD Not Available',
-                        text: 'COD is not available for orders above ₹6000. Please choose another payment method.',
-                        confirmButtonColor: '#007bff'
-                    });
-                    return false;
-                }
+               
                 
                 // Show loading
                 Swal.fire({

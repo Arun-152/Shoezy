@@ -173,15 +173,6 @@ const placeOrder = async (req, res) => {
       });
     }
 
-    if (payment === 'COD' && totalAmount > 6000) {
-      return res.status(400).json({
-        success: false,
-        showAlert: true,
-        alertType: "error",
-        alertMessage: "COD is not available for orders above ₹6000. Please choose another payment method."
-      });
-    }
-
     const address = await Address.findOne({ _id: selectedAddress, userId });
     if (!address) {
       return res.status(404).json({ error: "Address not found" });
