@@ -327,6 +327,23 @@ const addToCartFromWishlist = async(req,res)=>{
 
         await userCart.save()
 
+        // Calculate updated cart count
+        const updatedCart = await Cart.findOne({ userId }).populate({
+            path: 'items.productId',
+            match: { isDeleted: false, isBlocked: false },
+            populate: {
+                path: 'category',
+                match: { isListed: true, isDeleted: false }
+            }
+        });
+        
+        let cartCount = 0;
+        if (updatedCart && updatedCart.items.length > 0) {
+            cartCount = updatedCart.items
+                .filter(item => item.productId && item.productId.category)
+                .reduce((sum, item) => sum + item.quantity, 0);
+        }
+
         // Remove from wishlist
         const userWishlist = await Wishlist.findOne({ userId })
         if (userWishlist) {
@@ -335,9 +352,6 @@ const addToCartFromWishlist = async(req,res)=>{
             )
             await userWishlist.save()
         }
-
-        // Calculate cart count for frontend update
-        const cartCount = userCart.items.length;
 
         return res.status(200).json({
             success: true, 

@@ -298,6 +298,7 @@ const removeCart = async(req,res)=>{
             subtotal: subtotal,
             shipping: shipping,
             total: total,
+            cartCount: cart.items.length
         })
     } catch (error) {
         console.error(error)

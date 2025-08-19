@@ -27,15 +27,35 @@ const shopPage = async (req, res) => {
         // If user is logged in, fetch their wishlist and cart data
         if (userData) {
             // Fetch user's wishlist
-            const userWishlist = await Wishlist.findOne({ userId: userData }).populate('products.productId');
-            if (userWishlist && userWishlist.products) {
-                wishlistItems = userWishlist.products.map(item => item.productId).filter(product => product !== null);
+            const userWishlist = await Wishlist.findOne({ userId: userData }).populate({
+                path: 'products.productId',
+                match: { isDeleted: false, isBlocked: false },
+                populate: {
+                    path: 'category',
+                    match: { isListed: true, isDeleted: false }
+                }
+            });
+            
+            if (userWishlist && userWishlist.products.length > 0) {
+                wishlistItems = userWishlist.products
+                    .filter(item => item.productId && item.productId.category) // Ensure valid product and category
+                    .map(item => item.productId._id.toString());
             }
 
             // Fetch user's cart
-            const userCart = await Cart.findOne({ userId: userData }).populate('items.productId');
-            if (userCart && userCart.items) {
-                cartItems = userCart.items.map(item => item.productId).filter(product => product !== null);
+            const userCart = await Cart.findOne({ userId: userData }).populate({
+                path: 'items.productId',
+                match: { isDeleted: false, isBlocked: false },
+                populate: {
+                    path: 'category',
+                    match: { isListed: true, isDeleted: false }
+                }
+            });
+            
+            if (userCart && userCart.items.length > 0) {
+                cartItems = userCart.items
+                    .filter(item => item.productId && item.productId.category)
+                    .map(item => item.productId._id.toString());
             }
         }
        

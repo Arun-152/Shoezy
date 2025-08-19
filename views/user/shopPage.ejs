@@ -325,13 +325,10 @@
                                     </div>
 
                                     <!-- Enhanced Wishlist Button with Proper Toggle -->
-                                    <% 
-                                    const isInWishlist = wishlistItems.some(item => item._id.toString() === product._id.toString());
-                                    %>
-                                    <div class="wishlist-btn <%= isInWishlist ? 'wishlist-active' : '' %>" 
+                                    <div class="wishlist-btn <%= wishlistItems.includes(product._id.toString()) ? 'wishlist-active' : '' %>" 
                                          onclick="event.stopPropagation(); toggleWishlist('<%= product._id %>', this)" 
                                          data-product-id="<%= product._id %>">
-                                        <i class="<%= isInWishlist ? 'fas' : 'far' %> fa-heart"></i>
+                                        <i class="<%= wishlistItems.includes(product._id.toString()) ? 'fas' : 'far' %> fa-heart"></i>
                                     </div>
 
                                     <!-- Quick Actions -->
