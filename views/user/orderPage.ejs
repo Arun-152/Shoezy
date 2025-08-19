@@ -38,31 +38,27 @@
                             <% if (orders && orders.length > 0) { %>
                                 <% orders.forEach(order => { %>
                                     <% 
-                                    // Calculate dynamic order status based on item statuses
+                                    // Calculate dynamic order status based on item statuses with correct priority
                                     let itemStatuses = order.items.map(item => item.status || order.orderStatus);
-                                    let allReturned = itemStatuses.every(status => status === 'Returned');
-                                    let allCancelled = itemStatuses.every(status => status === 'Cancelled');
-                                    let allPending = itemStatuses.every(status => status === 'Pending');
-                                    let allProcessing = itemStatuses.every(status => status === 'Processing');
-                                    let allShipped = itemStatuses.every(status => status === 'Shipped');
                                     let hasDelivered = itemStatuses.some(status => status === 'Delivered');
-                                    let hasReturnRequested = itemStatuses.some(status => status === 'Return Requested');
+                                    let hasReturned = itemStatuses.some(status => status === 'Returned');
+                                    let hasCancelled = itemStatuses.some(status => status === 'Cancelled');
+                                    let hasReturnRequested = itemStatuses.some(status => status === 'ReturnRequested');
                                     
                                     let displayStatus = order.orderStatus;
-                                    if (allReturned) {
+                                    
+                                    // Priority: Delivered > Returned > Cancelled > admin status
+                                    if (hasDelivered) {
+                                        displayStatus = 'Delivered';
+                                    } else if (hasReturned) {
                                         displayStatus = 'Returned';
-                                    } else if (allCancelled) {
+                                    } else if (hasCancelled && itemStatuses.every(status => ['Cancelled', 'Returned'].includes(status))) {
                                         displayStatus = 'Cancelled';
-                                    } else if (allPending) {
-                                        displayStatus = 'Pending';
-                                    } else if (allProcessing) {
-                                        displayStatus = 'Processing';
-                                    } else if (allShipped) {
-                                        displayStatus = 'Shipped';
                                     } else if (hasReturnRequested) {
                                         displayStatus = 'Return Requested';
-                                    } else if (hasDelivered && !itemStatuses.every(status => ['Returned', 'Cancelled', 'Pending', 'Shipped', 'Processing'].includes(status))) {
-                                        displayStatus = 'Delivered';
+                                    } else {
+                                        // Use admin-side status for the whole order
+                                        displayStatus = order.orderStatus;
                                     }
                                     %>
                                     <div class="order-card" data-status="<%= displayStatus.toLowerCase().replace(/\s+/g, '') %>"
@@ -321,22 +317,21 @@
             
             const statuses = items.map(item => item.status);
             
-            // Check in priority order as requested
-            if (statuses.every(status => status === 'Returned')) {
+            // Priority: Delivered > Returned > Cancelled > admin status
+            if (statuses.some(status => status === 'Delivered')) {
+                return 'Delivered';
+            } else if (statuses.some(status => status === 'Returned')) {
                 return 'Returned';
-            } else if (statuses.every(status => status === 'Cancelled')) {
+            } else if (statuses.every(status => ['Cancelled', 'Returned'].includes(status))) {
                 return 'Cancelled';
-            } else if (statuses.every(status => status === 'Pending')) {
-                return 'Pending';
-            } else if (statuses.every(status => status === 'Processing')) {
-                return 'Processing';
+            } else if (statuses.some(status => status === 'ReturnRequested')) {
+                return 'Return Requested';
             } else if (statuses.every(status => status === 'Shipped')) {
                 return 'Shipped';
-            } else if (statuses.some(status => status === 'ReturnRequested' )) {
-                return 'Return Requested';
-            } else if (statuses.some(status => status === 'Delivered') && 
-                      !statuses.every(status => ['Returned', 'Cancelled', 'Pending', 'Shipped', 'Processing'].includes(status))) {
-                return 'Delivered';
+            } else if (statuses.every(status => status === 'Processing')) {
+                return 'Processing';
+            } else if (statuses.every(status => status === 'Pending')) {
+                return 'Pending';
             }
             
             return 'Processing'; // Default fallback
