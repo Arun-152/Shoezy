@@ -336,10 +336,13 @@ const addToCartFromWishlist = async(req,res)=>{
             await userWishlist.save()
         }
 
+        // Calculate cart count for frontend update
+        const cartCount = userCart.items.length;
+
         return res.status(200).json({
             success: true, 
             message: "Product moved to cart successfully",
-            
+            cartCount: cartCount
         })
 
     } catch (error) {
