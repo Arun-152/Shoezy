@@ -348,6 +348,18 @@ const addToCartFromWishlist = async(req,res)=>{
     }
 }
 
+
+const wishlistStatus = async(req,res)=>{
+    try{
+        const userId=req.session.userId
+        const wishlist = await Wishlist.findOne(userId)
+        const wishlistItems = wishlist.products.map((items)=>items.productId.toString())
+        res.json({success:true,wishlistItems})
+    }catch(error){
+        console.error()
+    }
+}
+
 module.exports = {
     loadWishlist,
     addToWishlist,
@@ -355,4 +367,5 @@ module.exports = {
     toggleWishlist,
     clearWishlist,
     addToCartFromWishlist,
+    wishlistStatus
 }

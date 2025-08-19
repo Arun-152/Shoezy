@@ -10,6 +10,8 @@ const orderPage = async (req, res) => {
         if (!userId) {
             return res.redirect("/login");
         }
+        const user = await User.findById(userId)
+        console.log(user)
 
         // Fetch user's orders
         const orders = await Order.find({ userId })
@@ -17,7 +19,7 @@ const orderPage = async (req, res) => {
             .sort({ createdAt: -1 }); // Most recent first
 
         return res.render("orderPage", {
-            user: userId,
+            user: user,
             orders: orders,
             isLandingPage: false,
         });

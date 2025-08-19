@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Shoezy - Verify OTP</title>
-  <link rel="stylesheet" href="/css/forgott.css" />
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
@@ -12,7 +11,7 @@
     <div class="left">
       <h1 class="brand">Shoezy</h1>
       <div class="circle"></div>
-      <img src="/images/fashion-shoes-sneakers_1203-7529.avif" alt="Shoe" class="shoe-img" />
+      <img src="/images/Unique_design_inspiration__all_in_one_picture_-removebg-preview.png" alt="Shoe" class="shoe-img" />
     </div>
     <div class="right">
       <h2>Verify OTP</h2>
@@ -20,7 +19,7 @@
       <form id="verifyOtpForm">
         <div class="form-group">
           <label for="otp">Enter OTP</label>
-          <input type="text" id="otp" name="otp" placeholder="Enter 6-digit OTP" maxlength="6" required />
+          <input type="text" id="otp" name="otp" placeholder="Enter 6-digit OTP" maxlength="6" />
           <span class="error-message" id="otpError"></span>
         </div>
         <button type="submit" class="btn" id="verifyBtn">Verify OTP</button>
@@ -131,7 +130,7 @@
       verifyBtn.textContent = 'Verifying...';
       
       try {
-        const response = await fetch('/verify-reset-otp', {
+        const response = await fetch('/verifyResetOtp', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -140,32 +139,32 @@
         });
         
         const data = await response.json();
-       if (data.success) {
-  clearInterval(timerInterval); // Stop timer
-  Swal.fire({
-    icon: 'success',
-    title: 'OTP Verified!',
-    text: data.message,
-    confirmButtonText: 'Reset Password'
-  }).then(() => {
-    window.location.href = '/reset-password';
-  });
-} else {
-  // Check if OTP expired
-  if (data.message && data.message.toLowerCase().includes("expired")) {
-    clearInterval(timerInterval); // Stop countdown
-    document.getElementById('resendBtn').style.display = 'inline-block'; // Show resend button
-    document.getElementById('resendBtn').disabled = false;
-    document.getElementById('resendCooldown').style.display = 'none';   // Hide countdown
-  }
+        if (data.success) {
+          clearInterval(timerInterval); // Stop timer
+          Swal.fire({
+            icon: 'success',
+            title: 'OTP Verified!',
+            text: data.message,
+            confirmButtonText: 'Reset Password'
+          }).then(() => {
+            window.location.href = '/resetPassword';
+          });
+        } else {
+          // Check if OTP expired
+          if (data.message && data.message.toLowerCase().includes("expired")) {
+            clearInterval(timerInterval); // Stop countdown
+            document.getElementById('resendBtn').style.display = 'inline-block'; // Show resend button
+            document.getElementById('resendBtn').disabled = false;
+            document.getElementById('resendCooldown').style.display = 'none';   // Hide countdown
+          }
 
-  Swal.fire({
-    icon: 'error',
-    title: 'Verification Failed',
-    text: data.message,
-    confirmButtonText: 'Try Again'
-  });
-}
+          Swal.fire({
+            icon: 'error',
+            title: 'Verification Failed',
+            text: data.message,
+            confirmButtonText: 'Try Again'
+          });
+        }
 
       } catch (error) {
         Swal.fire({
@@ -251,7 +250,7 @@
       resendBtn.textContent = 'Sending...';
 
       try {
-        const response = await fetch('/resend-reset-otp', {
+        const response = await fetch('/resendResetOtp', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -303,85 +302,288 @@
         }
       }
     });
-
-
   </script>
 
   <style>
-    .error-message {
-      color: #dc3545;
-      font-size: 12px;
-      margin-top: 5px;
-      display: block;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-    
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      display: flex;
+      width: 100%;
+      max-width: 1000px;
+      height: 600px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .left {
+      flex: 1;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 40px;
+      color: white;
+    }
+
+    .brand {
+      font-size: 3rem;
+      font-weight: bold;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      z-index: 2;
+      position: relative;
+    }
+
+    .circle {
+      width: 300px;
+      height: 300px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      backdrop-filter: blur(10px);
+    }
+
+    .shoe-img {
+      width: 250px;
+      height: 220px;
+      z-index: 2;
+      position: relative;
+      filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
+    }
+
+    .right {
+      flex: 1;
+      padding: 60px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .right h2 {
+      font-size: 2.5rem;
+      color: #333;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .right p {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 1.1rem;
+    }
+
+    .form-group {
+      margin-bottom: 25px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #333;
+      font-size: 1.1rem;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 15px 20px;
+      border: 2px solid #e1e8ed;
+      border-radius: 10px;
+      font-size: 20px;
+      text-align: center;
+      letter-spacing: 8px;
+      transition: all 0.3s ease;
+      background: #f8f9fa;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #667eea;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
     .btn:disabled {
       opacity: 0.6;
       cursor: not-allowed;
+      transform: none;
     }
-    
-    .form-group {
-      margin-bottom: 20px;
-    }
-    
-    .form-group label {
+
+    .error-message {
+      color: #dc3545;
+      font-size: 12px;
+      margin-top: 8px;
       display: block;
-      margin-bottom: 5px;
       font-weight: 500;
     }
-    
-    .form-group input {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 18px;
-      text-align: center;
-      letter-spacing: 3px;
-    }
-    
-    .form-group input:focus {
-      outline: none;
-      border-color: #007bff;
-    }
-    
+
     #timer {
-      background-color: #f8f9fa;
-      padding: 8px 12px;
-      border-radius: 4px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 12px 20px;
+      border-radius: 8px;
       display: inline-block;
+      border: 1px solid #dee2e6;
+      font-weight: 500;
     }
-    
+
     #countdown {
       font-weight: bold;
-      color: #007bff;
+      color: #667eea;
+      font-size: 1.1rem;
     }
-    
+
     .resend-btn {
-      background-color: #6c757d;
+      background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
       color: white;
       border: none;
-      padding: 10px 20px;
-      border-radius: 4px;
+      padding: 12px 25px;
+      border-radius: 8px;
       font-size: 14px;
+      font-weight: 600;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      transition: all 0.3s ease;
+      box-shadow: 0 3px 10px rgba(108, 117, 125, 0.3);
     }
-    
+
     .resend-btn:hover:not(:disabled) {
-      background-color: #5a6268;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 15px rgba(108, 117, 125, 0.4);
     }
-    
+
     .resend-btn:disabled {
       opacity: 0.6;
       cursor: not-allowed;
+      transform: none;
     }
-    
+
     #resendCooldown {
-      background-color: #f8f9fa;
-      padding: 8px 12px;
-      border-radius: 4px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 10px 16px;
+      border-radius: 6px;
       border: 1px solid #dee2e6;
+      display: inline-block;
+      font-weight: 500;
+    }
+
+    a {
+      color: #667eea !important;
+      text-decoration: none !important;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    a:hover {
+      color: #5a67d8 !important;
+      text-decoration: underline !important;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        height: auto;
+        max-width: 400px;
+      }
+
+      .left {
+        padding: 30px;
+        min-height: 250px;
+      }
+
+      .brand {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+      }
+
+      .circle {
+        width: 200px;
+        height: 200px;
+      }
+
+      .shoe-img {
+        width: 150px;
+      }
+
+      .right {
+        padding: 40px 30px;
+      }
+
+      .right h2 {
+        font-size: 2rem;
+      }
+
+      .form-group input {
+        font-size: 18px;
+        letter-spacing: 6px;
+        padding: 12px 15px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+
+      .container {
+        max-width: 350px;
+      }
+
+      .right {
+        padding: 30px 20px;
+      }
+
+      .brand {
+        font-size: 2rem;
+      }
+
+      .right h2 {
+        font-size: 1.8rem;
+      }
+
+      .form-group input {
+        letter-spacing: 4px;
+      }
     }
   </style>
 </body>

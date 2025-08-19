@@ -21,7 +21,7 @@ body {
 /* Enhanced Left Section */
 .left-section {
   width: 50%;
-  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  background: linear-gradient(135deg, #7a9dc5, #93bfe2);
   color: white;
   display: flex;
   flex-direction: column;
@@ -40,9 +40,9 @@ body {
   width: 200%;
   height: 200%;
   background: 
-    radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%);
-  animation: backgroundMove 20s ease-in-out infinite;
+    radial-gradient(circle at 40% 80%, rgba(255,255,255,0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 40%, rgba(255,255,255,0.1) 0%, transparent 50%);
+  
 }
 
 @keyframes backgroundMove {
@@ -84,10 +84,10 @@ body {
 }
 
 .shoe-image {
-  width: 80px;
-  height: 48px;
+  width: 120px;
+  height: 98px;
   filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
-  animation: shoeRotate 8s linear infinite;
+  
 }
 
 @keyframes shoeRotate {

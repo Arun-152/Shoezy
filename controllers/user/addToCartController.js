@@ -131,13 +131,13 @@ const loadAddToCart= async (req, res) => {
             userCart = new Cart({userId, items: []})
         }
 
-        // Check if product with same size already exists in cart
+ 
         const existingItemIndex = userCart.items.findIndex(item => 
             item.productId.toString() === productId && (item.size || "Default") === size
         )
 
         if (existingItemIndex > -1) {
-            // Update existing item quantity - prevent duplicates by increasing quantity
+          
             userCart.items[existingItemIndex].quantity += parseInt(quantity)
             userCart.items[existingItemIndex].totalPrice = userCart.items[existingItemIndex].price * userCart.items[existingItemIndex].quantity
             // Ensure the size field is set for existing items

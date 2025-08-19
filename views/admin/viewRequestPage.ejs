@@ -3,632 +3,614 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Cancellation/Return Requests</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f9;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        h2 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 20px;
-        }
-
-        .no-requests {
-            text-align: center;
-            color: #666;
-            font-size: 18px;
-            margin: 40px 0;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: #fff;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-            vertical-align: top;
-        }
-
-        th {
-            background-color: #e9ecef;
-            font-weight: bold;
-            color: #495057;
-        }
-
-        tr:hover {
-            background-color: #f8f9fa;
-        }
-
-        .order-info {
-            font-weight: 500;
-            color: #495057;
-        }
-
-        .customer-name {
-            color: #007bff;
-            font-weight: 500;
-        }
-
-        .products-container {
-            max-width: 400px;
-        }
-
-        .product-item {
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            padding: 10px;
-            margin-bottom: 8px;
-            position: relative;
-        }
-
-        .product-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .product-name {
-            font-weight: 500;
-            color: #28a745;
-            margin-bottom: 4px;
-        }
-
-        .product-details {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 6px;
-        }
-
-        .return-reason {
-            font-size: 13px;
-            color: #495057;
-            background-color: #fff3cd;
-            padding: 4px 6px;
-            border-radius: 3px;
-            border-left: 3px solid #ffc107;
-            margin-bottom: 8px;
-        }
-
-        .product-actions {
-            display: flex;
-            gap: 5px;
-        }
-
-        .product-actions button {
-            padding: 4px 8px;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 11px;
-            font-weight: 500;
-        }
-
-        .approve-btn {
-            background-color: #28a745;
-            color: white;
-        }
-
-        .reject-btn {
-            background-color: #dc3545;
-            color: white;
-        }
-
-        .approve-btn:hover {
-            background-color: #218838;
-        }
-
-        .reject-btn:hover {
-            background-color: #c82333;
-        }
-
-        .status-badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 500;
-            background-color: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-        }
-
-        .order-date {
-            color: #666;
-            font-size: 13px;
-        }
-
-        /* Breadcrumb Styles */
-        .admin-breadcrumb {
-            background: #ffffff;
-            border-bottom: 1px solid #e5e7eb;
-            padding: 1rem 1.5rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-
-        .breadcrumb-list {
-            display: flex;
-            align-items: center;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .breadcrumb-item {
-            display: flex;
-            align-items: center;
-            font-size: 0.875rem;
-            color: #6b7280;
-        }
-
-        .breadcrumb-link {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: #6b7280;
-            text-decoration: none;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.375rem;
-            transition: all 0.2s ease;
-            font-weight: 500;
-        }
-
-        .breadcrumb-link:hover {
-            color: #3b82f6;
-            background-color: #f3f4f6;
-            cursor: pointer;
-            text-decoration: underline;
-            text-underline-offset: 2px;
-        }
-
-        .breadcrumb-link i {
-            font-size: 0.75rem;
-            opacity: 0.8;
-        }
-
-        .breadcrumb-current {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: #1f2937;
-            font-weight: 600;
-            padding: 0.25rem 0.5rem;
-        }
-
-        .breadcrumb-current i {
-            font-size: 0.75rem;
-            color: #3b82f6;
-        }
-
-        .breadcrumb-separator {
-            color: #d1d5db;
-            font-size: 0.75rem;
-            margin: 0 0.25rem;
-        }
-
-        /* Pagination Styles */
-        .pagination-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 20px;
-            padding: 15px 0;
-            border-top: 1px solid #e5e7eb;
-        }
-
-        .pagination-info {
-            color: #6b7280;
-            font-size: 14px;
-        }
-
-        .pagination-controls {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .pagination-btn {
-            padding: 8px 12px;
-            border: 1px solid #d1d5db;
-            background: white;
-            color: #374151;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .pagination-btn:hover:not(:disabled) {
-            background: #f3f4f6;
-            border-color: #9ca3af;
-        }
-
-        .pagination-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .page-numbers {
-            display: flex;
-            gap: 5px;
-        }
-
-        .page-btn {
-            padding: 8px 12px;
-            border: 1px solid #d1d5db;
-            background: white;
-            color: #374151;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s ease;
-            min-width: 40px;
-        }
-
-        .page-btn:hover {
-            background: #f3f4f6;
-            border-color: #9ca3af;
-        }
-
-        .page-btn.active {
-            background: #3b82f6;
-            color: white;
-            border-color: #3b82f6;
-        }
-
-        footer {
-            text-align: center;
-            margin-top: 20px;
-            color: #666;
-            font-size: 12px;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 10px;
-            }
-            
-            table {
-                font-size: 12px;
-            }
-            
-            th, td {
-                padding: 8px;
-            }
-
-            .products-container {
-                max-width: 300px;
-            }
-        }
-    </style>
+    <title>Shoezy-Return Requests</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/css/adminoffersPage.css">
 </head>
-<body>
-    <div class="container">
-        <!-- Breadcrumb Navigation -->
-        <nav class="admin-breadcrumb" aria-label="Breadcrumb">
-            <ul class="breadcrumb-list">
-                <li class="breadcrumb-item">
-                    <a href="/admin/dashboard" class="breadcrumb-link">
-                        <i class="fas fa-tachometer-alt"></i>
-                        Dashboard
-                    </a>
-                    <i class="fas fa-chevron-right breadcrumb-separator"></i>
-                </li>
-                <li class="breadcrumb-item">
-                    <a href="/admin/orders" class="breadcrumb-link">
-                        <i class="fas fa-shopping-cart"></i>
-                        Orders
-                    </a>
-                    <i class="fas fa-chevron-right breadcrumb-separator"></i>
-                </li>
-                <li class="breadcrumb-item active">
-                    <span class="breadcrumb-current">
-                        <i class="fas fa-undo-alt"></i>
-                        Return Requests
-                    </span>
-                </li>
-            </ul>
-        </nav>
+<style>
+    /* Breadcrumb Styles */
+.breadcrumb {
+    background-color: #000000;
+    padding: 15px 30px;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 14px;
+    height: 60px;
+}
 
-        <h2>Manage Return Requests</h2>
-        
-        <% 
-        // Group orders that have return requests
-        let ordersWithReturnRequests = [];
-        
-        if (returnedOrders && returnedOrders.length > 0) {
-            returnedOrders.forEach(order => {
-                let returnRequestedItems = order.items.filter(item => item.status === 'ReturnRequested');
-                if (returnRequestedItems.length > 0) {
-                    ordersWithReturnRequests.push({
-                        ...order.toObject(),
-                        returnRequestedItems: returnRequestedItems
+.breadcrumb-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #6c757d;
+}
+
+.breadcrumb-nav a {
+    color: #4a90e2;
+    text-decoration: none;
+    transition: color 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.breadcrumb-nav a:hover {
+    color: #357abd;
+    text-decoration: underline;
+}
+
+.breadcrumb-nav .separator {
+    color: #6c757d;
+    margin: 0 4px;
+}
+
+.breadcrumb-nav .current {
+    color: #495057;
+    font-weight: 500;
+}
+
+/* Breadcrumb responsive design */
+@media (max-width: 768px) {
+    .breadcrumb {
+        padding: 12px 20px;
+    }
+    
+    .breadcrumb-nav {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .breadcrumb {
+        padding: 10px 15px;
+    }
+    
+    .breadcrumb-nav {
+        font-size: 12px;
+        flex-wrap: wrap;
+    }
+}
+
+.order-info-cell {
+    font-weight: 500;
+    color: #495057;
+}
+
+.customer-name-cell {
+    color: #4a90e2;
+    font-weight: 500;
+}
+
+.order-date-cell {
+    color: #666;
+    font-size: 14px;
+}
+
+.products-container-cell {
+    max-width: 400px;
+}
+
+.return-product-item {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.return-product-item:last-child {
+    margin-bottom: 0;
+}
+
+.return-product-name {
+    font-weight: 500;
+    color: #28a745;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+.return-product-details {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.return-reason-box {
+    font-size: 13px;
+    color: #495057;
+    background-color: #fff3cd;
+    padding: 6px 8px;
+    border-radius: 4px;
+    border-left: 3px solid #ffc107;
+    margin-bottom: 10px;
+}
+
+.return-product-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-approve,
+.btn-reject {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-approve {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-reject {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-approve:hover {
+    background-color: #218838;
+    transform: translateY(-1px);
+}
+
+.btn-reject:hover {
+    background-color: #c82333;
+    transform: translateY(-1px);
+}
+
+.return-status-badge {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+/* Empty state styles for table */
+.empty-state-row {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.empty-state-cell {
+    color: #666;
+    font-style: italic;
+}
+
+.no-requests-icon {
+    font-size: 48px;
+    color: #ddd;
+    margin-bottom: 20px;
+    display: block;
+}
+
+.empty-state-cell h3 {
+    font-size: 24px;
+    color: #333;
+    margin: 20px 0 10px 0;
+    font-style: normal;
+}
+
+.empty-state-cell p {
+    font-size: 16px;
+    color: #666;
+    margin: 0;
+    font-style: normal;
+}
+.pagination-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px auto;
+  max-width: 1000px;
+}
+
+.page-info {
+  font-size: 14px;
+  color: #555;
+}
+
+/* Pagination Numbers */
+.pagination {
+  list-style: none;
+  display: flex;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+}
+
+.pagination li a {
+  display: block;
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  color: #333;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.pagination li a:hover {
+  background: #f0f0f0;
+}
+
+.pagination li.active a {
+  background: #007bff;
+  color: #fff;
+  border-color: #007bff;
+}
+
+.pagination li.disabled a {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+
+/* Responsive adjustments for return requests */
+@media (max-width: 768px) {
+    .products-container-cell {
+        max-width: 300px;
+    }
+    
+    .return-product-item {
+        padding: 8px;
+    }
+    
+    .return-product-actions {
+        flex-direction: column;
+        gap: 6px;
+    }
+    
+    .btn-approve,
+    .btn-reject {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .return-product-details {
+        font-size: 11px;
+    }
+    
+    .return-reason-box {
+        font-size: 12px;
+        padding: 4px 6px;
+    }
+    
+    .btn-approve,
+    .btn-reject {
+        font-size: 11px;
+        padding: 4px 8px;
+    }
+}
+</style>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <%- include('../partials/admin/sidebar') %>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+                <div class="header-right">
+                    <div class="notification">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="admin-profile">
+                        <i class="fas fa-user-circle"></i>
+                        <span>ADMIN</span>
+                    </div>
+                </div>
+            </header>
+            
+            <div class="breadcrumb">
+                <div class="breadcrumb-nav">
+                    <a href="/admin/dashboard">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                    <span class="separator">/</span>
+                    <a href="/admin/orders">Orders</a>
+                    <span class="separator">/</span>
+                    <span class="current">Order Details</span>
+                </div>
+            </div>
+         
+            <section class="page-content">
+                <div class="page-header">
+                    <h1>Manage Return Requests</h1>
+                </div>
+
+                <% 
+                // Group orders that have return requests
+                let ordersWithReturnRequests = [];
+                
+                if (returnedOrders && returnedOrders.length > 0) {
+                    returnedOrders.forEach(order => {
+                        let returnRequestedItems = order.items.filter(item => item.status === 'ReturnRequested');
+                        if (returnRequestedItems.length > 0) {
+                            ordersWithReturnRequests.push({
+                                ...order.toObject(),
+                                returnRequestedItems: returnRequestedItems
+                            });
+                        }
                     });
                 }
-            });
-        }
 
-        // Pagination logic
-        const itemsPerPage = 10;
-        const currentPage = parseInt(locals.currentPage) || 1;
-        const totalItems = ordersWithReturnRequests.length;
-        const totalPages = Math.ceil(totalItems / itemsPerPage);
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const endIndex = startIndex + itemsPerPage;
-        const paginatedOrders = ordersWithReturnRequests.slice(startIndex, endIndex);
-        %>
-        
-        <% if (paginatedOrders.length > 0) { %>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Order ID</th>
-                        <th>Customer</th>
-                        <th>Order Date</th>
-                        <th>Return Requests</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% paginatedOrders.forEach(order => { %>
-                        <tr>
-                            <td class="order-info">
-                                #<%= order.orderNumber || order._id.toString().slice(-6) %>
-                            </td>
-                            <td class="customer-name">
-                                <%= order.userId?.fullname || 
-                                    order.userId?.name || 
-                                    (order.userId?.firstName ? order.userId.firstName + ' ' + (order.userId.lastName || '') : '') ||
-                                    'Unknown Customer' %>
-                            </td>
-                            <td class="order-date">
-                                <%= order.createdAt ? 
-                                    new Date(order.createdAt).toLocaleDateString('en-US', {
-                                        year: 'numeric',
-                                        month: 'short',
-                                        day: 'numeric'
-                                    }) : 'N/A' %>
-                            </td>
-                            <td class="products-container">
-                                <% order.returnRequestedItems.forEach((item, index) => { %>
-                                    <div class="product-item">
-                                        <div class="product-name">
-                                            <%= item.productId?.productName || item.productId?.name || 'Unknown Product' %>
-                                        </div>
-                                        <div class="product-details">
-                                            Qty: <%= item.quantity || 1 %> | Price: ₹<%= item.price ? item.price.toLocaleString() : 'N/A' %>
-                                        </div>
-                                        <div class="return-reason">
-                                            <strong>Reason:</strong> 
-                                            <%= item.returnReason || 
-                                                order.orderReturnReason || 
-                                                'No reason provided' %>
-                                        </div>
-                                        <div class="product-actions">
-                                            <button class="approve-btn"
-                                                    onclick="handleApprove('<%= order.orderNumber %>', '<%= item.productId._id %>', '<%= item.productId?.productName || item.productId?.name || "Unknown" %>')">
-                                                Approve
-                                            </button>
-                                            <button class="reject-btn"
-                                                    onclick="handleReject('<%= order.orderNumber %>', '<%= item.productId._id %>', '<%= item.productId?.productName || item.productId?.name || "Unknown" %>')">
-                                                Reject
-                                            </button>
-                                        </div>
-                                    </div>
-                                <% }); %>
-                            </td>
-                            <td>
-                                <span class="status-badge">
-                                    <%= order.returnRequestedItems.length %> Return Request<%= order.returnRequestedItems.length > 1 ? 's' : '' %>
-                                </span>
-                            </td>
-                        </tr>
-                    <% }); %>
-                </tbody>
-            </table>
+                // Pagination logic
+                const itemsPerPage = 10;
+                const currentPage = parseInt(locals.currentPage) || 1;
+                const totalItems = ordersWithReturnRequests.length;
+                const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+                const startIndex = (currentPage - 1) * itemsPerPage;
+                const endIndex = startIndex + itemsPerPage;
+                const paginatedOrders = ordersWithReturnRequests.slice(startIndex, endIndex);
+                %>
 
-            <!-- Pagination -->
-            <% if (totalPages > 1) { %>
-                <div class="pagination-section">
-                    <div class="pagination-info">
-                        Showing <%= startIndex + 1 %> to <%= Math.min(endIndex, totalItems) %> of <%= totalItems %> return requests
-                    </div>
-                    <div class="pagination-controls">
-                        <button class="pagination-btn" onclick="goToPage(<%= currentPage - 1 %>)"
-                            <%= currentPage <= 1 ? 'disabled' : '' %>>
-                            <i class="fas fa-chevron-left"></i> Previous
-                        </button>
-
-                        <div class="page-numbers">
-                            <% for(let i = 1; i <= totalPages; i++) { %>
-                                <button class="page-btn <%= i === currentPage ? 'active' : '' %>"
-                                    onclick="goToPage(<%= i %>)">
-                                    <%= i %>
-                                </button>
-                            <% } %>
-                        </div>
-
-                        <button class="pagination-btn" onclick="goToPage(<%= currentPage + 1 %>)"
-                            <%= currentPage >= totalPages ? 'disabled' : '' %>>
-                            Next <i class="fas fa-chevron-right"></i>
-                        </button>
+                <!-- Table Section - Always displayed -->
+                <div class="table-section">
+                    <div class="table-container">
+                        <table class="customers-table">
+                            <thead>
+                                <tr>
+                                    <th class="table-header">Order ID</th>
+                                    <th class="table-header">Customer</th>
+                                    <th class="table-header">Order Date</th>
+                                    <th class="table-header">Return Requests</th>
+                                    <th class="table-header">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (paginatedOrders.length > 0) { %>
+                                    <% paginatedOrders.forEach(order => { %>
+                                        <tr class="table-row">
+                                            <td class="order-info-cell">
+                                                #<%= order.orderNumber || order._id.toString().slice(-6) %>
+                                            </td>
+                                            <td class="customer-name-cell">
+                                                <%= order.userId?.fullname || 
+                                                    order.userId?.name || 
+                                                    (order.userId?.firstName ? order.userId.firstName + ' ' + (order.userId.lastName || '') : '') ||
+                                                    'Unknown Customer' %>
+                                            </td>
+                                            <td class="order-date-cell">
+                                                <%= order.createdAt ? 
+                                                    new Date(order.createdAt).toLocaleDateString('en-US', {
+                                                        year: 'numeric',
+                                                        month: 'short',
+                                                        day: 'numeric'
+                                                    }) : 'N/A' %>
+                                            </td>
+                                            <td class="products-container-cell">
+                                                <% order.returnRequestedItems.forEach((item, index) => { %>
+                                                    <div class="return-product-item">
+                                                        <div class="return-product-name">
+                                                            <%= item.productId?.productName || item.productId?.name || 'Unknown Product' %>
+                                                        </div>
+                                                        <div class="return-product-details">
+                                                            Qty: <%= item.quantity || 1 %> | Price: ₹<%= item.price ? item.price.toLocaleString() : 'N/A' %>
+                                                        </div>
+                                                        <div class="return-reason-box">
+                                                            <strong>Reason:</strong> 
+                                                            <%= item.returnReason || 
+                                                                order.orderReturnReason || 
+                                                                'No reason provided' %>
+                                                        </div>
+                                                        <div class="return-product-actions">
+                                                            <button class="btn-approve"
+                                                                    onclick="handleApprove('<%= order.orderNumber %>', '<%= item.productId._id %>', '<%= item.productId?.productName || item.productId?.name || "Unknown" %>')">
+                                                                <i class="fas fa-check"></i> Approve
+                                                            </button>
+                                                            <button class="btn-reject"
+                                                                    onclick="handleReject('<%= order.orderNumber %>', '<%= item.productId._id %>', '<%= item.productId?.productName || item.productId?.name || "Unknown" %>')">
+                                                                <i class="fas fa-times"></i> Reject
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                <% }); %>
+                                            </td>
+                                            <td>
+                                                <span class="return-status-badge">
+                                                    <%= order.returnRequestedItems.length %> Request<%= order.returnRequestedItems.length > 1 ? 's' : '' %>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    <% }); %>
+                                <% } else { %>
+                                    <!-- Empty state row -->
+                                    <tr class="table-row empty-state-row">
+                                        <td colspan="5" class="empty-state-cell">
+                                            <div class="no-requests-icon">
+                                                <i class="fas fa-inbox"></i>
+                                            </div>
+                                            <h3>No Return Requests Found</h3>
+                                            <p>There are no pending return requests at the moment.</p>
+                                        </td>
+                                    </tr>
+                                <% } %>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-            <% } %>
-        <% } else { %>
-            <div class="no-requests">
-                <h3>No Return Requests Found</h3>
-                <p>There are no pending return requests at the moment.</p>
-            </div>
-        <% } %>
 
-        <% if (ordersWithReturnRequests.length > 0 && totalPages <= 1) { %>
-            <!-- Show info even when no pagination needed -->
-            <div class="pagination-section">
-                <div class="pagination-info">
-                    Showing all <%= totalItems %> return request<%= totalItems !== 1 ? 's' : '' %>
-                </div>
-            </div>
-        <% } %>
-        
-        <footer>&copy; 2025 Tmz Admin Panel. All rights reserved.</footer>
+                <!-- Pagination Section - Always displayed -->
+               <div class="pagination-section">
+  <div class="page-info">
+    Page <%= currentPage %> of <%= totalPages %> Pages
+  </div>
+  <ul class="pagination">
+    <!-- Previous -->
+    <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+      <a href="?page=<%= currentPage - 1 %>">&laquo;</a>
+    </li>
+
+    <!-- Page Numbers -->
+    <% for (let i = 1; i <= totalPages; i++) { %>
+      <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+        <a href="?page=<%= i %>"><%= i %></a>
+      </li>
+    <% } %>
+
+    <!-- Next -->
+    <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+      <a href="?page=<%= currentPage + 1 %>">&raquo;</a>
+    </li>
+  </ul>
+</div>
+
+            </section>
+        </main>
     </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-    async function handleApprove(orderId, productId, productName) {
-        const result = await Swal.fire({
-            title: 'Are you sure?',
-            html: `Do you want to approve the return request for:<br><strong>${productName}</strong><br><br>This will process a refund to the customer.`,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Yes, approve it!',
-            cancelButtonText: 'Cancel',
-            confirmButtonColor: '#28a745',
-            cancelButtonColor: '#6c757d'
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Toggle sidebar
+        const menuToggle = document.querySelector('.menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('sidebar-open');
         });
 
-        if (result.isConfirmed) {
-            try {
-                Swal.fire({
-                    title: 'Processing...',
-                    text: 'Please wait while we process the return request.',
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
+        async function handleApprove(orderId, productId, productName) {
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                html: `Do you want to approve the return request for:<br><strong>${productName}</strong><br><br>This will process a refund to the customer.`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, approve it!',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d'
+            });
 
-                const response = await fetch(`/admin/orders/approve-return/${orderId}/${productId}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    await Swal.fire({
-                        icon: 'success',
-                        title: 'Approved!',
-                        html: `Return request for <strong>${productName}</strong> has been approved successfully.<br>Refund has been processed.`,
-                        confirmButtonColor: '#28a745'
+            if (result.isConfirmed) {
+                try {
+                    Swal.fire({
+                        title: 'Processing...',
+                        text: 'Please wait while we process the return request.',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
                     });
-                    location.reload();
-                } else {
+
+                    const response = await fetch(`/admin/orders/approve-return/${orderId}/${productId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        await Swal.fire({
+                            icon: 'success',
+                            title: 'Approved!',
+                            html: `Return request for <strong>${productName}</strong> has been approved successfully.<br>Refund has been processed.`,
+                            confirmButtonColor: '#28a745'
+                        });
+                        location.reload();
+                    } else {
+                        await Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: data.message || 'Failed to approve return request.',
+                            confirmButtonColor: '#dc3545'
+                        });
+                    }
+                } catch (error) {
+                    console.error('Approve Error:', error);
                     await Swal.fire({
                         icon: 'error',
-                        title: 'Error!',
-                        text: data.message || 'Failed to approve return request.',
+                        title: 'Server Error!',
+                        text: 'Please try again later.',
                         confirmButtonColor: '#dc3545'
                     });
                 }
-            } catch (error) {
-                console.error('Approve Error:', error);
-                await Swal.fire({
-                    icon: 'error',
-                    title: 'Server Error!',
-                    text: 'Please try again later.',
-                    confirmButtonColor: '#dc3545'
-                });
             }
         }
-    }
 
-    async function handleReject(orderId, productId, productName) {
-        const result = await Swal.fire({
-            title: 'Are you sure?',
-            html: `Do you want to reject the return request for:<br><strong>${productName}</strong>`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Yes, reject it!',
-            cancelButtonText: 'Cancel',
-            confirmButtonColor: '#dc3545',
-            cancelButtonColor: '#6c757d'
-        });
+        async function handleReject(orderId, productId, productName) {
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                html: `Do you want to reject the return request for:<br><strong>${productName}</strong>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, reject it!',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d'
+            });
 
-        if (result.isConfirmed) {
-            try {
-                Swal.fire({
-                    title: 'Processing...',
-                    text: 'Please wait while we process the rejection.',
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-
-                const response = await fetch(`/admin/orders/reject-return/${orderId}/${productId}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    await Swal.fire({
-                        icon: 'success',
-                        title: 'Rejected!',
-                        html: `Return request for <strong>${productName}</strong> has been rejected.`,
-                        confirmButtonColor: '#dc3545'
+            if (result.isConfirmed) {
+                try {
+                    Swal.fire({
+                        title: 'Processing...',
+                        text: 'Please wait while we process the rejection.',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
                     });
-                    location.reload();
-                } else {
+
+                    const response = await fetch(`/admin/orders/reject-return/${orderId}/${productId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        await Swal.fire({
+                            icon: 'success',
+                            title: 'Rejected!',
+                            html: `Return request for <strong>${productName}</strong> has been rejected.`,
+                            confirmButtonColor: '#dc3545'
+                        });
+                        location.reload();
+                    } else {
+                        await Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: data.message || 'Failed to reject return request.',
+                            confirmButtonColor: '#dc3545'
+                        });
+                    }
+                } catch (error) {
+                    console.error('Reject Error:', error);
                     await Swal.fire({
                         icon: 'error',
-                        title: 'Error!',
-                        text: data.message || 'Failed to reject return request.',
+                        title: 'Server Error!',
+                        text: 'Please try again later.',
                         confirmButtonColor: '#dc3545'
                     });
                 }
-            } catch (error) {
-                console.error('Reject Error:', error);
-                await Swal.fire({
-                    icon: 'error',
-                    title: 'Server Error!',
-                    text: 'Please try again later.',
-                    confirmButtonColor: '#dc3545'
-                });
             }
         }
-    }
 
-    function goToPage(page) {
-        if (page < 1 || page > <%= totalPages %>) return;
-        
-        const url = new URL(window.location);
-        url.searchParams.set('page', page);
-        window.location.href = url.toString();
-    }
-</script>
-
-
+        function goToPage(page) {
+            if (page < 1 || page > <%= totalPages %>) return;
+            
+            const url = new URL(window.location);
+            url.searchParams.set('page', page);
+            window.location.href = url.toString();
+        }
+    </script>
 </body>
 </html>

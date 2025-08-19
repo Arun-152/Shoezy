@@ -16,13 +16,14 @@
         .button-wrapper {
             display: flex;
             justify-content: flex-end;
+            height: 50px;
         }
 
         .view-request-btn {
             background-color: #007bff;
             color: white;
             padding: 6px 12px;
-            border: none;
+            border: black;
             border-radius: 4px;
             font-size: 14px;
             cursor: pointer;
@@ -170,35 +171,45 @@
                                 </table>
                             </div>
 
-                            <!-- Pagination -->
-                            <% if (totalPages> 1) { %>
-                                <div class="pagination-section">
-                                    <div class="pagination-info">
-                                        Showing <%= (currentPage - 1) * 5 + 1 %> to <%= Math.min(currentPage * 5,
-                                                totalOrders) %> of <%= totalOrders %> orders
-                                    </div>
-                                    <div class="pagination-controls">
-                                        <button class="pagination-btn" onclick="goToPage(<%= currentPage - 1 %>)"
-                                            <%=currentPage <=1 ? 'disabled' : '' %>>
-                                            <i class="fas fa-chevron-left"></i> Previous
-                                        </button>
+                            <!-- Pagination - Now always visible -->
+                            <div class="pagination-section">
+                                <div class="pagination-info">
+                                    <% if (totalOrders > 0) { %>
+                                        Showing <%= (currentPage - 1) * 5 + 1 %> to <%= Math.min(currentPage * 5, totalOrders) %> of <%= totalOrders %> orders
+                                    <% } else { %>
+                                        No orders found
+                                    <% } %>
+                                </div>
 
-                                        <div class="page-numbers">
-                                            <% for(let i=1; i <=totalPages; i++) { %>
+                                <div class="pagination-controls">
+                                    <!-- Prev Button -->
+                                    <button class="pagination-btn" onclick="goToPage(<%= currentPage - 1 %>)"
+                                        <%= currentPage <= 1 ? 'disabled' : '' %>>
+                                        <i class="fas fa-chevron-left"></i> Previous
+                                    </button>
+
+                                    <!-- Page Numbers -->
+                                    <div class="page-numbers">
+                                        <% if (totalPages > 0) { %>
+                                            <% for (let i = 1; i <= totalPages; i++) { %>
                                                 <button class="page-btn <%= i === currentPage ? 'active' : '' %>"
                                                     onclick="goToPage(<%= i %>)">
                                                     <%= i %>
                                                 </button>
-                                                <% } %>
-                                        </div>
-
-                                        <button class="pagination-btn" onclick="goToPage(<%= currentPage + 1 %>)"
-                                            <%=currentPage>= totalPages ? 'disabled' : '' %>>
-                                            Next <i class="fas fa-chevron-right"></i>
-                                        </button>
+                                            <% } %>
+                                        <% } else { %>
+                                            <button class="page-btn active">1</button>
+                                        <% } %>
                                     </div>
+
+                                    <!-- Next Button -->
+                                    <button class="pagination-btn" onclick="goToPage(<%= currentPage + 1 %>)"
+                                        <%= currentPage >= totalPages ? 'disabled' : '' %>>
+                                        Next <i class="fas fa-chevron-right"></i>
+                                    </button>
                                 </div>
-                                <% } %>
+                            </div>
+
                         </div>
                     </section>
             </main>

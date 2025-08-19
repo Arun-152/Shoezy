@@ -1,7 +1,7 @@
 /* Enhanced Body and Layout with Teal-Blue Gradient */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #4ecdc4 0%, #2c9aa0 50%, #17a2b8 100%);
+    background: linear-gradient(135deg, #99c0bd 0%, #7aa6a8 50%, #92d0da 100%);
     background-size: 400% 400%;
     animation: gradientShift 10s ease-in-out infinite;
     margin: 0;

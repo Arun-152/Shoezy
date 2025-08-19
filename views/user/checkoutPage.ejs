@@ -87,7 +87,10 @@
                     </div>
                 <% } %>
 
-               <a href="/profile/address"><button class="add-address-btn">+ Add New Address</button></a> 
+             <a href="/profile/address?returnUrl=/checkout">
+  <button class="add-address-btn">+ Add New Address</button>
+</a>
+
             </div>
 
             <!-- Payment Method -->
@@ -278,7 +281,7 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Server response:', data);
+                  
                     if (data.success && data.showAlert) {
                         Swal.fire({
                             icon: data.alertType,

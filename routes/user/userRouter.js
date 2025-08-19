@@ -53,7 +53,7 @@ router.post('/order/cancelSingleItem', userAuth, orderController.cancelSingleOrd
 
 
 // Forgot Password Routes
-router.get("/forgotPassword", userController.forgotPasswordPage);
+router.get("/emailVerification", userController.forgotPasswordPage);
 router.post("/forgotPassword", userController.postForgotPassword);
 router.get("/verifyResetOtp", userController.verifyOTPPage);
 router.post("/verifyResetOtp", userController.postVerifyOTP);

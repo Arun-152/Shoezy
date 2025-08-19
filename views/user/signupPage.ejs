@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,85 +8,106 @@
     <link rel="stylesheet" href="/css/signupPage.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
+
 <body>
     <main>
         <div class="signup-container">
-            <div class="shoe-image">
-                <img src="/images/wmnsaijo1hiogutc_photo1.png" alt="Shoe">
-            </div>
+
             <div class="signup-form">
                 <h2>Create Account</h2>
-                
+
                 <!-- Backend Flash Messages -->
-                <% if (error_msg && error_msg.length > 0) { %>
+                <% if (error_msg && error_msg.length> 0) { %>
                     <div class="alert alert-danger">
                         <% error_msg.forEach(function(error) { %>
-                            <p><%= error %></p>
-                        <% }); %>
+                            <p>
+                                <%= error %>
+                            </p>
+                            <% }); %>
                     </div>
-                <% } %>
-                
-                <% if (success_msg && success_msg.length > 0) { %>
-                    <div class="alert alert-success" id="backendSuccessMessage">
-                        <% success_msg.forEach(function(message) { %>
-                            <p><%= message %></p>
-                        <% }); %>
-                    </div>
-                <% } %>
-                
-                <% if (error && error.length > 0) { %>
-                    <div class="alert alert-danger">
-                        <% error.forEach(function(err) { %>
-                            <p><%= err %></p>
-                        <% }); %>
-                    </div>
-                <% } %>
-                
-                <button class="google-signup" onclick="window.location.href='/auth/google'">
-                    <img src="https://www.google.com/favicon.ico" alt="Google Icon">
-                    Sign up with Google
-                </button>
-                
-                <form id="signform" action="/signup" method="post" novalidate>
-                    <div class="input-group">
-                        <input type="text" placeholder="Full Name" name="fullname" id="fullname">
-                        <span id="error1" class="error-message"></span>
-                    </div>
-                    
-                    <div class="input-group">
-                        <input type="email" placeholder="Email Address" name="email" id="email">
-                        <span id="error2" class="error-message"></span>
-                    </div>
-                    
-                    <div class="input-group">
-                        <input type="tel" placeholder="Phone Number" name="phone" id="phone">
-                        <span id="error3" class="error-message"></span>
-                    </div>
-                    
-                    <div class="input-group">
-                        <div class="password-container">
-                            <input type="password" placeholder="Password" name="password" id="password">
-                            <button type="button" class="password-toggle" onclick="togglePassword('password')">👁️</button>
-                        </div>
-                        <span id="error4" class="error-message"></span>
-                    </div>
-                    
-                    <div class="input-group">
-                        <div class="password-container">
-                            <input type="password" placeholder="Confirm Password" name="confirmPassword" id="confirmPassword">
-                            <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword')">👁️</button>
-                        </div>
-                        <span id="error5" class="error-message"></span>
-                    </div>
-                    
-                    <div class="input-group">
-                        <input type="text" placeholder="Referral Code (Optional)" name="referralCode">
-                    </div>
-                    
-                    <button type="submit" class="create-account-btn">Create Account</button>
-                </form>
-                
-                <p class="login-link">Already have an account? <a href="/login">Login</a></p>
+                    <% } %>
+
+                        <% if (success_msg && success_msg.length> 0) { %>
+                            <div class="alert alert-success" id="backendSuccessMessage">
+                                <% success_msg.forEach(function(message) { %>
+                                    <p>
+                                        <%= message %>
+                                    </p>
+                                    <% }); %>
+                            </div>
+                            <% } %>
+
+                                <% if (error && error.length> 0) { %>
+                                    <div class="alert alert-danger">
+                                        <% error.forEach(function(err) { %>
+                                            <p>
+                                                <%= err %>
+                                            </p>
+                                            <% }); %>
+                                    </div>
+                                    <% } %>
+
+                                        <button class="google-signup" onclick="window.location.href='/auth/google'">
+                                            <img src="https://www.google.com/favicon.ico" alt="Google Icon">
+                                            Sign up with Google
+                                        </button>
+
+                                        <form id="signform" action="/signup" method="post" novalidate>
+                                            <div class="input-group">
+                                                <input type="text" placeholder="Full Name" name="fullname"
+                                                    id="fullname">
+                                                <span id="error1" class="error-message"></span>
+                                            </div>
+
+                                            <div class="input-group">
+                                                <input type="email" placeholder="Email Address" name="email" id="email">
+                                                <span id="error2" class="error-message"></span>
+  <% if(typeof message !=='undefined' && message) { %>
+                                                    <div style="color:red; margin-bottom: 10px;">
+                                                        <%= message %>
+                                                    </div>
+                                                    <% } %>
+
+                                                
+
+                                            </div>
+
+                                            <div class="input-group">
+                                                <input type="tel" placeholder="Phone Number" name="phone" id="phone">
+                                                <span id="error3" class="error-message"></span>
+                                            </div>
+
+                                            <div class="input-group">
+                                                <div class="password-container">
+                                                    <input type="password" placeholder="Password" name="password"
+                                                        id="password">
+                                                    <button type="button" class="password-toggle"
+                                                        onclick="togglePassword('password')">👁️</button>
+                                                </div>
+                                                <span id="error4" class="error-message"></span>
+                                            </div>
+
+                                            <div class="input-group">
+                                                <div class="password-container">
+                                                    <input type="password" placeholder="Confirm Password"
+                                                        name="confirmPassword" id="confirmPassword">
+                                                    <button type="button" class="password-toggle"
+                                                        onclick="togglePassword('confirmPassword')">👁️</button>
+                                                </div>
+                                                <span id="error5" class="error-message"></span>
+                                            </div>
+
+                                            <div class="input-group">
+                                                <input type="text" placeholder="Referral Code (Optional)"
+                                                    name="referralCode">
+                                            </div>
+
+                                          
+                                            <button href="/otpVerification" type="submit"
+                                                class="create-account-btn">Create Account</button>
+                                        </form>
+
+                                        <p class="login-link">Already have an account? <a href="/login">Login</a></p>
             </div>
         </div>
     </main>
@@ -95,7 +117,7 @@
         function togglePassword(inputId) {
             const input = document.getElementById(inputId);
             const toggleBtn = input.nextElementSibling;
-            
+
             if (input.type === 'password') {
                 input.type = 'text';
                 toggleBtn.textContent = '🔒';
@@ -108,7 +130,7 @@
         }
 
         // Client-side validation
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const form = document.getElementById('signform');
             const fullnameInput = document.getElementById('fullname');
             const emailInput = document.getElementById('email');
@@ -197,7 +219,7 @@
                 } else if (password.length < 6) {
                     setError(passwordInput, 'error4', 'Password must be at least 6 characters');
                     return false;
-                } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+                } else if  (!/(?=.*[a-z])(?=.*\d)/.test(password)) {
                     setError(passwordInput, 'error4', 'Must include uppercase, lowercase, and number');
                     return false;
                 } else {
@@ -227,18 +249,18 @@
             phoneInput.addEventListener('blur', validatePhone);
             passwordInput.addEventListener('blur', validatePassword);
             confirmPasswordInput.addEventListener('blur', validateConfirmPassword);
-            
+
             // Validate confirm password when password changes
-            passwordInput.addEventListener('input', function() {
+            passwordInput.addEventListener('input', function () {
                 if (confirmPasswordInput.value) {
                     validateConfirmPassword();
                 }
             });
 
             // Form submission validation - prevents submission and shows individual errors
-            form.addEventListener('submit', function(e) {
+            form.addEventListener('submit', function (e) {
                 e.preventDefault(); // Always prevent default submission first
-                
+
                 // Run all validations
                 const isFullnameValid = validateFullname();
                 const isEmailValid = validateEmail();
@@ -263,7 +285,7 @@
 
             // Clear errors when user starts typing
             [fullnameInput, emailInput, phoneInput, passwordInput, confirmPasswordInput].forEach(input => {
-                input.addEventListener('input', function() {
+                input.addEventListener('input', function () {
                     this.classList.remove('form-error');
                     // Find and hide corresponding error message
                     const inputGroup = this.closest('.input-group');
@@ -279,4 +301,5 @@
         });
     </script>
 </body>
+
 </html>

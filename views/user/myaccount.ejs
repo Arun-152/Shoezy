@@ -6,52 +6,79 @@
     <title>My Account</title>
     <link rel="stylesheet" href="/css/myaccount.css">
     <link rel="stylesheet" href="/css/breadcrumbs.css">
+    <style>
+        .profile-image {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .profile-image img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #ddd;
+        }
+        .default-profile-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #007bff;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+    </style>
 </head>
 <body>
     <%- include("../partials/user/navbar") %>
 
-    <!-- Main Layout Container -->
     <div class="page-container">
-        <!-- Main Layout with Sidebar -->
         <div class="page-layout">
-            <!-- Sidebar -->
             <aside class="sidebar">
                 <%- include("../partials/user/profileSidebar") %>
             </aside>
-
-            <!-- Main Content -->
             <main class="main-content">
                 <div class="container">
                     <div class="content-header">
                         <h2>Account Settings</h2>
                         <a href="/profile/edit"><button class="save-changes-btn edit-profile-btn">Edit Profile</button></a>
                     </div>
-
                     <div class="settings-container">
                         <div class="settings-section profile-card">
                             <div class="profile-info">
                                 <div class="profile-details">
                                     <h4>Full Name</h4>
-                                    <p><%=user.fullname%></p>
+                                    <p><%= user.fullname || 'Not provided' %></p>
                                     <h4>Email</h4>
-                                    <p><%=user.email%></p>
+                                    <p><%= user.email || 'Not provided' %></p>
                                     <h4>Phone</h4>
-                                    <p><%=user.phone%></p>
+                                    <p><%= user.phone || 'Not provided' %></p>
                                 </div>
                                 <div class="profile-image">
-                                    <% if (user.profilePicture) { %>
-                                        <img src="/uploads<%= user.profilePicture %>?t=<%= Date.now() %>" alt="Profile Image">
+                                    <% if (user.profilePicture && user.profilePicture.trim() !== '') { %>
+                                        <img src="<%= user.profilePicture%>" 
+                                             alt="Profile Image" 
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'; console.error('Failed to load image: <%= user.profilePicture %>');">
+                                        <div class="default-profile-image" style="display: none;">
+                                            <%= user.fullname ? user.fullname.charAt(0).toUpperCase() : 'U' %>
+                                        </div>
                                     <% } else { %>
-                                        <div class="default-profile-image"><%= user.fullname.charAt(0).toUpperCase() %></div>
+                                        <div class="default-profile-image">
+                                            <%= user.fullname ? user.fullname.charAt(0).toUpperCase() : 'U' %>
+                                        </div>
                                     <% } %>
                                 </div>
                             </div>
                         </div>
-
                         <div class="settings-section">
                             <h3>Account Management</h3>
                             <div class="account-management-buttons">
-                               <a href="/profile/address"><button class="save-changes-btn">Manage Addresses</button></a>
+                                <a href="/profile/address"><button class="save-changes-btn">Manage Addresses</button></a>
                                 <a href="/profile/changePassword"><button class="save-changes-btn">Change Password</button></a>
                             </div>
                         </div>
@@ -62,5 +89,13 @@
     </div>
 
     <%- include("../partials/user/userfooter") %>
+
+    <script>
+        console.log('Profile picture value from MongoDB:', '<%= user.profilePicture %>');
+        document.querySelectorAll('.profile-image img').forEach(img => {
+            img.addEventListener('load', () => console.log('Image loaded:', img.src));
+            img.addEventListener('error', () => console.error('Image failed to load:', img.src));
+        });
+    </script>
 </body>
 </html>

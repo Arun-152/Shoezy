@@ -45,7 +45,7 @@ const loadEditProfile = async(req,res)=>{
 }
 const updateProfile = async (req, res) => {
     try {
-        console.log("hyy")
+   
         const userId = req.session.userId;
 
         if (!userId) {
@@ -68,16 +68,18 @@ const updateProfile = async (req, res) => {
 
         let profileImageName = user.profilePicture;
         if (req.file) {
-            profileImageName = '/uploads/profiles' + req.file.filename;
+            console.log(req.file)
+            profileImageName = '/uploads/profiles/' + req.file.filename;
         }
 
-        const updateData = {
-            fullname: fullName,
-            phone: phoneNumber || user.phone, // Keep existing phone if not provided
-            profilePicture: profileImageName
-        };
+        user.fullname = fullName
+        user.phone = phoneNumber
+        user.profilePicture = profileImageName
+       
+       
 
-        await User.findByIdAndUpdate(userId, updateData);
+        await user.save()
+        console.log(user)
         return res.status(200).json({ success: true, message: "Profile updated successfully" });
 
     } catch (error) {
@@ -405,12 +407,15 @@ const loadAddress = async(req,res)=>{
             isDefault: -1,  // Default addresses first (true = 1, false = 0, so -1 puts true first)
             createdAt: -1   // Then by creation date (newest first)
         });
+        const returnURL = req.query.returnUrl ||  '/profile/address'
+        
         
         res.render("addressPage", {
             user: userData,
             addresses: addresses,
             errors: {},
-            formData: {}
+            formData: {},
+            returnURL,
         })
    
     }catch(error){
@@ -445,7 +450,7 @@ const postAdd = async(req,res)=>{
         
         if (!mobileNumber || mobileNumber.trim() === '') {
             errors.mobileNumber = "Mobile number is required";
-        } else if (!/^[789]\d{9}$/.test(mobileNumber.trim())) {
+        } else if (!/^[6789]\d{9}$/.test(mobileNumber.trim())) {
             errors.mobileNumber = "Please enter a valid 10-digit mobile number starting with 7, 8, or 9";
         }
         
@@ -490,6 +495,9 @@ const postAdd = async(req,res)=>{
             errors.landmark = "Landmark must be at least 4 characters";
         }
 
+        const returnURL = req.body.returnUrl ||  '/profile/address'
+       
+        
         // If there are validation errors, do not save and render the page with errors
         if (Object.keys(errors).length > 0) {
             const userData = await User.findById(userId);
@@ -498,11 +506,13 @@ const postAdd = async(req,res)=>{
                 createdAt: -1 
             });
             
+            
             return res.render("addressPage", {
                 user: userData,
                 addresses: addresses,
                 errors: errors,
-                formData: req.body
+                formData: req.body,
+                
             });
         }
 
@@ -530,7 +540,9 @@ const postAdd = async(req,res)=>{
                 formData: req.body
             });
         }
+        
 
+        
         // Create new address only if validation passes and address doesn't exist
         const newAddress = new Address({
             userId: userId,
@@ -542,13 +554,14 @@ const postAdd = async(req,res)=>{
             state: state.trim(),
             landmark: landmark ? landmark.trim() : "",
             pinCode: parseInt(pinCode),
-            addressType: addressType.charAt(0).toUpperCase() + addressType.slice(1).toLowerCase()
+            addressType: addressType.charAt(0).toUpperCase() + addressType.slice(1).toLowerCase(),
+           
         });
 
         await newAddress.save();
         
         // Redirect to addressPage with success flag for SweetAlert
-        res.redirect("/profile/address?success=true");
+       res.redirect(`${returnURL}?success=true`);
         
     }catch(error){
         console.error("Post add address error:", error);
@@ -583,9 +596,11 @@ const updateAddress = async(req, res) => {
         
         if (!mobileNumber || mobileNumber.trim() === '') {
             errors.mobileNumber = 'Mobile number is required';
-        } else if (!/^[789]\d{9}$/.test(mobileNumber.trim())) {
-            errors.mobileNumber = 'Please enter a valid 10-digit mobile number starting with 7, 8, or 9';
+        }else if (!/^(\+\d{1,3})?[6-9]\d{9}$/.test(mobileNumber.trim())) {
+            errors.mobileNumber = "Please enter a valid mobile number (10 digits starting with 6-9, with optional country code like +91, +1, +44)";
         }
+
+
         
         if (!address || address.trim() === '') {
             errors.address = 'Address is required';

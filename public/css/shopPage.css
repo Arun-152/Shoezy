@@ -399,6 +399,122 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
+/* Enhanced Filter Sidebar with Scroll */
+.filters-sidebar {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e7eb;
+    height: fit-content;
+    position: sticky;
+    top: 120px;
+    max-height: calc(100vh - 160px); /* NEW: Set max height */
+    overflow-y: auto; /* NEW: Enable scroll */
+    scrollbar-width: thin; /* NEW: Firefox scrollbar */
+    scrollbar-color: #cbd5e1 #f1f5f9; /* NEW: Firefox scrollbar colors */
+}
+
+/* NEW: Custom Webkit Scrollbar Styles */
+.filters-sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.filters-sidebar::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.filters-sidebar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.filters-sidebar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Enhanced Search Input with Clear Button */
+.search-input-wrapper {
+    position: relative;
+}
+
+.search-input-wrapper input {
+    padding-left: 2.5rem;
+    padding-right: 2.5rem; /* NEW: Extra padding for clear button */
+}
+
+.search-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    font-size: 0.9rem;
+    pointer-events: none;
+}
+
+/* NEW: Search Clear Button */
+.search-clear-btn {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #9ca3af;
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.search-clear-btn:hover {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.search-clear-btn.show {
+    display: flex;
+}
+
+/* Enhanced No Results Message with Stable Layout */
+.no-results-message {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    background: #fafbfc;
+    border-radius: 16px;
+    border: 2px dashed #e5e7eb;
+    margin: 0; /* NEW: Remove margin to prevent layout shifts */
+}
+
+/* Stable Grid Layout */
+.products-grid {
+    min-height: 400px; /* NEW: Ensure consistent minimum height */
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin-top: 2rem;
+    width: 100%;
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 768px) {
+    .filters-sidebar {
+        max-height: none; /* NEW: Remove height constraint on mobile */
+        overflow-y: visible; /* NEW: Allow natural flow on mobile */
+    }
+}
+
 
 .filter-section select,
 .filter-section input {

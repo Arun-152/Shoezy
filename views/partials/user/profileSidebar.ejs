@@ -19,6 +19,26 @@
             display: flex;
             
         }
+        .profile-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #ddd;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 18px;
+  color: #333;
+  overflow: hidden;
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 
         .sidebar {
             width: 280px;
@@ -124,8 +144,21 @@
 <body>
     <div class="sidebar">
         <div class="profile-header">
-            <div class="profile-avatar">A</div>
-            <div class="profile-name">Arun P</div>
+           <div class="profile-avatar">
+  <% if (user && user.profilePicture && user.profilePicture.trim() !== '') { %>
+      <!-- Profile Image -->
+      <img src="<%= user.profilePicture %>" 
+           alt="Profile Image" 
+           class="profile-image"
+           onerror="this.style.display='none'; this.parentElement.innerHTML='<span><%= user.name ? user.fullname.charAt(0).toUpperCase() : 'U' %></span>';">
+  <% } else { %>
+      <!-- Default First Letter -->
+      <span>
+        <%= user && user.fullname ? user.fullname.charAt(0).toUpperCase() : 'U' %>
+      </span>
+  <% } %>
+</div>
+
         </div>
         
         <ul class="menu-list">

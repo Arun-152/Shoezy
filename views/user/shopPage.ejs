@@ -11,12 +11,12 @@
     <style>
         /* CRITICAL: Wishlist Button Color Fix */
         .wishlist-btn i {
-            color: #6b7280 !important; /* Default gray color */
+            color: #6b7280 !important;
             transition: color 0.3s ease;
         }
         
         .wishlist-btn.wishlist-active i {
-            color: #ef4444 !important; /* Red color for active */
+            color: #ef4444 !important;
         }
         
         .wishlist-btn:hover i {
@@ -63,6 +63,122 @@
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.1); }
         }
+
+        /* Enhanced Filter Sidebar with Scroll */
+        .filters-sidebar {
+            max-height: calc(100vh - 160px);
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 #f1f5f9;
+        }
+
+        .filters-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .filters-sidebar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+
+        .filters-sidebar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .filters-sidebar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Enhanced Search Input with Clear Button */
+        .search-input-wrapper {
+            position: relative;
+        }
+
+        .search-input-wrapper input {
+            padding-left: 2.5rem;
+            padding-right: 2.5rem;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+
+        .search-clear-btn {
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #9ca3af;
+            font-size: 0.9rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .search-clear-btn:hover {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .search-clear-btn.show {
+            display: flex;
+        }
+
+        /* Enhanced No Results Message */
+        .no-results-message {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+            background: #fafbfc;
+            border-radius: 16px;
+            border: 2px dashed #e5e7eb;
+            margin: 0;
+        }
+
+        /* Stable Grid Layout */
+        .products-grid {
+            min-height: 400px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
+            width: 100%;
+        }
+
+        /* Mobile Responsive Adjustments */
+        @media (max-width: 1200px) {
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filters-sidebar {
+                max-height: none;
+                overflow-y: visible;
+            }
+        }
     </style>
 </head>
 
@@ -88,7 +204,7 @@
     <!-- Main Shop Section -->
     <section class="main-shop-section" id="shop">
         <div class="shop-container">
-            <!-- Sidebar Filters -->
+            <!-- Sidebar Filters with Scroll -->
             <aside class="filters-sidebar">
                 <div class="sidebar-header">
                     <h3><i class="fas fa-filter"></i> Filters</h3>
@@ -98,12 +214,15 @@
                     </button>
                 </div>
 
-                <!-- Search Filter -->
+                <!-- Enhanced Search Filter with Clear Button -->
                 <div class="filter-section">
                     <h4><i class="fas fa-search"></i> Search Products</h4>
                     <div class="search-input-wrapper">
                         <input type="text" id="searchInput" placeholder="Search products..." autocomplete="off">
                         <i class="fas fa-search search-icon"></i>
+                        <button type="button" class="search-clear-btn" id="searchClearBtn" onclick="clearSearch()">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
                 </div>
 
@@ -150,7 +269,7 @@
                     <h2>Our Collections</h2>
                 </div>
 
-                <!-- Products Grid -->
+                <!-- Products Grid with Stable Layout -->
                 <div class="products-grid" id="productsGrid">
                     <% if (products && products.length > 0) { %>
                         <% products.forEach((product, index) => { %>
@@ -272,10 +391,12 @@
                             </div>
                         <% }); %>
                     <% } else { %>
-                        <div class="no-products">
-                            <i class="fas fa-search"></i>
-                            <h3>No products found</h3>
-                            <p>Try adjusting your filters or check back later.</p>
+                        <div class="no-results-message">
+                            <div class="no-results-content">
+                                <i class="fas fa-search"></i>
+                                <h3>No products found</h3>
+                                <p>Try adjusting your filters or check back later.</p>
+                            </div>
                         </div>
                     <% } %>
                 </div>
@@ -325,30 +446,90 @@
     <%- include("../partials/user/userfooter") %>
 
     <script>
+        // Global variable to store current wishlist state
+        let currentWishlistItems = new Set();
+
         // Initialize wishlist state on page load
         document.addEventListener('DOMContentLoaded', function() {
             initializeWishlistState();
+            setupSearchClearButton();
         });
+
+        // Enhanced search clear button functionality
+        function setupSearchClearButton() {
+            const searchInput = document.getElementById('searchInput');
+            const clearBtn = document.getElementById('searchClearBtn');
+            
+            if (searchInput && clearBtn) {
+                searchInput.addEventListener('input', function() {
+                    if (this.value.trim().length > 0) {
+                        clearBtn.classList.add('show');
+                    } else {
+                        clearBtn.classList.remove('show');
+                    }
+                });
+            }
+        }
+
+        function clearSearch() {
+            const searchInput = document.getElementById('searchInput');
+            const clearBtn = document.getElementById('searchClearBtn');
+            
+            if (searchInput) {
+                searchInput.value = '';
+                searchInput.focus();
+                clearBtn.classList.remove('show');
+                filterProducts(); // Trigger filter update
+            }
+        }
 
         // Function to initialize wishlist state
         async function initializeWishlistState() {
             try {
                 const response = await fetch('/wishlist/status');
+                if (!response.ok) {
+                    console.log('Could not fetch wishlist status - user may not be logged in');
+                    return;
+                }
+                
                 const data = await response.json();
                 
                 if (data.success && data.wishlistItems) {
+                    // Clear current state
+                    currentWishlistItems.clear();
+                    
+                    // Update global state
+                    data.wishlistItems.forEach(productId => {
+                        currentWishlistItems.add(productId);
+                    });
+                    
+                    // Update UI for all wishlist items
                     data.wishlistItems.forEach(productId => {
                         const wishlistBtn = document.querySelector(`.wishlist-btn[data-product-id="${productId}"]`);
                         if (wishlistBtn) {
-                            const heartIcon = wishlistBtn.querySelector('i');
-                            heartIcon.classList.remove('far');
-                            heartIcon.classList.add('fas');
-                            wishlistBtn.classList.add('wishlist-active');
+                            setWishlistActive(wishlistBtn, true);
                         }
                     });
+                    
+                    console.log('Wishlist initialized with', currentWishlistItems.size, 'items');
                 }
             } catch (error) {
                 console.log('Could not load wishlist state:', error);
+            }
+        }
+
+        // Function to set wishlist button state
+        function setWishlistActive(wishlistBtn, isActive) {
+            const heartIcon = wishlistBtn.querySelector('i');
+            
+            if (isActive) {
+                heartIcon.classList.remove('far');
+                heartIcon.classList.add('fas');
+                wishlistBtn.classList.add('wishlist-active');
+            } else {
+                heartIcon.classList.remove('fas');
+                heartIcon.classList.add('far');
+                wishlistBtn.classList.remove('wishlist-active');
             }
         }
 
@@ -359,7 +540,6 @@
                 const newCount = Math.max(0, change);
                 cartCountElem.textContent = newCount;
                 
-                // Add animation to cart icon
                 const cartIcon = cartCountElem.closest('.cart-icon');
                 if (cartIcon) {
                     cartIcon.style.animation = 'cartBounce 0.5s ease';
@@ -413,11 +593,14 @@
             }
         }
 
-        // Enhanced wishlist toggle functionality with proper state management
         async function toggleWishlist(productId, element) {
-            const heartIcon = element.querySelector('i');
-            const isCurrentlyInWishlist = element.classList.contains('wishlist-active');
-
+            // Prevent double-clicking
+            if (element.classList.contains('processing')) {
+                return;
+            }
+            
+            element.classList.add('processing');
+            
             try {
                 const response = await fetch('/wishlist/toggle', {
                     method: 'POST',
@@ -431,17 +614,17 @@
 
                 if (data.success) {
                     if (data.action === 'added') {
-                        // First click: Add to wishlist - turn red
-                        heartIcon.classList.remove('far');
-                        heartIcon.classList.add('fas');
-                        element.classList.add('wishlist-active');
+                        // Update local state
+                        currentWishlistItems.add(productId);
+                        // Update UI
+                        setWishlistActive(element, true);
                         updateWishlistCount(1);
                         showNotification('Added to wishlist!');
                     } else if (data.action === 'removed') {
-                        // Second click: Remove from wishlist - back to default
-                        heartIcon.classList.remove('fas');
-                        heartIcon.classList.add('far');
-                        element.classList.remove('wishlist-active');
+                        // Update local state
+                        currentWishlistItems.delete(productId);
+                        // Update UI
+                        setWishlistActive(element, false);
                         updateWishlistCount(-1);
                         showNotification('Removed from wishlist!');
                     }
@@ -450,15 +633,17 @@
                         window.location.href = "/login";
                         return;
                     }
-                    showNotification(data.message || 'Error updating wishlist');
+                    showNotification(data.message || 'Error updating wishlist', 'error');
                 }
             } catch (error) {
                 console.error('Error toggling wishlist:', error);
-                showNotification('Error updating wishlist. Please try again.');
+                showNotification('Error updating wishlist. Please try again.', 'error');
+            } finally {
+                element.classList.remove('processing');
             }
         }
 
-        // Product filtering and sorting functions
+        // Enhanced product filtering with stable layout
         const allProductCards = document.querySelectorAll('.product-card');
 
         function filterProducts() {
@@ -587,8 +772,12 @@
             const minPriceInput = document.getElementById('minPrice');
             const maxPriceInput = document.getElementById('maxPrice');
             const sortBySelect = document.getElementById('sortBy');
+            const clearBtn = document.getElementById('searchClearBtn');
 
-            if (searchInput) searchInput.value = '';
+            if (searchInput) {
+                searchInput.value = '';
+                clearBtn.classList.remove('show');
+            }
             if (categorySelect) categorySelect.value = '';
             if (minPriceInput) minPriceInput.value = '';
             if (maxPriceInput) maxPriceInput.value = '';
@@ -609,7 +798,6 @@
         }
 
         function showNotification(message, type = 'success') {
-            // Remove existing notifications
             const existing = document.querySelectorAll('.notification');
             existing.forEach(n => n.remove());
 
@@ -634,7 +822,7 @@
             return false;
         }
 
-        // Set up filter event listeners
+        // Set up filter event listeners with instant search
         const searchInput = document.getElementById('searchInput');
         const categorySelect = document.getElementById('category');
         const minPriceInput = document.getElementById('minPrice');
@@ -655,10 +843,10 @@
 
         updateFilterHighlighting();
 
-        // Handle page visibility changes
+        // Re-sync wishlist state when page becomes visible
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden) {
-                console.log('Page visible again, syncing state...');
+                console.log('Page visible again, syncing wishlist state...');
                 setTimeout(() => {
                     initializeWishlistState();
                 }, 200);

@@ -38,6 +38,7 @@ const shopPage = async (req, res) => {
                 cartItems = userCart.items.map(item => item.productId).filter(product => product !== null);
             }
         }
+       
 
         const user  = await User.findById(userData)
 

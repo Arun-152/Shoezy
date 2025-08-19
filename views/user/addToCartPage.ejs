@@ -209,11 +209,6 @@
                             <span class="total-amount" id="total">₹<%= total.toFixed(2) %></span>
                         </div>
                        
-                        <div class="promo-section">
-                            <input type="text" placeholder="Enter promo code" class="promo-input" id="promoInput">
-                            <button class="apply-promo-btn" onclick="applyPromoCode()">Apply</button>
-                        </div>
-                       
                        <a href="/checkout"><button class="checkout-btn" onclick="proceedToCheckout()">
                             <i class="fas fa-lock"></i> Proceed to Checkout
                         </button></a>
@@ -488,18 +483,7 @@
             window.location.href = '/shop';
         }
 
-        function applyPromoCode() {
-            const promoCode = document.getElementById('promoInput').value.trim();
-            if (promoCode) {
-                if (promoCode.toUpperCase() === 'SAVE10') {
-                    showToast('Promo code feature coming soon!');
-                } else {
-                    showToast('Invalid promo code');
-                }
-                document.getElementById('promoInput').value = '';
-            }
-        }
-
+     
         async function proceedToCheckout() {
             const cartItems = document.querySelectorAll('.cart-item');
             if (cartItems.length === 0) {

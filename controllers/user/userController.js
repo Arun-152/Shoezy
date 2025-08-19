@@ -30,36 +30,6 @@ const signupPage = async (req, res) => {
     }
 };
 
-// const landingPage = async (req, res) => {
-//      if(req.session.userId)return res.redirect("/home")
-//     try {
-//         // Fetch featured products for landing page (same logic as home page)
-//         const featuredProducts = await Product.find({ isDeleted: false, isBlocked: false })
-//             .populate({
-//                 path: "category",
-//                 match: { isListed: true, isDeleted: false }
-//             })
-//             .sort({ createdAt: -1 })
-//             .limit(6);
-
-//         // Filter out products with unlisted categories
-//         const filteredProducts = featuredProducts.filter(product => product.category !== null);
-
-//         // Check if user is logged in for navbar display
-//         let userData = null;
-//         if (req.session.userId) {
-//             userData = await User.findById(req.session.userId);
-//         }
-
-//         return res.render("landingPage", {
-//             products: filteredProducts,
-//             user: userData,
-//             isLandingPage: true,
-//         });
-//     } catch (error) {
-//         res.status(500).send("Server error");
-//     }
-// };
 
 const loginPage = async (req, res) => {
     try {
@@ -189,7 +159,7 @@ const postSignup = async (req, res) => {
             errors.push("Password is required");
         } else if (password.length < 6) {
             errors.push("Password must be at least 6 characters long");
-        } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+        } else if  (!/(?=.*[a-z])(?=.*\d)/.test(password)) {
             errors.push("Password must contain at least one uppercase letter, one lowercase letter, and one number");
         }
 
@@ -203,16 +173,19 @@ const postSignup = async (req, res) => {
             return res.status(400).json({ success: false, message: errors.join(", ") });
         }
 
-        const existingUser = await User.findOne({
-            $or: [{ email: email.trim().toLowerCase() }, { phone: phone.trim() }],
-        });
+        const findUser = await User.findOne({email})
 
-        if (existingUser) {
-            const message =
-                existingUser.email === email.trim().toLowerCase()
-                    ? "An account with this email already exists"
-                    : "An account with this phone number already exists";
-            return res.status(400).json({ success: false, message });
+        if(findUser){
+            return res.render("signupPage",{
+                message : "User with this email already exists",
+                fullname,
+                phone,
+                email,
+                password
+                
+            })
+        
+            
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -244,19 +217,15 @@ const postSignup = async (req, res) => {
 
 const otpVerification = async (req, res) => {
     try {
-        if (!req.session.user || !req.session.userOtp) {
-            req.flash("error_msg", "No active signup session found. Please try again.");
-            return res.redirect("/signup");
+        if (req.session.user || req.session.userOtp) {
+            return res.redirect("/otpVerification");
         }
-        return res.render("otpverification", {
-            email: req.session.user.email,
-            error_msg: req.flash("error_msg"),
-            success_msg: req.flash("success_msg"),
-        });
+        return res.redirect("/signup")  
     } catch (error) {
         res.status(500).redirect("/usererrorPage");
     }
 };
+
 
 const verifyOTP = async (req, res) => {
     try {
@@ -492,15 +461,13 @@ async function sendPasswordResetOTP(email, otp) {
 }
 
 const forgotPasswordPage = async (req, res) => {
-    try {
-        if (req.session.userId) {
-            return res.redirect("/home");
-        }
-        return res.render("forgot-password",{message:"",success:null});
-    } catch (error) {
-        console.error("Error loading forgot password page:", error);
-        res.redirect("/usererrorPage");
-    }
+    try{
+
+    return res.render("forgotEmail");
+  } catch (error) {
+    console.error("Forgot password page not loading", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
 };
 
 const postForgotPassword = async (req, res) => {
@@ -535,7 +502,7 @@ const postForgotPassword = async (req, res) => {
         req.session.passwordResetOTP = {
             code: otp,
             email: email.toLowerCase(),
-            expiresAt: Date.now() + 60 * 1000, // 60 seconds OTP validity
+            expiresAt: Date.now() + 60 * 1000, 
         };
 
         try {
@@ -548,7 +515,8 @@ const postForgotPassword = async (req, res) => {
             }
 
             console.log("Password Reset OTP:", otp);
-            res.json({ success: true, message: "OTP has been sent to your email address", redirect: "/verify-reset-otp" });
+            // Change the redirect to match your GET route
+            res.json({ success: true, message: "OTP has been sent to your email address", redirect: "/verifyResetOtp" });
         } catch (emailError) {
             console.error("Email sending error:", emailError);
             return res.status(500).json({
@@ -585,40 +553,79 @@ const verifyOTPPage = async (req, res) => {
 
 const postVerifyOTP = async (req, res) => {
     try {
+        console.log("=== OTP Verification Debug ===");
+        console.log("Request body:", req.body);
+        console.log("Session data:", req.session.passwordResetOTP);
+
         const { otp } = req.body;
 
         if (!otp) {
+            console.log("❌ No OTP provided");
             return res.status(400).json({ success: false, message: "OTP is required" });
         }
 
-        if (otp.length !== 6 || !/^\d{6}$/.test(otp)) {
+        // Convert to string and trim
+        const trimmedOTP = String(otp).trim();
+        console.log("Input OTP after trim:", `"${trimmedOTP}"`, "Length:", trimmedOTP.length);
+
+        // Fixed regex pattern - single backslash
+        if (trimmedOTP.length !== 6 || !/^\d{6}$/.test(trimmedOTP)) {
+            console.log("❌ OTP validation failed - not 6 digits");
             return res.status(400).json({ success: false, message: "OTP must be 6 digits" });
         }
 
         const sessionOTP = req.session.passwordResetOTP;
 
         if (!sessionOTP) {
+            console.log("❌ No session OTP found");
             return res.status(400).json({ success: false, message: "No OTP session found. Please request again." });
         }
 
+        console.log("Session OTP object:", sessionOTP);
+        console.log("Current time:", Date.now());
+        console.log("OTP expires at:", sessionOTP.expiresAt);
+        console.log("Time remaining:", sessionOTP.expiresAt - Date.now(), "ms");
+
+        // Check expiry
         if (Date.now() > sessionOTP.expiresAt || sessionOTP.expired) {
-            // Mark as expired but don't delete the session
+            console.log("❌ OTP expired");
             req.session.passwordResetOTP.expired = true;
             return res.status(400).json({ success: false, message: "OTP has expired. Please click the Resend OTP button." });
         }
 
-        if (otp !== sessionOTP.code) {
+        // Convert session OTP to string for comparison
+        const sessionOTPCode = String(sessionOTP.code).trim();
+        
+        console.log("Comparing OTPs:");
+        console.log("Input OTP:", `"${trimmedOTP}"`, "Type:", typeof trimmedOTP);
+        console.log("Session OTP:", `"${sessionOTPCode}"`, "Type:", typeof sessionOTPCode);
+        console.log("Are they equal?", trimmedOTP === sessionOTPCode);
+
+        if (trimmedOTP !== sessionOTPCode) {
+            console.log("❌ OTP mismatch");
             return res.status(400).json({ success: false, message: "Invalid OTP. Please try again." });
         }
 
+        console.log("✅ OTP verified successfully");
+        
+        // Mark OTP as verified
         req.session.passwordResetOTP.verified = true;
+        
+        // Save session to ensure the verified flag is persisted
+        req.session.save((err) => {
+            if (err) {
+                console.error("Session save error:", err);
+            }
+        });
 
         res.json({ success: true, message: "OTP verified successfully", redirect: "/reset-password" });
+        
     } catch (error) {
         console.error("Verify OTP error:", error);
         res.status(500).json({ success: false, message: "Server error. Please try again." });
     }
 };
+
 
 const resendResetOTP = async (req, res) => {
     try {
@@ -626,9 +633,6 @@ const resendResetOTP = async (req, res) => {
         if (!sessionOTP || !sessionOTP.email) {
             return res.status(400).json({ success: false, message: "No active session found. Please start the process again." });
         }
-
-        // Allow resend even if OTP is expired (but session still exists)
-        // This is the key fix - don't reject expired sessions for resend
 
         const user = await User.findOne({ email: sessionOTP.email });
         if (!user) {
@@ -702,10 +706,6 @@ const postResetPassword = async (req, res) => {
             return res.status(400).json({ success: false, message: "Unauthorized access. Please verify OTP first." });
         }
 
-        if (Date.now() > sessionOTP.expiresAt) {
-            req.session.passwordResetOTP = null;
-            return res.status(400).json({ success: false, message: "Session expired. Please start the process again." });
-        }
 
         if (!password || !confirmPassword) {
             return res.status(400).json({ success: false, message: "All fields are required" });
@@ -729,6 +729,7 @@ const postResetPassword = async (req, res) => {
         await user.save();
 
         req.session.passwordResetOTP = null;
+        console.log("hy")
 
         res.json({ success: true, message: "Password has been reset successfully", redirect: "/login" });
     } catch (error) {
@@ -746,7 +747,7 @@ const loadCoupen = async (req, res) => {
         })
         }
     } catch (error) {
-        console.error("Error loading verify OTP page:", error);
+        console.error("Error loading verify OTP page:", error.message);
         return res.redirect("/usererrorPage");
     }
 };
