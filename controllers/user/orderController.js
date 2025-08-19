@@ -43,7 +43,7 @@ const orderDetails = async (req, res) => {
             .populate('items.productId');
 
         if (!order) {
-            return res.status(404).send("Order not found");
+            return res.status(404).json({success:false,message:"Order not found"});
         }
 
         return res.render("orderDetailsPage", {

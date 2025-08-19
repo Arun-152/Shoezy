@@ -99,7 +99,7 @@ const updateOrderStatus = async (req, res) => {
 
     // Update item statuses
     order.items.forEach((item) => {
-      if (!["cancelled", "returned"].includes(item.status)) {
+      if (!["Cancelled", "Returned", "cancelled", "returned"].includes(item.status)) {
         item.status = status;
       }
     });
