@@ -209,9 +209,9 @@
                             <span class="total-amount" id="total">₹<%= total.toFixed(2) %></span>
                         </div>
                        
-                       <a href="/checkout"><button class="checkout-btn" onclick="proceedToCheckout()">
+                        <button class="checkout-btn" onclick="proceedToCheckout()">
                             <i class="fas fa-lock"></i> Proceed to Checkout
-                        </button></a>
+                        </button>
                        
                         <div class="payment-methods">
                             <p>We accept:</p>
@@ -492,8 +492,8 @@
             }
 
             try {
-                // Validate cart before proceeding to checkout
-                const response = await fetch('/cart/validate', {
+                // Validate cart by checking current server state
+                const response = await fetch('/cart/validate-checkout', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -503,42 +503,45 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    if (data.blockedOrDeletedProducts && data.blockedOrDeletedProducts.length > 0) {
-                        // Show SweetAlert error for blocked/deleted products
-                        Swal.fire({
-                            title: 'Products Unavailable',
-                            text: 'Some products are unavailable. Please remove them before checkout.',
-                            icon: 'error',
-                            confirmButtonText: 'OK',
-                            confirmButtonColor: '#d33'
-                        });
-                        return;
-                    }
-                    
-                    // If validation passes, proceed to checkout
-                    showToast('Proceeding to checkout...');
-                    setTimeout(() => {
-                        window.location.href = '/checkout';
-                    },1000);
-                } else {
-                    // Show error message from server
+                    // If validation passes, proceed to checkout with success alert
                     Swal.fire({
-                        title: 'Error',
-                        text: data.message || 'Error validating cart',
+                        title: 'Proceeding to Checkout',
+                        text: 'Redirecting you to checkout page...',
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        timerProgressBar: true
+                    }).then(() => {
+                        window.location.href = '/checkout';
+                    });
+                } else {
+                    // Show error message for blocked/unavailable products
+                    Swal.fire({
+                        title: 'Products Unavailable',
+                        text: data.message || 'Some products in your cart are no longer available. Please refresh the page.',
                         icon: 'error',
-                        confirmButtonText: 'OK',
+                        confirmButtonText: 'Refresh Page',
                         confirmButtonColor: '#d33'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            location.reload();
+                        }
                     });
                 }
             } catch (error) {
+                console.error('Error validating cart:', error);
+                // Show error message if validation fails
                 Swal.fire({
-                    title: 'Error',
-                    text: 'Error validating cart. Please try again.',
+                    title: 'Validation Error',
+                    text: 'Unable to validate cart. Please refresh the page and try again.',
                     icon: 'error',
-                    confirmButtonText: 'OK',
+                    confirmButtonText: 'Refresh Page',
                     confirmButtonColor: '#d33'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        location.reload();
+                    }
                 });
-                console.log('hey error',error)
             }
         }
 

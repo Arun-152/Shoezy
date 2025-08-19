@@ -9,5 +9,6 @@ router.post("/add", addToCartController.addToCart);
 router.post("/update-quantity", addToCartController.updateQuantity);
 router.post("/remove", addToCartController.removeCart);
 router.post("/clear" , addToCartController.clearCart);
+router.post("/validate-checkout", addToCartController.validateCheckout);
 
 module.exports = router;

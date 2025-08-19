@@ -332,10 +332,68 @@ const clearCart = async(req,res)=>{
     }
 }
 
+const validateCheckout = async (req, res) => {
+    try {
+        const userId = req.session.userId;
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "User not authenticated" });
+        }
+
+        const userCart = await Cart.findOne({ userId }).populate({
+            path: 'items.productId',
+            populate: {
+                path: 'category',
+                match: { isListed: true, isDeleted: false }
+            }
+        });
+
+        if (!userCart || userCart.items.length === 0) {
+            return res.status(400).json({ success: false, message: "Your cart is empty" });
+        }
+
+        // Check for blocked, deleted, or unavailable products
+        const unavailableProducts = [];
+        
+        for (const item of userCart.items) {
+            const product = item.productId;
+            
+            // Check if product is deleted, blocked, or category is unavailable
+            if (!product || product.isDeleted || product.isBlocked || 
+                !product.category || !product.category.isListed || product.category.isDeleted) {
+                unavailableProducts.push(product ? product.productName : 'Unknown Product');
+                continue;
+            }
+
+            // Check stock availability for the specific size
+            const variant = product.variants.find(v => v.size === item.size);
+            if (!variant || variant.variantQuantity < item.quantity) {
+                unavailableProducts.push(`${product.productName} (Size: ${item.size})`);
+            }
+        }
+
+        if (unavailableProducts.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: `The following products are unavailable: ${unavailableProducts.join(', ')}. Please remove them from your cart.`
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Cart validation successful"
+        });
+
+    } catch (error) {
+        console.error('Error validating checkout:', error);
+        return res.status(500).json({ success: false, message: "Server error during validation" });
+    }
+};
+
 module.exports = {
     loadAddToCart,
     addToCart,
     updateQuantity,
     removeCart,
-    clearCart
+    clearCart,
+    validateCheckout
 }
