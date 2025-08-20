@@ -255,6 +255,25 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+
+         function updateCartCount(change) {
+            const cartCountElem = document.getElementById('cartCount');
+            if (cartCountElem) {
+                const currentCount = parseInt(cartCountElem.textContent) || 0;
+                const newCount = Math.max(0,change);
+                cartCountElem.textContent = newCount;
+                
+                // Add animation to cart icon
+                const cartIcon = cartCountElem.closest('.cart-icon');
+                if (cartIcon) {
+                    cartIcon.style.animation = 'cartBounce 0.5s ease';
+                    setTimeout(() => {
+                        cartIcon.style.animation = '';
+                    }, 500);
+                }
+            }
+        }
+
         // Dynamic cart functionality
         async function updateQuantity(productId, size, change) {
             try {
@@ -265,7 +284,7 @@
                 
                
                 const response = await fetch('/cart/update-quantity', {
-                    method: 'POST',
+                    method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
                     },
@@ -279,6 +298,7 @@
                 const data = await response.json();
 
                 if (data.success) {
+                    updateCartCount(data.cartCount)
                     qtyInput.value = newQty;
                    
                     // Update item total
@@ -470,9 +490,10 @@
            
             // Update navbar cart count
             const navCartCount = document.getElementById('cartCount');
-            if (navCartCount) {
-                navCartCount.textContent = data.cartCount;
-            }
+   
+    if (navCartCount) {
+        navCartCount.textContent = data.cartCount;
+    }
         }
 
         function saveForLater() {
@@ -571,8 +592,7 @@
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
-            // Add any initialization code here
-            console.log('Cart page loaded');
+           
         });
     </script>
 </body>

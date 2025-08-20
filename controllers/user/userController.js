@@ -553,42 +553,36 @@ const verifyOTPPage = async (req, res) => {
 
 const postVerifyOTP = async (req, res) => {
     try {
-        console.log("=== OTP Verification Debug ===");
-        console.log("Request body:", req.body);
-        console.log("Session data:", req.session.passwordResetOTP);
+        
 
         const { otp } = req.body;
 
         if (!otp) {
-            console.log("❌ No OTP provided");
+       
             return res.status(400).json({ success: false, message: "OTP is required" });
         }
 
         // Convert to string and trim
         const trimmedOTP = String(otp).trim();
-        console.log("Input OTP after trim:", `"${trimmedOTP}"`, "Length:", trimmedOTP.length);
+    
 
         // Fixed regex pattern - single backslash
         if (trimmedOTP.length !== 6 || !/^\d{6}$/.test(trimmedOTP)) {
-            console.log("❌ OTP validation failed - not 6 digits");
+           
             return res.status(400).json({ success: false, message: "OTP must be 6 digits" });
         }
 
         const sessionOTP = req.session.passwordResetOTP;
 
         if (!sessionOTP) {
-            console.log("❌ No session OTP found");
+           
             return res.status(400).json({ success: false, message: "No OTP session found. Please request again." });
         }
 
-        console.log("Session OTP object:", sessionOTP);
-        console.log("Current time:", Date.now());
-        console.log("OTP expires at:", sessionOTP.expiresAt);
-        console.log("Time remaining:", sessionOTP.expiresAt - Date.now(), "ms");
-
+       
         // Check expiry
         if (Date.now() > sessionOTP.expiresAt || sessionOTP.expired) {
-            console.log("❌ OTP expired");
+          
             req.session.passwordResetOTP.expired = true;
             return res.status(400).json({ success: false, message: "OTP has expired. Please click the Resend OTP button." });
         }
@@ -596,17 +590,14 @@ const postVerifyOTP = async (req, res) => {
         // Convert session OTP to string for comparison
         const sessionOTPCode = String(sessionOTP.code).trim();
         
-        console.log("Comparing OTPs:");
-        console.log("Input OTP:", `"${trimmedOTP}"`, "Type:", typeof trimmedOTP);
-        console.log("Session OTP:", `"${sessionOTPCode}"`, "Type:", typeof sessionOTPCode);
-        console.log("Are they equal?", trimmedOTP === sessionOTPCode);
+      
 
         if (trimmedOTP !== sessionOTPCode) {
-            console.log("❌ OTP mismatch");
+           
             return res.status(400).json({ success: false, message: "Invalid OTP. Please try again." });
         }
 
-        console.log("✅ OTP verified successfully");
+       
         
         // Mark OTP as verified
         req.session.passwordResetOTP.verified = true;
@@ -729,7 +720,7 @@ const postResetPassword = async (req, res) => {
         await user.save();
 
         req.session.passwordResetOTP = null;
-        console.log("hy")
+  
 
         res.json({ success: true, message: "Password has been reset successfully", redirect: "/login" });
     } catch (error) {

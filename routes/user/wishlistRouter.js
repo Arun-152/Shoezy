@@ -5,11 +5,11 @@ const wishlistController = require("../../controllers/user/wishlistController")
 
 router.get("/",userAuth,wishlistController.loadWishlist)
 router.post("/add",wishlistController.addToWishlist)
-router.post("/remove",wishlistController.removeWishlist)
+router.patch("/remove",wishlistController.removeWishlist)
 router.get("/status",userAuth,wishlistController.wishlistStatus)
 router.post("/toggle",wishlistController.toggleWishlist)
-router.post("/clear",wishlistController.clearWishlist)
-router.post("/add-to-cart",wishlistController.addToCartFromWishlist)
+router.patch("/clear",wishlistController.clearWishlist)
+router.patch("/add-to-cart",wishlistController.addToCartFromWishlist)
 
 
 

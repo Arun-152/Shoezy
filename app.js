@@ -28,7 +28,7 @@ app.use(session({
 }))
 app.use(navbarCount)
 app.use(flash())
-console.log("Flash Loaded");
+
 
 app.use(passport.initialize())
 app.use(passport.session())

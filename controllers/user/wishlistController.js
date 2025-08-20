@@ -2,6 +2,7 @@ const User = require("../../models/userSchema");
 const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
 const Wishlist = require("../../models/wishlistSchema");
+const Cart = require("../../models/cartSchema");
 
 const loadWishlist = async(req,res)=>{
     try{
@@ -299,7 +300,7 @@ const addToCartFromWishlist = async(req,res)=>{
         }
 
         // Add to cart
-        const Cart = require("../../models/cartSchema");
+ 
         let userCart = await Cart.findOne({userId})
         if (!userCart) {
             userCart = new Cart({userId, items: []})
@@ -338,10 +339,8 @@ const addToCartFromWishlist = async(req,res)=>{
         });
         
         let cartCount = 0;
-        if (updatedCart && updatedCart.items.length > 0) {
-            cartCount = updatedCart.items
-                .filter(item => item.productId && item.productId.category)
-                .reduce((sum, item) => sum + item.quantity, 0);
+         if(updatedCart && updatedCart.items){
+                cartCount = updatedCart.items.length
         }
 
         // Remove from wishlist

@@ -558,7 +558,7 @@
         
         if (result.isConfirmed) {
             const response = await fetch(`/order/${orderIdToCancel}/cancel`, {
-                method: 'POST',
+                method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -640,7 +640,7 @@ async function confirmReturnOrder() {
             // Send single request with all productIds
             try {
                 const response = await fetch(`/order/${orderIdToReturn}/return`, {
-                    method: 'POST',
+                    method: 'PATCH',
                     headers: { 
                         'Content-Type': 'application/json' 
                     },

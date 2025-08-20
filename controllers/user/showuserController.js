@@ -68,7 +68,7 @@ const updateProfile = async (req, res) => {
 
         let profileImageName = user.profilePicture;
         if (req.file) {
-            console.log(req.file)
+        
             profileImageName = '/uploads/profiles/' + req.file.filename;
         }
 
@@ -79,7 +79,7 @@ const updateProfile = async (req, res) => {
        
 
         await user.save()
-        console.log(user)
+        
         return res.status(200).json({ success: true, message: "Profile updated successfully" });
 
     } catch (error) {
@@ -512,7 +512,7 @@ const postAdd = async(req,res)=>{
                 addresses: addresses,
                 errors: errors,
                 formData: req.body,
-                
+                returnURL: returnURL
             });
         }
 
@@ -537,7 +537,8 @@ const postAdd = async(req,res)=>{
                 user: userData,
                 addresses: addresses,
                 errors: { address: "This address already exists." },
-                formData: req.body
+                formData: req.body,
+                returnURL: returnURL
             });
         }
         

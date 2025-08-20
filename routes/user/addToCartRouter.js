@@ -6,7 +6,7 @@ const addToCartController = require("../../controllers/user/addToCartController"
 // Cart management routes
 router.get("/", userAuth, addToCartController.loadAddToCart);
 router.post("/add", addToCartController.addToCart);
-router.post("/update-quantity", addToCartController.updateQuantity);
+router.patch("/update-quantity", addToCartController.updateQuantity);
 router.post("/remove", addToCartController.removeCart);
 router.post("/clear" , addToCartController.clearCart);
 router.post("/validate-checkout", addToCartController.validateCheckout);

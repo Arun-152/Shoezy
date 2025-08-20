@@ -203,7 +203,8 @@ const updateQuantity = async(req,res)=>{
     try {
         const userId = req.session.userId
         const {productId, size, quantity} = req.body
-        
+       
+  
     
 
         if (!userId) {
@@ -250,6 +251,11 @@ const updateQuantity = async(req,res)=>{
 
         const shipping = subtotal > 500 ? 0 : 50
         const total = subtotal + shipping
+        let cartCount = 0
+        if(cart && cart.items.length){
+            cartCount =cart.items.length
+        }
+       
 
         return res.status(200).json({
             success: true, 
@@ -258,6 +264,7 @@ const updateQuantity = async(req,res)=>{
             subtotal: subtotal,
             shipping: shipping,
             total: total,
+            cartCount
         })
     } catch (error) {
         console.error(error)
