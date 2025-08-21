@@ -194,7 +194,7 @@ body {
     position: absolute;
     width: 400px;
     height: 400px;
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    background: linear-gradient(135deg, #4c5c74, #81383f);
     border-radius: 50%;
     animation: pulse 3s ease-in-out infinite;
 }
@@ -348,7 +348,7 @@ body {
 }
 
 .category-card.large.air-jordan-card {
-    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    background: linear-gradient(135deg, #3ca373, #1d1622);
     color: white;
 }
 
@@ -408,8 +408,8 @@ body {
 
 .category-image {
     position: absolute;
-    right: -50px;
-    bottom: -50px;
+    right: 50px;
+    bottom: 50px;
     width: 300px;
     height: 300px;
 }

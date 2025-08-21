@@ -32,8 +32,6 @@ const loadWishlist = async(req,res)=>{
            
         }
 
-        // Also get cart count for navbar
-        const Cart = require("../../models/cartSchema");
         const userCart = await Cart.findOne({ userId }).populate({
             path: 'items.productId',
             match: { isDeleted: false, isBlocked: false },
