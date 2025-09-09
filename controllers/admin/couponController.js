@@ -99,11 +99,21 @@ const createCoupon = async (req, res) => {
     }
 
     const totalUsageLimitNum = totalUsageLimit ? parseInt(totalUsageLimit) : null;
-    if (totalUsageLimit && totalUsageLimitNum < 1) {
-      return res.status(400).json({ success: false, message: "Total usage limit must be at least 1" });
+    
+    // Enhanced Total Usage Limit validation with specific prompts
+    if (!totalUsageLimit || totalUsageLimit.trim() === '') {
+      return res.status(400).json({ success: false, message: "Total Usage Limit is required. Please enter a valid number." });
+    }
+    
+    if (isNaN(totalUsageLimitNum) || totalUsageLimitNum === null) {
+      return res.status(400).json({ success: false, message: "Enter a valid Total Usage Limit to proceed." });
+    }
+    
+    if (totalUsageLimitNum < 1) {
+      return res.status(400).json({ success: false, message: "Please provide a valid Total Usage Limit (greater than 0)." });
     }
     if (totalUsageLimitNum && maxUsesPerUserNum > totalUsageLimitNum) {
-      return res.status(400).json({ success: false, message: "Maximum uses per user cannot be greater than total usage limit" });
+      return res.status(400).json({ success: false, message: "Invalid Total Usage Limit. Kindly check and try again." });
     }
     if (parseFloat(minimumPrice) < 0) {
       return res.status(400).json({ success: false, message: "Minimum order amount cannot be negative" });
@@ -113,6 +123,11 @@ const createCoupon = async (req, res) => {
     }
     if (!isAllProducts && (!applicableProducts || applicableProducts.length === 0)) {
       return res.status(400).json({ success: false, message: "Please select at least one product or choose 'Apply to All Products'" });
+    }
+
+    // Final validation check for Total Usage Limit
+    if (!totalUsageLimitNum) {
+      return res.status(400).json({ success: false, message: "Coupon cannot be added without a valid Total Usage Limit." });
     }
 
     const newCoupon = new Coupon({
@@ -134,7 +149,7 @@ const createCoupon = async (req, res) => {
     });
 
     await newCoupon.save();
-    res.json({ success: true, message: "Coupon created successfully", redirect: "/admin/coupons" });
+    res.json({ success: true, message: "Coupon added successfully with Total Usage Limit applied.", redirect: "/admin/coupons" });
   } catch (error) {
     console.error("Coupon creation error:", error);
     return res.status(500).json({ success: false, message: "Something went wrong" });
@@ -156,17 +171,25 @@ const loadEditCoupon = async(req,res)=>{
             return res.redirect("/admin/coupons");
         }
 
-        res.render("adminEditCoupon", { coupon: coupon })
+        // Load categories and products for the edit form
+        const categories = await Category.find({isDeleted:false,isListed:true});
+        const products = await Product.find({isDeleted:false,isBlocked:false});
+
+        res.render("editCouponPage", { 
+            coupon: coupon,
+            categories: categories,
+            products: products
+        });
 
   }catch(error){
     console.error("loadedit page error",error)
-    return res.render("admin500")
+    return res.redirect("/admin500");
 
   }
 }
 const editCoupon = async(req,res)=>{
   try{
-    const couponId = req.params.id
+    const couponId = req.query.id
     const {
             name,
             offerPrice,
@@ -187,10 +210,11 @@ const editCoupon = async(req,res)=>{
           return res.status(400).json({success:false,message:"All required fields must be filled"})
         }
 
-        const existingCoupon = await Coupon.findOne({name})
+        // Check if coupon exists but exclude the current coupon being edited
+        const existingCoupon = await Coupon.findOne({name, _id: { $ne: couponId }});
 
         if(existingCoupon){
-          return res.status(400).json({success:false,message:"This coupon already exist,Please use diffrent name"})
+          return res.status(400).json({success:false,message:"This coupon already exist,Please use different name"})
         }
 
         const startDateObj = new Date(startDate);
@@ -198,7 +222,7 @@ const editCoupon = async(req,res)=>{
         const currentDate = new Date();
 
         if (startDateObj < currentDate.setHours(0, 0, 0, 0)){
-          return res.status({success:false,message:"Start date cannot be in the past"})
+          return res.status(400).json({success:false,message:"Start date cannot be in the past"})
         }
 
         if(expirationDate <= startDateObj){
@@ -238,16 +262,17 @@ const editCoupon = async(req,res)=>{
           return res.status(400).json({success:false,message:"Maximum uses per user cannot be greater than total usage limit"})
         }
         if(parseFloat(minimumPrice) < 0){
-          return res.status({success:false,message:"Minimum order amount cannot be negative"})
+          return res.status(400).json({success:false,message:"Minimum order amount cannot be negative"})
         }
         if(!isAllCategories && (!applicableCategories || applicableCategories.length === 0)){
-          return res.status(400).json({success:false,message:"Please select at least one category or choose 'Apply to All Categories"})
+          return res.status(400).json({success:false,message:"Please select at least one category or choose 'Apply to All Categories'"})
 
         }
         if (!isAllProducts && (!applicableProducts || applicableProducts.length === 0)){
-          return res.status(400).json({success:false,message:"Please select at least one product or choose 'Apply to All Products"})
+          return res.status(400).json({success:false,message:"Please select at least one product or choose 'Apply to All Products'"})
         }
-        const updateCoupon = await Coupon.findOneAndUpdate(couponId,{
+        
+        const updatedCoupon = await Coupon.findByIdAndUpdate(couponId,{
                 name: name.toUpperCase().trim(),
                 startDate: startDateObj,
                 expireOn: expirationDate,
@@ -266,10 +291,13 @@ const editCoupon = async(req,res)=>{
         );
 
         if (!updatedCoupon) {
-            return res.status(404).json({success:false,message:"Coupon updated successfully"})
+            return res.status(404).json({success:false,message:"Coupon not found"})
         }
+
+        return res.status(200).json({success:true,message:"Coupon updated successfully", redirect: "/admin/coupons"})
+
   }catch(error){
-    console.error("coupon udate error",error)
+    console.error("coupon update error",error)
     return res.status(500).json({success:false,message:"Failed to update coupon. Please try again"})
 
   }
