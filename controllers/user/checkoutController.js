@@ -5,6 +5,7 @@ const Cart = require("../../models/cartSchema")
 const Product = require("../../models/productSchema")
 const Order = require("../../models/orderSchema")
 const Coupon = require("../../models/CouponSchema")
+const { validateCouponForCheckout } = require('./couponController');
 const bcrypt = require("bcrypt")
 const env = require("dotenv").config()
 
@@ -50,7 +51,6 @@ const appliedCoupon = req.session.appliedCoupon || null
 const finalTotal = subtotal + shipping;
 
     if (appliedCoupon) {
-      const { validateCouponForCheckout } = require('./couponController');
       const couponValidation = await validateCouponForCheckout(appliedCoupon, userId, req)
       if (couponValidation.valid) {
         const coupon = couponValidation.coupon
@@ -234,12 +234,13 @@ const placeOrder = async (req, res) => {
         } else {
           discountAmount = Math.min(coupon.offerPrice, totalAmount)
         }
+        const originalAmount = totalAmount + discountAmount; // Calculate original amount before discount
         totalAmount = totalAmount - discountAmount
         couponData = {
           applied: true,
           code: appliedCoupon.couponCode,
           discount: discountAmount,
-          originalAmount: subtotal + shippingCost,
+          originalAmount: originalAmount,
           couponId: appliedCoupon.couponId
         };
 
@@ -297,7 +298,6 @@ const placeOrder = async (req, res) => {
       console.error("Stock update error:", stockError);
     }
 
-    // Clear cart
     await Cart.updateOne({ userId }, { $set: { items: [] } });
 
     res.status(200).json({
@@ -313,9 +313,6 @@ const placeOrder = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error", details: error.message });
   }
 };
-
-
-
 
 const orderSuccess = async (req, res) => {
   try {

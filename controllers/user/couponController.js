@@ -98,9 +98,9 @@ const removeCoupon = async(req,res)=>{
     console.error("coupon error",error)
   }
 }
-const validateCouponForCheckout = async(req,res)=>{
+const validateCouponForCheckout = async(couponData, userId, req)=>{
   try{
-    if(!couponData && !couponData.couponId){
+    if(!couponData || !couponData.couponId){
       return {valid:false,message:"No Coupon applied"}
     }
     const coupon = await Coupon.findById(couponData.couponId)
@@ -138,7 +138,7 @@ const validateCouponForCheckout = async(req,res)=>{
 
       }
       if(!coupon.isAllCategories && coupon.applicableCategories.length > 0){
-          const productCtegoryId =  product.category._id.toString()
+          const productCategoryId =  product.category._id.toString()
           const applicableCategoryIds = coupon.applicableCategories.map(cat => cat._id.toString())
           if(!applicableCategoryIds.includes(productCategoryId)){
             return {valid:false,message:"Coupon not applicable to this product"}
@@ -163,7 +163,7 @@ const validateCouponForCheckout = async(req,res)=>{
           select: '_id name'
           }
       });
-      if(!cart && cart.items.length===0){
+      if(!cart || cart.items.length===0){
         return {valid:false,message:"Cart is empty"}
       }
       if(!coupon.isAllCategories && coupon.applicableCategories.length > 0){
