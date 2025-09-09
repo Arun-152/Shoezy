@@ -498,7 +498,6 @@
             try {
                 const response = await fetch('/wishlist/status');
                 if (!response.ok) {
-                    console.log('Could not fetch wishlist status - user may not be logged in');
                     return;
                 }
                 
@@ -520,11 +519,10 @@
                             setWishlistActive(wishlistBtn, true);
                         }
                     });
-                    
-                    console.log('Wishlist initialized with', currentWishlistItems.size, 'items');
+                 
                 }
             } catch (error) {
-                console.log('Could not load wishlist state:', error);
+                console.error('Could not load wishlist state:', error);
             }
         }
 
@@ -856,7 +854,6 @@
         // Re-sync wishlist state when page becomes visible
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden) {
-                console.log('Page visible again, syncing wishlist state...');
                 setTimeout(() => {
                     initializeWishlistState();
                 }, 200);

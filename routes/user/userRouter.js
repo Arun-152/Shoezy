@@ -22,6 +22,8 @@ const profileRouter = require("./profileRouter")
 const checkoutRouter = require("./checkoutRouter")
 const walletRouter = require("./walletRouter")
 
+const couponRouter = require("./couponRouter")
+
 
 
 
@@ -71,5 +73,6 @@ router.use("/wishlist",wishlistRouter)
 router.use("/profile",profileRouter)
 router.use("/checkout",checkoutRouter)
 router.use("/wallet",walletRouter)
+router.use("/coupon",couponRouter)
 
 module.exports = router;

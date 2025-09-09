@@ -13,7 +13,6 @@ const loadWishlist = async(req,res)=>{
             return res.redirect("/login")
         }
 
-        // Find user's wishlist
         const userWishlist = await Wishlist.findOne({ userId }).populate({
             path: 'products.productId',
             populate: {

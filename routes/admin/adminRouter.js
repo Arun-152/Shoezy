@@ -6,10 +6,11 @@ const categoryController = require("../../controllers/admin/categoryController")
 const productsController = require("../../controllers/admin/productController");
 const multer = require("multer");
 const { upload } = require("../../helpers/multerConfig");
-const { userAuth, adminAuth } = require("../../middlewares/auth");
+const { adminAuth } = require("../../middlewares/auth");
 
 
 const adminOrderRouter = require("./adminOrderRouter")
+const adminCouponRouter = require("./adminCouponRouter")
 // Admin Login Management
 router.get("/login", adminController.adminLoginPage);
 router.post("/login", adminController.postLogin);
@@ -39,11 +40,7 @@ router.get("/editProducts", adminAuth, productsController.loadEditProduct);
 router.post("/editProducts/:id", adminAuth, upload.array("images", 3), productsController.editProducts);
 router.patch("/deleteProducts/:id", adminAuth, productsController.deleteProducts);
 
-// Orders Management
 
-
-// Coupon Management
-router.get("/coupons", adminAuth, adminController.couponPage);
 
 // Sales Report Management
 router.get("/salesReport", adminAuth, adminController.salesPage);
@@ -58,6 +55,7 @@ router.get("/logout", adminAuth, adminController.adminLogout);
 router.get("/adminErrorPage", adminController.adminErrorPage);
 
 router.use("/orders",adminOrderRouter)
+router.use("/coupons",adminCouponRouter)
 
 
 

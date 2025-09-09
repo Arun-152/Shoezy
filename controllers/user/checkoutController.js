@@ -4,14 +4,16 @@ const Address = require("../../models/addressSchema");
 const Cart = require("../../models/cartSchema")
 const Product = require("../../models/productSchema")
 const Order = require("../../models/orderSchema")
+const Coupon = require("../../models/CouponSchema")
 const bcrypt = require("bcrypt")
 const env = require("dotenv").config()
-const session = require("express-session")
+
 
 
 const loadCheckout = async (req, res) => {
   try {
     const userId = req.session.userId;
+    const coupon = await Coupon.find({ islist: true })
 
     const user = await User.findById(userId);
     if (!user) return res.redirect('/login');
@@ -20,17 +22,16 @@ const loadCheckout = async (req, res) => {
 
     const defaultAddress = await Address.findOne({ userId, isDefault: true });
     const allAddresses = await Address.find({ userId });
-
+    
     let subtotal = 0;
     let totalItems = 0;
     let allItems = [];
-    let blockedOrDeletedProducts = []; 
-
+    let blockedOrDeletedProducts = [];
     cartItems.forEach(cart => {
       const filteredItems = cart.items.filter(item => {
         const product = item.productId;
         if (product && (product.isBlocked || product.isDeleted)) {
-          blockedOrDeletedProducts.push(product.name); 
+          blockedOrDeletedProducts.push(product.name);
         }
         return product && !product.isBlocked && !product.isDeleted;
       });
@@ -43,18 +44,42 @@ const loadCheckout = async (req, res) => {
         allItems.push(item);
       });
     });
-     if (blockedOrDeletedProducts.length > 0) {
-       req.flash('error',`These products are blocked or deleted : ${blockedOrDeletedProducts.join(', ')}`)
-       return res.redirect("/cart")
-     } 
+    const shipping = 0;
+    
+const appliedCoupon = req.session.appliedCoupon || null
+const finalTotal = subtotal + shipping;
+
+    if (appliedCoupon) {
+      const { validateCouponForCheckout } = require('./couponController');
+      const couponValidation = await validateCouponForCheckout(appliedCoupon, userId, req)
+      if (couponValidation.valid) {
+        const coupon = couponValidation.coupon
+        const totalBeforeDiscount = subtotal + shipping
+
+        if (coupon.discountType === "percentage") {
+          couponDiscount = Math.min((totalBeforeDiscount * coupon.offerPrice) / 100, totalBeforeDiscount)
+        } else {
+          couponDiscount = Math.min(coupon.offerPrice, totalBeforeDiscount)
+        }
+
+        finalAmount = totalBeforeDiscount - couponDiscount;
+
+      } else {
+        delete req.session.appliedCoupon;
+        couponDiscount = 0;
+      }
+
+    }
+    
+    if (blockedOrDeletedProducts.length > 0) {
+      req.flash('error', `These products are blocked or deleted : ${blockedOrDeletedProducts.join(', ')}`)
+      return res.redirect("/cart")
+    }
 
     if (allItems.length === 0) {
       req.flash('error', 'Your cart is empty or contains unavailable products.');
       return res.redirect('/cart');
     }
-
-    const shipping = 0;
-    const finalTotal = subtotal + shipping;
 
     res.render('checkoutPage', {
       user,
@@ -63,14 +88,16 @@ const loadCheckout = async (req, res) => {
       subtotal,
       totalItems,
       shipping,
-      finalTotal,
+      totalAmount: finalTotal,
       defaultAddress,
-      allAddresses
+      allAddresses,
+      coupon,
+      cart: { total: finalTotal }
     });
 
   } catch (error) {
     console.error('Error loading checkout page:', error);
-    res.status(500).send('Server Error');
+    res.status(500).json({succes:false,message:'Server Error'});
   }
 };
 
@@ -105,30 +132,28 @@ const placeOrder = async (req, res) => {
     if (!cart || !cart.items || cart.items.length === 0) {
       return res.status(400).json({ success: false, message: "Cart is empty" });
     }
-    
-    // Check for blocked, deleted, or unavailable products FIRST
+
     const blockedProducts = [];
     const unavailableProducts = [];
-    
+
     for (const item of cart.items) {
       const product = item.productId;
-      
+
       if (!product) {
         unavailableProducts.push("Unknown Product");
         continue;
       }
-      
+
       if (product.isBlocked) {
         blockedProducts.push(product.productName);
         continue;
       }
-      
+
       if (product.isDeleted) {
         unavailableProducts.push(product.productName);
         continue;
       }
-      
-      // Check stock availability for the specific size/variant
+
       if (product.variants) {
         const variant = product.variants.find(v => v.size === item.size);
         if (!variant || variant.variantQuantity < item.quantity) {
@@ -137,7 +162,6 @@ const placeOrder = async (req, res) => {
       }
     }
 
-    // If ANY products are blocked or unavailable, stop the order process immediately
     if (blockedProducts.length > 0) {
       return res.status(400).json({
         success: false,
@@ -146,7 +170,7 @@ const placeOrder = async (req, res) => {
         alertMessage: `The following product(s) are currently blocked and unavailable: ${blockedProducts.join(", ")}. Please remove them from your cart and try again.`
       });
     }
-    
+
     if (unavailableProducts.length > 0) {
       return res.status(400).json({
         success: false,
@@ -156,13 +180,13 @@ const placeOrder = async (req, res) => {
       });
     }
 
-    // Only process valid items after confirming ALL items are available
+
     const orderItems = [];
     let totalAmount = 0;
 
     for (const item of cart.items) {
       const product = item.productId;
-      
+
       totalAmount += item.totalPrice;
       orderItems.push({
         productId: product._id,
@@ -191,6 +215,46 @@ const placeOrder = async (req, res) => {
       const existingOrder = await Order.findOne({ orderNumber });
       if (!existingOrder) isUnique = true;
     }
+    let couponData = {
+      applied: false,
+      code: null,
+      discount: 0,
+      orginalAmount: totalAmount
+    }
+    const appliedCoupon = req.session.appliedCoupon
+    if (appliedCoupon) {
+     
+      const couponValidation = await validateCouponForCheckout(appliedCoupon, userId, req)
+      if (couponValidation.valid) {
+        const coupon = couponValidation.coupon
+        let discountAmount = 0
+
+        if (coupon.discountType === "percentage") {
+          discountAmount = Math.min((totalAmount * coupon.offerPrice) / 100, totalAmount)
+        } else {
+          discountAmount = Math.min(coupon.offerPrice, totalAmount)
+        }
+        totalAmount = totalAmount - discountAmount
+        couponData = {
+          applied: true,
+          code: appliedCoupon.couponCode,
+          discount: discountAmount,
+          originalAmount: subtotal + shippingCost,
+          couponId: appliedCoupon.couponId
+        };
+
+      } else {
+        delete req.session.appliedCoupon;
+        return res.status(400).json({
+          success: false,
+          message: couponValidation.message || "Coupon is no longer valid"
+        });
+
+      }
+    }
+
+
+
 
     const newOrder = new Order({
       orderNumber,
@@ -207,12 +271,12 @@ const placeOrder = async (req, res) => {
         pinCode: address.pinCode,
         addressType: address.addressType
       },
-      totalAmount,
+      totalAmount:totalAmount,
       paymentMethod: payment
     });
 
     await newOrder.save();
-    
+
     // Update stock levels
     try {
       for (const item of orderItems) {
@@ -256,29 +320,32 @@ const placeOrder = async (req, res) => {
 const orderSuccess = async (req, res) => {
   try {
     const orderId = req.query.orderId;
-    
+
     if (!orderId) {
       return res.redirect('/order');
     }
-    
+
     const order = await Order.findById(orderId).populate('items.productId');
-    
+
     if (!order) {
       return res.redirect('/order');
     }
-    
+
     res.render("orderSuccessPage", {
       order: order
     });
-    
+
   } catch (error) {
     console.error("Order success page error:", error);
     res.redirect('/order');
   }
 }
 
-module.exports ={
-    loadCheckout,
-    placeOrder,
-    orderSuccess,
+
+
+module.exports = {
+  loadCheckout,
+  placeOrder,
+  orderSuccess,
+
 }

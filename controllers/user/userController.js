@@ -644,9 +644,9 @@ const resendResetOTP = async (req, res) => {
             req.session.passwordResetOTP = {
                 code: newOtp,
                 email: sessionOTP.email,
-                expiresAt: Date.now() + 5 * 60 * 1000, // 5 minutes resend OTP session timeout
+                expiresAt: Date.now() + 5 * 60 * 1000,
                 verified: false,
-                expired: false, // Clear expired flag
+                expired: false, 
             };
 
             console.log("Resend Password OTP:", newOtp);
@@ -684,7 +684,7 @@ const resetPasswordPage = async (req, res) => {
         res.render("reset-password");
     } catch (error) {
         console.error("Error loading reset password page:", error);
-        res.status(500).send("Server error");
+        res.status(500).json({success:false,message:"Server error"});
     }
 };
 

@@ -210,25 +210,18 @@ const dashboardPage = async (req, res) => {
     });
   } catch (error) {
     console.error("Error rendering dashboard:", error.message);
-    res.status(500).send(`Server error: ${error.message}`);
+    res.status(500).json({success:false,message:`Server error: ${error.message}`});
   }
 };
 
-const couponPage = (req, res) => {
-  try {
-    res.render("admincoupenPage", { title: "Coupons" });
-  } catch (error) {
-    console.error("Error rendering coupons page:", error.message);
-    res.status(500).send(`Server error: ${error.message}`);
-  }
-};
+
 
 const salesPage = (req, res) => {
   try {
     res.render("adminsalesreportPage", { title: "Sales Report" });
   } catch (error) {
     console.error("Error rendering sales report page:", error.message);
-    res.status(500).send(`Server error: ${error.message}`);
+    res.status(500).json({success:false,message:`Server error: ${error.message}`});
   }
 };
 
@@ -239,7 +232,7 @@ const offersPage = (req, res) => {
     res.render("adminoffersPage", { title: "Offers" });
   } catch (error) {
     console.error("Error rendering offers page:", error.message);
-    res.status(500).send(`Server error: ${error.message}`);
+    res.status(500).json({success:false,message:`Server error: ${error.message}`});
   }
 };
 
@@ -248,7 +241,7 @@ const settingsPage = (req, res) => {
     res.render("settingsPage", { title: "Settings" });
   } catch (error) {
     console.error("Error rendering settings page:", error.message);
-    res.status(500).send(`Server error: ${error.message}`);
+    res.status(500).json({success:false,message:`Server error: ${error.message}`});
   }
 };
 
@@ -258,7 +251,7 @@ const adminLogout = (req, res) => {
     res.redirect("/admin/login");
   } catch (err) {
     console.error("Admin Logout error:", err.message);
-    res.status(500).send("Logout failed");
+    res.status(500).json({success:false,message:"Logout failed"});
   }
 };
 
@@ -267,7 +260,6 @@ module.exports = {
   adminLoginPage,
   postLogin,
   dashboardPage,
-  couponPage,
   salesPage,
   offersPage,
   settingsPage,

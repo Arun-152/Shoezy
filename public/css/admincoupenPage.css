@@ -367,29 +367,64 @@ body {
 .modal {
     position: fixed;
     top: 0;
-    left: 0;
+    left: 400px;
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start; /* align top instead of center */
+    overflow-y: auto; /* enable scrolling if modal is taller than screen */
     z-index: 2000;
+   
 }
 
 .modal-content {
-    background: white;
-    padding: 25px;
-    border-radius: 12px;
+    background: #fff;
+    border-radius: 8px;
+    padding: 5px;
+    max-height: 100vh; /* fit within viewport */
+    overflow-y: auto; /* scroll inside modal if content is large */
     width: 100%;
-    max-width: 500px;
-    position: relative;
-    animation: fadeIn 0.3s ease-out;
+    max-width: 500px; /* keep modal width consistent */
 }
+.swal2-container {
+  z-index: 9999 !important;  /* higher than your modal */
+}
+   .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #333;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 14px;
+        outline: none;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-input:focus {
+        border-color: #4caf50; /* green highlight */
+    }
+
+    .error-msg {
+        font-size: 13px;
+        color: red;
+        margin-top: 5px;
+    }
 
 .modal-content h3 {
     font-size: 20px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 .close-btn {

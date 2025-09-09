@@ -982,26 +982,42 @@ select.form-control {
                         </div>
 
                         <!-- Order Summary -->
-                        <div class="order-summary-section">
-                            <h2>Order Summary</h2>
-                            <div class="summary-card">
-                                <div class="summary-row">
-                                    <span>Subtotal</span>
-                                    <span>₹<%= order.totalAmount.toLocaleString() %></span>
-                                </div>
-                                <div class="summary-row">
-                                    <span>Shipping</span>
-                                    <span class="free">FREE</span>
-                                </div>
-                                <div class="summary-row total">
-                                    <span>Total</span>
-                                    <span>₹<%= order.totalAmount.toLocaleString() %></span>
-                                </div>
-                                <div class="payment-method">
-                                    <span>Payment Method: <%= order.paymentMethod %></span>
-                                </div>
-                            </div>
-                        </div>
+                       <div class="order-summary-section">
+    <h2>Order Summary</h2>
+    <div class="summary-card">
+        <!-- Subtotal -->
+        <div class="summary-row">
+            <span>Subtotal</span>
+            <span>₹<%= order.totalAmount.toLocaleString() %></span>
+        </div>
+
+        <!-- Coupon Discount -->
+        <% if(order.discount && order.discount > 0) { %>
+        <div class="summary-row">
+            <span>Coupon Discount</span>
+            <span>- ₹<%= order.discount.toLocaleString() %></span>
+        </div>
+        <% } %>
+
+        <!-- Shipping -->
+        <div class="summary-row">
+            <span>Shipping</span>
+            <span class="free">FREE</span>
+        </div>
+
+        <!-- Total After Discount -->
+        <div class="summary-row total">
+            <span>Total</span>
+            <span>₹<%= order.finalAmount ? order.finalAmount.toLocaleString() : order.totalAmount.toLocaleString() %></span>
+        </div>
+
+        <!-- Payment Method -->
+        <div class="payment-method">
+            <span>Payment Method: <%= order.paymentMethod %></span>
+        </div>
+    </div>
+</div>
+
 
                         <!-- Delivery Address -->
                         <div class="delivery-address-section">

@@ -11,7 +11,7 @@ const orderPage = async (req, res) => {
             return res.redirect("/login");
         }
         const user = await User.findById(userId)
-        console.log(user)
+    
 
         // Fetch user's orders
         const orders = await Order.find({ userId })
@@ -25,7 +25,7 @@ const orderPage = async (req, res) => {
         });
     } catch (error) {
         console.error("Order page error:", error);
-        res.status(500).send("Server error");
+        res.status(500).json({success:false,message:"Server error"});
     }
 };
 
@@ -53,7 +53,7 @@ const orderDetails = async (req, res) => {
         });
     } catch (error) {
         console.error("Order details error:", error);
-        res.status(500).send("Server error");
+        return res.status(500).json({success:false,message:"Server error"});
     }
 };
 
@@ -297,7 +297,6 @@ const returnSingleOrder = async (req, res) => {
                 foundItem = order.items[itemIndex];
             }
         }
-        // Strategy 3: Try comparing with productId._id (in case frontend is still sending wrong ID)
         if (itemIndex === -1) {
             itemIndex = order.items.findIndex(item => item.productId?._id?.toString() === itemsId);
             if (itemIndex !== -1) {

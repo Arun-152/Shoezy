@@ -1,12 +1,10 @@
 const mongoose = require("mongoose");
 const Cart = require("../models/cartSchema");
 
-// Migration script to fix existing cart items without size field
 async function fixCartSizes() {
     try {
         console.log("Starting cart size migration");
         
-        // Find all carts with items that don't have size field
         const carts = await Cart.find({
             "items.size": { $exists: false }
         });

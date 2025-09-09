@@ -91,9 +91,7 @@
     <%- include("../partials/user/userfooter") %>
 
     <script>
-        console.log('Profile picture value from MongoDB:', '<%= user.profilePicture %>');
         document.querySelectorAll('.profile-image img').forEach(img => {
-            img.addEventListener('load', () => console.log('Image loaded:', img.src));
             img.addEventListener('error', () => console.error('Image failed to load:', img.src));
         });
     </script>
