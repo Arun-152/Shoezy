@@ -758,12 +758,12 @@
                   </div>
                   <div class="usage-col">
                     <label for="totalUsageLimit" class="form-label">
-                      <i class="fas fa-users label-icon"></i> Total Usage Limit
+                      <i class="fas fa-users label-icon"></i> Total Usage Limit *
                     </label>
-                    <input type="number" id="totalUsageLimit" name="totalUsageLimit" class="form-input" placeholder="Unlimited" min="1" />
+                    <input type="number" id="totalUsageLimit" name="totalUsageLimit" class="form-input" placeholder="Enter total usage limit" min="1" />
                     <div class="input-error" id="totalUsageLimitError"></div>
                     <div class="help-text">
-                      <i class="fas fa-info-circle"></i> Maximum total uses across all users (leave empty for unlimited)
+                      <i class="fas fa-info-circle"></i> Maximum total uses across all users (required field)
                     </div>
                   </div>
                 </div>
@@ -954,6 +954,42 @@
         }
       });
 
+      // Total Usage Limit validation - must be greater than 0 if provided
+      document.getElementById('totalUsageLimit').addEventListener('input', function () {
+        const value = parseFloat(this.value);
+        const errorElement = document.getElementById('totalUsageLimitError');
+        
+        // Clear previous error
+        errorElement.textContent = '';
+        this.style.borderColor = '#e2e8f0';
+        
+        // If value is provided, validate it
+        if (this.value.trim() !== '') {
+          if (isNaN(value) || value <= 0) {
+            errorElement.textContent = 'Total Usage Limit must be a number greater than 0';
+            this.style.borderColor = '#e53e3e';
+            return;
+          }
+          
+          // Ensure it's a whole number
+          if (value !== Math.floor(value)) {
+            this.value = Math.floor(value);
+          }
+        }
+      });
+
+      // Total Usage Limit validation on blur
+      document.getElementById('totalUsageLimit').addEventListener('blur', function () {
+        const value = parseFloat(this.value);
+        const errorElement = document.getElementById('totalUsageLimitError');
+        
+        if (this.value.trim() !== '' && (isNaN(value) || value <= 0)) {
+          errorElement.textContent = 'Total Usage Limit must be a number greater than 0';
+          this.style.borderColor = '#e53e3e';
+          this.focus();
+        }
+      });
+
       // Toggle category list
       const allCategoriesCheckbox = document.getElementById('allCategories');
       const categoryList = document.getElementById('categoryList');
@@ -1034,6 +1070,16 @@
         if (!formData.expireOn) errors.push('Expiration Date is required');
         if (!formData.discountType) errors.push('Discount Type is required');
 
+        // Total Usage Limit validation - now required
+        if (!formData.totalUsageLimit || formData.totalUsageLimit.trim() === '') {
+          errors.push('Total Usage Limit is required');
+        } else {
+          const totalUsageValue = parseFloat(formData.totalUsageLimit);
+          if (isNaN(totalUsageValue) || totalUsageValue <= 0) {
+            errors.push('Total Usage Limit must be a number greater than 0');
+          }
+        }
+
         // Category validation
         if (!formData.isAllCategories && formData.applicableCategories.length === 0) {
           errors.push('Please select at least one category or choose "Apply to All Categories"');
@@ -1073,6 +1119,8 @@
             if (error.includes('Minimum Order Amount')) setErrorOnField('minOrderAmountError', 'Minimum Order Amount is required');
             if (error.includes('Start Date')) setErrorOnField('startDateError', 'Start Date is required');
             if (error.includes('Expiration Date')) setErrorOnField('expirationDateError', 'Expiration Date is required');
+            if (error.includes('Total Usage Limit is required')) setErrorOnField('totalUsageLimitError', 'Total Usage Limit is required');
+            if (error.includes('Total Usage Limit must be a number greater than 0')) setErrorOnField('totalUsageLimitError', 'Total Usage Limit must be a number greater than 0');
             if (error.includes('category')) setErrorOnField('applicableCategoriesError', 'Please select at least one category');
             if (error.includes('product')) setErrorOnField('applicableProductsError', 'Please select at least one product');
           });
