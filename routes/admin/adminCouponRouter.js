@@ -13,6 +13,7 @@ router.get("/addcoupon",adminAuth,couponController.getCreateCoponPage)
 router.post("/addcoupon",adminAuth,couponController.createCoupon)
 router.get("/editCoupon",adminAuth,couponController.loadEditCoupon)
 router.patch("/editCoupon",adminAuth,couponController.editCoupon)
+router.patch("/deleteCoupon/:id",adminAuth,couponController.deleteCoupon)
 
 
 

@@ -7,6 +7,7 @@
     <title>Shoezy-Coupon</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
     <link rel="stylesheet" href="/css/admincoupenPage.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         .error-msg {
             color: red;
@@ -595,9 +596,9 @@
                                                                 <a href="/admin/coupons/editCoupon?id=<%= coupon._id %>" class="action-btn edit-btn">
                                                                     <i class="fas fa-edit"></i>
                                                                 </a>
-                                                                <a href="/coupons/delete/<%= coupon._id %>" class="action-btn delete-btn">
+                                                                <button class="action-btn delete-btn" onclick="deleteCoupon('<%= coupon._id %>', '<%= coupon.name %>')">
                                                                     <i class="fas fa-trash"></i>
-                                                                </a>
+                                                                </button>
                                                             <% } %>
                                                         </div>
                                                     </td>
@@ -917,11 +918,154 @@
             }
         });
 
-        // Mock data for demonstration (remove this in production)
-        // This simulates the API response structure
-        if (typeof fetch === 'undefined' || window.location.hostname === 'localhost') {
-            window.fetch = async function(url) {
-                // Mock customer data - replace with real API call
+        // Delete coupon function with SweetAlert confirmation
+        async function deleteCoupon(couponId, couponName) {
+            try {
+                console.log('Delete function called with:', { couponId, couponName });
+                
+                // Show confirmation dialog
+                const result = await Swal.fire({
+                    title: 'Delete Coupon?',
+                    html: `Are you sure you want to delete the coupon <strong>"${couponName}"</strong>?<br><br>This action cannot be undone.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="fas fa-trash"></i> Yes, Delete',
+                    cancelButtonText: '<i class="fas fa-times"></i> Cancel',
+                    reverseButtons: true,
+                    focusCancel: true,
+                    customClass: {
+                        confirmButton: 'btn btn-danger',
+                        cancelButton: 'btn btn-secondary'
+                    }
+                });
+
+                console.log('Confirmation result:', result);
+
+                // If user confirmed deletion
+                if (result.isConfirmed) {
+                    console.log('User confirmed deletion, making API call...');
+                    
+                    // Show loading state
+                    Swal.fire({
+                        title: 'Deleting Coupon...',
+                        html: 'Please wait while we delete the coupon.',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    const apiUrl = `/admin/coupons/deleteCoupon/${couponId}`;
+                    console.log('Making API call to:', apiUrl);
+
+                    // Make API call to delete coupon
+                    const response = await fetch(apiUrl, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+
+                    console.log('API Response status:', response.status);
+                    console.log('API Response ok:', response.ok);
+
+                    const data = await response.json();
+                    console.log('API Response data:', data);
+
+                    if (response.ok && data.success) {
+                        console.log('Delete successful, removing row immediately...');
+                        
+                        // Find and remove the coupon row from the table immediately
+                        const deleteButton = document.querySelector(`button[onclick="deleteCoupon('${couponId}', '${couponName}')"]`);
+                        const couponRow = deleteButton ? deleteButton.closest('tr') : null;
+                        
+                        if (couponRow) {
+                            // Add smooth fade-out animation
+                            couponRow.style.transition = 'all 0.4s ease-out';
+                            couponRow.style.opacity = '0';
+                            couponRow.style.transform = 'translateX(-20px)';
+                            couponRow.style.backgroundColor = '#f8d7da';
+                            
+                            // Remove from DOM after animation
+                            setTimeout(() => {
+                                couponRow.remove();
+                                
+                                // Check if table is empty and show "No coupons found" message
+                                const tbody = document.querySelector('.customers-table tbody');
+                                const remainingRows = tbody.querySelectorAll('tr:not(.no-coupons-row)');
+                                
+                                if (remainingRows.length === 0) {
+                                    tbody.innerHTML = `
+                                        <tr class="no-coupons-row">
+                                            <td colspan="7" style="text-align: center; padding: 40px; color: #6c757d; font-style: italic;">
+                                                <i class="fas fa-info-circle" style="margin-right: 8px;"></i>
+                                                No coupons found
+                                            </td>
+                                        </tr>
+                                    `;
+                                }
+                                
+                                console.log('Coupon row removed from table successfully');
+                            }, 400);
+                            
+                            // Remove from local data store
+                            delete couponsData[couponId];
+                        }
+                        
+                        // Show success message after row starts fading
+                        setTimeout(async () => {
+                            await Swal.fire({
+                                title: 'Deleted!',
+                                text: 'Coupon has been successfully deleted.',
+                                icon: 'success',
+                                confirmButtonColor: '#28a745',
+                                confirmButtonText: 'OK',
+                                timer: 2000,
+                                timerProgressBar: true
+                            });
+                        }, 100);
+
+                        console.log('Delete operation completed successfully');
+                    } else {
+                        console.log('Delete failed:', data);
+                        
+                        // Show error message
+                        await Swal.fire({
+                            title: 'Error!',
+                            text: data.message || 'Failed to delete coupon. Please try again.',
+                            icon: 'error',
+                            confirmButtonColor: '#dc3545',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                } else {
+                    console.log('User cancelled deletion');
+                }
+            } catch (error) {
+                console.error('Error deleting coupon:', error);
+                
+                // Show error message
+                await Swal.fire({
+                    title: 'Error!',
+                    text: 'Something went wrong. Please try again.',
+                    icon: 'error',
+                    confirmButtonColor: '#dc3545',
+                    confirmButtonText: 'OK'
+                });
+            }
+        }
+
+        // Mock data for customer modal only (not affecting delete API)
+        const originalFetch = window.fetch;
+        
+        // Override fetch only for customer data endpoint
+        window.fetch = async function(url, options) {
+            // Only mock the customer data endpoint, let delete API go through normally
+            if (url.includes('/customers') && !url.includes('deleteCoupon')) {
                 const mockData = {
                     customers: [
                         {
@@ -955,8 +1099,11 @@
                     ok: true,
                     json: async () => mockData
                 };
-            };
-        }
+            }
+            
+            // For all other requests (including delete), use the original fetch
+            return originalFetch(url, options);
+        };
     </script>
 
 </body>

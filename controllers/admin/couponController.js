@@ -10,7 +10,7 @@ require("dotenv").config();
 
 const couponPage = async (req, res) => {
     try {
-        const coupons = await Coupon.find()
+        const coupons = await Coupon.find({islist: true})
         res.render("admincoupenPage", { coupons });
     } catch (error) {
         console.error("Error rendering coupons page:", error.message);
@@ -305,16 +305,16 @@ const editCoupon = async(req,res)=>{
 const deleteCoupon = async(req,res)=>{
   try{
     const couponId = req.params.id
-    const result = await Coupon.findByIdAndUpdate(couponId,{islist:true},{new:true})
+    const result = await Coupon.findByIdAndUpdate(couponId,{islist:false},{new:true})
 
     if(!result){
-      return res.status(400).json({success:false,message:"coupon not found"})
+      return res.status(404).json({success:false,message:"Coupon not found"})
     }
     return res.status(200).json({success:true,message:"Coupon deleted successfully"})
 
   }catch(error){
     console.error("coupon deleted error",error)
-    return res.status(500).json({success:false,message:"something went wrong"})
+    return res.status(500).json({success:false,message:"Something went wrong"})
   }
 }
 const getCategories = async(req,res)=>{
