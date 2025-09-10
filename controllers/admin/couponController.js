@@ -10,7 +10,7 @@ require("dotenv").config();
 
 const couponPage = async (req, res) => {
     try {
-        const coupons = await Coupon.find({islist: true})
+        const coupons = await Coupon.find({})
         res.render("admincoupenPage", { coupons });
     } catch (error) {
         console.error("Error rendering coupons page:", error.message);
@@ -149,7 +149,7 @@ const createCoupon = async (req, res) => {
     });
 
     await newCoupon.save();
-    res.json({ success: true, message: "Coupon added successfully with Total Usage Limit applied.", redirect: "/admin/coupons" });
+    res.json({ success: true, message: "Coupon added successfully with Total Usage Limit applied." });
   } catch (error) {
     console.error("Coupon creation error:", error);
     return res.status(500).json({ success: false, message: "Something went wrong" });
@@ -317,6 +317,35 @@ const deleteCoupon = async(req,res)=>{
     return res.status(500).json({success:false,message:"Something went wrong"})
   }
 }
+const couponToggle = async (req, res) => {
+    try {
+        const { id } = req.body;
+        console.log(id)
+
+        if (!id) {
+            return res.status(400).json({ success: false, message: "Coupon id is required" });
+        }
+
+        const coupon = await Coupon.findById(id);
+        if (!coupon) {
+            return res.status(404).json({ success: false, message: "Coupon not found" });
+        }
+
+        
+        coupon.islist = !coupon.islist;
+        await coupon.save();
+
+        return res.json({
+            success: true,
+            message: `Coupon ${coupon.islist ? "Listed" : "Unlisted"} successfully`,
+            couponId: id,
+            islist: coupon.islist,
+        });
+    } catch (error) {
+        console.error("Error toggling coupon:", error);
+        return res.status(500).json({ success: false, message: "Internal server error" });
+    }
+};
 const getCategories = async(req,res)=>{
   try{
     const category = await Category.find({isListed:true})
@@ -358,5 +387,6 @@ module.exports = {
     editCoupon,
     deleteCoupon,
     getCategories,
-    getProducts
+    getProducts,
+    couponToggle
 }

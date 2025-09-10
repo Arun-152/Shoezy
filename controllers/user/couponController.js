@@ -6,6 +6,27 @@ const Coupon = require("../../models/CouponSchema")
 const bcrypt = require("bcrypt")
 const env = require("dotenv").config()
 
+const loadCoupons = async (req, res) => {
+    try {
+      const userData  =  await User.findById(req.session.userId)
+
+        const coupons = await Coupon.find({
+            islist: true,
+            expireOn: { $gte: new Date() }
+        });
+        console.log(coupons)
+
+        res.render("couponPage", { 
+            coupons,
+            user: userData  
+        });
+    } catch (error) {
+        console.error("Error fetching user coupons:", error);
+        res.status(500).send("Server error");
+    }
+};
+
+
 
 const applyCoupon = async(req,res)=>{
   try {
@@ -203,6 +224,7 @@ const validateCouponForCheckout = async(couponData, userId, req)=>{
 }
 
 module.exports = {
+    loadCoupons,
     applyCoupon,
     removeCoupon,
     validateCouponForCheckout,
