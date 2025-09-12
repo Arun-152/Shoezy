@@ -34,9 +34,7 @@ async function fixCartSizes() {
     }
 }
 
-module.exports = { fixCartSizes };
-
-// Run migration if this file is executed directly
+module.exports = { fixCartSizes }
 if (require.main === module) {
     const db = require("../config/db");
     

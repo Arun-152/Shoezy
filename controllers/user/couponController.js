@@ -8,18 +8,39 @@ const env = require("dotenv").config()
 
 const loadCoupons = async (req, res) => {
     try {
-      const userData  =  await User.findById(req.session.userId)
+        const userData = await User.findById(req.session.userId);
 
-        const coupons = await Coupon.find({
+        // 1️⃣ Get page number from query params (default: 1)
+        const page = parseInt(req.query.page) || 1;
+        const limit = 6; 
+        const skip = (page - 1) * limit;
+
+        // 2️⃣ Fetch total count
+        const totalCoupons = await Coupon.countDocuments({
             islist: true,
             expireOn: { $gte: new Date() }
         });
-        console.log(coupons)
 
-        res.render("couponPage", { 
+        // 3️⃣ Fetch paginated coupons
+        const coupons = await Coupon.find({
+            islist: true,
+            expireOn: { $gte: new Date() }
+        })
+            .skip(skip)
+            .limit(limit)
+            .sort({ createdAt: -1 }); // latest first (optional)
+
+        // 4️⃣ Calculate total pages
+        const totalPages = Math.ceil(totalCoupons / limit);
+
+        // 5️⃣ Render with pagination info
+        res.render("couponPage", {
             coupons,
-            user: userData  
+            user: userData,
+            currentPage: page,
+            totalPages
         });
+
     } catch (error) {
         console.error("Error fetching user coupons:", error);
         res.status(500).send("Server error");

@@ -71,6 +71,10 @@ const orderSchema = new Schema({
         enum: ['Pending', 'Paid', 'Failed'],
         default: 'Pending'
     },
+    razorpayPaymentId: {
+        type: String,
+        required: false
+    },
     statusHistory: [{
         status: {
             type: String,

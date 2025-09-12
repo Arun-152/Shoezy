@@ -24,6 +24,8 @@ const walletRouter = require("./walletRouter")
 
 const couponRouter = require("./couponRouter")
 
+const razorpayRouter = require("./razorpayRouter")
+
 
 
 
@@ -74,5 +76,6 @@ router.use("/profile",profileRouter)
 router.use("/checkout",checkoutRouter)
 router.use("/wallet",walletRouter)
 router.use("/coupon",couponRouter)
+router.use("/payment",razorpayRouter)
 
 module.exports = router;

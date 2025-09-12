@@ -409,7 +409,6 @@ const returnSingleOrder = async (req, res) => {
                     break;
             }
         } else {
-            // Mixed statuses - determine by priority and counts
             const itemCounts = {
                 returned: allStatuses.filter(status => status === 'Returned').length,
                 returnApproved: allStatuses.filter(status => status === 'ReturnApproved').length,
@@ -526,9 +525,7 @@ const cancelSingleOrder = async (req, res) => {
         if (product && product.variants) {
             const variant = product.variants.find(v => v.size === (itemToCancel.size || "Default"));
             if (variant) {
-                variant.variantQuantity += itemToCancel.quantity; // Only add back the cancelled item's quantity
-                
-                // Update product status if it was out of stock
+                variant.variantQuantity += itemToCancel.quantity; 
                 if (product.status === "out of stock") {
                     const totalStock = product.variants.reduce((sum, v) => sum + v.variantQuantity, 0);
                     if (totalStock > 0) {
@@ -539,17 +536,14 @@ const cancelSingleOrder = async (req, res) => {
             }
         }
 
-        // Update item status
         itemToCancel.status = 'Cancelled';
 
-        // Check if all items are cancelled, then update order status
         const allItemsCancelled = order.items.every(item => item.status === 'Cancelled');
         if (allItemsCancelled) {
             order.orderStatus = 'Cancelled';
             order.cancellationReason = 'All items cancelled';
         }
 
-        // Add to status history
         order.statusHistory.push({
             status: 'Cancelled',
             date: new Date(),

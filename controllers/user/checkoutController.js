@@ -104,7 +104,7 @@ const finalTotal = subtotal + shipping;
 const placeOrder = async (req, res) => {
   try {
     const userId = req.session.userId;
-    const { selectedAddress, payment } = req.body;
+    const { selectedAddress, payment } = req.body
 
     if (!userId) {
       return res.status(401).json({ success: false, message: "User not authenticated" });
@@ -119,14 +119,7 @@ const placeOrder = async (req, res) => {
       });
     }
 
-    if (!['COD'].includes(payment)) {
-      return res.status(400).json({
-        success: false,
-        showAlert: true,
-        alertType: "error",
-        alertMessage: "Please select a valid payment method"
-      });
-    }
+  
 
     const cart = await Cart.findOne({ userId }).populate('items.productId');
     if (!cart || !cart.items || cart.items.length === 0) {
@@ -278,7 +271,6 @@ const placeOrder = async (req, res) => {
 
     await newOrder.save();
 
-    // Update stock levels
     try {
       for (const item of orderItems) {
         const product = await Product.findById(item.productId);

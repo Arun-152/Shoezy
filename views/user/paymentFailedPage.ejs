@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Failed - Please Try Again</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            padding: 60px 40px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ff6b6b, #ffa500, #ff6b6b);
+            background-size: 200% 100%;
+            animation: gradientMove 3s ease-in-out infinite;
+        }
+
+        @keyframes gradientMove {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .error-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 30px;
+            background: linear-gradient(135deg, #ff6b6b, #ff5252);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .error-icon::before {
+            content: '✕';
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .error-message {
+            color: #718096;
+            font-size: 16px;
+            margin-bottom: 30px;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .error-details {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-left: 4px solid #ff6b6b;
+        }
+
+        .error-code {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            color: #e53e3e;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .error-reason {
+            font-size: 14px;
+            color: #4a5568;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            min-width: 140px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #4a5568;
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #f7fafc;
+            border-color: #cbd5e0;
+            transform: translateY(-1px);
+        }
+
+        .support-info {
+            background: #edf2f7;
+            border-radius: 12px;
+            padding: 20px;
+            font-size: 14px;
+            color: #4a5568;
+        }
+
+        .support-info strong {
+            color: #2d3748;
+        }
+
+        .transaction-id {
+            font-family: 'Monaco', 'Menlo', monospace;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 13px;
+            color: #2d3748;
+            border: 1px solid #e2e8f0;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 40px 24px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        .loading {
+            display: none;
+        }
+
+        .loading.show {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 2px solid white;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="error-icon"></div>
+        
+        <h1>Payment Failed</h1>
+        
+        <p class="error-message">
+            We're sorry, but your payment could not be processed at this time. This may be due to insufficient funds, card restrictions, or a temporary issue with your payment method.
+        </p>
+
+        <div class="error-details">
+            <div class="error-code">Error Code: PMT_001</div>
+            <div class="error-reason">Payment authorization declined by issuing bank</div>
+        </div>
+
+        <div class="button-group">
+            <button class="btn btn-primary" id="retryBtn" onclick="retryPayment()">
+                <span class="loading" id="loadingSpinner"></span>
+                <span id="retryText">Retry Payment</span>
+            </button>
+            <a href="#" class="btn btn-secondary" onclick="goBack()">Go Back</a>
+        </div>
+
+        <div class="support-info">
+            <strong>Need Help?</strong><br>
+            If you continue to experience issues, please contact our support team at <strong>support@company.com</strong> or call <strong>(555) 123-4567</strong>
+            
+            <div class="transaction-id">
+                Transaction ID: TXN-2025091201234567
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function retryPayment() {
+            const btn = document.getElementById('retryBtn');
+            const spinner = document.getElementById('loadingSpinner');
+            const text = document.getElementById('retryText');
+            
+            // Show loading state
+            btn.disabled = true;
+            spinner.classList.add('show');
+            text.textContent = 'Processing...';
+            
+            // Simulate payment retry process
+            setTimeout(() => {
+                // Reset button state
+                btn.disabled = false;
+                spinner.classList.remove('show');
+                text.textContent = 'Retry Payment';
+                
+                // In a real application, you would redirect to the payment gateway
+                // For demo purposes, we'll show an alert
+                alert('Redirecting to payment gateway...\n\nIn a real application, this would redirect to your payment processor.');
+                
+                // Example redirect (uncomment and modify for real use):
+                // window.location.href = '/checkout/payment';
+            }, 2000);
+        }
+
+        function goBack() {
+            // In a real application, this might go to the cart or previous page
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                // Fallback redirect
+                window.location.href = '/';
+            }
+        }
+
+        // Prevent accidental page refresh
+        window.addEventListener('beforeunload', function(e) {
+            // Only show warning if payment retry is in progress
+            const btn = document.getElementById('retryBtn');
+            if (btn.disabled) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+    </script>
+</body>
+</html>
