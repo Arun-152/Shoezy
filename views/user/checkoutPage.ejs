@@ -316,7 +316,7 @@
 
         <%- include('../partials/user/userfooter') %>
 
-        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+            <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
             <script>
                 let originalSubtotal = <%= subtotal %>;
@@ -470,7 +470,7 @@
 
 
                 document.addEventListener('DOMContentLoaded', () => {
-                  
+
                     const defaultAddress = document.querySelector('input[name="selectedAddress"]:checked');
                     if (defaultAddress) document.getElementById('selectedAddressInput').value = defaultAddress.value;
 
@@ -533,22 +533,19 @@
                                         });
                                         return;
                                     }
-
-                                    // Razorpay options
                                     const options = {
-                                        key: orderData.key, // your Razorpay key from server
-                                        amount: orderData.razorpayOrder.amount,   // amount in paise
+                                        key: orderData.key,
+                                        amount: orderData.razorpayOrder.amount,
                                         currency: 'INR',
                                         name: 'Shoezy',
                                         description: 'Order Payment',
-                                        order_id: orderData.razorpayOrder.id,      // Razorpay order ID from server
+                                        order_id: orderData.razorpayOrder.id,
                                         prefill: {
                                             name: orderData.useraddress.fullName,
                                             contact: orderData.useraddress.mobileNumber,
                                         },
                                         theme: { color: '#007bff' },
                                         handler: function (response) {
-                                            // Verify payment on server
                                             fetch('/payment/verifyPayment', {
                                                 method: 'POST',
                                                 headers: { 'Content-Type': 'application/json' },
@@ -561,7 +558,7 @@
                                                     appliedCoupon,
                                                     finalTotal,
                                                     discountAmount: currentDiscount,
-                                                    UserOrderId:orderData.orderId,
+                                                    UserOrderId: orderData.orderId,
                                                 })
                                             })
                                                 .then(res => res.json())
@@ -575,7 +572,7 @@
                                                             allowOutsideClick: false,
                                                             allowEscapeKey: false
                                                         }).then(result => {
-                                                            window.location.href='/checkout/orderSuccess?orderId='+verifyData.orderId;
+                                                            window.location.href = '/checkout/orderSuccess?orderId=' + verifyData.orderId;
                                                         });
                                                     } else {
                                                         Swal.fire({
@@ -583,6 +580,8 @@
                                                             title: 'Payment Failed',
                                                             text: verifyData.message || 'Payment verification failed',
                                                             confirmButtonColor: '#007bff'
+                                                        }).then(() => {
+
                                                         });
                                                     }
                                                 })
@@ -603,7 +602,21 @@
                                     };
 
                                     const rzp = new Razorpay(options);
+                                  
+
+                                    rzp.on('payment.failed', function (response) {
+                                        // response contains error info
+                                        console.error("Payment Failed:", response.error);
+
+                                      
+                                            // Redirect user to your custom failure page
+                                            window.location.href = `/payment/orderFailed/${orderData.orderId}`;
+                                       
+                                    });
+
                                     rzp.open();
+
+                                    
                                 })
                                 .catch(err => {
                                     console.error('Order Creation Error:', err);
@@ -612,7 +625,7 @@
                                         title: 'Error',
                                         text: 'Unable to initiate payment. Try again.',
                                         confirmButtonColor: '#007bff'
-                                    });
+                                    })
                                 });
 
                             return;

@@ -146,6 +146,7 @@ const createOrder = async (req, res) => {
         orderId: newOrder._id,
         useraddress:address
       });
+
     
 
   } catch (error) {
@@ -206,8 +207,29 @@ const verifyPayment = async(req,res)=>{
         console.error(error,"razorpay verify payment error")
     }
 }
+const paymentFailed = async (req, res) => {
+  try {
+   
+    const { orderId } = req.params
+
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(400).json({ success: false, message: "Order not found" });
+    }
+    
+
+    order.paymentStatus = "Failed";
+    await order.save();
+
+    return res.render("paymentFailedPage", { order });
+  } catch (err) {
+    console.error("Payment failed handler error:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
 
 module.exports = {
     createOrder,
-    verifyPayment
+    verifyPayment,
+    paymentFailed
 }

@@ -214,8 +214,12 @@ const placeOrder = async (req, res) => {
       discount: 0,
       orginalAmount: totalAmount
     }
+    
+
     const appliedCoupon = req.session.appliedCoupon
+
     if (appliedCoupon) {
+
      
       const couponValidation = await validateCouponForCheckout(appliedCoupon, userId, req)
       if (couponValidation.valid) {
