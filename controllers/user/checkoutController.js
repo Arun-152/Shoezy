@@ -325,7 +325,7 @@ const orderSuccess = async (req, res) => {
     }
 
     res.render("orderSuccessPage", {
-      order: order
+      order,
     });
 
   } catch (error) {

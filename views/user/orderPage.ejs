@@ -39,8 +39,9 @@
                             <div class="orders-list">
                                 <% if (orders && orders.length> 0) { %>
                                     <% orders.forEach(order=> { %>
-                                        <% // Calculate dynamic order status based on item statuses with correct
-                                            priority let itemStatuses=order.items.map(item=> item.status ||
+                                        <% 
+                                            //  Calculate dynamic order status based on item statuses with correct priority
+                                            let itemStatuses=order.items.map(item=> item.status ||
                                             order.orderStatus);
                                             let hasDelivered = itemStatuses.some(status => status === 'Delivered');
                                             let hasReturned = itemStatuses.some(status => status === 'Returned');
@@ -65,6 +66,7 @@
                                             displayStatus = order.orderStatus;
                                             }
                                             %>
+
                                             <div class="order-card"
                                                 data-status="<%= displayStatus.toLowerCase().replace(/\s+/g, '') %>"
                                                 data-order-id="<%= order._id %>"
@@ -117,7 +119,7 @@
                                                 <div class="order-footer">
                                                     <div class="order-total">
                                                         <strong>Total: ₹<%= order.totalAmount.toLocaleString() %>
-                                                                </strong>
+                                                        </strong>
                                                     </div>
                                                     <div class="order-actions">
                                                         <a href="/order/<%= order._id %>" class="btn btn-secondary">View
@@ -125,10 +127,12 @@
 
                                                         <% if (order.paymentStatus==='Failed' ) { %>
                                                             <!-- Retry Payment Button -->
-                                                            <button class="btn btn-retry"
-                                                                onclick="retryPayment('<%= order._id %>')">
-                                                                Retry Payment
-                                                            </button>
+                                                            <form action="/payment/retryPayment/<%= order._id %>"
+                                                                method="get" style="display:inline;">
+                                                                <button type="submit" class="btn btn-retry">Retry
+                                                                    Payment</button>
+                                                            </form>
+
                                                             <% } else if (displayStatus==='Pending' ||
                                                                 displayStatus==='Processing' ||
                                                                 displayStatus==='Shipped' ) { %>

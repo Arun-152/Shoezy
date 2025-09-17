@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -47,8 +48,15 @@
         }
 
         @keyframes gradientMove {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
+
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
         }
 
         .error-icon {
@@ -65,8 +73,15 @@
         }
 
         @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
         }
 
         .error-icon::before {
@@ -212,19 +227,26 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="error-icon"></div>
-        
+
         <h1>Payment Failed</h1>
-        
+
         <p class="error-message">
-            We're sorry, but your payment could not be processed at this time. This may be due to insufficient funds, card restrictions, or a temporary issue with your payment method.
+            We're sorry, but your payment could not be processed at this time. This may be due to insufficient funds,
+            card restrictions, or a temporary issue with your payment method.
         </p>
 
         <div class="error-details">
@@ -233,69 +255,38 @@
         </div>
 
         <div class="button-group">
-            <button class="btn btn-primary" id="retryBtn" onclick="retryPayment()">
-                <span class="loading" id="loadingSpinner"></span>
+            <button class="btn btn-primary" id="retryBtn" onclick="retryPayment('<%= order._id %>')">
+                <span id="loadingSpinner" style="display:none;" class="spinner-border spinner-border-sm"></span>
                 <span id="retryText">Retry Payment</span>
             </button>
+
             <a href="#" class="btn btn-secondary" onclick="goBack()">Go Back</a>
         </div>
 
         <div class="support-info">
             <strong>Need Help?</strong><br>
-            If you continue to experience issues, please contact our support team at <strong>support@company.com</strong> or call <strong>(555) 123-4567</strong>
-            
+            If you continue to experience issues, please contact our support team at
+            <strong>support@company.com</strong> or call <strong>(555) 123-4567</strong>
+
             <div class="transaction-id">
                 ORDER ID : <%= order.orderId %>
             </div>
         </div>
     </div>
+<script>function retryPayment(orderId) {
+    // Show spinner
+    document.getElementById("loadingSpinner").style.display = "inline-block";
+    document.getElementById("retryText").innerText = "Processing...";
 
-    <script>
-        function retryPayment() {
-            const btn = document.getElementById('retryBtn');
-            const spinner = document.getElementById('loadingSpinner');
-            const text = document.getElementById('retryText');
-            
-            // Show loading state
-            btn.disabled = true;
-            spinner.classList.add('show');
-            text.textContent = 'Processing...';
-            
-            // Simulate payment retry process
-            setTimeout(() => {
-                // Reset button state
-                btn.disabled = false;
-                spinner.classList.remove('show');
-                text.textContent = 'Retry Payment';
-                
-                // In a real application, you would redirect to the payment gateway
-                // For demo purposes, we'll show an alert
-                alert('Redirecting to payment gateway...\n\nIn a real application, this would redirect to your payment processor.');
-                
-                // Example redirect (uncomment and modify for real use):
-                // window.location.href = '/checkout/payment';
-            }, 2000);
-        }
+    // Redirect to retryPayment route
+    window.location.href = `/payment/retryPayment/${orderId}`;
+}
 
-        function goBack() {
-            // In a real application, this might go to the cart or previous page
-            if (window.history.length > 1) {
-                window.history.back();
-            } else {
-                // Fallback redirect
-                window.location.href = '/';
-            }
-        }
-
-        // Prevent accidental page refresh
-        window.addEventListener('beforeunload', function(e) {
-            // Only show warning if payment retry is in progress
-            const btn = document.getElementById('retryBtn');
-            if (btn.disabled) {
-                e.preventDefault();
-                e.returnValue = '';
-            }
-        });
-    </script>
+function goBack() {
+    window.history.back();
+}
+</script>
+   
 </body>
+
 </html>

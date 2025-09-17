@@ -995,15 +995,17 @@
                                             <!-- Total Price -->
                                             <div class="item-total">
                                                 <span class="total-price">₹<%= item.totalPrice.toLocaleString() %>
-                                                        </span>
+                                                </span>
                                             </div>
 
                                             <!-- Cancel or Return Button -->
                                             <div class="item-actions">
                                                 <% if (order.paymentStatus==='Failed' ) { %>
-                                                    <button class="btn-warning"
-                                                        onclick="retryPayment('<%= order._id %>')">Retry
-                                                        Payment</button>
+                                                    <form action="/payment/retryPayment/<%= order._id %>" method="get">
+                                                        <button type="submit" class="btn btn-warning">Retry
+                                                            Payment</button>
+                                                    </form>
+
                                                     <% } else { %>
                                                         <% if (item.status==='Pending' || item.status==='Processing' ) {
                                                             %>

@@ -7,5 +7,7 @@ const razorpayController = require("../../controllers/user/razorpayController")
 router.post("/createOrder",userAuth,razorpayController.createOrder)
 router.post("/verifyPayment",userAuth,razorpayController.verifyPayment)
 router.get("/orderFailed/:orderId",userAuth,razorpayController.paymentFailed)
+router.get("/retryPayment/:orderId",userAuth,razorpayController.loadRetryPayment)
+router.post("/retryPayment/:orderId",userAuth,razorpayController.retryPayment)
 
 module.exports = router
