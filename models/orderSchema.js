@@ -37,7 +37,16 @@ const orderSchema = new Schema({
         },
         status: {
             type: String,
-            enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned', 'ReturnRequested','ReturnApproved'], 
+            enum: [
+                'Pending',
+                'Processing',
+                'Shipped',
+                'Delivered',
+                'Cancelled',
+                'Returned',
+                'ReturnRequested',
+                'ReturnApproved'
+            ],
             default: 'Pending'
         }
     }],
@@ -63,7 +72,16 @@ const orderSchema = new Schema({
     },
     orderStatus: {
         type: String,
-        enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'ReturnRequested', 'Returned','ReturnApproved'], 
+        enum: [
+            'Pending',
+            'Processing',
+            'Shipped',
+            'Delivered',
+            'Cancelled',
+            'ReturnRequested',
+            'Returned',
+            'ReturnApproved'
+        ],
         default: 'Pending'
     },
     paymentStatus: {
@@ -78,7 +96,16 @@ const orderSchema = new Schema({
     statusHistory: [{
         status: {
             type: String,
-            enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled', 'Returned','ReturnRequested'], // ✅ added
+            enum: [
+                'Pending',
+                'Processing',
+                'Shipped',
+                'Delivered',
+                'Cancelled',
+                'Returned',
+                'ReturnRequested',
+                'ReturnApproved'
+            ],
             required: true
         },
         date: {
@@ -99,16 +126,28 @@ const orderSchema = new Schema({
         required: false
     },
     orderReturnReason: {
-    type: String,
-    default: null
+        type: String,
+        default: null
     },
     deliveryDate: {
         type: Date,
         required: false
+    },
+    couponCode: {
+        type: String,     // store coupon name/code
+        default: null
+    },
+    couponId: {
+        type: Schema.Types.ObjectId, // reference actual Coupon document
+        ref: "Coupon",
+        default: null
+    },
+    discountAmount: {
+        type: Number,     // how much discount was applied
+        default: 0
     }
-}, {
-    timestamps: true
-});
+
+}, { timestamps: true });
 
 const Order = mongoose.model("Order", orderSchema);
 module.exports = Order;

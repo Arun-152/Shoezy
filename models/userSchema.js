@@ -26,7 +26,6 @@ const UserSchema = new Schema(
         password: {
             type: String,
             required: function () {
-                // Password is not required for Google OAuth users
                 return !this.googleId;
             },
         },

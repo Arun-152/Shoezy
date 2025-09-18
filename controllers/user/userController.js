@@ -114,14 +114,15 @@ async function sendVerificationEmail(email, otp) {
 
 const postSignup = async (req, res) => {
     try {
-        const { fullname, email, phone, password, confirmPassword } = req.body;
+        const { fullname, email, phone, password, confirmPassword , referralCode } = req.body;
 
         const allFieldsEmpty =
             (!fullname || fullname.trim() === "") &&
             (!email || email.trim() === "") &&
             (!phone || phone.trim() === "") &&
             (!password || password === "") &&
-            (!confirmPassword || confirmPassword === "");
+            (!confirmPassword || confirmPassword === "")
+            
 
         if (allFieldsEmpty) {
             return res.status(400).json({ success: false, message: "All fields are required" });

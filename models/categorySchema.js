@@ -14,7 +14,7 @@ const categorySchema = new mongoose.Schema({
     default: ""
   },
   categoryImage: {
-    type: String, // or [String] if multiple images are allowed
+    type: String, 
     required: false
   },
   isListed: {

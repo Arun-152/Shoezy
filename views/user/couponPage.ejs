@@ -318,6 +318,27 @@
         align-items: center;
         margin-bottom: 20px;
     }
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: white;
+}
+
+.badge.expired {
+  background-color: black;
+}
+
+.badge.used {
+  background-color: #ef4444; /* red */
+}
+
+.badge.available {
+  background-color: #22c55e; /* green */
+}
 
     .section-title h2 {
         font-size: 1.5rem;
@@ -358,6 +379,7 @@
         transition: all 0.3s ease;
         font-size: 0.9rem;
     }
+
 
     .filter-tab.active {
         background: #6366f1;
@@ -1034,11 +1056,17 @@
                                                     <button class="copy-btn" onclick="copyCoupon('<%= coupon.name %>')">
                                                         <span class="material-icons">content_copy</span>
                                                     </button>
-                                                    <% if (new Date(coupon.expireOn)>= new Date()) { %>
-                                                        <button class="use-btn">available</button>
-                                                        <% } else { %>
-                                                            <button class="use-btn" disabled>Expired</button>
-                                                            <% } %>
+                                                  <!-- Updated condition in couponPage.ejs for the status badge (replace the existing if-else block for the status display) -->
+
+<% if (coupon.expireOn < new Date()) { %>
+  <span class="badge expired">Expired</span>
+<% } else if (coupon.isUsed) { %>
+  <span class="badge used">Used</span>
+<% } else { %>
+  <span class="badge available">Available</span>
+<% } %>
+
+
                                                 </div>
                                             </div>
                                         </div>
