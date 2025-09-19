@@ -10,10 +10,6 @@ const productSchema = new Schema({
     type: String,
     required: true
   },
-  brand: {
-    type: String,
-    required: false
-  },
   category: {
     type: Schema.Types.ObjectId,
     ref: "Category",
@@ -21,7 +17,15 @@ const productSchema = new Schema({
   },
   productOffer: {
     type: Number,
-    required:false
+    required: false,
+    min: 0,
+    max: 100 
+  },
+  bestOffer:{
+    type:Number,
+    required:false,
+    min:0,
+    max:100
   },
   color: {
     type: String,
@@ -33,9 +37,9 @@ const productSchema = new Schema({
         type: String,
         required: true
       },
-      variantPrice: {
-        type: Number,
-        required: true
+      regularPrice:{
+        type:Number,
+        required:true
       },
       salePrice: {
         type: Number,

@@ -298,7 +298,7 @@
                                 data-status="<%= product.status || 'Available' %>"
                                 data-brand="<%= product.brand || '' %>"
                                 data-color="<%= product.color || '' %>"
-                                data-product-offer="<%= product.productOffer || 0 %>"
+                                data-product-offer="<%= product.bestOffer || 0 %>"
                                 data-rating="<%= product.ratings && product.ratings.average ? product.ratings.average : 4.5 %>"
                                 data-rating-count="<%= product.ratings && product.ratings.count ? product.ratings.count : 0 %>"
                                 onclick="<%= typeof user !== 'undefined' && user ? `window.location.href='/product/${product._id}'` : 'redirectToLogin()' %>" 
@@ -314,9 +314,9 @@
                                     </div>
 
                                     <!-- Badges -->
-                                    <% if (product.productOffer && product.productOffer > 0) { %>
+                                    <% if (product.bestOffer && product.bestOffer > 0) { %>
                                         <div class="offer-badge">
-                                            <%= product.productOffer %>% OFF
+                                            <%= product.bestOffer %>% OFF
                                         </div>
                                     <% } %>
 

@@ -35,18 +35,32 @@ const categoryPage = async (req, res) => {
 }
 const addCategory = async (req, res) => {
     try {
-        const { name, description} = req.body;
+        const { name, description, categoryOffer } = req.body;
+
+        // Validation for required fields
         if (!name || !description) {
             return res.status(400).json({ error: "Name and description are required" });
         }
+
+        // Validate category offer
+        let parsedCategoryOffer = categoryOffer ? parseFloat(categoryOffer) : null;
+        if (categoryOffer && (isNaN(parsedCategoryOffer) || parsedCategoryOffer < 0 || parsedCategoryOffer > 100)) {
+            return res.status(400).json({ error: "Category offer must be a percentage between 0 and 100" });
+        }
+
+        // Check for existing category
         const existingCategory = await Category.findOne({ name });
         if (existingCategory) {
             return res.status(400).json({ error: "Category already exists" });
         }
+
+        // Create new category
         const category = new Category({
             name,
-            description
+            description,
+            categoryOffer: parsedCategoryOffer || undefined
         });
+
         await category.save();
         res.status(201).json({ success: true, message: "Category added successfully", id: category._id });
     } catch (error) {
@@ -54,6 +68,7 @@ const addCategory = async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 };
+
 
 const categoryDelete = async (req, res) => {
     try {
@@ -97,35 +112,51 @@ const categoryToggle = async (req, res) => {
         return res.status(500).json({ success: false, message: "Internal server error" });
     }
 }
-const categoryEdit= async(req,res)=>{
+const categoryEdit = async (req, res) => {
     try {
-       const {id}=req.params
-       const {name,description}=req.body 
+        const { id } = req.params;
+        const { name, description, categoryOffer } = req.body;
 
-       if(!name||!description){
-        return res.status(400).json({message:"All fields are required"})
-
-       }
-       const existing =await Category.findOne({name:name.trim(),_id:{$ne:id}})
-        if(existing){
-            return res.status(400).json({message:"Category name already existing"})
+        // Validation for required fields
+        if (!name || !description) {
+            return res.status(400).json({ message: "All fields are required" });
         }
-        const updated=await Category.findByIdAndUpdate(id,
-            {name:name.trim(),description:description.trim()},
-            {new:true}
-        )
 
-        if(!updated){
-            return res.status(404).json({message:"Category not found"})
+        // Validate category offer
+        let parsedCategoryOffer = categoryOffer ? parseFloat(categoryOffer) : null;
+        if (categoryOffer && (isNaN(parsedCategoryOffer) || parsedCategoryOffer < 0 || parsedCategoryOffer > 100)) {
+            return res.status(400).json({ message: "Category offer must be a percentage between 0 and 100" });
         }
-        res.json({message:"Category updated successfully"})
+
+        // Check for existing category with the same name
+        const existing = await Category.findOne({ name: name.trim(), _id: { $ne: id } });
+        if (existing) {
+            return res.status(400).json({ message: "Category name already existing" });
+        }
+
+        // Update category
+        const updated = await Category.findByIdAndUpdate(
+            id,
+            {
+                name: name.trim(),
+                description: description.trim(),
+                categoryOffer: parsedCategoryOffer !== null ? parsedCategoryOffer : undefined
+            },
+            { new: true }
+        );
+
+        if (!updated) {
+            return res.status(404).json({ message: "Category not found" });
+        }
+
+        res.json({ message: "Category updated successfully" });
 
     } catch (error) {
-        console.error("Edit category error",error)
-        res.status(500).json({message:"Internal server error"})
-        
+        console.error("Edit category error", error);
+        res.status(500).json({ message: "Internal server error" });
     }
-}
+};
+
 module.exports = {
     categoryPage,
     addCategory,

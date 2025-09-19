@@ -126,9 +126,9 @@
                                 </div>
 
                                 <!-- Badges -->
-                                <% if (product.productOffer && product.productOffer > 0) { %>
+                                <% if (product.bestOffer && product.bestOffer > 0) { %>
                                     <div class="offer-badge">
-                                        <%= product.productOffer %>% OFF
+                                        <%= product.bestOffer %>% OFF
                                     </div>
                                 <% } %>
 
@@ -226,7 +226,7 @@
                         // Sort products by highest offer/discount first
                         const sortedByOffer = products.slice().sort((a, b) => {
                             const getOffer = (product) => {
-                                return product.productOffer || 0;
+                                return product.bestOffer || 0;
                             };
                             return getOffer(b) - getOffer(a);
                         });
@@ -243,9 +243,9 @@
                                     <% } %>
                                 </div>
 
-                                <% if (product.productOffer && product.productOffer > 0) { %>
+                                <% if (product.bestOffer && product.bestOffer > 0) { %>
                                     <div class="offer-badge">
-                                        <%= product.productOffer %>% OFF
+                                        <%= product.bestOffer %>% OFF
                                     </div>
                                 <% } %>
 
@@ -363,9 +363,9 @@
 
                                 <div class="premium-badge">PREMIUM</div>
 
-                                <% if (product.productOffer && product.productOffer > 0) { %>
+                                <% if (product.bestOffer && product.bestOffer > 0) { %>
                                     <div class="offer-badge">
-                                        <%= product.productOffer %>% OFF
+                                        <%= product.bestOffer %>% OFF
                                     </div>
                                 <% } %>
 
