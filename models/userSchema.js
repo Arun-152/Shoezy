@@ -47,13 +47,22 @@ const UserSchema = new Schema(
         },
 
         wishlist: [{
-            type:Schema.Types.ObjectId,
+            type: Schema.Types.ObjectId,
             ref: "Product"
         }],
         cart: [{
-            type:Schema.Types.ObjectId,
+            type: Schema.Types.ObjectId,
             ref: "Cart"
-        }],
+        }], 
+        referralCode: {
+            type: String,
+            unique: true,
+            required: true
+        },
+        referredBy: {
+            type: String, 
+            default: null,
+        },
         isAdmin: {
             type: Boolean,
             default: false,

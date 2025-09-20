@@ -4,6 +4,7 @@ const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
 const Order = require("../../models/orderSchema");
 const Wallet = require("../../models/walletSchema")
+const Coupon = require("../../models/CouponSchema")
 require("dotenv").config();
 
 const ordersPage = async (req, res) => {
@@ -186,22 +187,56 @@ const approveReturnRequest = async (req, res) => {
     let refundAmount = 0;
     let updatedProducts = [];
     let productFound = false;
-    
-    // Process only the specific product return request
+
+    // ✅ Step 1: Calculate total before discount (real price × quantity)
+    const orderTotalBeforeDiscount = order.items.reduce(
+      (sum, item) => sum + (item.price * item.quantity),
+      0
+    );
+
+    // ✅ Step 2: Fetch coupon if applied
+    let coupon = null;
+    if (order.couponId) {
+      coupon = await Coupon.findById(order.couponId);
+    }
+
+    // Step 3: Process only the specific product return request
     order.items = order.items.map(item => {
       if (item.productId._id.toString() === productId && item.status === "ReturnRequested") {
         item.status = "Returned";
-        refundAmount += item.price || item.productId.price || 0;
+
+        // base refund = item totalPrice
+        let baseRefund = item.totalPrice;
+
+        // ✅ Correct coupon distribution
+        if (order.discountAmount > 0 && orderTotalBeforeDiscount > 0) {
+          let discountShare = 0;
+
+          if (coupon && coupon.discountType === "flat") {
+            // Flat discount → equally split across items
+            discountShare = order.discountAmount / order.items.length;
+          } else {
+            // Percentage discount → proportional to item price
+            discountShare = ((item.price * item.quantity) / orderTotalBeforeDiscount) * order.discountAmount;
+          }
+
+          baseRefund -= discountShare;
+        }
+
+        refundAmount += baseRefund;
+
         updatedProducts.push({
           name: item.productId.productName || "Unknown Product",
           quantity: item.quantity || 1,
-          size: item.size
+          size: item.size,
+          refund: baseRefund.toFixed(2)
         });
+
         productFound = true;
       }
       return item;
     });
-    
+
     if (!productFound) {
       return res.status(400).json({ 
         success: false, 
@@ -209,39 +244,31 @@ const approveReturnRequest = async (req, res) => {
       });
     }
     
-    // Check if all items in the order are returned
-    let allOrderReturn = true;
-    order.items.forEach(item => {
-      if (item.status !== "Returned" && item.status !== "Cancelled") {
-        allOrderReturn = false;
-      }
-    });
-    
+    // Step 4: Update order status if all items are returned/cancelled
+    let allOrderReturn = order.items.every(item => item.status === "Returned" || item.status === "Cancelled");
     if (allOrderReturn) {
       order.orderStatus = "Returned";
     }
-    
-    // Update product quantities for the returned item
+  
+    // Step 5: Update product quantities back to inventory
     for (let prod of updatedProducts) {
-      const productDoc = await Product.findOne({ "productName": prod.name });
+      const productDoc = await Product.findOne({ productName: prod.name });
       if (productDoc) {
-        const variant = productDoc.variants.find(v => v.size === prod.size);
-        if (variant) {
-          variant.variantQuantity += prod.quantity;
-          await productDoc.save();
-        }
+        await Product.updateOne(
+          { _id: productDoc._id, "variants.size": prod.size },
+          { $inc: { "variants.$.variantQuantity": prod.quantity } }
+        );
       }
     }
-    
-    // Wallet refund
+  
+    // Step 6: Wallet refund
     const wallet = await Wallet.findOne({ userId: order.userId });
     if (!wallet) {
       return res.status(404).json({ success: false, message: "Wallet not found for user" });
     }
-    
     const newBalance = wallet.balance + refundAmount;
     const transaction = {
-      transactionId: "TXN" + Date.now() + Math.random().toString(36).substr(2, 5).toUpperCase(),
+      transactionId: Date.now().toString() + Math.random().toString(36).slice(2, 7).toUpperCase(),
       type: "credit",
       amount: refundAmount,
       description: `Refund for returned items: ${updatedProducts.map(p => `${p.name} (${p.quantity} units, size ${p.size})`).join(", ")}`,
@@ -259,7 +286,8 @@ const approveReturnRequest = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Return request approved and refund processed",
-      updatedProducts
+      updatedProducts,
+      refundAmount: refundAmount.toFixed(2)
     });
     
   } catch (error) {
@@ -267,6 +295,7 @@ const approveReturnRequest = async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error", error: error.message });
   }
 };
+
 
 
 const rejectReturnRequest = async (req, res) => {

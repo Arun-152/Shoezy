@@ -45,9 +45,6 @@ router.patch("/deleteProducts/:id", adminAuth, productsController.deleteProducts
 // Sales Report Management
 router.get("/salesReport", adminAuth, adminController.salesPage);
 
-// Offers Management
-router.get("/offers", adminAuth, adminController.offersPage);
-
 // Admin Logout
 router.get("/logout", adminAuth, adminController.adminLogout);
 
