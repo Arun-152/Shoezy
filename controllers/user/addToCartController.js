@@ -78,8 +78,7 @@ const loadAddToCart= async (req, res) => {
     }        
 }   
 
-
- const addToCart = async(req,res)=>{
+const addToCart = async(req,res)=>{
     try {
         const userId = req.session.userId
         let {productId, size, price, quantity} = req.body
@@ -125,20 +124,51 @@ const loadAddToCart= async (req, res) => {
             return res.status(400).json({success: false, message: "Missing required product information"})
         }
 
+        // Validate requested quantity bounds (client may send any number)
+        quantity = parseInt(quantity)
+        if (isNaN(quantity) || quantity <= 0) quantity = 1
+        if (quantity > 10) {
+            return res.status(400).json({success: false, message: "You can only add up to 10 units per product"})
+        }
+
+        // Find variant stock for the selected size
+        let variantStock = Infinity
+        if (product.variants && product.variants.length > 0) {
+            const variant = product.variants.find(v => (v.size || "Default") === (size || "Default"))
+            if (!variant) {
+                return res.status(400).json({success: false, message: "Selected size is unavailable"})
+            }
+            variantStock = parseInt(variant.variantQuantity) || 0
+            if (variantStock <= 0) {
+                return res.status(400).json({success: false, message: "This size is out of stock"})
+            }
+        }
+
         // Find or create user's cart
         let userCart = await Cart.findOne({userId})
         if (!userCart) {
             userCart = new Cart({userId, items: []})
         }
 
- 
         const existingItemIndex = userCart.items.findIndex(item => 
             item.productId.toString() === productId && (item.size || "Default") === size
         )
 
         if (existingItemIndex > -1) {
-          
-            userCart.items[existingItemIndex].quantity += parseInt(quantity)
+            const currentQty = parseInt(userCart.items[existingItemIndex].quantity) || 0
+            const desiredQty = currentQty + quantity
+
+            // Enforce per-item maximum of 10
+            if (desiredQty > 10) {
+                return res.status(400).json({success: false, message: "You can only add up to 10 units of this product in your cart"})
+            }
+
+            // Enforce stock
+            if (desiredQty > variantStock) {
+                return res.status(400).json({success: false, message: `Only ${variantStock} stock left`})
+            }
+
+            userCart.items[existingItemIndex].quantity = desiredQty
             userCart.items[existingItemIndex].totalPrice = userCart.items[existingItemIndex].price * userCart.items[existingItemIndex].quantity
             // Ensure the size field is set for existing items
             if (!userCart.items[existingItemIndex].size) {
@@ -146,6 +176,10 @@ const loadAddToCart= async (req, res) => {
             }
         } else {
             // Add new item to cart only if it doesn't exist
+            // Enforce stock for new item
+            if (quantity > variantStock) {
+                return res.status(400).json({success: false, message: `Only ${variantStock} stock left`})
+            }
             userCart.items.push({
                 productId: productId,
                 size: size,

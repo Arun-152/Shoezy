@@ -1117,6 +1117,19 @@
         let selectedOriginalPrice = 0;
         let availableStock = 0;
 
+        // Warning toast for limit reached
+        function warnToast(message) {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'warning',
+                title: message,
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true
+            });
+        }
+
         function changeMainImage(imageSrc, thumbnail) {
             document.getElementById('mainImage').src = imageSrc;
 
@@ -1154,9 +1167,13 @@
             
             // Update quantity input max
             const quantityInput = document.getElementById('quantityInput');
-            quantityInput.max = availableStock;
+            quantityInput.max = Math.min(availableStock, 5);
             if (parseInt(quantityInput.value) > availableStock) {
                 quantityInput.value = availableStock;
+            }
+            // Enforce global cap of 5 even if stock is higher
+            if (parseInt(quantityInput.value) > 5) {
+                quantityInput.value = 5;
             }
         }
 
@@ -1234,14 +1251,38 @@
 
         function changeQuantity(change) {
             const quantityInput = document.getElementById('quantityInput');
-            let newValue = parseInt(quantityInput.value) + change;
-            
+            const currentValue = parseInt(quantityInput.value) || 1;
+            let newValue = currentValue + change;
+
             if (newValue < 1) newValue = 1;
-            if (selectedSize && newValue > availableStock) newValue = availableStock;
-            if (!selectedSize && newValue > 10) newValue = 10;
-            
+
+            // Global maximum: 5
+            if (change > 0 && currentValue >= 5) {
+                warnToast('Limit is reached');
+                return;
+            }
+            if (newValue > 5) {
+                newValue = 5;
+                warnToast('Limit is reached');
+            }
+
+            if (selectedSize) {
+                if (change > 0 && currentValue >= availableStock) {
+                    // Already at max stock, block increment and show toast
+                    warnToast('Limit is reached');
+                    return;
+                }
+                if (newValue > availableStock) {
+                    newValue = availableStock;
+                    warnToast('Limit is reached');
+                }
+            } else {
+                // Without size, still maintain the 5 cap
+                if (newValue > 5) newValue = 5;
+            }
+
             quantityInput.value = newValue;
-            
+
             // Update total price when quantity changes
             if (selectedSize) {
                 updateTotalPrice();
@@ -1291,7 +1332,15 @@
                     return;
                 }
                 
-                const quantity = parseInt(document.getElementById('quantityInput').value);
+                // Clamp quantity to min(stock, 5)
+                const qtyInputEl = document.getElementById('quantityInput');
+                let quantity = parseInt(qtyInputEl.value) || 1;
+                const maxAllowed = selectedSize ? Math.min(availableStock, 5) : 5;
+                if (quantity > maxAllowed) {
+                    quantity = maxAllowed;
+                    qtyInputEl.value = maxAllowed;
+                    warnToast('Limit is reached');
+                }
                 
                 // Send data to backend
                 const response = await fetch('/cart/add', {
@@ -1464,15 +1513,24 @@
                     value = 1;
                     this.value = 1;
                 }
+
+                // Global cap: 5
+                if (value > 5) {
+                    value = 5;
+                    this.value = 5;
+                    warnToast('Limit is reached');
+                }
                 
                 if (selectedSize && value > availableStock) {
                     value = availableStock;
                     this.value = availableStock;
+                    warnToast('Limit is reached');
                 }
                 
-                if (!selectedSize && value > 10) {
-                    value = 10;
-                    this.value = 10;
+                // Even without size selected, cap at 5
+                if (!selectedSize && value > 5) {
+                    value = 5;
+                    this.value = 5;
                 }
                 
                 // Update total price when quantity changes manually
