@@ -512,6 +512,20 @@
                 return;
             }
 
+            // Confirm before navigating to checkout
+            const go = await Swal.fire({
+                title: 'Proceed to checkout?',
+                text: 'You will be redirected to the checkout page.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, continue',
+                cancelButtonText: 'No',
+                confirmButtonColor: '#007bff',
+                cancelButtonColor: '#6b7280'
+            });
+
+            if (!go.isConfirmed) return;
+
             try {
                 // Validate cart by checking current server state
                 const response = await fetch('/cart/validate-checkout', {

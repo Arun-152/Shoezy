@@ -141,7 +141,7 @@
                                     <div class="section">
                                         <h2 class="section-title">💳 Payment Method</h2>
 
-                                        <div class="payment-option selected-payment">
+                                        <div class="payment-option">
                                             <input type="radio" id="cod" name="payment" class="payment-radio"
                                                 value="COD" />
                                             <label for="cod" class="payment-label">
@@ -267,7 +267,7 @@
                     </div>
                     <form id="checkoutForm">
                         <input type="hidden" name="selectedAddress" id="selectedAddressInput" />
-                        <input type="hidden" name="payment" value="COD" />
+                        <input type="hidden" name="payment" />
                         <input type="hidden" name="appliedCoupon" id="appliedCouponInput" />
                         <button type="submit" class="place-order-btn">Place Order</button>
                     </form>
@@ -467,14 +467,12 @@
                     return selected ? selected.value : null;
                 }
 
-
-
                 document.addEventListener('DOMContentLoaded', () => {
 
                     const defaultAddress = document.querySelector('input[name="selectedAddress"]:checked');
                     if (defaultAddress) document.getElementById('selectedAddressInput').value = defaultAddress.value;
 
-                    document.getElementById('checkoutForm').addEventListener('submit', e => {
+                    document.getElementById('checkoutForm').addEventListener('submit', async e => {
                         e.preventDefault();
                         const selectedAddress = document.getElementById('selectedAddressInput').value;
                         const payment = getSelectedPayment()
@@ -499,6 +497,19 @@
                             });
                             return false;
                         }
+
+                        const confirmPlace = await Swal.fire({
+                            title: `Proceed with ${payment}?`,
+                            text: `We will place your order using ${payment}. Total: ₹${finalTotal.toLocaleString()}`,
+                            icon: 'question',
+                            showCancelButton: true,
+                            confirmButtonText: 'Yes, place order',
+                            cancelButtonText: 'No',
+                            confirmButtonColor: '#007bff',
+                            cancelButtonColor: '#6b7280'
+                        });
+
+                        if (!confirmPlace.isConfirmed) return;
 
                         Swal.fire({
                             title: 'Processing Order...',

@@ -150,6 +150,22 @@
                 });
             }
 
+            // If backend rendered any error alerts (e.g., email exists), show via SweetAlert as well
+            const backendErrorAlert = document.querySelector('.alert.alert-danger');
+            if (backendErrorAlert) {
+                const messages = Array.from(backendErrorAlert.querySelectorAll('p'))
+                    .map(p => p.textContent.trim())
+                    .filter(Boolean);
+                const errorText = messages.length ? messages.join('\n') : backendErrorAlert.textContent.trim();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Signup Failed',
+                    text: errorText,
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#d33'
+                });
+            }
+
             // Helper function for setting individual field errors
             function setError(element, errorId, message) {
                 const errorElement = document.getElementById(errorId);
@@ -219,7 +235,7 @@
                 } else if (password.length < 6) {
                     setError(passwordInput, 'error4', 'Password must be at least 6 characters');
                     return false;
-                } else if  (!/(?=.*[a-z])(?=.*\d)/.test(password)) {
+                } else if  (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
                     setError(passwordInput, 'error4', 'Must include uppercase, lowercase, and number');
                     return false;
                 } else {
