@@ -143,7 +143,8 @@ const addProduct = async (req, res) => {
             categoryOffer = categoryDoc && categoryDoc.categoryOffer ? parseFloat(categoryDoc.categoryOffer) : 0;
             const maxOffer = Math.max(parsedProductOffer || 0, categoryOffer || 0);
             if (maxOffer > 0) {
-                salePrice = regularPrice * (1 - maxOffer / 100);
+               salePrice = Math.round(regularPrice * (1 - maxOffer / 100));
+;
 
             }
 
@@ -334,7 +335,7 @@ const editProducts = async (req, res) => {
             categoryOffer = categoryDoc && categoryDoc.categoryOffer ? parseFloat(categoryDoc.categoryOffer) : 0;
             const maxOffer = Math.max(parsedProductOffer || 0, categoryOffer || 0);
             if (maxOffer > 0) {
-                salePrice = regularPrice * (1 - maxOffer / 100);
+                salePrice = Math.round(regularPrice * (1 - maxOffer / 100));
 
             }
 

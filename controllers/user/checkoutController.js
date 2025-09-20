@@ -20,6 +20,43 @@ const loadCheckout = async (req, res) => {
 
     const defaultAddress = await Address.findOne({ userId, isDefault: true });
     const allAddresses = await Address.find({ userId });
+
+    // --- Start: Corrected Coupon Filtering Logic ---
+    const appliedCouponInSession = req.session.appliedCoupon || null;
+    const appliedCouponCode = appliedCouponInSession ? appliedCouponInSession.couponCode : null;
+    const currentDate = new Date();
+
+    const allCoupons = await Coupon.find({
+      islist: true,
+      startDate: { $lte: currentDate }, // Only active coupons
+      expireOn: { $gte: currentDate }   // Only non-expired coupons
+    }).sort({ expireOn: 1 });
+
+    const availableCouponsForPage = [];
+    for (const couponItem of allCoupons) {
+      // Skip if the coupon is the one currently applied
+      if (appliedCouponCode && couponItem.name === appliedCouponCode) {
+        continue;
+      }
+
+      // Check global usage limit
+      if (couponItem.totalUsageLimit && couponItem.currentUsageCount >= couponItem.totalUsageLimit) {
+        continue;
+      }
+
+      // Check if user has already used this coupon
+      const userUsageCount = await Order.countDocuments({
+        userId: userId,
+        couponCode: couponItem.name,
+        status: { $ne: 'Cancelled' }
+      });
+      if (userUsageCount >= (couponItem.maxUsesPerUser || 1)) {
+        continue;
+      }
+
+      availableCouponsForPage.push(couponItem);
+    }
+    // --- End: Corrected Coupon Filtering Logic ---
     
     let subtotal = 0;
     let totalItems = 0;
@@ -88,6 +125,7 @@ const loadCheckout = async (req, res) => {
       defaultAddress,
       allAddresses,
       coupon,
+      coupon: availableCouponsForPage, // Pass the correctly filtered coupons
       cart: { total: finalTotal }
     });
 

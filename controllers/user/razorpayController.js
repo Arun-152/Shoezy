@@ -123,7 +123,8 @@ const createOrder = async (req, res) => {
         pinCode: address.pinCode,
         addressType: address.addressType,
       },
-      totalAmount: finalTotal,
+      // Ensure numeric total amount
+      totalAmount: Number(finalTotal),
       paymentMethod: "Online",
       paymentStatus: "Failed",
     });
@@ -131,7 +132,8 @@ const createOrder = async (req, res) => {
     await newOrder.save();
 
     const options = {
-      amount: newOrder.totalAmount * 100,
+      // Razorpay expects amount in paise as an integer
+      amount: Math.round(Number(newOrder.totalAmount) * 100),
       currency: "INR",
       receipt: `order_rcpt_${newOrder._id}`,
       notes: { internalOrderId: newOrder._id.toString() },
@@ -162,7 +164,7 @@ const verifyPayment = async (req, res) => {
     const { UserOrderId } = req.body
     const order = await Order.findById(UserOrderId)
     const userId = req.session.userId
-    console.log( razorpay_payment_id, razorpay_order_id, razorpay_signature)
+    console.log(razorpay_payment_id, razorpay_order_id, razorpay_signature)
     if (!order) {
       return res.status(400).json({ success: false, message: "Order not found" })
     }
@@ -200,9 +202,8 @@ const verifyPayment = async (req, res) => {
       success: true,
       showAlert: true,
       alertType: "success",
-      orderId:order._id,
+      orderId: order._id,
       alertMessage: "Order placed successfully!",
-      
     });
 
 
@@ -267,7 +268,8 @@ const retryPayment = async(req,res)=>{
     console.log("hy",order)
 
     const options = {
-      amount: order.totalAmount * 100,
+      // Razorpay expects amount in paise as an integer
+      amount: Math.round(Number(order.totalAmount) * 100),
       currency: "INR",
       receipt: `order_rcpt_${order._id}`,
       notes: { internalOrderId: order._id.toString() },

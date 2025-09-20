@@ -886,12 +886,12 @@
                     <p class="product-category"><%= product.category ? product.category.name : 'Uncategorized' %></p>
 
                     <!-- Product Offer Badge -->
-                    <% if (product.productOffer && product.productOffer > 0) { %>
+                    <% if (product.bestOffer && product.bestOffer > 0) { %>
                         <div class="offer-section">
                             <div class="offer-badge-large">
                                 <i class="fas fa-fire"></i>
                                 <span class="offer-text">Limited Time Offer</span>
-                                <span class="offer-percent"><%= product.productOffer %>% OFF</span>
+                                <span class="offer-percent"><%= product.bestOffer %>% OFF</span>
                             </div>
                         </div>
                     <% } %>
@@ -1031,9 +1031,9 @@
                                     <% } %>
 
                                     <!-- Offer Ribbon for Related Products -->
-                                    <% if (relatedProduct.productOffer && relatedProduct.productOffer > 0) { %>
+                                    <% if (relatedProduct.bestOffer && relatedProduct.bestOffer > 0) { %>
                                         <div class="related-offer-ribbon">
-                                            <span><%= relatedProduct.productOffer %>% OFF</span>
+                                            <span><%= relatedProduct.bestOffer %>% OFF</span>
                                         </div>
                                     <% } %>
 
