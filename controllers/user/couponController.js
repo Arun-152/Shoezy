@@ -260,13 +260,15 @@ const validateCouponForCheckout = async (couponData, userId, req) => {
 }
 const markCouponUsed = async (couponId, userId) => {
   try {
-    await Coupon.findByIdAndUpdate(couponId,
+    await Coupon.findByIdAndUpdate(
+      couponId,
       {
-        $addToSet: { userid: userId },
+        // Track that this user has used the coupon at least once
+        $addToSet: { userId: userId },
+        // Maintain global usage count
         $inc: { currentUsageCount: 1 }
       }
-
-    )
+    );
     return true
 
   } catch (error) {
