@@ -204,35 +204,36 @@ const approveReturnRequest = async (req, res) => {
     order.items = order.items.map(item => {
       if (item.productId._id.toString() === productId && item.status === "ReturnRequested") {
         item.status = "Returned";
+        productFound = true;
 
-        // base refund = item totalPrice
-        let baseRefund = item.totalPrice;
+        // COD Orders: No refund
+        if (order.paymentMethod === 'COD') {
+          refundAmount = 0;
+        } else {
+          // Online Payment
+          let baseRefund = item.totalPrice; // Product's sale price * quantity
 
-        // ✅ Correct coupon distribution
-        if (order.discountAmount > 0 && orderTotalBeforeDiscount > 0) {
-          let discountShare = 0;
-
-          if (coupon && coupon.discountType === "flat") {
-            // Flat discount → equally split across items
-            discountShare = order.discountAmount / order.items.length;
-          } else {
-            // Percentage discount → proportional to item price
-            discountShare = ((item.price * item.quantity) / orderTotalBeforeDiscount) * order.discountAmount;
+          // If coupon was applied, calculate proportional discount
+          if (order.couponId && order.discountAmount > 0 && orderTotalBeforeDiscount > 0) {
+            let discountShare = 0;
+            if (coupon && coupon.discountType === "flat") {
+              // Flat discount → equally split across items
+              discountShare = order.discountAmount / order.items.length;
+            } else {
+              // Percentage discount → proportional to item price
+              discountShare = ((item.price * item.quantity) / orderTotalBeforeDiscount) * order.discountAmount;
+            }
+            baseRefund -= discountShare;
           }
-
-          baseRefund -= discountShare;
+          refundAmount += baseRefund;
         }
-
-        refundAmount += baseRefund;
 
         updatedProducts.push({
           name: item.productId.productName || "Unknown Product",
           quantity: item.quantity || 1,
           size: item.size,
-          refund: baseRefund.toFixed(2)
+          refund: refundAmount.toFixed(2)
         });
-
-        productFound = true;
       }
       return item;
     });
@@ -278,7 +279,7 @@ const approveReturnRequest = async (req, res) => {
       source: "return_refund"
     };
     
-    wallet.transactions.push(transaction);
+    wallet.transactions.unshift(transaction);
     wallet.balance = newBalance;
     await wallet.save();
     await order.save();
