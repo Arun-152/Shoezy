@@ -48,7 +48,7 @@ const loadCheckout = async (req, res) => {
       const userUsageCount = await Order.countDocuments({
         userId: userId,
         couponCode: couponItem.name,
-        status: { $ne: 'Cancelled' }
+        orderStatus: { $ne: 'Cancelled' }
       });
       if (userUsageCount >= (couponItem.maxUsesPerUser || 1)) {
         continue;

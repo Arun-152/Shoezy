@@ -1,18 +1,18 @@
 const Razorpay = require("razorpay")
 const crypto = require("crypto")
 const Order = require("../../models/orderSchema")
+const Coupon = require("../../models/CouponSchema")
 const User = require("../../models/userSchema")
 require("dotenv").config()
 const Address = require("../../models/addressSchema")
 const Cart = require("../../models/cartSchema")
 const Product = require("../../models/productSchema")
-const { validateCouponForCheckout } = require('./couponController');
+const { validateCouponForCheckout, markCouponUsed } = require('./couponController');
 
 const razorpayInstance = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET
 });
-
 
 const createOrder = async (req, res) => {
   try {
@@ -127,6 +127,10 @@ const createOrder = async (req, res) => {
       totalAmount: Number(finalTotal),
       paymentMethod: "Online",
       paymentStatus: "Failed",
+      // Persist coupon details so that usage checks work later
+      couponCode: couponData.applied ? couponData.code : null,
+      couponId: couponData.applied ? couponData.couponId : null,
+      discountAmount: couponData.applied ? couponData.discount : 0,
     });
 
     await newOrder.save();
@@ -177,6 +181,23 @@ const verifyPayment = async (req, res) => {
     order.paymentMethod = "Online"
     order.razorpayPaymentId = razorpay_payment_id
     await order.save()
+
+    // If a coupon was applied to this online order, mark it as used now
+    try {
+      if (order.couponId) {
+        await markCouponUsed(order.couponId, userId);
+        // Also record usage entry on the coupon document
+        await Coupon.findByIdAndUpdate(order.couponId, {
+          $push: { userUsage: { userId, orderId: order._id } }
+        });
+      }
+      // Clear applied coupon from session after a successful order
+      if (req.session && req.session.appliedCoupon) {
+        delete req.session.appliedCoupon;
+      }
+    } catch (couponErr) {
+      console.error('Error updating coupon usage after payment:', couponErr);
+    }
     try {
       for (const item of order.items) {
         const product = await Product.findById(item.productId);

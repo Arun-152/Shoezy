@@ -34,7 +34,7 @@ const loadCoupons = async (req, res) => {
         const userUsageCount = await Order.countDocuments({
           userId: req.session.userId,
           couponCode: coupon.name,
-          status: { $ne: "Cancelled" }
+          orderStatus: { $ne: "Cancelled" }
         });
 
         const isUsedByUser = userUsageCount >= (coupon.maxUsesPerUser || 1);
@@ -101,7 +101,7 @@ const applyCoupon = async (req, res) => {
     const userUsageCount = await Order.countDocuments({
       userId,
       couponCode: coupon.name,
-      status: { $ne: "Cancelled" }
+      orderStatus: { $ne: "Cancelled" }
     });
     const maxUsesPerUser = coupon.maxUsesPerUser || 1;
     if (userUsageCount >= maxUsesPerUser) {
@@ -179,7 +179,7 @@ const validateCouponForCheckout = async (couponData, userId, req) => {
     const userUsageCount = await Order.countDocuments({
       userId: userId,
       couponCode: coupon.name,
-      status: { $ne: 'Cancelled' }
+      orderStatus: { $ne: 'Cancelled' }
     });
     const maxUsesPerUser = coupon.maxUsesPerUser || 1;
 
@@ -299,7 +299,7 @@ const getAvailableCoupon = async (req, res) => {
       const userUsageCount = await Order.countDocuments({
         userId: userId,
         couponCode: coupon.name,
-        status: { $ne: 'Cancelled' }
+        orderStatus: { $ne: 'Cancelled' }
       });
       const maxUsesPerUser = coupon.maxUsesPerUser || 1;
 
