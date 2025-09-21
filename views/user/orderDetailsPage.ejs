@@ -1177,10 +1177,7 @@
                             <div class="order-actions-section">
                                 <div class="action-buttons">
                                     <!-- Cancel Order Button for eligible orders -->
-                                    <% if (['Pending', 'Processing' ].includes(order.orderStatus)) { %>
-                                        <button class="btn-danger" onclick="cancelOrder('<%= order._id %>')">Cancel
-                                            Entire Order</button>
-                                        <% } %>
+                                    
 
                                             <% if (order.orderStatus==='Shipped' ) { %>
                                                 <button class="btn-primary">Track Package</button>
@@ -1405,7 +1402,7 @@
                         });
 
                         if (isConfirmed) {
-                            const response = await fetch('/order/cancelSingleItem', {
+                            const response = await fetch('/order/cancel', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',

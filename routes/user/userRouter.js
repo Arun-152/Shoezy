@@ -48,12 +48,11 @@ router.post("/resendOtp", userController.resendOTP);
 
 router.get("/order",userAuth, orderController.orderPage);
 router.get("/order/:orderId",userAuth, orderController.orderDetails);
-router.patch("/order/:orderId/cancel",userAuth, orderController.cancelOrder);
+router.post("/order/cancel",userAuth, orderController.cancelOrder);
 router.get("/userErrorPage", userAuth,userController.userErrorPage)
 router.patch("/order/:orderId/return", userAuth, orderController.returnOrder);
 router.get("/order/:orderId/invoice",userAuth,orderController.getInvoice)
 router.post('/order/individualOrderReturn',userAuth,orderController.returnSingleOrder)
-router.post('/order/cancelSingleItem', userAuth, orderController.cancelSingleOrder);
 
 
 // Forgot Password Routes

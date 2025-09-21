@@ -634,12 +634,13 @@
                         });
 
                         if (result.isConfirmed) {
-                            const response = await fetch(`/order/${orderIdToCancel}/cancel`, {
-                                method: 'PATCH',
+                            const response = await fetch(`/order/cancel`, {
+                                method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
                                 },
                                 body: JSON.stringify({
+                                    orderId: orderIdToCancel,
                                     reason: reason
                                 })
                             });
