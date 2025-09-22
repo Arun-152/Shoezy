@@ -2,6 +2,7 @@ const User = require("../../models/userSchema");
 const Product = require("../../models/productSchema");
 const Order = require("../../models/orderSchema");
 const Wallet = require("../../models/walletSchema");
+const Coupon = require("../../models/CouponSchema");
 const generateInvoice = require("../../helpers/generateInvoice");
 
 const orderPage = async (req, res) => {
@@ -83,26 +84,58 @@ const cancelOrder = async (req, res) => {
         const isProvidedFull = providedIds.length > 0 && providedIds.length === activeIds.length && providedIds.every(id => activeIds.includes(id));
         const fullCancellationRequested = !itemsId || isProvidedFull;
 
-        // Compute proportional discount once (do not modify coupon fields)
+        // Determine coupon type and compute discount helpers
         const originalSubtotal = order.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-        const discountPercentage = originalSubtotal > 0 ? (order.discountAmount / originalSubtotal) : 0;
+        let isFlatCoupon = false;
+        let flatDiscountPerItem = 0;
+        if (order.couponId) {
+            try {
+                const appliedCoupon = await Coupon.findById(order.couponId).select('discountType');
+                if (appliedCoupon && appliedCoupon.discountType === 'flat') {
+                    isFlatCoupon = true;
+                    // Split the actual discount used on the order equally among all items (not quantity)
+                    const itemsCount = order.items.length || 1;
+                    flatDiscountPerItem = (order.discountAmount || 0) / itemsCount;
+                }
+            } catch (_) {
+                // If coupon fetch fails, default to existing percentage logic
+                isFlatCoupon = false;
+            }
+        }
+        // For percentage coupon, keep existing proportional logic
+        const discountPercentage = (!isFlatCoupon && originalSubtotal > 0)
+            ? (order.discountAmount / originalSubtotal)
+            : 0;
 
         // Calculate refund amount based on request scope (independent of payment method)
         if (fullCancellationRequested) {
             refundAmount = activeItems.reduce((sum, item) => {
-                const itemTotal = item.price * item.quantity;
-                const itemDiscount = itemTotal * discountPercentage;
-                const net = order.couponCode ? (itemTotal - itemDiscount) : itemTotal;
-                return sum + net;
+                if (isFlatCoupon && order.couponCode) {
+                    // Refund per item line: unit price minus equal flat share
+                    const unitPrice = item.price; // treat stored price as salePrice at order time
+                    const net = Math.max(0, unitPrice - flatDiscountPerItem);
+                    return sum + net;
+                } else {
+                    // Existing percentage or no coupon logic
+                    const itemTotal = item.price * item.quantity;
+                    const itemDiscount = itemTotal * discountPercentage;
+                    const net = order.couponCode ? (itemTotal - itemDiscount) : itemTotal;
+                    return sum + net;
+                }
             }, 0);
         } else {
             // Single item cancellation
             const targetId = providedIds[0];
             const itemToCancel = order.items.find(item => item._id.toString() === targetId);
             if (itemToCancel && itemToCancel.status !== 'Cancelled') {
-                const itemTotal = itemToCancel.price * itemToCancel.quantity;
-                const itemDiscount = itemTotal * discountPercentage;
-                refundAmount = order.couponCode ? (itemTotal - itemDiscount) : itemTotal;
+                if (isFlatCoupon && order.couponCode) {
+                    const unitPrice = itemToCancel.price; // treat stored price as salePrice at order time
+                    refundAmount = Math.max(0, unitPrice - flatDiscountPerItem);
+                } else {
+                    const itemTotal = itemToCancel.price * itemToCancel.quantity;
+                    const itemDiscount = itemTotal * discountPercentage;
+                    refundAmount = order.couponCode ? (itemTotal - itemDiscount) : itemTotal;
+                }
             }
         }
 
