@@ -69,57 +69,64 @@ const cancelOrder = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Order not found' });
         }
 
+        // Track refund and determine scope
         let refundAmount = 0;
-        const isFullCancellation = !itemsId || itemsId.length === order.items.length;
+        // Consider active items only (not already cancelled)
+        const activeItems = order.items.filter(it => it.status !== 'Cancelled');
+        // Full cancellation if no itemsId provided OR provided list equals all active item ids
+        const providedIds = itemsId
+            ? Array.isArray(itemsId)
+                ? itemsId.map(String)
+                : [String(itemsId)]
+            : [];
+        const activeIds = activeItems.map(it => it._id.toString());
+        const isProvidedFull = providedIds.length > 0 && providedIds.length === activeIds.length && providedIds.every(id => activeIds.includes(id));
+        const fullCancellationRequested = !itemsId || isProvidedFull;
 
-        if (order.paymentMethod === 'Online') {
+        // Compute proportional discount once (do not modify coupon fields)
+        const originalSubtotal = order.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+        const discountPercentage = originalSubtotal > 0 ? (order.discountAmount / originalSubtotal) : 0;
+
+        // Calculate refund amount based on request scope (independent of payment method)
+        if (fullCancellationRequested) {
+            refundAmount = activeItems.reduce((sum, item) => {
+                const itemTotal = item.price * item.quantity;
+                const itemDiscount = itemTotal * discountPercentage;
+                const net = order.couponCode ? (itemTotal - itemDiscount) : itemTotal;
+                return sum + net;
+            }, 0);
+        } else {
+            // Single item cancellation
+            const targetId = providedIds[0];
+            const itemToCancel = order.items.find(item => item._id.toString() === targetId);
+            if (itemToCancel && itemToCancel.status !== 'Cancelled') {
+                const itemTotal = itemToCancel.price * itemToCancel.quantity;
+                const itemDiscount = itemTotal * discountPercentage;
+                refundAmount = order.couponCode ? (itemTotal - itemDiscount) : itemTotal;
+            }
+        }
+
+        // Only credit wallet when Online payment
+        if (order.paymentMethod === 'Online' && refundAmount > 0) {
             let wallet = await Wallet.findOne({ userId });
             if (!wallet) {
                 wallet = new Wallet({ userId, balance: 0, transactions: [] });
             }
-
-            if (isFullCancellation) {
-                refundAmount = order.totalAmount;
-            } else {
-                const itemToCancel = order.items.find(item => item._id.toString() === itemsId);
-                if (itemToCancel) {
-                    if (order.couponCode) {
-                        // Proportional refund
-                        const discountPercentage = order.discountAmount / order.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-                        const itemTotal = itemToCancel.price * itemToCancel.quantity;
-                        const itemDiscount = itemTotal * discountPercentage;
-                        refundAmount = itemTotal - itemDiscount;
-                    } else {
-                        refundAmount = itemToCancel.price * itemToCancel.quantity;
-                    }
-                }
-            }
-
-            if (refundAmount > 0) {
-                wallet.balance += refundAmount;
-                wallet.transactions.push({
-                    type: 'credit',
-                    amount: refundAmount,
-                    description: `Refund for order cancellation #${order.orderNumber}`,
-                    balanceAfter: wallet.balance,
-                    source: 'order_cancellation',
-                    orderId: order._id,
-                });
-                await wallet.save();
-            }
+            wallet.balance += refundAmount;
+            wallet.transactions.push({
+                type: 'credit',
+                amount: refundAmount,
+                description: `Refund for order cancellation #${order.orderNumber}`,
+                balanceAfter: wallet.balance,
+                source: 'order_cancellation',
+                orderId: order._id,
+            });
+            await wallet.save();
         }
 
-        if (isFullCancellation) {
-            order.orderStatus = 'Cancelled';
-            order.cancellationReason = reason;
-            order.cancelledAt = new Date();
-            order.statusHistory.push({
-                status: 'Cancelled',
-                date: new Date(),
-                description: `Order cancelled. Reason: ${reason}`
-            });
-
-            for (const item of order.items) {
+        if (fullCancellationRequested) {
+            // Cancel only active items
+            for (const item of activeItems) {
                 item.status = 'Cancelled';
                 const product = await Product.findById(item.productId);
                 if (product && product.variants) {
@@ -133,6 +140,29 @@ const cancelOrder = async (req, res) => {
                         await product.save();
                     }
                 }
+            }
+
+            // If all items are now cancelled, update order status and set total to 0
+            const allItemsCancelledAfter = order.items.every(it => it.status === 'Cancelled');
+            if (allItemsCancelledAfter) {
+                order.orderStatus = 'Cancelled';
+                order.cancellationReason = reason;
+                order.cancelledAt = new Date();
+                order.statusHistory.push({
+                    status: 'Cancelled',
+                    date: new Date(),
+                    description: `Order cancelled. Reason: ${reason}`
+                });
+                order.totalAmount = 0;
+            } else {
+                // Should not happen in a full request, but keep consistency
+                order.statusHistory.push({
+                    status: 'Cancelled',
+                    date: new Date(),
+                    description: `Some items cancelled. Reason: ${reason}`
+                });
+                // Reduce totalAmount by the refunded sum irrespective of payment method
+                order.totalAmount = Math.max(0, (order.totalAmount || 0) - refundAmount);
             }
         } else {
             const itemToCancel = order.items.id(itemsId);
@@ -152,10 +182,16 @@ const cancelOrder = async (req, res) => {
                     }
                 }
 
+                // Adjust order total to reflect the cancelled item's refund for all payment methods
+                if (refundAmount > 0) {
+                    order.totalAmount = Math.max(0, (order.totalAmount || 0) - refundAmount);
+                }
+
                 const allItemsCancelled = order.items.every(item => item.status === 'Cancelled');
                 if (allItemsCancelled) {
                     order.orderStatus = 'Cancelled';
                     order.cancellationReason = 'All items cancelled';
+                    order.totalAmount = 0; // everything cancelled
                 }
                 order.statusHistory.push({
                     status: 'Cancelled',
