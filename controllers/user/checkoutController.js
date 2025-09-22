@@ -4,6 +4,7 @@ const Cart = require("../../models/cartSchema");
 const Product = require("../../models/productSchema");
 const Order = require("../../models/orderSchema");
 const Coupon = require("../../models/CouponSchema");
+const Wallet = require("../../models/walletSchema");
 const { validateCouponForCheckout, markCouponUsed } = require('./couponController'); // Import markCouponUsed
 const bcrypt = require("bcrypt");
 const env = require("dotenv").config();
@@ -114,6 +115,8 @@ const loadCheckout = async (req, res) => {
       return res.redirect('/cart');
     }
 
+    const userWallet = await Wallet.findOne({ userId });
+
     res.render('checkoutPage', {
       user,
       cartItems,
@@ -126,7 +129,8 @@ const loadCheckout = async (req, res) => {
       allAddresses,
       coupon,
       coupon: availableCouponsForPage, // Pass the correctly filtered coupons
-      cart: { total: finalTotal }
+      cart: { total: finalTotal },
+      walletBalance: userWallet ? userWallet.balance : 0
     });
 
   } catch (error) {
@@ -278,6 +282,11 @@ const placeOrder = async (req, res) => {
       }
     }
 
+    let finalOrderAmount = totalAmount;
+    let walletDeduction = 0;
+    let orderPaymentMethod = payment;
+    let orderStatus = "Pending"; // Default status
+
     const newOrder = new Order({
       orderNumber,
       userId,
@@ -293,13 +302,76 @@ const placeOrder = async (req, res) => {
         pinCode: address.pinCode,
         addressType: address.addressType
       },
-      totalAmount: totalAmount,
-      paymentMethod: payment,
+      totalAmount: totalAmount, // This is the original total amount before wallet deduction
+      finalAmount: finalOrderAmount, // This is the amount remaining to be paid after wallet deduction
+      paymentMethod: orderPaymentMethod,
+      paymentStatus: orderStatus,
+      walletDeduction: walletDeduction,
       couponCode: couponData.code,
       couponId: couponData.couponId,
       discountAmount: couponData.discount
     });
 
+    await newOrder.save();
+
+    const userWallet = await Wallet.findOne({ userId });
+
+    if (payment === "Wallet" || payment === "Wallet_COD" || payment === "Wallet_Online") {
+      if (!userWallet || userWallet.balance < 0) {
+        return res.status(400).json({
+          success: false,
+          showAlert: true,
+          alertType: "error",
+          alertMessage: "Wallet not found or invalid balance."
+        });
+      }
+
+      if (finalOrderAmount <= userWallet.balance) {
+        // Full payment from wallet
+        walletDeduction = finalOrderAmount;
+        finalOrderAmount = 0;
+        orderPaymentMethod = "Wallet";
+        orderStatus = "Paid";
+      } else if (userWallet.balance > 0) {
+        // Partial payment from wallet
+        walletDeduction = userWallet.balance;
+        finalOrderAmount -= walletDeduction;
+        orderPaymentMethod = `Wallet + ${payment.split('_')[1]}`; // e.g., "Wallet + COD"
+        orderStatus = "Pending"; // Remaining amount needs to be paid
+      } else {
+        // Wallet selected but balance is 0, proceed with other payment method
+        orderPaymentMethod = payment.split('_')[1]; // e.g., "COD" or "Online"
+        orderStatus = "Pending";
+      }
+
+      if (walletDeduction > 0) {
+        userWallet.balance -= walletDeduction;
+        userWallet.transactions.push({
+          type: "debit",
+          amount: walletDeduction,
+          description: `Payment for order ${orderNumber}`,
+          balanceAfter: userWallet.balance,
+          orderId: newOrder._id, // Now newOrder._id is available
+          status: "completed",
+          source: "order_payment",
+          metadata: {
+            orderNumber: orderNumber,
+            paymentMethod: orderPaymentMethod
+          }
+        });
+        await userWallet.save();
+      }
+    } else if (payment === "COD") {
+      orderStatus = "Placed"; // For COD, order is placed but payment is pending
+    } else if (payment === "Online") {
+      orderStatus = "Pending"; // For online, payment is pending
+    }
+
+    // Update the order with the final payment method and status after wallet deduction
+    newOrder.paymentMethod = orderPaymentMethod;
+    newOrder.paymentStatus = orderStatus;
+    newOrder.finalAmount = finalOrderAmount;
+    newOrder.walletDeduction = walletDeduction;
     await newOrder.save();
 
     // Update coupon usage if a coupon was applied

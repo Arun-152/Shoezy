@@ -172,7 +172,7 @@
                                                 <span class="payment-icon">📱</span>
                                                 <div>
                                                     <div class="payment-title">Wallet Payment</div>
-                                                    <div class="payment-balance">Balance: ₹0</div>
+                                                    <div class="payment-balance">Balance: ₹<%= walletBalance.toLocaleString() %></div>
                                                 </div>
                                             </label>
                                         </div>
@@ -267,7 +267,7 @@
                     </div>
                     <form id="checkoutForm">
                         <input type="hidden" name="selectedAddress" id="selectedAddressInput" />
-                        <input type="hidden" name="payment" />
+                        <input type="hidden" name="payment" id="paymentInput" />
                         <input type="hidden" name="appliedCoupon" id="appliedCouponInput" />
                         <button type="submit" class="place-order-btn">Place Order</button>
                     </form>
@@ -324,6 +324,7 @@
                 const availableCoupons = <%- JSON.stringify(coupon || []) %>;
                 let currentCoupon = null;
                 let currentDiscount = 0;
+                let walletBalance = <%= walletBalance %>;
 
                 // 🧩 Main: applyCoupon() using backend
                 async function applyCoupon(couponCodeFromModal) {
@@ -392,6 +393,7 @@
                         document.getElementById('couponDiscountRow').style.display = 'none';
                     }
                     document.getElementById('appliedCouponInput').value = data.couponCode;
+                    updatePaymentOptions(); // Call this to re-evaluate wallet options
                 }
 
                 // 👁️ Modal logic: pass code to backend
@@ -451,6 +453,39 @@
                 }
 
                 const paymentRadios = document.querySelectorAll(".payment-radio");
+                const walletRadio = document.getElementById('wallet');
+                const codRadio = document.getElementById('cod');
+                const onlineRadio = document.getElementById('online');
+                const finalTotalAmountSpan = document.getElementById('finalTotalAmount');
+
+                function getFinalOrderAmount() {
+                    return parseFloat(finalTotalAmountSpan.textContent.replace('₹', '').replace(/,/g, ''));
+                }
+
+                function updatePaymentOptions() {
+                    const currentFinalTotal = getFinalOrderAmount();
+
+                    if (walletBalance >= currentFinalTotal) {
+                        // Wallet can cover full amount
+                        walletRadio.value = "Wallet";
+                        walletRadio.nextElementSibling.querySelector('.payment-balance').textContent = "Full payment from wallet";
+                        codRadio.disabled = true;
+                        onlineRadio.disabled = true;
+                    } else if (walletBalance > 0) {
+                        // Wallet can cover partial amount
+                        walletRadio.value = "Wallet_Partial"; // Temporary value to indicate partial
+                        walletRadio.nextElementSibling.querySelector('.payment-balance').textContent = `Partial payment from wallet. Remaining: ₹${(currentFinalTotal - walletBalance).toLocaleString()}`;
+                        codRadio.disabled = false;
+                        onlineRadio.disabled = false;
+                    } else {
+                        // Wallet has no balance
+                        walletRadio.value = "Wallet"; // Default value
+                        walletRadio.nextElementSibling.querySelector('.payment-balance').textContent = "Insufficient balance";
+                        codRadio.disabled = false;
+                        onlineRadio.disabled = false;
+                    }
+                }
+
                 paymentRadios.forEach(radio => {
                     radio.addEventListener("change", () => {
                         // Remove highlight from all
@@ -459,12 +494,48 @@
                         // Highlight selected
                         const parentOption = radio.closest(".payment-option");
                         if (parentOption) parentOption.classList.add("selected-payment");
+
+                        // Handle wallet partial payment selection
+                        if (walletRadio.checked && walletRadio.value === "Wallet_Partial") {
+                            // If wallet is selected for partial, user must choose COD or Online
+                            Swal.fire({
+                                title: 'Choose Secondary Payment',
+                                text: 'Your wallet balance is insufficient. Please select COD or Online for the remaining amount.',
+                                icon: 'info',
+                                showCancelButton: true,
+                                confirmButtonText: 'COD',
+                                cancelButtonText: 'Online',
+                                confirmButtonColor: '#007bff',
+                                cancelButtonColor: '#6b7280',
+                                reverseButtons: true
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    walletRadio.value = "Wallet_COD";
+                                    codRadio.checked = true;
+                                    codRadio.closest(".payment-option").classList.add("selected-payment");
+                                    onlineRadio.closest(".payment-option").classList.remove("selected-payment");
+                                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                                    walletRadio.value = "Wallet_Online";
+                                    onlineRadio.checked = true;
+                                    onlineRadio.closest(".payment-option").classList.add("selected-payment");
+                                    codRadio.closest(".payment-option").classList.remove("selected-payment");
+                                } else {
+                                    // User closed the modal, uncheck wallet and clear payment input
+                                    walletRadio.checked = false;
+                                    walletRadio.closest(".payment-option").classList.remove("selected-payment");
+                                    document.getElementById('paymentInput').value = '';
+                                    return; // Exit to prevent setting paymentInput outside this block
+                                }
+                                document.getElementById('paymentInput').value = walletRadio.value;
+                            });
+                        } else {
+                            document.getElementById('paymentInput').value = radio.value;
+                        }
                     });
                 });
 
                 function getSelectedPayment() {
-                    const selected = document.querySelector(".payment-radio:checked");
-                    return selected ? selected.value : null;
+                    return document.getElementById('paymentInput').value;
                 }
 
                 document.addEventListener('DOMContentLoaded', () => {
@@ -472,11 +543,13 @@
                     const defaultAddress = document.querySelector('input[name="selectedAddress"]:checked');
                     if (defaultAddress) document.getElementById('selectedAddressInput').value = defaultAddress.value;
 
+                    updatePaymentOptions(); // Initial call to set up wallet options
+
                     document.getElementById('checkoutForm').addEventListener('submit', async e => {
                         e.preventDefault();
                         const selectedAddress = document.getElementById('selectedAddressInput').value;
-                        const payment = getSelectedPayment()
-                        const finalTotal = originalFinalTotal - currentDiscount;
+                        const payment = getSelectedPayment();
+                        const finalTotal = getFinalOrderAmount();
                         const appliedCoupon = document.getElementById('appliedCouponInput').value;
 
                         if (!selectedAddress) {
@@ -488,7 +561,7 @@
                             });
                             return false;
                         }
-                        if (!payment) {
+                        if (!payment || payment === "Wallet_Partial") {
                             Swal.fire({
                                 icon: 'warning',
                                 title: 'Payment Method Required',
@@ -520,7 +593,7 @@
                             didOpen: () => Swal.showLoading()
                         });
 
-                        if (payment === 'Online') {
+                        if (payment === 'Online' || payment === 'Wallet_Online') {
                             // Prepare order on server
                             fetch('/payment/createOrder', {
                                 method: 'POST',

@@ -53,6 +53,7 @@ router.get("/userErrorPage", userAuth,userController.userErrorPage)
 router.patch("/order/:orderId/return", userAuth, orderController.returnOrder);
 router.get("/order/:orderId/invoice",userAuth,orderController.getInvoice)
 router.post('/order/individualOrderReturn',userAuth,orderController.returnSingleOrder)
+router.post("/wallet-order", userAuth, orderController. placeOrderWithWallet)
 
 
 // Forgot Password Routes

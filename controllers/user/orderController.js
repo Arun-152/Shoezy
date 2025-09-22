@@ -581,6 +581,98 @@ const returnSingleOrder = async (req, res) => {
         });
     }
 };
+const placeOrderWithWallet = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const { items, address, couponCode } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Not authenticated" });
+    }
+
+    // Step 1: Calculate total
+    let totalAmount = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+
+    let discountAmount = 0;
+    let appliedCoupon = null;
+
+    // Step 2: Apply coupon if available
+    if (couponCode) {
+      appliedCoupon = await Coupon.findOne({ name: couponCode.toUpperCase(), status: "Available" });
+
+      if (appliedCoupon && totalAmount >= appliedCoupon.minimumPrice) {
+        if (appliedCoupon.discountType === "flat") {
+          discountAmount = appliedCoupon.offerPrice;
+        } else if (appliedCoupon.discountType === "percentage") {
+          discountAmount = (totalAmount * appliedCoupon.offerPrice) / 100;
+        }
+        totalAmount -= discountAmount;
+      }
+    }
+
+    // Step 3: Check Wallet Balance
+    let wallet = await Wallet.findOne({ userId });
+    if (!wallet || wallet.balance < totalAmount) {
+      return res.status(400).json({ success: false, message: "Insufficient wallet balance" });
+    }
+
+    // Step 4: Create Order
+    const newOrder = new Order({
+      orderNumber: "ORD" + Date.now(),
+      userId,
+      items: items.map(it => ({
+        productId: it.productId,
+        size: it.size || "Default",
+        quantity: it.quantity,
+        price: it.price,
+        totalPrice: it.price * it.quantity
+      })),
+      address,
+      totalAmount,
+      paymentMethod: "Wallet",
+      paymentStatus: "Paid",
+      couponCode: appliedCoupon ? appliedCoupon.name : null,
+      couponId: appliedCoupon ? appliedCoupon._id : null,
+      discountAmount
+    });
+
+    await newOrder.save();
+
+    // Step 5: Deduct Wallet Balance
+    wallet.balance -= totalAmount;
+    wallet.transactions.push({
+      type: "debit",
+      amount: totalAmount,
+      description: `Payment for order ${newOrder.orderNumber}`,
+      balanceAfter: wallet.balance,
+      orderId: newOrder._id,
+      source: "order_payment",
+      metadata: {
+        orderNumber: newOrder.orderNumber,
+        paymentMethod: "Wallet"
+      }
+    });
+    await wallet.save();
+
+    // Step 6: Update coupon usage if applied
+    if (appliedCoupon) {
+      appliedCoupon.currentUsageCount += 1;
+      appliedCoupon.userUsage.push({ userId, orderId: newOrder._id });
+      appliedCoupon.status = "Used"; // Optional, if coupon is single-use
+      await appliedCoupon.save();
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: "Order placed successfully using wallet",
+      order: newOrder
+    });
+
+  } catch (error) {
+    console.error("Error placing order with wallet:", error);
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
 
 module.exports = {
     orderPage,
@@ -589,4 +681,5 @@ module.exports = {
     returnOrder,
     getInvoice,
     returnSingleOrder,
+    placeOrderWithWallet
 };
