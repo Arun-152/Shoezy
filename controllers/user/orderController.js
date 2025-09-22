@@ -3,6 +3,8 @@ const Product = require("../../models/productSchema");
 const Order = require("../../models/orderSchema");
 const Wallet = require("../../models/walletSchema");
 const generateInvoice = require("../../helpers/generateInvoice");
+const Coupon = require("../../models/CouponSchema");
+
 
 const orderPage = async (req, res) => {
     try {
@@ -96,32 +98,45 @@ const cancelOrder = async (req, res) => {
                     const itemsCount = order.items.length || 1;
                     flatDiscountPerItem = (order.discountAmount || 0) / itemsCount;
                 }
-            } catch (_) {
-                // If coupon fetch fails, default to existing percentage logic
+            } catch (error) {
+                console.error('DEBUG: Error fetching coupon:', error);
                 isFlatCoupon = false;
             }
+        } else {
         }
         // For percentage coupon, keep existing proportional logic
         const discountPercentage = (!isFlatCoupon && originalSubtotal > 0)
             ? (order.discountAmount / originalSubtotal)
             : 0;
 
-        // Calculate refund amount based on request scope (independent of payment method)
         if (fullCancellationRequested) {
             refundAmount = activeItems.reduce((sum, item) => {
-                const itemTotal = item.price * item.quantity;
-                const itemDiscount = itemTotal * discountPercentage;
-                const net = order.couponCode ? (itemTotal - itemDiscount) : itemTotal;
-                return sum + net;
+                if (isFlatCoupon) {
+                    // For flat coupons, refund is item price minus the equally distributed flat discount per item
+                    const itemRefund = item.price - flatDiscountPerItem;
+                    return sum + itemRefund;
+                } else {
+                    // Existing logic for percentage coupons or no coupon
+                    const itemTotal = item.price * item.quantity;
+                    const itemDiscount = itemTotal * discountPercentage;
+                    const net = order.couponCode ? (itemTotal - itemDiscount) : itemTotal;
+                    return sum + net;
+                }
             }, 0);
         } else {
             // Single item cancellation
             const targetId = providedIds[0];
             const itemToCancel = order.items.find(item => item._id.toString() === targetId);
             if (itemToCancel && itemToCancel.status !== 'Cancelled') {
-                const itemTotal = itemToCancel.price * itemToCancel.quantity;
-                const itemDiscount = itemTotal * discountPercentage;
-                refundAmount = order.couponCode ? (itemTotal - itemDiscount) : itemTotal;
+                if (isFlatCoupon) {
+                    // For flat coupons, refund is item price minus the equally distributed flat discount per item
+                    refundAmount = itemToCancel.price - flatDiscountPerItem;
+                } else {
+                    // Existing logic for percentage coupons or no coupon
+                    const itemTotal = itemToCancel.price * itemToCancel.quantity;
+                    const itemDiscount = itemTotal * discountPercentage;
+                    refundAmount = order.couponCode ? (itemTotal - itemDiscount) : itemTotal;
+                }
             }
         }
 
@@ -222,6 +237,8 @@ const cancelOrder = async (req, res) => {
             }
         }
 
+        // Coupon usage is not reset when an order is cancelled.
+        // The coupon remains marked as 'Used' for the user.
         await order.save();
 
         return res.json({ success: true, message: 'Order cancelled successfully.' });
@@ -307,6 +324,8 @@ const returnOrder = async (req, res) => {
             }
         }
 
+        // Coupon usage is not reset when an order is returned.
+        // The coupon remains marked as 'Used' for the user.
         await order.save();
 
         return res.status(200).json({ 
@@ -544,6 +563,8 @@ const returnSingleOrder = async (req, res) => {
                 description: statusDescription
             });
         }
+        // Coupon usage is not reset when an order item is returned.
+        // The coupon remains marked as 'Used' for the user.
         await order.save();
         res.json({
             success: true,
