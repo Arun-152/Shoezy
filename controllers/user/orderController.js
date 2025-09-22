@@ -140,8 +140,8 @@ const cancelOrder = async (req, res) => {
             }
         }
 
-        // Only credit wallet when Online payment
-        if (order.paymentMethod === 'Online' && refundAmount > 0) {
+        // Credit wallet when Online or Wallet payment methods are used
+        if (['Online', 'Wallet'].includes(order.paymentMethod) && refundAmount > 0) {
             let wallet = await Wallet.findOne({ userId });
             if (!wallet) {
                 wallet = new Wallet({ userId, balance: 0, transactions: [] });
@@ -590,6 +590,9 @@ const placeOrderWithWallet = async (req, res) => {
       return res.status(401).json({ success: false, message: "Not authenticated" });
     }
 
+    // This function is designed for full payment using only the wallet.
+    // Combination payments (e.g., Wallet + COD, Wallet + Online) are not supported here.
+
     // Step 1: Calculate total
     let totalAmount = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
@@ -611,6 +614,8 @@ const placeOrderWithWallet = async (req, res) => {
     }
 
     // Step 3: Check Wallet Balance
+    // Wallet payment is only enabled if the wallet has enough balance to cover the full order amount.
+    // If balance is insufficient, wallet payment is effectively disabled for this transaction.
     let wallet = await Wallet.findOne({ userId });
     if (!wallet || wallet.balance < totalAmount) {
       return res.status(400).json({ success: false, message: "Insufficient wallet balance" });

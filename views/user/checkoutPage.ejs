@@ -469,18 +469,14 @@
                         // Wallet can cover full amount
                         walletRadio.value = "Wallet";
                         walletRadio.nextElementSibling.querySelector('.payment-balance').textContent = "Full payment from wallet";
+                        walletRadio.disabled = false; // Enable wallet option
                         codRadio.disabled = true;
                         onlineRadio.disabled = true;
-                    } else if (walletBalance > 0) {
-                        // Wallet can cover partial amount
-                        walletRadio.value = "Wallet_Partial"; // Temporary value to indicate partial
-                        walletRadio.nextElementSibling.querySelector('.payment-balance').textContent = `Partial payment from wallet. Remaining: ₹${(currentFinalTotal - walletBalance).toLocaleString()}`;
-                        codRadio.disabled = false;
-                        onlineRadio.disabled = false;
                     } else {
-                        // Wallet has no balance
+                        // Wallet has insufficient balance, disable wallet option
                         walletRadio.value = "Wallet"; // Default value
                         walletRadio.nextElementSibling.querySelector('.payment-balance').textContent = "Insufficient balance";
+                        walletRadio.disabled = true; // Disable wallet option
                         codRadio.disabled = false;
                         onlineRadio.disabled = false;
                     }
@@ -495,42 +491,8 @@
                         const parentOption = radio.closest(".payment-option");
                         if (parentOption) parentOption.classList.add("selected-payment");
 
-                        // Handle wallet partial payment selection
-                        if (walletRadio.checked && walletRadio.value === "Wallet_Partial") {
-                            // If wallet is selected for partial, user must choose COD or Online
-                            Swal.fire({
-                                title: 'Choose Secondary Payment',
-                                text: 'Your wallet balance is insufficient. Please select COD or Online for the remaining amount.',
-                                icon: 'info',
-                                showCancelButton: true,
-                                confirmButtonText: 'COD',
-                                cancelButtonText: 'Online',
-                                confirmButtonColor: '#007bff',
-                                cancelButtonColor: '#6b7280',
-                                reverseButtons: true
-                            }).then((result) => {
-                                if (result.isConfirmed) {
-                                    walletRadio.value = "Wallet_COD";
-                                    codRadio.checked = true;
-                                    codRadio.closest(".payment-option").classList.add("selected-payment");
-                                    onlineRadio.closest(".payment-option").classList.remove("selected-payment");
-                                } else if (result.dismiss === Swal.DismissReason.cancel) {
-                                    walletRadio.value = "Wallet_Online";
-                                    onlineRadio.checked = true;
-                                    onlineRadio.closest(".payment-option").classList.add("selected-payment");
-                                    codRadio.closest(".payment-option").classList.remove("selected-payment");
-                                } else {
-                                    // User closed the modal, uncheck wallet and clear payment input
-                                    walletRadio.checked = false;
-                                    walletRadio.closest(".payment-option").classList.remove("selected-payment");
-                                    document.getElementById('paymentInput').value = '';
-                                    return; // Exit to prevent setting paymentInput outside this block
-                                }
-                                document.getElementById('paymentInput').value = walletRadio.value;
-                            });
-                        } else {
-                            document.getElementById('paymentInput').value = radio.value;
-                        }
+                        // Set the payment input value directly
+                        document.getElementById('paymentInput').value = radio.value;
                     });
                 });
 
