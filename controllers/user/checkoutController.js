@@ -362,7 +362,7 @@ const placeOrder = async (req, res) => {
         await userWallet.save();
       }
     } else if (payment === "COD") {
-      orderStatus = "Placed"; // For COD, order is placed but payment is pending
+      orderStatus = "Pending"; // For COD, order is placed but payment is pending
     } else if (payment === "Online") {
       orderStatus = "Pending"; // For online, payment is pending
     }

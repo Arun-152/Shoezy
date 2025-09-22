@@ -371,14 +371,6 @@ const getProducts = async(req,res)=>{
     return res.status(500).json({success:false,message:"Failed to fetch Products"})
   }
 }
-const getCouponUsage = async(req,res)=>{
-  try{
-
-  }catch(error){
-    console.error("couponusage error",error)
-    return res.status(500).json({success:false,message:"failed to fetch "})
-  }
-}
 module.exports = {
     couponPage,
     createCoupon,
