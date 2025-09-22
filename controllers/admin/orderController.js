@@ -210,20 +210,23 @@ const approveReturnRequest = async (req, res) => {
         if (order.paymentMethod === 'COD') {
           refundAmount = 0;
         } else {
-          // Online Payment
-          let baseRefund = item.totalPrice; // Product's sale price * quantity
+          // Online/Wallet Payment
+          let baseRefund = item.totalPrice; // price per unit * quantity at order time
 
-          // If coupon was applied, calculate proportional discount
-          if (order.couponId && order.discountAmount > 0 && orderTotalBeforeDiscount > 0) {
+          // If coupon was applied, calculate discount share based on type
+          if (order.couponId && order.discountAmount > 0) {
             let discountShare = 0;
             if (coupon && coupon.discountType === "flat") {
-              // Flat discount → equally split across items
-              discountShare = order.discountAmount / order.items.length;
-            } else {
-              // Percentage discount → proportional to item price
+              // Flat coupon: distribute equally per line item across the entire order
+              const itemCount = order.items.length || 1;
+              const flatPerItem = order.discountAmount / itemCount;
+              discountShare = flatPerItem;
+            } else if (orderTotalBeforeDiscount > 0) {
+              // Percentage coupon: keep existing proportional logic
               discountShare = ((item.price * item.quantity) / orderTotalBeforeDiscount) * order.discountAmount;
             }
             baseRefund -= discountShare;
+            if (baseRefund < 0) baseRefund = 0;
           }
           refundAmount += baseRefund;
         }
