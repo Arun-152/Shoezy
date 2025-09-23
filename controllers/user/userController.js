@@ -259,7 +259,7 @@ const verifyOTP = async (req, res) => {
             phone,
             password: hashedPassword,
             referralCode: generatedReferralCode,
-            referredBy: referralCode || null,
+            referredBy:  referralCode ? referralCode.trim() : null,
         });
         await newUser.save();
 

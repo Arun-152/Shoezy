@@ -4,9 +4,8 @@ const userController = require("../../controllers/user/userController");
 const homepageController = require("../../controllers/user/homepageController");
 const shopPageController = require("../../controllers/user/shopPageController");
 const orderController = require("../../controllers/user/orderController");
-const productController = require("../../controllers/user/productController");
-const wishlistController = require("../../controllers/user/wishlistController")
-const showUserController = require("../../controllers/user/showUserController")
+const productController = require("../../controllers/user/productController")
+const referralController = require("../../controllers/user/referralController")
 
 const { userAuth } = require("../../middlewares/auth");
 const passport = require("../../config/passport");
@@ -65,7 +64,11 @@ router.post("/resendResetOtp", userController.resendResetOTP);
 router.get("/resetPassword", userController.resetPasswordPage);
 router.post("/resetPassword", userController.postResetPassword);
 
-//coupen
+//referrral code
+
+router.get("/referral",userAuth,referralController.getReferralPage)
+
+
 
 router.get("/coupen",userController.loadCoupen)
 

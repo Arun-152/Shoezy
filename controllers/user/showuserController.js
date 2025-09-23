@@ -4,6 +4,8 @@ const bcrypt = require("bcrypt")
 const env = require("dotenv").config()
 const session = require("express-session")
 const { validateEmailConfig, createEmailTransporter, sendEmail } = require("../../config/emailConfig");
+const Wallet = require("../../models/walletSchema");
+
 
 const showUser = async (req, res) => {
     try {
@@ -12,12 +14,15 @@ const showUser = async (req, res) => {
         const userData = await User.findById(userId);
         if (!userData) {
             return res.redirect("/login");
-           
         }
-         
+
+        // Fetch wallet balance
+        const wallet = await Wallet.findOne({ userId: userId });
+        const walletBalance = wallet ? wallet.balance : 0;
 
         res.render("myaccount", {
             user: userData,
+            walletBalance,   // pass it to EJS
             isLandingPage: false,
         });
     } catch (error) {
