@@ -178,23 +178,22 @@ const postSignup = async (req, res) => {
         const findUser = await User.findOne({ email })
 
         if (findUser) {
-            return res.render("signupPage", {
-                message: "User with this email already exists",
-                fullname,
-                phone,
-                email,
-                password
-            })
+            return res.status(400).json({ success: false, message: "User with this email already exists" });
         }
         const hashedPassword = await bcrypt.hash(password, 10);
         const otp = generateOtp();
         console.log("Signup OTP:", otp);
 
         try {
-            await sendVerificationEmail(email.trim(), otp);
+            const emailSent = await sendVerificationEmail(email.trim(), otp);
+            if (!emailSent) {
+                return res.status(400).json({ success: false, message: "Could not send verification email. Please check your email address and try again." });
+            }
         } catch (emailError) {
-
+            console.error("Signup email error:", emailError);
+            return res.status(500).json({ success: false, message: "There was an issue with our email service. Please try again later." });
         }
+
         const newReferralCode = generatedReferralCode(fullname)
 
         req.session.user = {
@@ -209,7 +208,7 @@ const postSignup = async (req, res) => {
             code: otp,
             expiresAt: Date.now() + 60 * 1000,
         };
-        res.render("otpverification")
+        return res.status(200).json({ success: true, redirect: "/otpVerification" });
     } catch (error) {
         console.error("Signup error:", error);
         res.status(500).json({ success: false, message: "Server error. Please try again." });

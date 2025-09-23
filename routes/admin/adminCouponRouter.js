@@ -15,6 +15,7 @@ router.get("/editCoupon",adminAuth,couponController.loadEditCoupon)
 router.patch("/editCoupon",adminAuth,couponController.editCoupon)
 router.patch("/deleteCoupon/:id",adminAuth,couponController.deleteCoupon)
 router.patch("/list",adminAuth,couponController.couponToggle)
+router.get("/:couponId/customers",adminAuth,couponController.getCustomers)
 
 
 

@@ -10,6 +10,8 @@ require("dotenv").config();
 
 const couponPage = async (req, res) => {
     try {
+       const userId = req.session.userId;
+        const user = await User.findById(userId)
         const coupons = await Coupon.find({})
         res.render("admincoupenPage", { coupons });
     } catch (error) {
@@ -31,6 +33,23 @@ const getCreateCoponPage = async (req, res) => {
 
     }
 }
+const getCustomers = async(req,res)=>{
+  try{
+    const couponId = req.params.couponId;
+    const userId = req.session.userId;
+    const user = await User.findById(userId)
+
+    if(!user){
+      return res.status(404).json({success:false,message:"User not found"})
+    }
+   
+    const coupon = await Coupon.findById(couponId)
+  }catch(error){
+    console.error("getCustomers error",error)
+    return res.status(500).json({success:false,message:"Something went wrong"})
+  }
+}
+
 const createCoupon = async (req, res) => {
   try {
     const {
@@ -380,5 +399,6 @@ module.exports = {
     deleteCoupon,
     getCategories,
     getProducts,
-    couponToggle
+    couponToggle,
+    getCustomers,
 }
