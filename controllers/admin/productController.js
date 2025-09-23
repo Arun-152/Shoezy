@@ -1,7 +1,9 @@
-const Products = require("../../models/productSchema");
+const Products = require("../../models/productSchema")
 const Category = require("../../models/categorySchema");
-const Product = require("../../models/productSchema");
+const User = require("../../models/userSchema")
 const MulterError = require('multer').MulterError;
+const calculateBestOffer = require("../../helpers/calculatorBestOffer");
+
 
 const productsPage = async (req, res) => {
     try {
@@ -51,9 +53,9 @@ const loadAddProductPage = async (req, res) => {
     }
 };
 
+
 const addProduct = async (req, res) => {
     try {
-        // Extract form data
         const {
             productName,
             description,
@@ -64,110 +66,94 @@ const addProduct = async (req, res) => {
             variants,
         } = req.body;
 
-        // Validate product name
+        // 1️⃣ Validate product name
         const trimmedProductName = productName ? productName.trim() : '';
-        if (!trimmedProductName || trimmedProductName.length === 0) {
-            return res.status(400).json({ error: 'Product name cannot be empty or only spaces.' });
-        }
-        if (trimmedProductName.length < 2 || trimmedProductName.length > 100) {
+        if (!trimmedProductName) return res.status(400).json({ error: 'Product name cannot be empty.' });
+        if (trimmedProductName.length < 2 || trimmedProductName.length > 100)
             return res.status(400).json({ error: 'Product name must be 2-100 characters' });
-        }
+
         const validNameRegex = /^[a-zA-Z0-9 _-]+$/;
-        if (!validNameRegex.test(trimmedProductName)) {
+        if (!validNameRegex.test(trimmedProductName))
             return res.status(400).json({ error: 'Product name contains invalid characters' });
-        }
-        const existingProduct = await Product.findOne({
+
+        const existingProduct = await Products.findOne({
             productName: { $regex: new RegExp(`^${trimmedProductName}$`, 'i') },
             isDeleted: false,
         });
-        if (existingProduct) {
-            return res.status(400).json({ error: 'This product already exists.' });
-        }
+        if (existingProduct) return res.status(400).json({ error: 'This product already exists.' });
 
-        // Validate description
-        if (!description || description.trim().length < 10 || description.trim().length > 500) {
+        // 2️⃣ Validate description
+        if (!description || description.trim().length < 10 || description.trim().length > 500)
             return res.status(400).json({ error: 'Description must be 10-500 characters' });
-        }
 
-        // Validate product offer
+        // 3️⃣ Validate product offer
         let parsedProductOffer = productOffer ? parseFloat(productOffer) : 0;
-        if (productOffer && (isNaN(parsedProductOffer) || parsedProductOffer < 0 || parsedProductOffer > 100)) {
+        if (productOffer && (isNaN(parsedProductOffer) || parsedProductOffer < 0 || parsedProductOffer > 100))
             return res.status(400).json({ error: 'Product offer must be between 0-100' });
-        }
 
-        // Validate color
-        if (!color || !/^[A-Za-z, ]{1,50}$/.test(color.trim())) {
-            return res.status(400).json({ error: 'Color must be letters, spaces, or commas (max 50 characters)' });
-        }
+        // 4️⃣ Validate color
+        if (!color || !/^[A-Za-z, ]{1,50}$/.test(color.trim()))
+            return res.status(400).json({ error: 'Color must be letters, spaces, or commas (max 50 chars)' });
 
-        // Validate category
+        // 5️⃣ Validate category
         const categoryDoc = await Category.findById(category);
-        if (!categoryDoc || categoryDoc.isDeleted || !categoryDoc.isListed) {
+        if (!categoryDoc || categoryDoc.isDeleted || !categoryDoc.isListed)
             return res.status(400).json({ error: 'Invalid category' });
-        }
 
-        // Validate status
-        if (!status || !['Available', 'out of stock'].includes(status)) {
+        const parsedCategoryOffer = categoryDoc.categoryOffer || 0;
+
+        // 6️⃣ Validate status
+        if (!status || !['Available', 'out of stock'].includes(status))
             return res.status(400).json({ error: 'Valid product status is required' });
-        }
 
-        // Validate variants
-        if (!variants || !variants.size || !Array.isArray(variants.size) || variants.size.length === 0) {
+        // 7️⃣ Validate variants
+        if (!variants || !variants.size || !Array.isArray(variants.size) || variants.size.length === 0)
             return res.status(400).json({ error: 'At least one valid variant is required' });
-        }
 
         const sizes = variants.size;
         const regularPrices = variants.regularPrice.map(Number);
         const quantities = variants.variantQuantity.map(Number);
 
-        if (sizes.length !== regularPrices.length || sizes.length !== quantities.length) {
+        if (sizes.length !== regularPrices.length || sizes.length !== quantities.length)
             return res.status(400).json({ error: 'Variant fields mismatch' });
-        }
-        let categoryOffer = 0
+
         const selectedSizes = new Set();
         const formattedVariants = sizes.map((size, index) => {
             const regularPrice = regularPrices[index];
             const quantity = quantities[index];
 
-            if (!size || !['6', '7', '8', '9', '10'].includes(size)) {
+            if (!size || !['6', '7', '8', '9', '10'].includes(size))
                 throw new Error('Invalid size');
-            }
-            if (isNaN(regularPrice) || regularPrice < 0 || isNaN(quantity) || quantity < 0) {
+            if (isNaN(regularPrice) || regularPrice < 0 || isNaN(quantity) || quantity < 0)
                 throw new Error('Invalid variant details');
-            }
-            if (selectedSizes.has(size)) {
-                throw new Error('Duplicate sizes are not allowed');
-            }
-            selectedSizes.add(size);
-            let salePrice = regularPrice;
-            categoryOffer = categoryDoc && categoryDoc.categoryOffer ? parseFloat(categoryDoc.categoryOffer) : 0;
-            const maxOffer = Math.max(parsedProductOffer || 0, categoryOffer || 0);
-            if (maxOffer > 0) {
-               salePrice = Math.round(regularPrice * (1 - maxOffer / 100));
-;
+            if (selectedSizes.has(size)) throw new Error('Duplicate sizes are not allowed');
 
-            }
+            selectedSizes.add(size);
+
+            // ✅ Calculate best offer using helper
+            const { salePrice, appliedOffer } = calculateBestOffer(regularPrice, parsedProductOffer, parsedCategoryOffer);
 
             return {
                 size,
                 regularPrice,
                 salePrice,
                 variantQuantity: quantity,
+                appliedOffer,
             };
         });
 
-        // Validate images
-        if (!req.files || req.files.length !== 3) {
+        // 8️⃣ Validate images
+        if (!req.files || req.files.length !== 3)
             return res.status(400).json({ error: 'Exactly 3 images are required' });
-        }
+
         const imagePaths = req.files.map(file => `/uploads/products/${file.filename}`);
 
-        // Create new product
-        const newProduct = new Product({
+        // 9️⃣ Create new product
+        const newProduct = new Products({
             productName: trimmedProductName,
             description: description.trim(),
             productOffer: parsedProductOffer,
-            bestOffer: Math.max(parsedProductOffer || 0, categoryOffer || 0),
+            bestOffer: Math.max(parsedProductOffer, parsedCategoryOffer),
             color: color.trim(),
             category: categoryDoc._id,
             status,
@@ -179,16 +165,16 @@ const addProduct = async (req, res) => {
             tags: [],
         });
 
-        // Save product to database
         await newProduct.save();
 
-        // Respond with success
-        res.status(200).json({ message: 'Product added successfully' });
+        res.status(201).json({ success: true, message: 'Product added successfully', product: newProduct });
     } catch (error) {
         console.error('Error adding product:', error);
         res.status(500).json({ error: error.message || 'Something went wrong' });
     }
 };
+
+
 
 
 const blockProduct = async (req, res) => {
@@ -238,120 +224,78 @@ const editProducts = async (req, res) => {
         const id = req.params.id;
         const data = req.body;
 
-        if (!data) {
-            return res.status(400).json({ success: false, message: "All fields are required" });
-        }
+        if (!data) return res.status(400).json({ success: false, message: "All fields required" });
 
-        const trimmedProductName = data.productName ? data.productName.trim() : '';
-
-        if (!trimmedProductName || trimmedProductName.length === 0) {
-            return res.status(400).json({
-                success: false,
-                error: "Product name cannot be empty or only spaces."
-            });
-        }
-
-        if (trimmedProductName.length < 2 || trimmedProductName.length > 100) {
-            return res.status(400).json({
-                success: false,
-                error: "Product name must be 2-100 characters"
-            });
+        // Validate productName
+        const trimmedName = data.productName?.trim();
+        if (!trimmedName || trimmedName.length < 2 || trimmedName.length > 100) {
+            return res.status(400).json({ success: false, error: "Invalid product name" });
         }
 
         const validNameRegex = /^[a-zA-Z0-9 _-]+$/;
-        if (!validNameRegex.test(trimmedProductName)) {
-            return res.status(400).json({
-                success: false,
-                error: "Product name contains invalid characters"
-            });
+        if (!validNameRegex.test(trimmedName)) {
+            return res.status(400).json({ success: false, error: "Product name contains invalid characters" });
         }
 
-        const existingProduct = await Products.findOne({
-            productName: { $regex: new RegExp(`^${trimmedProductName}$`, 'i') },
-            _id: { $ne: id },
-            isDeleted: false
-        });
-
-        if (existingProduct) {
-            return res.status(400).json({
-                success: false,
-                error: "This product already exists."
-            });
-        }
+        const existingProduct = await Products.findOne({ productName: { $regex: `^${trimmedName}$`, $options: 'i' }, _id: { $ne: id }, isDeleted: false });
+        if (existingProduct) return res.status(400).json({ success: false, error: "This product already exists" });
 
         // Description validation
         if (!data.description || data.description.length < 10 || data.description.length > 500) {
             return res.status(400).json({ success: false, error: "Description must be 10-500 characters" });
         }
 
-        // Offer validation
-        let parsedProductOffer = data.productOffer ? parseFloat(data.productOffer) : null;
+        // Product offer
+        let parsedProductOffer = data.productOffer ? parseFloat(data.productOffer) : 0;
         if (data.productOffer && (isNaN(parsedProductOffer) || parsedProductOffer < 0 || parsedProductOffer > 100)) {
-            return res.status(400).json({ success: false, error: "Product offer must be a percentage between 0 and 100" });
+            return res.status(400).json({ success: false, error: "Product offer must be 0-100%" });
         }
 
-        // Color validation
+        // Color & status
         if (!data.color || !/^[A-Za-z, ]{1,50}$/.test(data.color.trim())) {
-            return res.status(400).json({ success: false, error: "Invalid color format" });
+            return res.status(400).json({ success: false, error: "Invalid color" });
+        }
+        if (!["Available","out of stock"].includes(data.status)) {
+            return res.status(400).json({ success: false, error: "Invalid status" });
         }
 
-        // Status validation
-        if (!data.status || !["Available", "out of stock"].includes(data.status)) {
-            return res.status(400).json({ success: false, error: "Please select a valid product status" });
-        }
-
-        // Variant validation
         const variants = data.variants;
-        if (!variants || !variants.size || !Array.isArray(variants.size) || variants.size.length === 0) {
-            return res.status(400).json({ success: false, error: "At least one variant required" });
+        if (!variants?.size?.length) return res.status(400).json({ success: false, error: "At least one variant required" });
+
+        // Category validation
+        const categoryDoc = await Category.findById(data.category);
+        if (!categoryDoc || categoryDoc.isDeleted || !categoryDoc.isListed) {
+            return res.status(400).json({ success: false, error: "Invalid category" });
         }
 
         const variantData = [];
         const selectedSizes = new Set();
-
-        let categoryOffer = 0
+        let overallBestOfferValue = 0;
 
         for (let i = 0; i < variants.size.length; i++) {
             const size = variants.size[i];
             const regularPrice = parseFloat(variants.regularPrice[i]);
             const variantQuantity = parseInt(variants.variantQuantity[i]);
 
-            if (!size || !['6', '7', '8', '9', '10'].includes(size)) {
-                return res.status(400).json({ success: false, error: "Invalid size" });
+            if (!size || selectedSizes.has(size) || !['6','7','8','9','10'].includes(size)) {
+                return res.status(400).json({ success: false, error: "Invalid or duplicate size" });
             }
+            selectedSizes.add(size);
 
             if (isNaN(regularPrice) || regularPrice < 0 || isNaN(variantQuantity) || variantQuantity < 0) {
                 return res.status(400).json({ success: false, error: "Invalid variant details" });
             }
 
-            if (selectedSizes.has(size)) {
-                return res.status(400).json({ success: false, error: "Duplicate sizes not allowed" });
-            }
+            const { salePrice, appliedOffer } = calculateBestOffer(regularPrice, parsedProductOffer, categoryDoc.categoryOffer || 0);
+            overallBestOfferValue = Math.max(overallBestOfferValue, appliedOffer?.value || 0);
 
-            selectedSizes.add(size);
-
-            let salePrice = regularPrice;
-            const categoryDoc = await Category.findById(data.category);
-            categoryOffer = categoryDoc && categoryDoc.categoryOffer ? parseFloat(categoryDoc.categoryOffer) : 0;
-            const maxOffer = Math.max(parsedProductOffer || 0, categoryOffer || 0);
-            if (maxOffer > 0) {
-                salePrice = Math.round(regularPrice * (1 - maxOffer / 100));
-
-            }
-
-            variantData.push({ size, regularPrice, salePrice, variantQuantity });
+            variantData.push({ size, regularPrice, salePrice, variantQuantity, appliedOffer });
         }
 
-        // Validate category
-        const categoryDoc = await Category.findById(data.category);
-        if (!categoryDoc || categoryDoc.isDeleted || !categoryDoc.isListed) {
-            return res.status(400).json({ success: false, error: "Invalid category" });
-        }
-
-        // Images validation (if uploading new images)
+        // Images
         let imagePaths = [];
-        if (req.files && req.files.length === 3) {
-            imagePaths = req.files.map(file => '/uploads/products/' + file.filename);
+        if (req.files?.length === 3) {
+            imagePaths = req.files.map(f => '/uploads/products/' + f.filename);
         } else {
             imagePaths = req.body.existingImages || [];
         }
@@ -360,26 +304,28 @@ const editProducts = async (req, res) => {
         const updatedProduct = await Products.findByIdAndUpdate(
             id,
             {
-                productName: data.productName.trim(),
+                productName: trimmedName,
                 description: data.description.trim(),
-                productOffer: parsedProductOffer || 0,
+                productOffer: parsedProductOffer,
                 color: data.color.trim(),
-                bestOffer: Math.max(parsedProductOffer || 0, categoryOffer || 0),
+                bestOffer: overallBestOfferValue,
                 category: categoryDoc._id,
                 variants: variantData,
                 images: imagePaths,
                 status: data.status
             },
-            { new: true }
+            { new: true, runValidators: true }
         );
 
-        return res.status(200).json({ success: true, message: "Product updated successfully" });
+        return res.status(200).json({ success: true, message: "Product updated", product: updatedProduct });
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ success: false, error: "Internal Server Error" });
+        return res.status(500).json({ success: false, error: "Internal server error" });
     }
 };
+
+
 
 const deleteProducts = async (req, res) => {
     try {
