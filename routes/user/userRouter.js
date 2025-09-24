@@ -56,13 +56,13 @@ router.post("/wallet-order", userAuth, orderController. placeOrderWithWallet)
 
 
 // Forgot Password Routes
-router.get("/emailVerification", userController.forgotPasswordPage);
-router.post("/forgotPassword", userController.postForgotPassword);
-router.get("/verifyResetOtp", userController.verifyOTPPage);
-router.post("/verifyResetOtp", userController.postVerifyOTP);
-router.post("/resendResetOtp", userController.resendResetOTP);
-router.get("/resetPassword", userController.resetPasswordPage);
-router.post("/resetPassword", userController.postResetPassword);
+router.get("/emailVerification",userAuth, userController.forgotPasswordPage);
+router.post("/forgotPassword", userAuth,userController.postForgotPassword);
+router.get("/verifyResetOtp",userAuth, userController.verifyOTPPage);
+router.post("/verifyResetOtp", userAuth,userController.postVerifyOTP);
+router.post("/resendResetOtp",userAuth, userController.resendResetOTP);
+router.get("/resetPassword", userAuth,userController.resetPasswordPage);
+router.post("/resetPassword",userAuth, userController.postResetPassword);
 
 //referrral code
 

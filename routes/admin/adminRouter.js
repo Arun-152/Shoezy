@@ -14,8 +14,8 @@ const adminOrderRouter = require("./adminOrderRouter")
 const adminCouponRouter = require("./adminCouponRouter")
 
 // Admin Login Management
-router.get("/login", adminController.adminLoginPage);
-router.post("/login", adminController.postLogin);
+router.get("/login",adminAuth, adminController.adminLoginPage);
+router.post("/login",adminAuth, adminController.postLogin);
 
 // Dashboard Management
 router.get("/dashboard", adminAuth, adminController.dashboardPage);
@@ -53,7 +53,7 @@ router.get("/salesreport/export/csv", adminAuth, salesReportController.exportCsv
 router.get("/logout", adminAuth, adminController.adminLogout);
 
 // Admin Error Page
-router.get("/adminErrorPage", adminController.adminErrorPage);
+router.get("/adminErrorPage", adminAuth,adminController.adminErrorPage);
 
 router.use("/orders",adminOrderRouter)
 router.use("/coupons",adminCouponRouter)

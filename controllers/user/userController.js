@@ -20,12 +20,15 @@ const signupPage = async (req, res) => {
         if (req.session.userId) {
             return res.redirect("/home");
         }
+        const referralCode = req.query.referralCode || null; // Extract referralCode from query
         return res.render("signupPage", {
             error_msg: req.flash("error_msg"),
             success_msg: req.flash("success_msg"),
             error: req.flash("error"),
+            referralCode: referralCode, // Pass referralCode to the view
         });
     } catch (error) {
+        console.error("Error loading signup page:", error);
         res.redirect("/usererrorPage");
     }
 };
