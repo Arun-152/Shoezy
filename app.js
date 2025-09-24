@@ -92,10 +92,8 @@ app.use((req, res, next) => {
     }
 })
 
-// Global error handler - must have 4 params to be recognized by Express
 app.use((err, req, res, next) => {
     console.error('Unhandled error:', err)
-    // If headers already sent, delegate to Express default handler
     if (res.headersSent) return next(err)
 
     const status = err.status || err.statusCode || 500

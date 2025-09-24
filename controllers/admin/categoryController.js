@@ -169,7 +169,7 @@ const categoryEdit = async (req, res) => {
             name: name.trim(),
             description: description.trim()
         };
-        updateObj.categoryOffer = parsedCategoryOffer; // Assign null if no offer
+        updateObj.categoryOffer = parsedCategoryOffer; 
 
         const updatedCategory = await Category.findByIdAndUpdate(id, updateObj, { new: true, runValidators: true });
         if (!updatedCategory) return res.status(404).json({ message: "Category not found" });

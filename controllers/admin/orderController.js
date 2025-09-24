@@ -211,18 +211,14 @@ const approveReturnRequest = async (req, res) => {
           refundAmount = 0;
         } else {
           // Online/Wallet Payment
-          let baseRefund = item.totalPrice; // price per unit * quantity at order time
-
-          // If coupon was applied, calculate discount share based on type
+          let baseRefund = item.totalPrice; 
           if (order.couponId && order.discountAmount > 0) {
             let discountShare = 0;
             if (coupon && coupon.discountType === "flat") {
-              // Flat coupon: distribute equally per line item across the entire order
               const itemCount = order.items.length || 1;
               const flatPerItem = order.discountAmount / itemCount;
               discountShare = flatPerItem;
             } else if (orderTotalBeforeDiscount > 0) {
-              // Percentage coupon: keep existing proportional logic
               discountShare = ((item.price * item.quantity) / orderTotalBeforeDiscount) * order.discountAmount;
             }
             baseRefund -= discountShare;
@@ -248,13 +244,11 @@ const approveReturnRequest = async (req, res) => {
       });
     }
     
-    // Step 4: Update order status if all items are returned/cancelled
     let allOrderReturn = order.items.every(item => item.status === "Returned" || item.status === "Cancelled");
     if (allOrderReturn) {
       order.orderStatus = "Returned";
     }
   
-    // Step 5: Update product quantities back to inventory
     for (let prod of updatedProducts) {
       const productDoc = await Product.findOne({ productName: prod.name });
       if (productDoc) {

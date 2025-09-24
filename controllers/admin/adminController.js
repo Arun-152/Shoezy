@@ -18,7 +18,7 @@ const adminLoginPage = async (req, res) => {
     if (req.session.adminId) {
       return res.redirect("/admin/dashboard");
     }
-    // Always render with clean form - no pre-filled values
+   
     res.render("adminloginPage", {
       email: "",
       password: "",
@@ -74,7 +74,6 @@ const postLogin = async (req, res) => {
       });
     }
 
-    // First check if any user exists with this email
     const user = await User.findOne({ email: email.trim().toLowerCase() });
 
     if (!user) {
@@ -95,7 +94,6 @@ const postLogin = async (req, res) => {
       });
     }
 
-    // Check if the user has admin access
     if (!user.isAdmin) {
       if (isAjax) {
         return res.status(400).json({
@@ -114,7 +112,7 @@ const postLogin = async (req, res) => {
       });
     }
 
-    const admin = user; // User is confirmed to be an admin
+    const admin = user; 
 
     const matchpass = await bcrypt.compare(password, admin.password);
 
@@ -247,7 +245,7 @@ const settingsPage = (req, res) => {
 
 const adminLogout = (req, res) => {
   try {
-    delete req.session.adminId; // Only remove admin session ID
+    delete req.session.adminId;
     res.redirect("/admin/login");
   } catch (err) {
     console.error("Admin Logout error:", err.message);

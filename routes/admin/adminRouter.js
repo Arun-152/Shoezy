@@ -14,8 +14,8 @@ const adminOrderRouter = require("./adminOrderRouter")
 const adminCouponRouter = require("./adminCouponRouter")
 
 // Admin Login Management
-router.get("/login",adminAuth, adminController.adminLoginPage);
-router.post("/login",adminAuth, adminController.postLogin);
+router.get("/login", adminController.adminLoginPage);
+router.post("/login", adminController.postLogin);
 
 // Dashboard Management
 router.get("/dashboard", adminAuth, adminController.dashboardPage);

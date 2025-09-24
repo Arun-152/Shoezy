@@ -30,7 +30,7 @@ const razorpayRouter = require("./razorpayRouter")
 
 router.get("/login", userController.loginPage);
 router.get("/signup", userController.signupPage);
-router.post("/signup", userController.postSignup);
+router.post("/signup",userController.postSignup);
 router.get("/otpVerification", userController.otpVerification);
 router.post("/verifyOtp", userController.verifyOTP);
 router.post("/login", userController.postLogin);
@@ -38,7 +38,7 @@ router.post("/login", userController.postLogin);
 router.get("/", homepageController.homePage);
 router.get("/home", homepageController.homePage);
 router.get("/logout", userController.logout);
-router.get("/shop", shopPageController.shopPage);
+router.get("/shop", userAuth,shopPageController.shopPage);
 router.get("/product/:id", userAuth,productController.productDetailPage);
 router.post("/resendOtp", userController.resendOTP);
 

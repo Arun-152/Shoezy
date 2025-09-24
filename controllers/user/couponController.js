@@ -43,8 +43,8 @@ const loadCoupons = async (req, res) => {
 
         return {
           ...coupon.toObject(),
-          isUsed: isUsedByUser || isGloballyUsed, // Coupon is used if user or global limit reached
-          isExpired: isExpired // Explicitly flag expired coupons
+          isUsed: isUsedByUser || isGloballyUsed, 
+          isExpired: isExpired 
         };
       })
     );

@@ -613,9 +613,7 @@ const placeOrderWithWallet = async (req, res) => {
       }
     }
 
-    // Step 3: Check Wallet Balance
-    // Wallet payment is only enabled if the wallet has enough balance to cover the full order amount.
-    // If balance is insufficient, wallet payment is effectively disabled for this transaction.
+  
     let wallet = await Wallet.findOne({ userId });
     if (!wallet || wallet.balance < totalAmount) {
       return res.status(400).json({ success: false, message: "Insufficient wallet balance" });

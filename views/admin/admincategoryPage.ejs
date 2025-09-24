@@ -465,8 +465,8 @@
       } else if (description.length < 10) {
         displayErrorMessage("descriptionError", "Description must be at least 10 characters.");
         isvalid = false;
-      } else if (description.length > 200) {
-        displayErrorMessage("descriptionError", "Description cannot exceed 200 characters.");
+      } else if (description.length > 50) {
+        displayErrorMessage("descriptionError", "Description cannot exceed 50 characters.");
         isvalid = false;
       }
 
@@ -522,8 +522,8 @@
       } else if (description.length < 10) {
         displayEditErrorMessage("editDescriptionError", "Description must be at least 10 characters.");
         isValid = false;
-      } else if (description.length > 200) {
-        displayEditErrorMessage("editDescriptionError", "Description cannot exceed 200 characters.");
+      } else if (description.length > 50) {
+        displayEditErrorMessage("editDescriptionError", "Description cannot exceed 50 characters.");
         isValid = false;
       }
 
