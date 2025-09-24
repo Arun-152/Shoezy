@@ -165,10 +165,10 @@
                 if (!password) {
                     setError(passwordInput, 'error4', 'Password is required');
                     return false;
-                } else if (password.length < 6) {
-                    setError(passwordInput, 'error4', 'Password must be at least 6 characters');
+                } else if (password.length < 5) {
+                    setError(passwordInput, 'error4', 'Password must be at least 5 characters');
                     return false;
-                } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*d)/.test(password)) {
+                } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
                     setError(passwordInput, 'error4', 'Must include uppercase, lowercase, and number');
                     return false;
                 } else {

@@ -158,9 +158,9 @@ const postSignup = async (req, res) => {
 
         if (!password || password === "") {
             errors.push("Password is required");
-        } else if (password.length < 6) {
-            errors.push("Password must be at least 6 characters long");
-        } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+        } else if (password.length < 5) {
+            errors.push("Password must be at least 5 characters long");
+        } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/.test(password)) {
             errors.push("Password must contain at least one uppercase letter, one lowercase letter, and one number");
         }
 
@@ -175,22 +175,28 @@ const postSignup = async (req, res) => {
             return res.status(400).json({ success: false, message: errors.join(", ") });
         }
         
-        const findUser = await User.findOne({ email })
+        console.log("postSignup: Starting user existence check for email:", email);
+        const findUser = await User.findOne({ email });
 
         if (findUser) {
+            console.log("postSignup: User with this email already exists.");
             return res.status(400).json({ success: false, message: "User with this email already exists" });
         }
+        console.log("postSignup: User does not exist, proceeding with signup.");
         const hashedPassword = await bcrypt.hash(password, 10);
         const otp = generateOtp();
-        console.log("Signup OTP:", otp);
+        console.log("postSignup: Generated OTP:", otp);
 
         try {
+            console.log("postSignup: Attempting to send verification email to:", email.trim());
             const emailSent = await sendVerificationEmail(email.trim(), otp);
             if (!emailSent) {
+                console.log("postSignup: Failed to send verification email.");
                 return res.status(400).json({ success: false, message: "Could not send verification email. Please check your email address and try again." });
             }
+            console.log("postSignup: Verification email sent successfully.");
         } catch (emailError) {
-            console.error("Signup email error:", emailError);
+            console.error("postSignup: Signup email error:", emailError);
             return res.status(500).json({ success: false, message: "There was an issue with our email service. Please try again later." });
         }
 
@@ -217,11 +223,12 @@ const postSignup = async (req, res) => {
 
 const otpVerification = async (req, res) => {
     try {
-        if (req.session.user || req.session.userOtp) {
-            return res.redirect("/otpVerification");
+        if (req.session.user && req.session.userOtp) {
+            return res.render("otpverification"); // Render the OTP verification page
         }
-        return res.redirect("/signup")
+        return res.redirect("/signup"); // Redirect to signup if no session data
     } catch (error) {
+        console.error("Error loading OTP verification page:", error);
         res.status(500).redirect("/usererrorPage");
     }
 };
