@@ -389,62 +389,86 @@
                         <!-- Sales Summary -->
                         <div class="sales-summary">
                             <div class="summary-card">
-                                <i class="fas fa-dollar-sign"></i>
+                                <i class="fas fa-rupee-sign"></i>
                                 <div class="card-content">
-                                    <h3>Total Revenue</h3>
-                                    <p>$45,231</p>
+                                    <h3>Total Sales</h3>
+                                    <p>₹<%= summary.totalSales.toFixed(2) %></p>
                                 </div>
                             </div>
                             <div class="summary-card">
                                 <i class="fas fa-shopping-cart"></i>
                                 <div class="card-content">
-                                    <h3>Orders</h3>
-                                    <p>1,234</p>
+                                    <h3>Total Orders</h3>
+                                    <p><%= summary.totalOrders %></p>
                                 </div>
                             </div>
                             <div class="summary-card">
-                                <i class="fas fa-users"></i>
+                                <i class="fas fa-box"></i>
                                 <div class="card-content">
-                                    <h3>Customers</h3>
-                                    <p>892</p>
+                                    <h3>Products Sold</h3>
+                                    <p><%= summary.productsSold %></p>
                                 </div>
                             </div>
                             <div class="summary-card">
                                 <i class="fas fa-chart-line"></i>
                                 <div class="card-content">
-                                    <h3>Avg. Order Value</h3>
-                                    <p>$36.65</p>
+                                    <h3>Net Revenue</h3>
+                                    <p>₹<%= summary.netRevenue.toFixed(2) %></p>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Filters & Controls -->
-                        <div class="filters">
-                            <h3>Filters & Controls</h3>
-                            <select name="date-filter">
-                                <option value="all-time">All Time</option>
-                                <option value="daily">Daily</option>
-                                <option value="weekly">Weekly</option>
-                                <option value="monthly">Monthly</option>
-                            </select>
-                            <select name="order-status">
-                                <option value="all-status">All Status</option>
-                                <option value="completed">Completed</option>
-                                <option value="pending">Pending</option>
-                            </select>
-                            <select name="payment-method">
-                                <option value="all-methods">All Methods</option>
-                                <option value="credit-card">Credit Card</option>
-                                <option value="paypal">PayPal</option>
-                                <option value="bank-transfer">Bank Transfer</option>
-                            </select>
-                            <input type="text" name="search-customer" placeholder="Customer name or email">
-                            <select name="sort-by">
-                                <option value="date-newest">Date (Newest First)</option>
-                                <option value="date-oldest">Date (Oldest First)</option>
-                            </select>
-                            <button class="apply">Apply Filters</button>
-                            <button class="clear">Clear</button>
+                        <div class="filters-controls">
+                            <h2>Filter Sales Report</h2>
+                            <form id="filterForm" action="/admin/salesreport" method="GET">
+                                <div class="time-range-filters">
+                                    <button type="button" class="time-filter-btn <%= filters.timeRange === 'daily' ? 'active' : '' %>" data-time-range="daily">Daily</button>
+                                    <button type="button" class="time-filter-btn <%= filters.timeRange === 'weekly' ? 'active' : '' %>" data-time-range="weekly">Weekly</button>
+                                    <button type="button" class="time-filter-btn <%= filters.timeRange === 'monthly' ? 'active' : '' %>" data-time-range="monthly">Monthly</button>
+                                    <button type="button" class="time-filter-btn <%= filters.timeRange === 'yearly' ? 'active' : '' %>" data-time-range="yearly">Yearly</button>
+                                    <input type="hidden" name="timeRange" id="timeRangeInput" value="<%= filters.timeRange || '' %>">
+                                </div>
+
+                                <input type="date" name="startDate" value="<%= filters.startDate || '' %>">
+                                <input type="date" name="endDate" value="<%= filters.endDate || '' %>">
+
+                                <select name="status">
+                                    <option value="all" <%= filters.status === 'all' ? 'selected' : '' %>>All Status</option>
+                                    <option value="Pending" <%= filters.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                                    <option value="Processing" <%= filters.status === 'Processing' ? 'selected' : '' %>>Processing</option>
+                                    <option value="Shipped" <%= filters.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                                    <option value="Delivered" <%= filters.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                                    <option value="Cancelled" <%= filters.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                                    <option value="ReturnRequested" <%= filters.status === 'ReturnRequested' ? 'selected' : '' %>>Return Requested</option>
+                                    <option value="Returned" <%= filters.status === 'Returned' ? 'selected' : '' %>>Returned</option>
+                                    <option value="ReturnApproved" <%= filters.status === 'ReturnApproved' ? 'selected' : '' %>>Return Approved</option>
+                                </select>
+
+                                <select name="payment">
+                                    <option value="all" <%= filters.payment === 'all' ? 'selected' : '' %>>All Methods</option>
+                                    <option value="cod" <%= filters.payment === 'cod' ? 'selected' : '' %>>COD</option>
+                                    <option value="online" <%= filters.payment === 'online' ? 'selected' : '' %>>Online</option>
+                                    <option value="wallet" <%= filters.payment === 'wallet' ? 'selected' : '' %>>Wallet</option>
+                                </select>
+
+                                <input type="text" name="search" placeholder="Order ID or Customer Name" value="<%= filters.search || '' %>">
+
+                                <select name="sort">
+                                    <option value="date-newest" <%= filters.sort === 'date-newest' ? 'selected' : '' %>>Date (Newest First)</option>
+                                    <option value="date-oldest" <%= filters.sort === 'date-oldest' ? 'selected' : '' %>>Date (Oldest First)</option>
+                                    <option value="amount-low" <%= filters.sort === 'amount-low' ? 'selected' : '' %>>Amount (Low to High)</option>
+                                    <option value="amount-high" <%= filters.sort === 'amount-high' ? 'selected' : '' %>>Amount (High to Low)</option>
+                                </select>
+
+                                <button type="submit">Apply Filters</button>
+                                <button type="button" onclick="window.location.href='/admin/salesreport'">Clear Filters</button>
+                            </form>
+                            <div class="export-buttons" style="margin-top: 20px;">
+                                <button type="button" id="exportPdfBtn">Export PDF</button>
+                                <button type="button" id="exportExcelBtn">Export Excel</button>
+                                <button type="button" id="exportCsvBtn">Export CSV</button>
+                            </div>
                         </div>
 
                         <!-- Detailed Sales Table -->
@@ -465,72 +489,100 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>#12345</td>
-                                        <td>2023-10-01</td>
-                                        <td>John Smith</td>
-                                        <td>Credit Card</td>
-                                        <td>SAVE10</td>
-                                        <td>$50.00</td>
-                                        <td>$5.00</td>
-                                        <td>$45.00</td>
-                                        <td>Completed</td>
-                                        <td><button
-                                                onclick="showModal('12345', '$50.00', 'SAVE10', '2023-10-01', 'Widget A: 2')">View
-                                                Products</button></td>
-                                    </tr>
-                                    <tr>
-                                        <td>#12346</td>
-                                        <td>2023-10-02</td>
-                                        <td>Jane Doe</td>
-                                        <td>PayPal</td>
-                                        <td>None</td>
-                                        <td>$25.00</td>
-                                        <td>$0.00</td>
-                                        <td>$25.00</td>
-                                        <td>Pending</td>
-                                        <td><button
-                                                onclick="showModal('12346', '$25.00', 'None', '2023-10-02', 'Widget B: 1')">View
-                                                Products</button></td>
-                                    </tr>
-                                    <tr>
-                                        <td>#12347</td>
-                                        <td>2023-10-03</td>
-                                        <td>Bob Johnson</td>
-                                        <td>Bank Transfer</td>
-                                        <td>FREE15</td>
-                                        <td>$75.00</td>
-                                        <td>$15.00</td>
-                                        <td>$60.00</td>
-                                        <td>Completed</td>
-                                        <td><button
-                                                onclick="showModal('12347', '$75.00', 'FREE15', '2023-10-03', 'Widget C: 3')">View
-                                                Products</button></td>
-                                    </tr>
+                                    <% salesData.forEach(order => { %>
+                                        <tr>
+                                            <td><%= order.id %></td>
+                                            <td><%= new Date(order.date).toLocaleDateString() %></td>
+                                            <td><%= order.customerName %></td>
+                                            <td><%= order.paymentMethod %></td>
+                                            <td><%= order.couponUsed || 'N/A' %></td>
+                                            <td>₹<%= order.totalAmount.toFixed(2) %></td>
+                                            <td>₹<%= order.discount.toFixed(2) %></td>
+                                            <td>₹<%= order.netPaidAmount.toFixed(2) %></td>
+                                            <td><%= order.status %></td>
+                                            <td>
+                                                <button class="view-products-btn" data-order='<%= JSON.stringify(order) %>'>View Products</button>
+                                            </td>
+                                        </tr>
+                                    <% }); %>
                                 </tbody>
                             </table>
                             <div class="modal" id="orderModal">
                                 <div class="modal-content">
                                     <h2>Order Details</h2>
                                     <p><strong>Order ID:</strong> <span id="modalOrderId"></span></p>
-                                    <p><strong>Order Price:</strong> <span id="modalOrderPrice"></span></p>
-                                    <p><strong>Coupon Applied:</strong> <span id="modalCoupon"></span></p>
-                                    <p><strong>Date:</strong> <span id="modalDate"></span></p>
-                                    <p><strong>Product Quantity:</strong> <span id="modalProductQuantity"></span></p>
+                                    <p><strong>Order Date:</strong> <span id="modalOrderDate"></span></p>
+                                    <p><strong>Coupon Applied:</strong> <span id="modalCouponApplied"></span></p>
+                                    <p><strong>Order Total Price:</strong> <span id="modalOrderTotalPrice"></span></p>
+                                    <h3>Products:</h3>
+                                    <ul id="modalProductList"></ul>
                                     <button onclick="closeModal()">Close</button>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <script>
-                        function showModal(orderId, orderPrice, coupon, date, productQuantity) {
-                            document.getElementById('modalOrderId').textContent = orderId;
-                            document.getElementById('modalOrderPrice').textContent = orderPrice;
-                            document.getElementById('modalCoupon').textContent = coupon;
-                            document.getElementById('modalDate').textContent = date;
-                            document.getElementById('modalProductQuantity').textContent = productQuantity;
-                            document.getElementById('orderModal').style.display = 'flex';
-                        }
+                        document.addEventListener('DOMContentLoaded', () => {
+                            document.querySelectorAll('.view-products-btn').forEach(button => {
+                                button.addEventListener('click', function() {
+                                    const order = JSON.parse(this.dataset.order);
+                                    
+                                    document.getElementById('modalOrderId').textContent = order.id;
+                                    document.getElementById('modalOrderDate').textContent = new Date(order.date).toLocaleDateString();
+                                    document.getElementById('modalCouponApplied').textContent = order.couponUsed || 'N/A';
+                                    document.getElementById('modalOrderTotalPrice').textContent = '₹' + order.totalAmount.toFixed(2);
+
+                                    const productList = document.getElementById('modalProductList');
+                                    productList.innerHTML = ''; // Clear previous products
+                                    order.products.forEach(product => {
+                                        const listItem = document.createElement('li');
+                                        listItem.textContent = `${product.name} (Qty: ${product.quantity}, Price: ₹${product.price.toFixed(2)})`;
+                                        productList.appendChild(listItem);
+                                    });
+
+                                    document.getElementById('orderModal').style.display = 'flex';
+                                });
+                            });
+
+                            // Time range filter buttons
+                            document.querySelectorAll('.time-filter-btn').forEach(button => {
+                                button.addEventListener('click', function() {
+                                    document.getElementById('timeRangeInput').value = this.dataset.timeRange;
+                                    document.getElementById('filterForm').submit();
+                                });
+                            });
+
+                            // Export buttons
+                            document.getElementById('exportPdfBtn').addEventListener('click', () => exportReport('pdf'));
+                            document.getElementById('exportExcelBtn').addEventListener('click', () => exportReport('excel'));
+                            document.getElementById('exportCsvBtn').addEventListener('click', () => exportReport('csv'));
+
+                            function exportReport(format) {
+                                const form = document.getElementById('filterForm');
+                                const formData = new FormData(form);
+                                const params = new URLSearchParams();
+
+                                for (const pair of formData) {
+                                    if (pair[1]) { // Only include parameters that have a value
+                                        params.append(pair[0], pair[1]);
+                                    }
+                                }
+                                // Ensure startDate and endDate are included if they have values, even if timeRange is set
+                                if (form.elements.startDate.value) {
+                                    params.set('startDate', form.elements.startDate.value);
+                                }
+                                if (form.elements.endDate.value) {
+                                    params.set('endDate', form.elements.endDate.value);
+                                }
+                                // If a timeRange is active, ensure it's passed
+                                if (form.elements.timeRange.value) {
+                                    params.set('timeRange', form.elements.timeRange.value);
+                                }
+
+
+                                window.location.href = `/admin/salesreport/export/${format}?${params.toString()}`;
+                            }
+                        });
 
                         function closeModal() {
                             document.getElementById('orderModal').style.display = 'none';
