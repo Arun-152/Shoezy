@@ -517,9 +517,9 @@
       }
 
       if (!description) {
-        displayEditErrorMessage("editDescriptionError", "quired.");
+        displayEditErrorMessage("editDescriptionError", "Description is required.");
         isValid = false;
-      } else if (description.length < 10) {Description is re
+      } else if (description.length < 10) {
         displayEditErrorMessage("editDescriptionError", "Description must be at least 10 characters.");
         isValid = false;
       } else if (description.length > 200) {

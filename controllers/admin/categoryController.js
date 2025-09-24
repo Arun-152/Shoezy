@@ -153,15 +153,12 @@ const categoryEdit = async (req, res) => {
             return res.status(400).json({ message: "All fields are required" });
         }
 
-        let parsedCategoryOffer;
-
-        // Check if input is missing or empty
-        if (categoryOffer === undefined || categoryOffer.toString().trim() === '') {
-            return res.status(400).json({ message: "Please enter a category offer"});
-        }
-        parsedCategoryOffer = parseFloat(categoryOffer);
-        if (isNaN(parsedCategoryOffer) || parsedCategoryOffer < 0 || parsedCategoryOffer > 100) {
-            return res.status(400).json({ message: "Category offer must be a number between 0 and 100" });
+        let parsedCategoryOffer = null;
+        if (categoryOffer !== undefined && categoryOffer.toString().trim() !== '') {
+            parsedCategoryOffer = parseFloat(categoryOffer);
+            if (isNaN(parsedCategoryOffer) || parsedCategoryOffer < 0 || parsedCategoryOffer > 100) {
+                return res.status(400).json({ message: "Category offer must be a number between 0 and 100" });
+            }
         }
 
 
@@ -172,7 +169,7 @@ const categoryEdit = async (req, res) => {
             name: name.trim(),
             description: description.trim()
         };
-        if (parsedCategoryOffer !== null) updateObj.categoryOffer = parsedCategoryOffer;
+        updateObj.categoryOffer = parsedCategoryOffer; // Assign null if no offer
 
         const updatedCategory = await Category.findByIdAndUpdate(id, updateObj, { new: true, runValidators: true });
         if (!updatedCategory) return res.status(404).json({ message: "Category not found" });
