@@ -4,79 +4,70 @@ const Category = require("../../models/categorySchema");
 const Cart = require("../../models/cartSchema")
 const Wishlist = require("../../models/wishlistSchema")
 
-const loadAddToCart= async (req, res) => {
-    try {
-        const userId = req.session.userId
-        if (!userId) {
-            return res.redirect("/login");
-        }
+const loadAddToCart = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    if (!userId) return res.redirect("/login");
 
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.redirect("/login");
-        }
+    const user = await User.findById(userId);
+    if (!user) return res.redirect("/login");
 
-        const userCart = await Cart.findOne({ userId }).populate({
-            path: 'items.productId',
-           
-            populate: {
-                path: 'category',
-                match: { isListed: true, isDeleted: false }
-            }
-        });
+    const userCart = await Cart.findOne({ userId }).populate({
+      path: "items.productId",
+      match: { isDeleted: false, isBlocked: false },
+      populate: {
+        path: "category",
+        match: { isListed: true, isDeleted: false },
+      },
+    });
 
-        let cartItems = [];
-        let subtotal = 0;
+    let cartItems = [];
+    let subtotal = 0;
 
-        if (userCart && userCart.items.length > 0) {
-            let cartUpdated = false;
-            userCart.items.forEach(item => {
-                if (!item.size) {
-                    item.size = "Default";
-                    cartUpdated = true;
-                }
-            });
+    if (userCart && userCart.items.length > 0) {
+      cartItems = userCart.items
+        .filter(item => item.productId && item.productId.category)
+        .map(item => {
+          const variant = item.productId.variants.find(v => v.size === item.size);
+          if (!variant) {
+            return null; 
+          }
+          const currentPrice = variant.salePrice;
+          const itemTotal = currentPrice * item.quantity;
+          subtotal += itemTotal;
+          return {
+            ...item.toObject(),
+            price: currentPrice,
+            itemTotal,
+          };
+        })
+        .filter(item => item !== null); 
+    }
 
-            if (cartUpdated) {
-                await userCart.save();
-            }
+    const userWishlist = await Wishlist.findOne({ userId }).populate({
+      path: "products.productId",
+      match: { isDeleted: false, isBlocked: false },
+      populate: {
+        path: "category",
+        match: { isListed: true, isDeleted: false },
+      },
+    });
 
-            cartItems = userCart.items
-                .filter(item => item.productId && item.productId.category)
-                .map(item => {
-                    const itemTotal = item.price * item.quantity;
-                    subtotal += itemTotal;
-                    return {
-                        ...item.toObject(),
-                        itemTotal: itemTotal
-                    };
-                });
-            
-        }
-        const userWishlist = await Wishlist.findOne({ userId }).populate({
-            path: 'products.productId',
-            match: { isDeleted: false, isBlocked: false },
-            populate: {
-                path: 'category',
-                match: { isListed: true, isDeleted: false }
-            }
-        });
+    const shipping = subtotal > 500 ? 0 : 50;
+    const total = subtotal + shipping;
 
-        const shipping = subtotal > 500 ? 0 : 50;
-        const total = subtotal + shipping;
-
-        return res.render("addToCartPage", {
-            user: user,
-            cartItems: cartItems,
-            subtotal: subtotal,
-            shipping: shipping,
-            total: total
-        });
-    } catch (error) {
-        console.error("Add to cart page error:", error);
-        res.redirect("/usererrorPage");
-    }        
-}   
+    return res.render("addToCartPage", {
+      user,
+      cartItems,
+      subtotal,
+      shipping,
+      total,
+    });
+  } catch (error) {
+    console.error("Add to cart page error:", error);
+    res.redirect("/usererrorPage");
+  }
+};
 
 const addToCart = async(req,res)=>{
     try {

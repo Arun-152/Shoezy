@@ -75,9 +75,26 @@ const loadCheckout = async (req, res) => {
       cart.items = filteredItems;
 
       filteredItems.forEach(item => {
-        subtotal += item.totalPrice;
-        totalItems += item.quantity;
-        allItems.push(item);
+        const product = item.productId;
+        const variant = product.variants.find(v => v.size === item.size);
+
+        if (variant) {
+          const price = variant.salePrice || variant.regularPrice;
+          const totalPrice = price * item.quantity;
+
+          const itemWithPrice = {
+            ...item.toObject(),
+            price: price,
+            totalPrice: totalPrice
+          };
+
+          subtotal += totalPrice;
+          totalItems += item.quantity;
+          allItems.push(itemWithPrice);
+        } else {
+          // Handle cases where the variant is not found, though this should ideally not happen if cart is managed well
+          console.warn(`Variant not found for product ${product._id} with size ${item.size}`);
+        }
       });
     });
     const shipping = 0;
