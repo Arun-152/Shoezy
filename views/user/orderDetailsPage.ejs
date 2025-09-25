@@ -299,6 +299,7 @@
         display: grid;
         grid-template-columns: 2fr 1fr;
         gap: 30px;
+        align-items: start;
     }
 
     /* Section Styles */
@@ -318,9 +319,18 @@
         grid-column: 1 / 2;
     }
 
-    .order-summary-section,
-    .delivery-address-section {
+    .order-details-right-column {
         grid-column: 2 / 3;
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+        position: sticky;
+        top: 90px;
+    }
+
+    .order-details-right-column .order-summary-section,
+    .order-details-right-column .delivery-address-section {
+        margin-bottom: 0;
     }
 
     .order-timeline-section,
@@ -417,26 +427,86 @@
     }
 
     /* Summary Card */
-    .summary-card {
-        background: #f8f9fa;
-        padding: 20px;
-        border-radius: 10px;
-    }
+.summary-card {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+}
 
-    .summary-row {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 10px;
-        padding: 5px 0;
-    }
+.summary-details {
+    margin-bottom: 15px;
+}
 
-    .summary-row.total {
-        border-top: 2px solid #e5e7eb;
-        padding-top: 15px;
-        margin-top: 15px;
-        font-weight: 600;
-        font-size: 18px;
-    }
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    color: #4b5563;
+}
+
+.summary-label {
+    font-weight: 500;
+}
+
+.summary-value {
+    font-weight: 600;
+}
+
+.summary-value.discount {
+    color: #ef4444; /* Red for discount */
+}
+
+.summary-value.free {
+    color: #22c55e; /* Green for free shipping */
+    font-weight: 700;
+}
+
+.summary-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 2px solid #e5e7eb;
+    padding-top: 15px;
+    margin-top: 10px;
+}
+
+.total-label {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.total-amount {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #6366f1;
+}
+
+.payment-method {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px dashed #d1d5db;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #4b5563;
+}
+
+.payment-label {
+    font-weight: 500;
+}
+
+.payment-value {
+    font-weight: 600;
+    background-color: #e0e7ff;
+    color: #4338ca;
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 0.9rem;
+}
+
 
     .free {
         color: #10b981;
@@ -1033,43 +1103,47 @@
                                 </div>
                             </div>
 
-                            <!-- Order Summary -->
-                            <div class="order-summary-section">
-                                <h2>Order Summary</h2>
-                                <div class="summary-card">
-                                    <!-- Subtotal -->
-                                    <div class="summary-row">
-                                        <span>Subtotal</span>
-                                        <span>₹<%= order.totalAmount.toLocaleString() %></span>
-                                    </div>
+                            <div class="order-details-right-column">
+                                <!-- Order Summary -->
+                                <div class="order-summary-section">
+    <h2>Order Summary</h2>
+    <div class="summary-card">
+        <div class="summary-details">
+            <!-- Subtotal -->
+            <div class="summary-row">
+                <span class="summary-label">Subtotal</span>
+                <span class="summary-value">₹<%= (order.totalAmount + (order.discountAmount || 0)).toLocaleString() %></span>
+            </div>
 
-                                    <!-- Coupon Discount -->
-                                    <% if(order.discount && order.discount> 0) { %>
-                                        <div class="summary-row">
-                                            <span>Coupon Discount</span>
-                                            <span>- ₹<%= order.discount.toLocaleString() %></span>
-                                        </div>
-                                        <% } %>
+            <!-- Coupon Discount -->
+            <% if (order.discountAmount && order.discountAmount > 0) { %>
+            <div class="summary-row">
+                <span class="summary-label">Coupon Discount</span>
+                <span class="summary-value discount">- ₹<%= order.discountAmount.toLocaleString() %></span>
+            </div>
+            <% } %>
 
-                                            <!-- Shipping -->
-                                            <div class="summary-row">
-                                                <span>Shipping</span>
-                                                <span class="free">FREE</span>
-                                            </div>
+            <!-- Shipping -->
+            <div class="summary-row">
+                <span class="summary-label">Shipping</span>
+                <span class="summary-value free">FREE</span>
+            </div>
+        </div>
 
-                                            <!-- Total After Discount -->
-                                            <div class="summary-row total">
-                                                <span>Total</span>
-                                                <span>₹<%= order.finalAmount ? order.finalAmount.toLocaleString() :
-                                                        order.totalAmount.toLocaleString() %></span>
-                                            </div>
+        <!-- Total -->
+        <div class="summary-total">
+            <span class="summary-label total-label">Total</span>
+            <span class="summary-value total-amount">₹<%= order.finalAmount ? order.finalAmount.toLocaleString() : order.totalAmount.toLocaleString() %></span>
+        </div>
 
-                                            <!-- Payment Method -->
-                                            <div class="payment-method">
-                                                <span>Payment Method: <%= order.paymentMethod %></span>
-                                            </div>
-                                </div>
-                            </div>
+        <!-- Payment Method -->
+        <div class="payment-method">
+            <span class="payment-label">Payment Method:</span>
+            <span class="payment-value"><%= order.paymentMethod %></span>
+        </div>
+    </div>
+</div>
+
 
 
                             <!-- Delivery Address -->
@@ -1100,9 +1174,9 @@
                                                 </p>
                                                 <p>Phone: <%= order.address.mobileNumber %>
                                                 </p>
-                                    </div>
                                 </div>
                             </div>
+</div>
 
                             <!-- Order Timeline -->
                             <div class="order-timeline-section">
