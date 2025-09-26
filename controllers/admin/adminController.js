@@ -2,6 +2,7 @@ const User = require("../../models/userSchema");
 const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
 const bcrypt = require("bcrypt");
+const Order = require("../../models/orderSchema")
 require("dotenv").config();
 
 const adminErrorPage = (req, res) => {
@@ -165,66 +166,6 @@ const postLogin = async (req, res) => {
     });
   }
 };
-
-const dashboardPage = async (req, res) => {
-  try {
-  
-    
-    // Fetch dynamic data for dashboard
-    const totalUsers = await User.countDocuments({ isAdmin: false, isBlocked: false });
-    const totalProducts = await Product.countDocuments({ isDeleted: false });
-    const totalCategories = await Category.countDocuments({ isDeleted: false });
-    const blockedUsers = await User.countDocuments({ isAdmin: false, isBlocked: true });
-    
-    // Calculate total sales value (sum of all variant prices)
-    const products = await Product.find({ isDeleted: false });
-    let totalSalesValue = 0;
-    products.forEach(product => {
-      product.variants.forEach(variant => {
-        totalSalesValue += variant.variantPrice * variant.variantQuantity;
-      });
-    });
-    
-    // Get recent products for latest orders section
-    const recentProducts = await Product.find({ isDeleted: false })
-      .populate('category')
-      .sort({ createdAt: -1 })
-      .limit(4);
-    
-    const dashboardData = {
-      totalSales: totalSalesValue,
-      totalUsers: totalUsers,
-      totalProducts: totalProducts,
-      totalCategories: totalCategories,
-      blockedUsers: blockedUsers,
-      recentProducts: recentProducts,
-      totalOrders: 0,
-      visitors: totalUsers + blockedUsers
-    };
-    
-    res.render("dashboardPage", { 
-      title: "Admin Dashboard",
-      data: dashboardData
-    });
-  } catch (error) {
-    console.error("Error rendering dashboard:", error.message);
-    res.status(500).json({success:false,message:`Server error: ${error.message}`});
-  }
-};
-
-
-
-const salesPage = (req, res) => {
-  try {
-    res.render("adminsalesreportPage", { title: "Sales Report" });
-  } catch (error) {
-    console.error("Error rendering sales report page:", error.message);
-    res.status(500).json({success:false,message:`Server error: ${error.message}`});
-  }
-};
-
-
-
 const offersPage = (req, res) => {
   try {
     res.render("adminoffersPage", { title: "Offers" });
@@ -252,15 +193,292 @@ const adminLogout = (req, res) => {
     res.status(500).json({success:false,message:"Logout failed"});
   }
 };
+const dashboard = async (req, res) => {
+  try {
+    // Total Customers (non-admin users)
+    const totalCustomers = await User.countDocuments({ isAdmin: false });
 
+    // Total Products (active products)
+    const totalProducts = await Product.countDocuments({
+      isDeleted: false,
+      isBlocked: false,
+    });
+
+    // Total Orders
+    const totalOrders = await Order.countDocuments();
+
+    // Total Revenue (from delivered and paid orders)
+    const revenueAgg = await Order.aggregate([
+      {
+        $match: {
+          orderStatus: "Delivered",
+          paymentStatus: "Paid",
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$totalAmount" },
+        },
+      },
+    ]);
+    const totalRevenue = revenueAgg.length > 0 ? revenueAgg[0].total : 0;
+
+    // Order Status Counts
+    const statusCounts = await Order.aggregate([
+      {
+        $group: {
+          _id: "$orderStatus",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+    let pending = 0,
+      processing = 0,
+      shipped = 0,
+      delivered = 0;
+    statusCounts.forEach((s) => {
+      if (s._id === "Pending") pending = s.count;
+      else if (s._id === "Processing") processing = s.count;
+      else if (s._id === "Shipped") shipped = s.count;
+      else if (s._id === "Delivered") delivered = s.count;
+    });
+
+    // Recent Orders (last 5)
+    const recentOrders = await Order.find()
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .populate("userId", "fullname");
+    const recentOrdersData = recentOrders.map((order) => ({
+      orderNumber: order.orderNumber,
+      customer: order.userId ? order.userId.fullname : "Unknown",
+      status: order.orderStatus,
+      amount: order.totalAmount,
+      date: order.createdAt.toLocaleString("en-IN", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    }));
+
+    // Most Ordered Products (top 5 by number of unique orders)
+    const mostOrderedProducts = await Order.aggregate([
+      { $unwind: "$items" },
+      {
+        $group: {
+          _id: "$items.productId",
+          orders: { $addToSet: "$_id" },
+        },
+      },
+      {
+        $project: {
+          count: { $size: "$orders" },
+        },
+      },
+      { $sort: { count: -1 } },
+      { $limit: 5 },
+      {
+        $lookup: {
+          from: "products",
+          localField: "_id",
+          foreignField: "_id",
+          as: "product",
+        },
+      },
+      { $unwind: "$product" },
+      {
+        $project: {
+          name: "$product.productName",
+          count: 1,
+        },
+      },
+    ]);
+
+    // Most Ordered Categories (top 5 by number of unique orders containing products from category)
+    const mostOrderedCategories = await Order.aggregate([
+      { $unwind: "$items" },
+      {
+        $lookup: {
+          from: "products",
+          localField: "items.productId",
+          foreignField: "_id",
+          as: "product",
+        },
+      },
+      { $unwind: "$product" },
+      {
+        $group: {
+          _id: "$product.category",
+          orders: { $addToSet: "$_id" },
+        },
+      },
+      {
+        $project: {
+          count: { $size: "$orders" },
+        },
+      },
+      { $sort: { count: -1 } },
+      { $limit: 5 },
+      {
+        $lookup: {
+          from: "categories",
+          localField: "_id",
+          foreignField: "_id",
+          as: "category",
+        },
+      },
+      { $unwind: "$category" },
+      {
+        $project: {
+          name: "$category.name", // Assuming Category has a 'name' field
+          count: 1,
+        },
+      },
+    ]);
+
+    // Sales Data for Chart (monthly sales over last 12 months)
+    const monthlySalesRaw = await Order.aggregate([
+      {
+        $match: {
+          orderStatus: "Delivered",
+          paymentStatus: "Paid",
+        },
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
+          },
+          total: { $sum: "$totalAmount" },
+        },
+      },
+      { $sort: { "_id.year": -1, "_id.month": -1 } },
+      { $limit: 12 },
+    ]);
+    const monthlySales = monthlySalesRaw
+      .map((s) => ({
+        label: `${s._id.month}/${s._id.year % 100}`,
+        total: s.total,
+      }))
+      .reverse(); // Oldest to newest
+
+    // Percentage Calculations (last 30 days vs previous 30 days)
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+
+    // Helper functions
+    const getPeriodRevenue = async (start, end) => {
+      const agg = await Order.aggregate([
+        {
+          $match: {
+            orderStatus: "Delivered",
+            paymentStatus: "Paid",
+            createdAt: { $gte: start, $lt: end },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: "$totalAmount" },
+          },
+        },
+      ]);
+      return agg.length > 0 ? agg[0].total : 0;
+    };
+
+    const getPeriodOrders = async (start, end) => {
+      return await Order.countDocuments({
+        createdAt: { $gte: start, $lt: end },
+      });
+    };
+
+    const getPeriodNewCustomers = async (start, end) => {
+      return await User.countDocuments({
+        isAdmin: false,
+        createdAt: { $gte: start, $lt: end },
+      });
+    };
+
+    const getPeriodNewProducts = async (start, end) => {
+      return await Product.countDocuments({
+        createdAt: { $gte: start, $lt: end },
+      });
+    };
+
+    const currentRevenue = await getPeriodRevenue(thirtyDaysAgo, now);
+    const previousRevenue = await getPeriodRevenue(sixtyDaysAgo, thirtyDaysAgo);
+    const revenuePercentage =
+      previousRevenue > 0
+        ? ((currentRevenue - previousRevenue) / previousRevenue * 100).toFixed(
+            1
+          )
+        : 0;
+
+    const currentOrders = await getPeriodOrders(thirtyDaysAgo, now);
+    const previousOrders = await getPeriodOrders(sixtyDaysAgo, thirtyDaysAgo);
+    const ordersPercentage =
+      previousOrders > 0
+        ? ((currentOrders - previousOrders) / previousOrders * 100).toFixed(1)
+        : 0;
+
+    const currentNewCustomers = await getPeriodNewCustomers(thirtyDaysAgo, now);
+    const previousNewCustomers = await getPeriodNewCustomers(sixtyDaysAgo, thirtyDaysAgo);
+    const customersPercentage =
+      previousNewCustomers > 0
+        ? (
+            (currentNewCustomers - previousNewCustomers) /
+            previousNewCustomers *
+            100
+          ).toFixed(1)
+        : 0;
+
+    const currentNewProducts = await getPeriodNewProducts(thirtyDaysAgo, now);
+    const previousNewProducts = await getPeriodNewProducts(sixtyDaysAgo, thirtyDaysAgo);
+    const productsPercentage =
+      previousNewProducts > 0
+        ? (
+            (currentNewProducts - previousNewProducts) /
+            previousNewProducts *
+            100
+          ).toFixed(1)
+        : 0;
+
+    // Render the dashboard with dynamic data
+   res.render("dashboardPage", {
+  totalCustomers,
+  customersPercentage: `${customersPercentage > 0 ? "+" : ""}${customersPercentage}%`,
+  totalRevenue: `₹${totalRevenue.toLocaleString("en-IN")}`,
+  revenuePercentage: `${revenuePercentage > 0 ? "+" : ""}${revenuePercentage}%`,
+  totalOrders,
+  ordersPercentage: `${ordersPercentage > 0 ? "+" : ""}${ordersPercentage}%`,
+  totalProducts,
+  productsPercentage: `${productsPercentage > 0 ? "+" : ""}${productsPercentage}%`,
+  pending,
+  processing,
+  shipped,
+  delivered,
+  recentOrdersData,
+  mostOrderedProducts, 
+  mostOrderedCategories, 
+  monthlySales, 
+});
+
+  } catch (error) {
+    console.error("Error loading dashboard:", error);
+    res.render("admin500");
+  }
+}
 
 module.exports = {
   adminLoginPage,
   postLogin,
-  dashboardPage,
-  salesPage,
   offersPage,
   settingsPage,
   adminLogout,
   adminErrorPage,
+  dashboard
 };

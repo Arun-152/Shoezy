@@ -18,7 +18,7 @@ router.get("/login", adminController.adminLoginPage);
 router.post("/login", adminController.postLogin);
 
 // Dashboard Management
-router.get("/dashboard", adminAuth, adminController.dashboardPage);
+router.get("/dashboard", adminAuth, adminController.dashboard);
 
 // Customer Management
 router.get("/customers", adminAuth, customerController.customerPage);
