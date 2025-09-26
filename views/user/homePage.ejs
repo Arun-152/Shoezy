@@ -1,670 +1,744 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shoezy - Premium Sneakers</title>
     <link rel="stylesheet" href="css/homePage.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
 </head>
+
 <body>
     <!-- Header -->
     <%-include('../partials/user/navbar')%>
 
-    <!-- Enhanced Hero Section -->
-    <section class="hero">
-        <div class="hero-container">
-            <div class="hero-content">
-                <div class="hero-text">
-                    <span class="hero-badge">
-                        <i class="fas fa-star"></i>
-                        New Collection 2024
-                    </span>
-                    <h1>Step Into <span class="gradient-text">Excellence</span></h1>
-                    <p class="hero-description">Discover our premium collection of modern sneakers designed for style, comfort, and performance. Elevate your footwear game with Shoezy.</p>
-                    
-                    <div class="hero-buttons">
-                        <button class="btn-primary shop-btn">
-                            <span>Shop Collection</span>
+        <!-- Enhanced Hero Section -->
+        <section class="hero">
+            <div class="hero-container">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <span class="hero-badge">
+                            <i class="fas fa-star"></i>
+                            New Collection 2024
+                        </span>
+                        <h1>Step Into <span class="gradient-text">Excellence</span></h1>
+                        <p class="hero-description">Discover our premium collection of modern sneakers designed for
+                            style, comfort, and performance. Elevate your footwear game with Shoezy.</p>
+
+                        <div class="hero-buttons">
+                            <button class="btn-primary shop-btn">
+                                <span>Shop Collection</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                            <button class="btn-secondary">
+                                <i class="fas fa-play"></i>
+                                <span>Watch Story</span>
+                            </button>
+                        </div>
+
+                        <div class="hero-stats">
+                            <div class="stat">
+                                <span class="stat-number">50K+</span>
+                                <span class="stat-label">Happy Customers</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-number">500+</span>
+                                <span class="stat-label">Premium Styles</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-number">4.9★</span>
+                                <span class="stat-label">Customer Rating</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="hero-visual">
+                        <div class="hero-image-container">
+                            <div class="hero-image-bg"></div>
+                            <img src="/images/aijo1rehiogpabr_photo1.png" alt="Featured Sneaker" class="hero-sneaker">
+
+                            <!-- Floating Elements -->
+                            <div class="floating-elements">
+                                <div class="floating-card price-card">
+                                    <span class="price">₹8,999</span>
+                                    <span class="price-label">Starting from</span>
+                                </div>
+                                <div class="floating-card rating-card">
+                                    <div class="stars">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                    <span>4.9 (2.1k reviews)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Categories - FULL WIDTH AIR JORDAN SECTION -->
+        <section class="featured-categories">
+            <!-- Full-width Air Jordan section - no container wrapper -->
+            <div class="full-width-air-jordan">
+                <div class="category-card large air-jordan-card">
+                    <div class="category-content">
+                        <h3>AIR JORDAN</h3>
+                        <p>Iconic basketball sneakers with legendary performance and style</p>
+                        <button class="category-btn shop-btn">
+                            <span>Explore Collection</span>
                             <i class="fas fa-arrow-right"></i>
                         </button>
-                        <button class="btn-secondary">
-                            <i class="fas fa-play"></i>
-                            <span>Watch Story</span>
-                        </button>
                     </div>
-
-                    <div class="hero-stats">
-                        <div class="stat">
-                            <span class="stat-number">50K+</span>
-                            <span class="stat-label">Happy Customers</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-number">500+</span>
-                            <span class="stat-label">Premium Styles</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-number">4.9★</span>
-                            <span class="stat-label">Customer Rating</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="hero-visual">
-                    <div class="hero-image-container">
-                        <div class="hero-image-bg"></div>
-                        <img src="/images/aijo1rehiogpabr_photo1.png" alt="Featured Sneaker" class="hero-sneaker">
-                        
-                        <!-- Floating Elements -->
-                        <div class="floating-elements">
-                            <div class="floating-card price-card">
-                                <span class="price">₹8,999</span>
-                                <span class="price-label">Starting from</span>
-                            </div>
-                            <div class="floating-card rating-card">
-                                <div class="stars">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                </div>
-                                <span>4.9 (2.1k reviews)</span>
-                            </div>
-                        </div>
+                    <div class="category-image">
+                        <img src="/images/Speedcat-OG-Sneakers.avif" alt="Air Jordan">
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Featured Categories - FULL WIDTH AIR JORDAN SECTION -->
-    <section class="featured-categories">
-        <!-- Full-width Air Jordan section - no container wrapper -->
-        <div class="full-width-air-jordan">
-            <div class="category-card large air-jordan-card">
-                <div class="category-content">
-                    <h3>AIR JORDAN</h3>
-                    <p>Iconic basketball sneakers with legendary performance and style</p>
-                    <button class="category-btn shop-btn">
-                        <span>Explore Collection</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </button>
+        <!-- New Arrivals Section -->
+        <section class="products-section new-arrivals">
+            <div class="container">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>New Arrivals</h2>
+                        <p>Fresh styles just dropped</p>
+                    </div>
+                    <div class="section-controls">
+                        <a href="/shop" class="view-all-btn">View All</a>
+                    </div>
                 </div>
-                <div class="category-image">
-                    <img src="/images/Speedcat-OG-Sneakers.avif" alt="Air Jordan">
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- New Arrivals Section -->
-    <section class="products-section new-arrivals">
-        <div class="container">
-            <div class="section-header">
-                <div class="section-title">
-                    <h2>New Arrivals</h2>
-                    <p>Fresh styles just dropped</p>
-                </div>
-                <div class="section-controls">
-                    <a href="/shop" class="view-all-btn">View All</a>
-                </div>
-            </div>
-            
-            <div class="products-grid" id="new-arrivals-grid">
-                <% if (products && products.length > 0) { %>
-                    <% products.slice(0, 4).forEach(product => { %>
-                        <div class="product-card modern" onclick="<%= typeof user !== 'undefined' && user ? `window.location.href='/product/${product._id}'` : 'redirectToLogin()' %>" style="cursor: pointer;">
-                            <div class="product-image-container">
-                                <div class="product-image">
-                                    <% if (product.images && product.images.length > 0) { %>
-                                        <img src="<%= product.images[0] %>" alt="<%= product.productName %>">
-                                    <% } else { %>
-                                        <img src="https://via.placeholder.com/280x280/f8f9fa/dee2e6?text=No+Image" alt="<%= product.productName %>">
-                                    <% } %>
-                                </div>
-
-                                <!-- Badges -->
-                                <% if (product.bestOffer && product.bestOffer > 0) { %>
-                                    <div class="offer-badge">
-                                        <%= product.bestOffer %>% OFF
-                                    </div>
-                                <% } %>
-
-                                <div class="stock-badge <%= product.status === 'Available' ? 'in-stock' : 'out-of-stock' %>">
-                                    <%= product.status === 'Available' ? 'Available' : 'Out of Stock' %>
-                                </div>
-
-                                <!-- Wishlist -->
-                                <div class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('<%= product._id %>', this)">
-                                    <% if (wishlistItems && wishlistItems.includes(product._id.toString())) { %>
-                                        <i class="fas fa-heart" style="color: #ff4757;"></i>
-                                    <% } else { %>
-                                        <i class="far fa-heart"></i>
-                                    <% } %>
-                                </div>
-
-                                <!-- Quick Actions -->
-                                <div class="quick-actions">
-                                    <button class="quick-action-btn" onclick="event.stopPropagation(); addToCart('<%= product._id %>')" title="Add to Cart">
-                                        <i class="fas fa-shopping-cart"></i>
-                                    </button>
-                                    <% if (typeof user !== 'undefined' && user) { %>
-                                        <button class="quick-action-btn" onclick="event.stopPropagation(); window.location.href='/product/<%= product._id %>'" title="Quick View">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    <% } %>
-                                </div>
-                            </div>
-
-                            <div class="product-info">
-                                <h3 class="product-name"><%= product.productName %></h3>
-                                <p class="product-category"><%= product.category ? product.category.name : 'Uncategorized' %></p>
-                                
-                                <div class="product-rating">
-                                    <div class="stars">
-                                        <% if (product.ratings && product.ratings.average > 0) { %>
-                                            <% const rating = product.ratings.average; %>
-                                            <% for (let i = 1; i <= 5; i++) { %>
-                                                <% if (i <= Math.floor(rating)) { %>
-                                                    <i class="fas fa-star"></i>
-                                                <% } else if (i - 0.5 <= rating) { %>
-                                                    <i class="fas fa-star-half-alt"></i>
-                                                <% } else { %>
-                                                    <i class="far fa-star"></i>
+                <div class="products-grid" id="new-arrivals-grid">
+                    <% if (products && products.length> 0) { %>
+                        <% products.slice(0, 4).forEach(product=> { %>
+                            <div class="product-card modern"
+                                onclick="<%= typeof user !== 'undefined' && user ? `window.location.href='/product/${product._id}'` : 'redirectToLogin()' %>"
+                                style="cursor: pointer;">
+                                <div class="product-image-container">
+                                    <div class="product-image">
+                                        <% if (product.images && product.images.length> 0) { %>
+                                            <img src="<%= product.images[0] %>" alt="<%= product.productName %>">
+                                            <% } else { %>
+                                                <img src="https://via.placeholder.com/280x280/f8f9fa/dee2e6?text=No+Image"
+                                                    alt="<%= product.productName %>">
                                                 <% } %>
-                                            <% } %>
-                                        <% } else { %>
-                                            <i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
-                                        <% } %>
                                     </div>
-                                    <span class="rating-text">(<%= product.ratings && product.ratings.count ? product.ratings.count : 0 %>)</span>
+
+                                    <!-- Badges -->
+                                    <% if (product.bestOffer && product.bestOffer> 0) { %>
+                                        <div class="offer-badge">
+                                            <%= product.bestOffer %>% OFF
+                                        </div>
+                                        <% } %>
+
+                                            <div
+                                                class="stock-badge <%= product.status === 'Available' ? 'in-stock' : 'out-of-stock' %>">
+                                                <%= product.status==='Available' ? 'Available' : 'Out of Stock' %>
+                                            </div>
+
+                                            <!-- Wishlist -->
+                                            <div class="wishlist-btn"
+                                                onclick="event.stopPropagation(); toggleWishlist('<%= product._id %>', this)">
+                                                <% if (wishlistItems && wishlistItems.includes(product._id.toString()))
+                                                    { %>
+                                                    <i class="fas fa-heart" style="color: #ff4757;"></i>
+                                                    <% } else { %>
+                                                        <i class="far fa-heart"></i>
+                                                        <% } %>
+                                            </div>
+
+                                            <!-- Quick Actions -->
+                                            <div class="quick-actions">
+                                                <button class="quick-action-btn"
+                                                    onclick="event.stopPropagation(); addToCart('<%= product._id %>')"
+                                                    title="Add to Cart">
+                                                    <i class="fas fa-shopping-cart"></i>
+                                                </button>
+                                                <% if (typeof user !=='undefined' && user) { %>
+                                                    <button class="quick-action-btn"
+                                                        onclick="event.stopPropagation(); window.location.href='/product/<%= product._id %>'"
+                                                        title="Quick View">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <% } %>
+                                            </div>
                                 </div>
 
-                                <div class="product-price">
-                                    <% if (product.variants && product.variants.length > 0) { %>
-                                        <%
-                                            const prices = product.variants.map(v => v.salePrice);
-                                            const originalPrices = product.variants.map(v => v.variantPrice);
-                                            const minSalePrice = Math.min(...prices);
-                                            const minOriginalPrice = Math.min(...originalPrices);
-                                            const hasDiscount = minSalePrice < minOriginalPrice;
-                                        %>
-                                        <span class="current-price">₹<%= minSalePrice %></span>
-                                        <% if (hasDiscount) { %>
-                                            <span class="original-price">₹<%= minOriginalPrice %></span>
-                                        <% } %>
-                                    <% } else { %>
-                                        <span class="current-price">Price not available</span>
-                                    <% } %>
+                                <div class="product-info">
+                                    <h3 class="product-name">
+                                        <%= product.productName %>
+                                    </h3>
+                                    <p class="product-category">
+                                        <%= product.category ? product.category.name : 'Uncategorized' %>
+                                    </p>
+
+                                    <div class="product-rating">
+                                        <div class="stars">
+                                            <% if (product.ratings && product.ratings.average> 0) { %>
+                                                <% const rating=product.ratings.average; %>
+                                                    <% for (let i=1; i <=5; i++) { %>
+                                                        <% if (i <=Math.floor(rating)) { %>
+                                                            <i class="fas fa-star"></i>
+                                                            <% } else if (i - 0.5 <=rating) { %>
+                                                                <i class="fas fa-star-half-alt"></i>
+                                                                <% } else { %>
+                                                                    <i class="far fa-star"></i>
+                                                                    <% } %>
+                                                                        <% } %>
+                                                                            <% } else { %>
+                                                                                <i class="far fa-star"></i><i
+                                                                                    class="far fa-star"></i><i
+                                                                                    class="far fa-star"></i><i
+                                                                                    class="far fa-star"></i><i
+                                                                                    class="far fa-star"></i>
+                                                                                <% } %>
+                                        </div>
+                                        <span class="rating-text">(<%= product.ratings && product.ratings.count ?
+                                                product.ratings.count : 0 %>)</span>
+                                    </div>
+
+                                    <div class="product-price">
+                                        <% if (product.variants && product.variants.length> 0) { %>
+                                            <% const prices=product.variants.map(v=> v.salePrice);
+                                                const originalPrices = product.variants.map(v => v.regularPrice); 
+                                                const minSalePrice = Math.min(...prices);
+                                                const minOriginalPrice = Math.min(...originalPrices);
+                                                const hasDiscount = minSalePrice < minOriginalPrice; %>
+                                                    <span class="current-price">₹<%= minSalePrice %></span>
+                                                    <% if (hasDiscount) { %>
+                                                        <span class="original-price"
+                                                            style="text-decoration: line-through; font-weight: 400; font-size: larger; color: #db2525; margin-left: 5px;">
+                                                            ₹<%= minOriginalPrice %> <!-- fixed -->
+                                                        </span>
+                                                        <% } %>
+                                                            <% } else { %>
+                                                                <span class="current-price">Price not available</span>
+                                                                <% } %>
+                                    </div>
+
                                 </div>
                             </div>
-                        </div>
-                    <% }) %>
-                <% } %>
+                            <% }) %>
+                                <% } %>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Trending Now Section - SORTED BY HIGHEST OFFER/DISCOUNT -->
-    <section class="products-section trending">
-        <div class="container">
-            <div class="section-header">
-                <div class="section-title">
-                    <h2>Trending Now</h2>
-                    <p>Most popular this week - Highest discounts first</p>
+        <!-- Trending Now Section - SORTED BY HIGHEST OFFER/DISCOUNT -->
+        <section class="products-section trending">
+            <div class="container">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>Trending Now</h2>
+                        <p>Most popular this week - Highest discounts first</p>
+                    </div>
+                    <div class="section-controls">
+                        <a href="/shop" class="view-all-btn">View All</a>
+                    </div>
                 </div>
-                <div class="section-controls">
-                    <a href="/shop" class="view-all-btn">View All</a>
-                </div>
-            </div>
-            
-            <div class="products-grid" id="trending-grid">
-                <% if (products && products.length > 0) { %>
-                    <%
-                        // Sort products by highest offer/discount first
-                        const sortedByOffer = products.slice().sort((a, b) => {
+
+                <div class="products-grid" id="trending-grid">
+                    <% if (products && products.length> 0) { %>
+                        <% // Sort products by highest offer/discount first const
+                            sortedByOffer=products.slice().sort((a, b)=> {
                             const getOffer = (product) => {
-                                return product.bestOffer || 0;
+                            return product.bestOffer || 0;
                             };
                             return getOffer(b) - getOffer(a);
-                        });
-                    %>
-                    <% sortedByOffer.slice(0, 4).forEach(product => { %>
-                        <div class="product-card modern" onclick="<%= typeof user !== 'undefined' && user ? `window.location.href='/product/${product._id}'` : 'redirectToLogin()' %>" style="cursor: pointer;">
-                            <!-- Same product card structure as New Arrivals -->
-                            <div class="product-image-container">
-                                <div class="product-image">
-                                    <% if (product.images && product.images.length > 0) { %>
-                                        <img src="<%= product.images[0] %>" alt="<%= product.productName %>">
-                                    <% } else { %>
-                                        <img src="https://via.placeholder.com/280x280/f8f9fa/dee2e6?text=No+Image" alt="<%= product.productName %>">
-                                    <% } %>
-                                </div>
-
-                                <% if (product.bestOffer && product.bestOffer > 0) { %>
-                                    <div class="offer-badge">
-                                        <%= product.bestOffer %>% OFF
-                                    </div>
-                                <% } %>
-
-                                <div class="stock-badge <%= product.status === 'Available' ? 'in-stock' : 'out-of-stock' %>">
-                                    <%= product.status === 'Available' ? 'Available' : 'Out of Stock' %>
-                                </div>
-
-                                <div class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('<%= product._id %>', this)">
-                                    <% if (wishlistItems && wishlistItems.includes(product._id.toString())) { %>
-                                        <i class="fas fa-heart" style="color: #ff4757;"></i>
-                                    <% } else { %>
-                                        <i class="far fa-heart"></i>
-                                    <% } %>
-                                </div>
-
-                                <div class="quick-actions">
-                                    <button class="quick-action-btn" onclick="event.stopPropagation(); addToCart('<%= product._id %>')" title="Add to Cart">
-                                        <i class="fas fa-shopping-cart"></i>
-                                    </button>
-                                    <% if (typeof user !== 'undefined' && user) { %>
-                                        <button class="quick-action-btn" onclick="event.stopPropagation(); window.location.href='/product/<%= product._id %>'" title="Quick View">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    <% } %>
-                                </div>
-                            </div>
-
-                            <div class="product-info">
-                                <h3 class="product-name"><%= product.productName %></h3>
-                                <p class="product-category"><%= product.category ? product.category.name : 'Uncategorized' %></p>
-                                
-                                <div class="product-rating">
-                                    <div class="stars">
-                                        <% if (product.ratings && product.ratings.average > 0) { %>
-                                            <% const rating = product.ratings.average; %>
-                                            <% for (let i = 1; i <= 5; i++) { %>
-                                                <% if (i <= Math.floor(rating)) { %>
-                                                    <i class="fas fa-star"></i>
-                                                <% } else if (i - 0.5 <= rating) { %>
-                                                    <i class="fas fa-star-half-alt"></i>
+                            });
+                            %>
+                            <% sortedByOffer.slice(0, 4).forEach(product=> { %>
+                                <div class="product-card modern"
+                                    onclick="<%= typeof user !== 'undefined' && user ? `window.location.href='/product/${product._id}'` : 'redirectToLogin()' %>"
+                                    style="cursor: pointer;">
+                                    <!-- Same product card structure as New Arrivals -->
+                                    <div class="product-image-container">
+                                        <div class="product-image">
+                                            <% if (product.images && product.images.length> 0) { %>
+                                                <img src="<%= product.images[0] %>" alt="<%= product.productName %>">
                                                 <% } else { %>
-                                                    <i class="far fa-star"></i>
-                                                <% } %>
+                                                    <img src="https://via.placeholder.com/280x280/f8f9fa/dee2e6?text=No+Image"
+                                                        alt="<%= product.productName %>">
+                                                    <% } %>
+                                        </div>
+
+                                        <% if (product.bestOffer && product.bestOffer> 0) { %>
+                                            <div class="offer-badge">
+                                                <%= product.bestOffer %>% OFF
+                                            </div>
                                             <% } %>
-                                        <% } else { %>
-                                            <i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
-                                        <% } %>
+
+                                                <div
+                                                    class="stock-badge <%= product.status === 'Available' ? 'in-stock' : 'out-of-stock' %>">
+                                                    <%= product.status==='Available' ? 'Available' : 'Out of Stock' %>
+                                                </div>
+
+                                                <div class="wishlist-btn"
+                                                    onclick="event.stopPropagation(); toggleWishlist('<%= product._id %>', this)">
+                                                    <% if (wishlistItems &&
+                                                        wishlistItems.includes(product._id.toString())) { %>
+                                                        <i class="fas fa-heart" style="color: #ff4757;"></i>
+                                                        <% } else { %>
+                                                            <i class="far fa-heart"></i>
+                                                            <% } %>
+                                                </div>
+
+                                                <div class="quick-actions">
+                                                    <button class="quick-action-btn"
+                                                        onclick="event.stopPropagation(); addToCart('<%= product._id %>')"
+                                                        title="Add to Cart">
+                                                        <i class="fas fa-shopping-cart"></i>
+                                                    </button>
+                                                    <% if (typeof user !=='undefined' && user) { %>
+                                                        <button class="quick-action-btn"
+                                                            onclick="event.stopPropagation(); window.location.href='/product/<%= product._id %>'"
+                                                            title="Quick View">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                        <% } %>
+                                                </div>
                                     </div>
-                                    <span class="rating-text">(<%= product.ratings && product.ratings.count ? product.ratings.count : 0 %>)</span>
-                                </div>
 
-                                <div class="product-price">
-                                    <% if (product.variants && product.variants.length > 0) { %>
-                                        <%
-                                            const prices = product.variants.map(v => v.salePrice);
-                                            const originalPrices = product.variants.map(v => v.variantPrice);
-                                            const minSalePrice = Math.min(...prices);
-                                            const minOriginalPrice = Math.min(...originalPrices);
-                                            const hasDiscount = minSalePrice < minOriginalPrice;
-                                        %>
-                                        <span class="current-price">₹<%= minSalePrice %></span>
-                                        <% if (hasDiscount) { %>
-                                            <span class="original-price">₹<%= minOriginalPrice %></span>
-                                        <% } %>
-                                    <% } else { %>
-                                        <span class="current-price">Price not available</span>
+                                    <div class="product-info">
+                                        <h3 class="product-name">
+                                            <%= product.productName %>
+                                        </h3>
+                                        <p class="product-category">
+                                            <%= product.category ? product.category.name : 'Uncategorized' %>
+                                        </p>
+
+                                        <div class="product-rating">
+                                            <div class="stars">
+                                                <% if (product.ratings && product.ratings.average> 0) { %>
+                                                    <% const rating=product.ratings.average; %>
+                                                        <% for (let i=1; i <=5; i++) { %>
+                                                            <% if (i <=Math.floor(rating)) { %>
+                                                                <i class="fas fa-star"></i>
+                                                                <% } else if (i - 0.5 <=rating) { %>
+                                                                    <i class="fas fa-star-half-alt"></i>
+                                                                    <% } else { %>
+                                                                        <i class="far fa-star"></i>
+                                                                        <% } %>
+                                                                            <% } %>
+                                                                                <% } else { %>
+                                                                                    <i class="far fa-star"></i><i
+                                                                                        class="far fa-star"></i><i
+                                                                                        class="far fa-star"></i><i
+                                                                                        class="far fa-star"></i><i
+                                                                                        class="far fa-star"></i>
+                                                                                    <% } %>
+                                            </div>
+                                            <span class="rating-text">(<%= product.ratings && product.ratings.count ?
+                                                    product.ratings.count : 0 %>)</span>
+                                        </div>
+
+
+                                        <div class="product-price">
+                                            <% if (product.variants && product.variants.length> 0) { %>
+                                                <% const prices=product.variants.map(v=> v.salePrice);
+                                                    const originalPrices = product.variants.map(v => v.regularPrice); 
+                                                    const minSalePrice = Math.min(...prices);
+                                                    const minOriginalPrice = Math.min(...originalPrices);
+                                                    const hasDiscount = minSalePrice < minOriginalPrice; %>
+                                                        <span class="current-price">₹<%= minSalePrice %></span>
+                                                        <% if (hasDiscount) { %>
+                                                            <span class="original-price"
+                                                                style="text-decoration: line-through; font-weight: 400; font-size: larger; color: #db2525; margin-left: 5px;">
+                                                                ₹<%= minOriginalPrice %> <!-- fixed -->
+                                                            </span>
+                                                            <% } %>
+                                                                <% } else { %>
+                                                                    <span class="current-price">Price not
+                                                                        available</span>
+                                                                    <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% }) %>
                                     <% } %>
-                                </div>
-                            </div>
-                        </div>
-                    <% }) %>
-                <% } %>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Premium Collections Section - WHITE BACKGROUND & HIGHEST PRICED PRODUCTS -->
-    <section class="products-section premium-white">
-        <div class="container">
-            <div class="section-header">
-                <div class="section-title">
-                    <h2>Premium Collections</h2>
-                    <p>Exclusive luxury footwear - Highest priced collection</p>
+        <!-- Premium Collections Section - WHITE BACKGROUND & HIGHEST PRICED PRODUCTS -->
+        <section class="products-section premium-white">
+            <div class="container">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>Premium Collections</h2>
+                        <p>Exclusive luxury footwear - Highest priced collection</p>
+                    </div>
+                    <div class="section-controls">
+                        <a href="/shop" class="view-all-btn">View All</a>
+                    </div>
                 </div>
-                <div class="section-controls">
-                    <a href="/shop" class="view-all-btn">View All</a>
-                </div>
-            </div>
-            
-            <div class="products-grid" id="premium-grid">
-                <% if (products && products.length > 0) { %>
-                    <%
-                        // Sort products by highest price (using maximum sale price from variants)
-                        const sortedProducts = products.slice().sort((a, b) => {
+
+                <div class="products-grid" id="premium-grid">
+                    <% if (products && products.length> 0) { %>
+                        <% // Sort products by highest price (using maximum sale price from variants) const
+                            sortedProducts=products.slice().sort((a, b)=> {
                             const getMaxPrice = (product) => {
-                                if (product.variants && product.variants.length > 0) {
-                                    const prices = product.variants.map(v => v.salePrice);
-                                    return Math.max(...prices);
-                                }
-                                return 0;
+                            if (product.variants && product.variants.length > 0) {
+                            const prices = product.variants.map(v => v.salePrice);
+                            return Math.max(...prices);
+                            }
+                            return 0;
                             };
                             return getMaxPrice(b) - getMaxPrice(a);
-                        });
-                    %>
-                    <% sortedProducts.slice(0, 4).forEach(product => { %>
-                        <div class="product-card modern premium-card" onclick="<%= typeof user !== 'undefined' && user ? `window.location.href='/product/${product._id}'` : 'redirectToLogin()' %>" style="cursor: pointer;">
-                            <div class="product-image-container">
-                                <div class="product-image">
-                                    <% if (product.images && product.images.length > 0) { %>
-                                        <img src="<%= product.images[0] %>" alt="<%= product.productName %>">
-                                    <% } else { %>
-                                        <img src="https://via.placeholder.com/280x280/f8f9fa/dee2e6?text=No+Image" alt="<%= product.productName %>">
-                                    <% } %>
-                                </div>
-
-                                <div class="premium-badge">PREMIUM</div>
-
-                                <% if (product.bestOffer && product.bestOffer > 0) { %>
-                                    <div class="offer-badge">
-                                        <%= product.bestOffer %>% OFF
-                                    </div>
-                                <% } %>
-
-                                <div class="stock-badge <%= product.status === 'Available' ? 'in-stock' : 'out-of-stock' %>">
-                                    <%= product.status === 'Available' ? 'Available' : 'Out of Stock' %>
-                                </div>
-
-                                <div class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('<%= product._id %>', this)">
-                                    <% if (wishlistItems && wishlistItems.includes(product._id.toString())) { %>
-                                        <i class="fas fa-heart" style="color: #ff4757;"></i>
-                                    <% } else { %>
-                                        <i class="far fa-heart"></i>
-                                    <% } %>
-                                </div>
-
-                                <div class="quick-actions">
-                                    <button class="quick-action-btn" onclick="event.stopPropagation(); addToCart('<%= product._id %>')" title="Add to Cart">
-                                        <i class="fas fa-shopping-cart"></i>
-                                    </button>
-                                    <% if (typeof user !== 'undefined' && user) { %>
-                                        <button class="quick-action-btn" onclick="event.stopPropagation(); window.location.href='/product/<%= product._id %>'" title="Quick View">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                    <% } %>
-                                </div>
-                            </div>
-
-                            <div class="product-info">
-                                <h3 class="product-name"><%= product.productName %></h3>
-                                <p class="product-category"><%= product.category ? product.category.name : 'Uncategorized' %></p>
-                                
-                                <div class="product-rating">
-                                    <div class="stars">
-                                        <% if (product.ratings && product.ratings.average > 0) { %>
-                                            <% const rating = product.ratings.average; %>
-                                            <% for (let i = 1; i <= 5; i++) { %>
-                                                <% if (i <= Math.floor(rating)) { %>
-                                                    <i class="fas fa-star"></i>
-                                                <% } else if (i - 0.5 <= rating) { %>
-                                                    <i class="fas fa-star-half-alt"></i>
+                            });
+                            %>
+                            <% sortedProducts.slice(0, 4).forEach(product=> { %>
+                                <div class="product-card modern premium-card"
+                                    onclick="<%= typeof user !== 'undefined' && user ? `window.location.href='/product/${product._id}'` : 'redirectToLogin()' %>"
+                                    style="cursor: pointer;">
+                                    <div class="product-image-container">
+                                        <div class="product-image">
+                                            <% if (product.images && product.images.length> 0) { %>
+                                                <img src="<%= product.images[0] %>" alt="<%= product.productName %>">
                                                 <% } else { %>
-                                                    <i class="far fa-star"></i>
-                                                <% } %>
-                                            <% } %>
-                                        <% } else { %>
-                                            <i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i>
-                                        <% } %>
-                                    </div>
-                                    <span class="rating-text">(<%= product.ratings && product.ratings.count ? product.ratings.count : 0 %>)</span>
-                                </div>
+                                                    <img src="https://via.placeholder.com/280x280/f8f9fa/dee2e6?text=No+Image"
+                                                        alt="<%= product.productName %>">
+                                                    <% } %>
+                                        </div>
 
-                                <div class="product-price">
-                                    <% if (product.variants && product.variants.length > 0) { %>
-                                        <%
-                                            const prices = product.variants.map(v => v.salePrice);
-                                            const originalPrices = product.variants.map(v => v.variantPrice);
-                                            const minSalePrice = Math.min(...prices);
-                                            const minOriginalPrice = Math.min(...originalPrices);
-                                            const hasDiscount = minSalePrice < minOriginalPrice;
-                                        %>
-                                        <span class="current-price">₹<%= minSalePrice %></span>
-                                        <% if (hasDiscount) { %>
-                                            <span class="original-price">₹<%= minOriginalPrice %></span>
-                                        <% } %>
-                                    <% } else { %>
-                                        <span class="current-price">Price not available</span>
-                                    <% } %>
+                                        <div class="premium-badge">PREMIUM</div>
+
+                                        <% if (product.bestOffer && product.bestOffer> 0) { %>
+                                            <div class="offer-badge">
+                                                <%= product.bestOffer %>% OFF
+                                            </div>
+                                            <% } %>
+
+                                                <div
+                                                    class="stock-badge <%= product.status === 'Available' ? 'in-stock' : 'out-of-stock' %>">
+                                                    <%= product.status==='Available' ? 'Available' : 'Out of Stock' %>
+                                                </div>
+
+                                                <div class="wishlist-btn"
+                                                    onclick="event.stopPropagation(); toggleWishlist('<%= product._id %>', this)">
+                                                    <% if (wishlistItems &&
+                                                        wishlistItems.includes(product._id.toString())) { %>
+                                                        <i class="fas fa-heart" style="color: #ff4757;"></i>
+                                                        <% } else { %>
+                                                            <i class="far fa-heart"></i>
+                                                            <% } %>
+                                                </div>
+
+                                                <div class="quick-actions">
+                                                    <button class="quick-action-btn"
+                                                        onclick="event.stopPropagation(); addToCart('<%= product._id %>')"
+                                                        title="Add to Cart">
+                                                        <i class="fas fa-shopping-cart"></i>
+                                                    </button>
+                                                    <% if (typeof user !=='undefined' && user) { %>
+                                                        <button class="quick-action-btn"
+                                                            onclick="event.stopPropagation(); window.location.href='/product/<%= product._id %>'"
+                                                            title="Quick View">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                        <% } %>
+                                                </div>
+                                    </div>
+
+                                    <div class="product-info">
+                                        <h3 class="product-name">
+                                            <%= product.productName %>
+                                        </h3>
+                                        <p class="product-category">
+                                            <%= product.category ? product.category.name : 'Uncategorized' %>
+                                        </p>
+
+                                        <div class="product-rating">
+                                            <div class="stars">
+                                                <% if (product.ratings && product.ratings.average> 0) { %>
+                                                    <% const rating=product.ratings.average; %>
+                                                        <% for (let i=1; i <=5; i++) { %>
+                                                            <% if (i <=Math.floor(rating)) { %>
+                                                                <i class="fas fa-star"></i>
+                                                                <% } else if (i - 0.5 <=rating) { %>
+                                                                    <i class="fas fa-star-half-alt"></i>
+                                                                    <% } else { %>
+                                                                        <i class="far fa-star"></i>
+                                                                        <% } %>
+                                                                            <% } %>
+                                                                                <% } else { %>
+                                                                                    <i class="far fa-star"></i><i
+                                                                                        class="far fa-star"></i><i
+                                                                                        class="far fa-star"></i><i
+                                                                                        class="far fa-star"></i><i
+                                                                                        class="far fa-star"></i>
+                                                                                    <% } %>
+                                            </div>
+                                            <span class="rating-text">(<%= product.ratings && product.ratings.count ?
+                                                    product.ratings.count : 0 %>)</span>
+                                        </div>
+
+
+                                        <div class="product-price">
+                                            <% if (product.variants && product.variants.length> 0) { %>
+                                                <% const prices=product.variants.map(v=> v.salePrice);
+                                                    const originalPrices = product.variants.map(v => v.regularPrice); 
+                                                    const minSalePrice = Math.min(...prices);
+                                                    const minOriginalPrice = Math.min(...originalPrices);
+                                                    const hasDiscount = minSalePrice < minOriginalPrice; %>
+                                                        <span class="current-price">₹<%= minSalePrice %></span>
+                                                        <% if (hasDiscount) { %>
+                                                            <span class="original-price"
+                                                                style="text-decoration: line-through; font-weight: 400; font-size: larger; color: #db2525; margin-left: 5px;">
+                                                                ₹<%= minOriginalPrice %> <!-- fixed -->
+                                                            </span>
+                                                            <% } %>
+                                                                <% } else { %>
+                                                                    <span class="current-price">Price not
+                                                                        available</span>
+                                                                    <% } %>
+                                        </div>
+                                    </div>
                                 </div>
+                                <% }) %>
+                                    <% } %>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials Section -->
+        <section class="testimonials">
+            <div class="container">
+                <div class="section-header centered">
+                    <h2>What Our Customers Say</h2>
+                    <p>Real reviews from real sneaker enthusiasts</p>
+                </div>
+
+                <div class="testimonials-grid">
+                    <div class="testimonial-card">
+                        <div class="testimonial-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p class="testimonial-text">"Absolutely love my new sneakers from Shoezy! The quality is
+                            outstanding and they're incredibly comfortable. Will definitely be ordering more!"</p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">
+                                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&h=60&fit=crop&crop=face"
+                                    alt="Rahul">
+                            </div>
+                            <div class="author-info">
+                                <h4>Rahul Sharma</h4>
+                                <span>Verified Customer</span>
                             </div>
                         </div>
-                    <% }) %>
-                <% } %>
-            </div>
-        </div>
-    </section>
+                    </div>
 
-    <!-- Testimonials Section -->
-    <section class="testimonials">
-        <div class="container">
-            <div class="section-header centered">
-                <h2>What Our Customers Say</h2>
-                <p>Real reviews from real sneaker enthusiasts</p>
-            </div>
-            
-            <div class="testimonials-grid">
-                <div class="testimonial-card">
-                    <div class="testimonial-rating">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <p class="testimonial-text">"Absolutely love my new sneakers from Shoezy! The quality is outstanding and they're incredibly comfortable. Will definitely be ordering more!"</p>
-                    <div class="testimonial-author">
-                        <div class="author-avatar">
-                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&h=60&fit=crop&crop=face" alt="Rahul">
+                    <div class="testimonial-card">
+                        <div class="testimonial-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
                         </div>
-                        <div class="author-info">
-                            <h4>Rahul Sharma</h4>
-                            <span>Verified Customer</span>
+                        <p class="testimonial-text">"Fast delivery and amazing customer service. The sneakers fit
+                            perfectly and look even better in person. Highly recommend Shoezy!"</p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">
+                                <img src="https://images.unsplash.com/photo-1494790108755-2616b612cf62?w=60&h=60&fit=crop&crop=face"
+                                    alt="Priya">
+                            </div>
+                            <div class="author-info">
+                                <h4>Priya Patel</h4>
+                                <span>Verified Customer</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-                
-                <div class="testimonial-card">
-                    <div class="testimonial-rating">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <p class="testimonial-text">"Fast delivery and amazing customer service. The sneakers fit perfectly and look even better in person. Highly recommend Shoezy!"</p>
-                    <div class="testimonial-author">
-                        <div class="author-avatar">
-                            <img src="https://images.unsplash.com/photo-1494790108755-2616b612cf62?w=60&h=60&fit=crop&crop=face" alt="Priya">
+
+                    <div class="testimonial-card">
+                        <div class="testimonial-rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
                         </div>
-                        <div class="author-info">
-                            <h4>Priya Patel</h4>
-                            <span>Verified Customer</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="testimonial-card">
-                    <div class="testimonial-rating">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <p class="testimonial-text">"Best sneaker collection I've found online. Great prices, authentic products, and the website is so easy to use. Five stars!"</p>
-                    <div class="testimonial-author">
-                        <div class="author-avatar">
-                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=60&h=60&fit=crop&crop=face" alt="Arjun">
-                        </div>
-                        <div class="author-info">
-                            <h4>Arjun Kumar</h4>
-                            <span>Verified Customer</span>
+                        <p class="testimonial-text">"Best sneaker collection I've found online. Great prices, authentic
+                            products, and the website is so easy to use. Five stars!"</p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">
+                                <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=60&h=60&fit=crop&crop=face"
+                                    alt="Arjun">
+                            </div>
+                            <div class="author-info">
+                                <h4>Arjun Kumar</h4>
+                                <span>Verified Customer</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Footer -->
-    <%-include("../partials/user/userfooter")%>
+        <!-- Footer -->
+        <%-include("../partials/user/userfooter")%>
 
-    <script>
-        // Enhanced Add to Cart functionality
-        async function addToCart(productId, size = null) {
-            try {
-                const response = await fetch('/cart/add', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ 
-                        productId: productId,
-                        size: size,
-                        quantity: 1
-                    })
-                });
+            <script>
+                // Enhanced Add to Cart functionality
+                async function addToCart(productId, size = null) {
+                    try {
+                        const response = await fetch('/cart/add', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                productId: productId,
+                                size: size,
+                                quantity: 1
+                            })
+                        });
 
-                const data = await response.json();
+                        const data = await response.json();
 
-                if (data.success) {
-                    updateCartCount(data.cartCount) 
-                    showNotification('Product added to cart successfully!');
-                } else {
-                    if(data.message==="User not authenticated"){
-                        window.location.href='/login'
+                        if (data.success) {
+                            updateCartCount(data.cartCount)
+                            showNotification('Product added to cart successfully!');
+                        } else {
+                            if (data.message === "User not authenticated") {
+                                window.location.href = '/login'
+                            }
+                            showNotification(data.message || 'Error adding product to cart');
+                        }
+                    } catch (error) {
+                        console.error('Error adding to cart:', error);
+                        showNotification('Error adding product to cart. Please try again.');
                     }
-                    showNotification(data.message || 'Error adding product to cart');
                 }
-            } catch (error) {
-                console.error('Error adding to cart:', error);
-                showNotification('Error adding product to cart. Please try again.');
-            }
-        }
 
-        // Update cart count in navbar
-        function updateCartCount(change) {
-            const cartCountElem = document.getElementById('cartCount');
-            if (cartCountElem) {
-                const currentCount = parseInt(cartCountElem.textContent) || 0;
-                const newCount = Math.max(0,change);
-                cartCountElem.textContent = newCount;
-                
-                // Add animation to cart icon
-                const cartIcon = cartCountElem.closest('.cart-icon');
-                if (cartIcon) {
-                    cartIcon.style.animation = 'cartBounce 0.5s ease';
-                    setTimeout(() => {
-                        cartIcon.style.animation = '';
-                    }, 500);
-                }
-            }
-        }
+                // Update cart count in navbar
+                function updateCartCount(change) {
+                    const cartCountElem = document.getElementById('cartCount');
+                    if (cartCountElem) {
+                        const currentCount = parseInt(cartCountElem.textContent) || 0;
+                        const newCount = Math.max(0, change);
+                        cartCountElem.textContent = newCount;
 
-        // Enhanced wishlist functionality
-        async function toggleWishlist(productId, element) {
-            const heartIcon = element.querySelector('i');
-            const isInWishlist = heartIcon.classList.contains('fas');
-
-            try {
-                const response = await fetch('/wishlist/toggle', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ productId: productId })
-                });
-
-                const data = await response.json();
-                
-                if (data.success) {
-                    if (data.action === 'added') {
-                        heartIcon.classList.remove('far');
-                        heartIcon.classList.add('fas');
-                        heartIcon.style.color = '#ff4757';
-                         updateWishlistCount(1)
-                        showNotification('Added to wishlist!');
-                    } else if (data.action === 'removed') {
-                        heartIcon.classList.remove('fas');
-                        heartIcon.classList.add('far');
-                        heartIcon.style.color = '';
-                        updateWishlistCount(-1)
-                        showNotification('Removed from wishlist!');
-                    } 
-                } else {
-                    if(data.message==="User not authenticated"){
-                        window.location.href='/login'
+                        // Add animation to cart icon
+                        const cartIcon = cartCountElem.closest('.cart-icon');
+                        if (cartIcon) {
+                            cartIcon.style.animation = 'cartBounce 0.5s ease';
+                            setTimeout(() => {
+                                cartIcon.style.animation = '';
+                            }, 500);
+                        }
                     }
-                    showNotification(data.message || 'Error updating wishlist');
                 }
-            } catch (error) {
-                console.error('Error toggling wishlist:', error.message);
-                showNotification('Error updating wishlist. Please try again.');
-            }
-        }
 
-        function updateWishlistCount(change) {
-            const wishlistCountElem = document.getElementById('wishlistCount');
-            if (wishlistCountElem) {
-                const currentCount = parseInt(wishlistCountElem.textContent) || 0;
-                const newCount = Math.max(0, currentCount + change);
-                wishlistCountElem.textContent = newCount;
-            }
-        }
+                // Enhanced wishlist functionality
+                async function toggleWishlist(productId, element) {
+                    const heartIcon = element.querySelector('i');
+                    const isInWishlist = heartIcon.classList.contains('fas');
 
-        function showNotification(message) {
-            const notification = document.createElement('div');
-            notification.className = 'notification';
-            notification.innerHTML = `
+                    try {
+                        const response = await fetch('/wishlist/toggle', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ productId: productId })
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            if (data.action === 'added') {
+                                heartIcon.classList.remove('far');
+                                heartIcon.classList.add('fas');
+                                heartIcon.style.color = '#ff4757';
+                                updateWishlistCount(1)
+                                showNotification('Added to wishlist!');
+                            } else if (data.action === 'removed') {
+                                heartIcon.classList.remove('fas');
+                                heartIcon.classList.add('far');
+                                heartIcon.style.color = '';
+                                updateWishlistCount(-1)
+                                showNotification('Removed from wishlist!');
+                            }
+                        } else {
+                            if (data.message === "User not authenticated") {
+                                window.location.href = '/login'
+                            }
+                            showNotification(data.message || 'Error updating wishlist');
+                        }
+                    } catch (error) {
+                        console.error('Error toggling wishlist:', error.message);
+                        showNotification('Error updating wishlist. Please try again.');
+                    }
+                }
+
+                function updateWishlistCount(change) {
+                    const wishlistCountElem = document.getElementById('wishlistCount');
+                    if (wishlistCountElem) {
+                        const currentCount = parseInt(wishlistCountElem.textContent) || 0;
+                        const newCount = Math.max(0, currentCount + change);
+                        wishlistCountElem.textContent = newCount;
+                    }
+                }
+
+                function showNotification(message) {
+                    const notification = document.createElement('div');
+                    notification.className = 'notification';
+                    notification.innerHTML = `
                 <i class="fas fa-check-circle"></i>
                 <span>${message}</span>
             `;
-            document.body.appendChild(notification);
+                    document.body.appendChild(notification);
 
-            setTimeout(() => {
-                notification.style.animation = 'slideOut 0.3s ease forwards';
-                setTimeout(() => {
-                    notification.remove();
-                }, 300);
-            }, 2700);
-        }
+                    setTimeout(() => {
+                        notification.style.animation = 'slideOut 0.3s ease forwards';
+                        setTimeout(() => {
+                            notification.remove();
+                        }, 300);
+                    }, 2700);
+                }
 
-        function redirectToLogin() {
-            window.location.href = '/login';
-            return false;
-        }
+                function redirectToLogin() {
+                    window.location.href = '/login';
+                    return false;
+                }
 
-        // Enhanced functionality for new design
-        document.addEventListener('DOMContentLoaded', function() {
-            // All shop buttons functionality
-            const shopBtns = document.querySelectorAll('.shop-btn');
-            shopBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
+                // Enhanced functionality for new design
+                document.addEventListener('DOMContentLoaded', function () {
+                    // All shop buttons functionality
+                    const shopBtns = document.querySelectorAll('.shop-btn');
+                    shopBtns.forEach(btn => {
+                        btn.addEventListener('click', function () {
                     <% if (typeof user !== 'undefined' && user) { %>
-                        window.location.href = '/shop';
+                                window.location.href = '/shop';
                     <% } else { %>
-                        redirectToLogin();
+                                redirectToLogin();
                     <% } %>
                 });
-            });
+                    });
 
-            // Color selector functionality
-            const colorDots = document.querySelectorAll('.color-dot');
-            colorDots.forEach(dot => {
-                dot.addEventListener('click', function() {
-                    colorDots.forEach(d => d.classList.remove('active'));
-                    this.classList.add('active');
+                    // Color selector functionality
+                    const colorDots = document.querySelectorAll('.color-dot');
+                    colorDots.forEach(dot => {
+                        dot.addEventListener('click', function () {
+                            colorDots.forEach(d => d.classList.remove('active'));
+                            this.classList.add('active');
+                        });
+                    });
                 });
-            });
-        });
-    </script>
+            </script>
 </body>
+
 </html>

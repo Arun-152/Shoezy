@@ -47,6 +47,17 @@
             font-weight: 600;
             transition: background 0.3s;
         }
+.regular-price {
+  text-decoration: line-through;
+  color: rgb(207, 37, 37);
+  margin-right: 5px;
+}
+
+.current-price {
+  font-weight: bold;
+  color: #14a3db; 
+  font-size: medium;
+}
 
         .empty-cart .btn:hover {
             background: #0056b3;
@@ -74,8 +85,10 @@
         }
 
         .item-total small {
-            color: #666;
-            font-weight: 500;
+            color: #0fa730;
+            font-weight: 600;
+            font-style: normal;
+            font-size: larger;
         }
     </style>
 </head>
@@ -156,12 +169,16 @@
                                             <input type="number" class="qty-input" value="<%= item.quantity %>" min="1" max="10" onchange="validateQuantity('<%= item.productId._id %>', '<%= item.size %>', this.value)">
                                             <button class="qty-btn" onclick="updateQuantity('<%= item.productId._id %>', '<%= item.size %>', 1)">+</button>
                                         </div>
-                                        <div class="item-price">
-                                            <span class="current-price">₹<%= item.price.toFixed(2) %></span>
-                                            <div class="item-total">
-                                                <small>Total: ₹<%= item.itemTotal.toFixed(2) %></small>
-                                            </div>
-                                        </div>
+                                       <div class="item-price">
+  <% if(item.regularPrice && item.regularPrice > item.price){ %>
+    <span class="regular-price">₹<%= item.regularPrice.toFixed(2) %></span>
+  <% } %>
+  <span class="current-price">₹<%= item.price.toFixed(2) %></span>
+  <div class="item-total">
+    <small>Total: ₹<%= item.itemTotal.toFixed(2) %></small>
+  </div>
+</div>
+
                                         <div class="item-actions">
                                             <button class="action-btn remove-btn" onclick="removeItem('<%= item.productId._id %>', '<%= item.size %>')">
                                                 <i class="fas fa-trash"></i> Remove
@@ -275,16 +292,16 @@
         }
 
         // Dynamic cart functionality
-        async function updateQuantity(productId, size, change) {
-            try {
+async function updateQuantity(productId, size, change) {
+    try {
                 const cartItem = document.querySelector(`[data-product-id="${productId}"]`);
-                const qtyInput = cartItem.querySelector('.qty-input');
-                let newQty = parseInt(qtyInput.value) + change;
+        const qtyInput = cartItem.querySelector('.qty-input');
+        let newQty = parseInt(qtyInput.value) + change;
                
                 
-               
-                const response = await fetch('/cart/update-quantity', {
-                    method: 'PATCH',
+
+        const response = await fetch('/cart/update-quantity', {
+            method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
                     },
@@ -293,42 +310,42 @@
                         size: size,
                         quantity: newQty
                     })
-                });
+        });
 
-                const data = await response.json();
+        const data = await response.json();
 
-                if (data.success) {
+        if (data.success) {
                     updateCartCount(data.cartCount)
-                    qtyInput.value = newQty;
-                   
-                    // Update item total
+            qtyInput.value = newQty;
+
+            // Update item total
                     const itemTotal = cartItem.querySelector('.item-total small');
                     itemTotal.textContent = `Total: ₹${data.itemTotal.toFixed(2)}`;
-                   
+
                     // Update summary
-                    updateSummaryDisplay(data);
+            updateSummaryDisplay(data);
                     
                     showToast(`Quantity updated to ${newQty}`);
-                } else {
-                    errorToast(data.message || 'Error updating quantity');
-                }
-            } catch (error) {
-                console.error('Error updating quantity:', error);
-                showToast('Error updating quantity. Please try again.');
-            }
+        } else {
+            errorToast(data.message || 'Error updating quantity');
         }
+    } catch (error) {
+        console.error('Error updating quantity:', error);
+                showToast('Error updating quantity. Please try again.');
+    }
+}
 
-        async function validateQuantity(productId, size, value) {
-            let qty = parseInt(value);
+async function validateQuantity(productId, size, value) {
+    let qty = parseInt(value);
             if (qty < 1) qty = 1;
-            if (qty > 10) qty = 10;
-           
+    if (qty > 10) qty = 10;
+
             if (qty !== parseInt(value)) {
                 const cartItem = document.querySelector(`[data-product-id="${productId}"]`);
-                const qtyInput = cartItem.querySelector('.qty-input');
-                qtyInput.value = qty;
-            }
-           
+    const qtyInput = cartItem.querySelector('.qty-input');
+    qtyInput.value = qty;
+}
+
             await updateQuantity(productId, size, 0); // Update with current quantity
         }
 
@@ -471,25 +488,25 @@
 
         function updateSummaryDisplay(data) {
             // Update summary values
-            document.getElementById('subtotal').textContent = `₹${data.subtotal.toFixed(2)}`;
-            document.getElementById('total').textContent = `₹${data.total.toFixed(2)}`;
-           
+    document.getElementById('subtotal').textContent = `₹${data.subtotal.toFixed(2)}`;
+    document.getElementById('total').textContent = `₹${data.total.toFixed(2)}`;
+    
             // Update shipping
             const shippingElement = document.getElementById('shipping');
-            if (data.shipping === 0) {
+    if (data.shipping === 0) {
                 shippingElement.textContent = 'FREE';
                 shippingElement.className = 'free-shipping';
-            } else {
+    } else {
                 shippingElement.textContent = `₹${data.shipping.toFixed(2)}`;
                 shippingElement.className = '';
-            }
-           
+    }
+
             // Update cart count
-            document.getElementById('cartItemsCount').textContent = `${data.cartCount} item${data.cartCount !== 1 ? 's' : ''}`;
-            document.getElementById('cartTotalAmount').textContent = `₹${data.total.toFixed(2)}`;
-           
-            // Update navbar cart count
-            const navCartCount = document.getElementById('cartCount');
+    document.getElementById('cartItemsCount').textContent = `${data.cartCount} item${data.cartCount !== 1 ? 's' : ''}`;
+    document.getElementById('cartTotalAmount').textContent = `₹${data.total.toFixed(2)}`;
+
+    // Update navbar cart count
+    const navCartCount = document.getElementById('cartCount');
    
     if (navCartCount) {
         navCartCount.textContent = data.cartCount;

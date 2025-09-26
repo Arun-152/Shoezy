@@ -33,11 +33,13 @@ const loadAddToCart = async (req, res) => {
             return null; 
           }
           const currentPrice = variant.salePrice;
+          const regularPrice = variant.regularPrice;
           const itemTotal = currentPrice * item.quantity;
           subtotal += itemTotal;
           return {
             ...item.toObject(),
             price: currentPrice,
+            regularPrice,
             itemTotal,
           };
         })

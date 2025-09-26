@@ -835,7 +835,7 @@
                                 </div>
                             </div>
                             <div class="chart-container">
-                                <div class="chart">
+                                <div class="chart" id="salesChart">
                                     <div class="bar" style="height: 40%;"></div>
                                     <div class="bar" style="height: 60%;"></div>
                                     <div class="bar" style="height: 80%;"></div>
@@ -845,6 +845,7 @@
                                     <div class="bar" style="height: 75%;"></div>
                                 </div>
                             </div>
+
                         </div>
                         <div class="orders-section">
                             <h3>Order Status</h3>
@@ -951,6 +952,53 @@
             </div>
     </div>
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const periodBtns = document.querySelectorAll('.period-btn');
+            const chart = document.getElementById('salesChart');
+
+            // Update chart when a period is selected
+            periodBtns.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    periodBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+
+                    const period = this.textContent.toLowerCase(); // daily/weekly/monthly/yearly
+                    updateChart(period);
+                });
+            });
+
+            function updateChart(period) {
+                const bars = chart.querySelectorAll('.bar');
+                let heights;
+
+                switch (period) {
+                    case 'daily':
+                        heights = ['40%', '65%', '80%', '55%', '70%', '85%', '75%'];
+                        break;
+                    case 'weekly':
+                        heights = ['60%', '80%', '95%', '70%', '45%', '30%', '25%'];
+                        break;
+                    case 'monthly':
+                        heights = ['75%', '90%', '85%', '60%', '95%', '80%', '70%'];
+                        break;
+                    case 'yearly':
+                        heights = ['85%', '70%', '90%', '95%', '80%', '75%', '88%'];
+                        break;
+                    default:
+                        heights = ['40%', '60%', '70%', '50%', '65%', '75%', '85%'];
+                }
+
+                bars.forEach((bar, index) => {
+                    if (heights[index]) {
+                        bar.style.height = heights[index];
+                    }
+                });
+            }
+
+            // Initialize with daily
+            updateChart('daily');
+        });
+
         // Add some interactivity
         document.addEventListener('DOMContentLoaded', function () {
             // Period button functionality
