@@ -231,14 +231,17 @@ const placeOrder = async (req, res) => {
 
     for (const item of cart.items) {
       const product = item.productId;
+      const variant = product.variants.find(v => v.size === item.size);
+      const price = variant.salePrice || variant.regularPrice;
+      const totalPrice = price * item.quantity;
 
-      totalAmount += item.totalPrice;
+      totalAmount += totalPrice;
       orderItems.push({
         productId: product._id,
         size: item.size || "Default",
         quantity: item.quantity,
-        price: item.price,
-        totalPrice: item.totalPrice
+        price: price,
+        totalPrice: totalPrice
       });
     }
 

@@ -6,10 +6,12 @@ const Coupon = require("../../models/CouponSchema")
 const bcrypt = require("bcrypt")
 const env = require("dotenv").config()
 
-
 const loadCoupons = async (req, res) => {
   try {
     const userData = await User.findById(req.session.userId);
+    if (!userData) {
+      return res.status(401).send("User not authenticated");
+    }
 
     const page = parseInt(req.query.page) || 1;
     const limit = 6;
@@ -29,25 +31,28 @@ const loadCoupons = async (req, res) => {
       .sort({ createdAt: -1 });
 
     // Compute user-specific usage and status for each coupon
-    const couponsWithUsage = await Promise.all(
-      coupons.map(async (coupon) => {
-        const userUsageCount = await Order.countDocuments({
-          userId: req.session.userId,
-          couponCode: coupon.name,
-          orderStatus: { $ne: "Cancelled" }
-        });
+    const couponsWithUsage = coupons.map(coupon => {
+      // Check if userId is in the coupon's userId (usedBy) array
+      const isUsedByUser = coupon.userUsage.some(id => id.userId.toString() === req.session.userId.toString());
+      const isGloballyUsed = coupon.totalUsageLimit && coupon.currentUsageCount >= coupon.totalUsageLimit;
+      const isExpired = coupon.expireOn < new Date();
+      console.log("used By",isUsedByUser)
 
-        const isUsedByUser = userUsageCount >= (coupon.maxUsesPerUser || 1);
-        const isGloballyUsed = coupon.totalUsageLimit && coupon.currentUsageCount >= coupon.totalUsageLimit;
-        const isExpired = coupon.expireOn < new Date();
+      // Update coupon status dynamically
+      let status = 'Available';
+      if (isExpired) {
+        status = 'Expired';
+      } else if (isUsedByUser || isGloballyUsed) {
+        status = 'Used';
+      }
 
-        return {
-          ...coupon.toObject(),
-          isUsed: isUsedByUser || isGloballyUsed, 
-          isExpired: isExpired 
-        };
-      })
-    );
+      return {
+        ...coupon.toObject(),
+        isUsed: isUsedByUser || isGloballyUsed,
+        isExpired: isExpired,
+        status: status
+      };
+    });
 
     const totalPages = Math.ceil(totalCoupons / limit);
 
@@ -63,6 +68,7 @@ const loadCoupons = async (req, res) => {
     res.status(500).send("Server error");
   }
 };
+
 
 const applyCoupon = async (req, res) => {
   try {

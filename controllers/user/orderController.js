@@ -57,196 +57,190 @@ const orderDetails = async (req, res) => {
 };
 
 const cancelOrder = async (req, res) => {
-    try {
-        const userId = req.session.userId;
-        const { orderId, itemsId, reason } = req.body;
+  try {
+    const userId = req.session.userId;
+    const { orderId, itemsId, reason } = req.body;
 
-        if (!userId) {
-            return res.status(401).json({ success: false, message: 'Not authenticated' });
-        }
-
-        const order = await Order.findById(orderId).populate('items.productId');
-
-        if (!order) {
-            return res.status(404).json({ success: false, message: 'Order not found' });
-        }
-
-        // Track refund and determine scope
-        let refundAmount = 0;
-        // Consider active items only (not already cancelled)
-        const activeItems = order.items.filter(it => it.status !== 'Cancelled');
-        // Full cancellation if no itemsId provided OR provided list equals all active item ids
-        const providedIds = itemsId
-            ? Array.isArray(itemsId)
-                ? itemsId.map(String)
-                : [String(itemsId)]
-            : [];
-        const activeIds = activeItems.map(it => it._id.toString());
-        const isProvidedFull = providedIds.length > 0 && providedIds.length === activeIds.length && providedIds.every(id => activeIds.includes(id));
-        const fullCancellationRequested = !itemsId || isProvidedFull;
-
-        // Compute proportional discount once (do not modify coupon fields)
-        const originalSubtotal = order.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-        let isFlatCoupon = false;
-        let flatDiscountPerItem = 0;
-        if (order.couponId) {
-            try {
-                const appliedCoupon = await Coupon.findById(order.couponId).select('discountType');
-                if (appliedCoupon && appliedCoupon.discountType === 'flat') {
-                    isFlatCoupon = true;
-                    // Split the actual discount used on the order equally among all items (not quantity)
-                    const itemsCount = order.items.length || 1;
-                    flatDiscountPerItem = (order.discountAmount || 0) / itemsCount;
-                }
-            } catch (error) {
-                console.error('DEBUG: Error fetching coupon:', error);
-                isFlatCoupon = false;
-            }
-        } else {
-        }
-        // For percentage coupon, keep existing proportional logic
-        const discountPercentage = (!isFlatCoupon && originalSubtotal > 0)
-            ? (order.discountAmount / originalSubtotal)
-            : 0;
-
-        if (fullCancellationRequested) {
-            refundAmount = activeItems.reduce((sum, item) => {
-                if (isFlatCoupon) {
-                    // For flat coupons, refund is item price minus the equally distributed flat discount per item
-                    const itemRefund = item.price - flatDiscountPerItem;
-                    return sum + itemRefund;
-                } else {
-                    // Existing logic for percentage coupons or no coupon
-                    const itemTotal = item.price * item.quantity;
-                    const itemDiscount = itemTotal * discountPercentage;
-                    const net = order.couponCode ? (itemTotal - itemDiscount) : itemTotal;
-                    return sum + net;
-                }
-            }, 0);
-        } else {
-            // Single item cancellation
-            const targetId = providedIds[0];
-            const itemToCancel = order.items.find(item => item._id.toString() === targetId);
-            if (itemToCancel && itemToCancel.status !== 'Cancelled') {
-                if (isFlatCoupon) {
-                    // For flat coupons, refund is item price minus the equally distributed flat discount per item
-                    refundAmount = itemToCancel.price - flatDiscountPerItem;
-                } else {
-                    // Existing logic for percentage coupons or no coupon
-                    const itemTotal = itemToCancel.price * itemToCancel.quantity;
-                    const itemDiscount = itemTotal * discountPercentage;
-                    refundAmount = order.couponCode ? (itemTotal - itemDiscount) : itemTotal;
-                }
-            }
-        }
-
-        // Credit wallet when Online or Wallet payment methods are used
-        if (['Online', 'Wallet'].includes(order.paymentMethod) && refundAmount > 0) {
-            let wallet = await Wallet.findOne({ userId });
-            if (!wallet) {
-                wallet = new Wallet({ userId, balance: 0, transactions: [] });
-            }
-            wallet.balance += refundAmount;
-            wallet.transactions.push({
-                type: 'credit',
-                amount: refundAmount,
-                description: `Refund for order cancellation #${order.orderNumber}`,
-                balanceAfter: wallet.balance,
-                source: 'order_cancellation',
-                orderId: order._id,
-            });
-            await wallet.save();
-        }
-
-        if (fullCancellationRequested) {
-            // Cancel only active items
-            for (const item of activeItems) {
-                item.status = 'Cancelled';
-                const product = await Product.findById(item.productId);
-                if (product && product.variants) {
-                    const variant = product.variants.find(v => v.size === (item.size || "Default"));
-                    if (variant) {
-                        variant.variantQuantity += item.quantity;
-                        if (product.status === "out of stock") {
-                            const totalStock = product.variants.reduce((sum, v) => sum + v.variantQuantity, 0);
-                            if (totalStock > 0) product.status = "Available";
-                        }
-                        await product.save();
-                    }
-                }
-            }
-
-            // If all items are now cancelled, update order status and set total to 0
-            const allItemsCancelledAfter = order.items.every(it => it.status === 'Cancelled');
-            if (allItemsCancelledAfter) {
-                order.orderStatus = 'Cancelled';
-                order.cancellationReason = reason;
-                order.cancelledAt = new Date();
-                order.statusHistory.push({
-                    status: 'Cancelled',
-                    date: new Date(),
-                    description: `Order cancelled. Reason: ${reason}`
-                });
-                order.totalAmount = 0;
-            } else {
-                // Should not happen in a full request, but keep consistency
-                order.statusHistory.push({
-                    status: 'Cancelled',
-                    date: new Date(),
-                    description: `Some items cancelled. Reason: ${reason}`
-                });
-                // Reduce totalAmount by the refunded sum irrespective of payment method
-                order.totalAmount = Math.max(0, (order.totalAmount || 0) - refundAmount);
-            }
-        } else {
-            const itemToCancel = order.items.id(itemsId);
-            if (itemToCancel && ['Pending', 'Processing'].includes(itemToCancel.status)) {
-                itemToCancel.status = 'Cancelled';
-
-                const product = await Product.findById(itemToCancel.productId);
-                if (product && product.variants) {
-                    const variant = product.variants.find(v => v.size === (itemToCancel.size || "Default"));
-                    if (variant) {
-                        variant.variantQuantity += itemToCancel.quantity;
-                        if (product.status === "out of stock") {
-                            const totalStock = product.variants.reduce((sum, v) => sum + v.variantQuantity, 0);
-                            if (totalStock > 0) product.status = "Available";
-                        }
-                        await product.save();
-                    }
-                }
-
-                // Adjust order total to reflect the cancelled item's refund for all payment methods
-                if (refundAmount > 0) {
-                    order.totalAmount = Math.max(0, (order.totalAmount || 0) - refundAmount);
-                }
-
-                const allItemsCancelled = order.items.every(item => item.status === 'Cancelled');
-                if (allItemsCancelled) {
-                    order.orderStatus = 'Cancelled';
-                    order.cancellationReason = 'All items cancelled';
-                    order.totalAmount = 0; // everything cancelled
-                }
-                order.statusHistory.push({
-                    status: 'Cancelled',
-                    date: new Date(),
-                    description: `Item cancelled. Reason: ${reason || 'Item cancelled by customer'}`
-                });
-            } else {
-                return res.status(400).json({ success: false, message: 'Item cannot be cancelled' });
-            }
-        }
-
-        // Coupon usage is not reset when an order is cancelled.
-        // The coupon remains marked as 'Used' for the user.
-        await order.save();
-
-        return res.json({ success: true, message: 'Order cancelled successfully.' });
-
-    } catch (error) {
-        console.error('Cancel order error:', error);
-        return res.status(500).json({ success: false, message: 'Server error' });
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Not authenticated' });
     }
+
+    const order = await Order.findById(orderId).populate('items.productId');
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    // Track refund and determine scope
+    let refundAmount = 0;
+    // Consider active items only (not already cancelled)
+    const activeItems = order.items.filter(it => it.status !== 'Cancelled');
+    // Full cancellation if no itemsId provided OR provided list equals all active item ids
+    const providedIds = itemsId
+      ? Array.isArray(itemsId)
+        ? itemsId.map(String)
+        : [String(itemsId)]
+      : [];
+    const activeIds = activeItems.map(it => it._id.toString());
+    const isProvidedFull = providedIds.length > 0 && providedIds.length === activeIds.length && providedIds.every(id => activeIds.includes(id));
+    const fullCancellationRequested = !itemsId || isProvidedFull;
+
+    // Compute proportional discount once
+    const originalSubtotal = order.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+    let isFlatCoupon = false;
+    let flatDiscountPerItem = 0;
+    if (order.couponId) {
+      try {
+        const appliedCoupon = await Coupon.findById(order.couponId).select('discountType');
+        if (appliedCoupon && appliedCoupon.discountType === 'flat') {
+          isFlatCoupon = true;
+          const itemsCount = order.items.length || 1;
+          flatDiscountPerItem = (order.discountAmount || 0) / itemsCount;
+        }
+      } catch (error) {
+        console.error('DEBUG: Error fetching coupon:', error);
+        isFlatCoupon = false;
+      }
+    }
+    const discountPercentage = (!isFlatCoupon && originalSubtotal > 0)
+      ? (order.discountAmount / originalSubtotal)
+      : 0;
+
+    if (fullCancellationRequested) {
+      refundAmount = activeItems.reduce((sum, item) => {
+        if (isFlatCoupon) {
+          const itemRefund = item.price - flatDiscountPerItem;
+          return sum + itemRefund;
+        } else {
+          const itemTotal = item.price * item.quantity;
+          const itemDiscount = itemTotal * discountPercentage;
+          const net = order.couponCode ? (itemTotal - itemDiscount) : itemTotal;
+          return sum + net;
+        }
+      }, 0);
+
+      // Cancel only active items
+      for (const item of activeItems) {
+        item.status = 'Cancelled';
+        const product = await Product.findById(item.productId);
+        if (product && product.variants) {
+          const variant = product.variants.find(v => v.size === (item.size || "Default"));
+          if (variant) {
+            variant.variantQuantity += item.quantity;
+            if (product.status === "out of stock") {
+              const totalStock = product.variants.reduce((sum, v) => sum + v.variantQuantity, 0);
+              if (totalStock > 0) product.status = "Available";
+            }
+            await product.save();
+          }
+        }
+      }
+
+      // Update order status and coupon usage
+      const allItemsCancelledAfter = order.items.every(it => it.status === 'Cancelled');
+      if (allItemsCancelledAfter) {
+        order.orderStatus = 'Cancelled';
+        order.cancellationReason = reason;
+        order.cancelledAt = new Date();
+        order.statusHistory.push({
+          status: 'Cancelled',
+          date: new Date(),
+          description: `Order cancelled. Reason: ${reason}`
+        });
+        order.totalAmount = 0;
+        // Remove userId from coupon's usedBy array if coupon was applied
+        if (order.couponId && order.userId) {
+          await Coupon.findByIdAndUpdate(order.couponId, {
+            $pull: { usedBy: order.userId }
+          });
+        }
+      } else {
+        order.statusHistory.push({
+          status: 'Cancelled',
+          date: new Date(),
+          description: `Some items cancelled. Reason: ${reason}`
+        });
+        order.totalAmount = Math.max(0, (order.totalAmount || 0) - refundAmount);
+      }
+    } else {
+      const itemToCancel = order.items.id(itemsId);
+      if (itemToCancel && ['Pending', 'Processing'].includes(itemToCancel.status)) {
+        if (isFlatCoupon) {
+          refundAmount = itemToCancel.price - flatDiscountPerItem;
+        } else {
+          const itemTotal = itemToCancel.price * itemToCancel.quantity;
+          const itemDiscount = itemTotal * discountPercentage;
+          refundAmount = order.couponCode ? (itemTotal - itemDiscount) : itemTotal;
+        }
+
+        itemToCancel.status = 'Cancelled';
+
+        const product = await Product.findById(itemToCancel.productId);
+        if (product && product.variants) {
+          const variant = product.variants.find(v => v.size === (itemToCancel.size || "Default"));
+          if (variant) {
+            variant.variantQuantity += itemToCancel.quantity;
+            if (product.status === "out of stock") {
+              const totalStock = product.variants.reduce((sum, v) => sum + v.variantQuantity, 0);
+              if (totalStock > 0) product.status = "Available";
+            }
+            await product.save();
+          }
+        }
+
+        // Adjust order total
+        if (refundAmount > 0) {
+          order.totalAmount = Math.max(0, (order.totalAmount || 0) - refundAmount);
+        }
+
+        const allItemsCancelled = order.items.every(item => item.status === 'Cancelled');
+        if (allItemsCancelled) {
+          order.orderStatus = 'Cancelled';
+          order.cancellationReason = 'All items cancelled';
+          order.totalAmount = 0;
+          // Remove userId from coupon's usedBy array if coupon was applied
+          if (order.couponId && order.userId) {
+            await Coupon.findByIdAndUpdate(order.couponId, {
+              $pull: { usedBy: order.userId }
+            });
+          }
+        }
+        order.statusHistory.push({
+          status: 'Cancelled',
+          date: new Date(),
+          description: `Item cancelled. Reason: ${reason || 'Item cancelled by customer'}`
+        });
+      } else {
+        return res.status(400).json({ success: false, message: 'Item cannot be cancelled' });
+      }
+    }
+
+    // Credit wallet when Online or Wallet payment methods are used
+    if (['Online', 'Wallet'].includes(order.paymentMethod) && refundAmount > 0) {
+      let wallet = await Wallet.findOne({ userId });
+      if (!wallet) {
+        wallet = new Wallet({ userId, balance: 0, transactions: [] });
+      }
+      wallet.balance += refundAmount;
+      wallet.transactions.push({
+        type: 'credit',
+        amount: refundAmount,
+        description: `Refund for order cancellation #${order.orderNumber}`,
+        balanceAfter: wallet.balance,
+        source: 'order_cancellation',
+        orderId: order._id,
+      });
+      await wallet.save();
+    }
+
+    await order.save();
+
+    return res.json({ success: true, message: 'Order cancelled successfully.' });
+
+  } catch (error) {
+    console.error('Cancel order error:', error);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
 };
 
 const returnOrder = async (req, res) => {

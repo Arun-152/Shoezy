@@ -2,6 +2,7 @@
 const express = require("express")
 const app = express()
 const path = require("path")
+const { execSync } = require('child_process')
 const env = require("dotenv").config()
 const session = require("express-session")
 const flash = require("connect-flash")
@@ -9,6 +10,7 @@ const passport = require("./config/passport")
 const {registerRoutes} = require("./routes/index")
 const db = require("./config/db")
 const navbarCount =require("./middlewares/navbarCount")
+const PORT = process.env.PORT || 5000;
 db()
 
 
@@ -114,9 +116,30 @@ app.use((err, req, res, next) => {
     })
 })
 
-const PORT = process.env.PORT || 4000;
+
+const killProcessOnPort = (port) => {
+    if (process.platform === 'win32') {
+        try {
+            const command = `netstat -ano | findstr :${port}`;
+            const output = execSync(command).toString();
+            const lines = output.split('\n').filter(line => line.includes('LISTENING'));
+            lines.forEach(line => {
+                const parts = line.trim().split(/\s+/);
+                const pid = parts[parts.length - 1];
+                if (pid && pid !== '0') {
+                    console.log(`Terminating process with PID ${pid} using port ${port}`);
+                    execSync(`taskkill /PID ${pid} /F`);
+                    console.log(`Process ${pid} terminated.`);
+                }
+            });
+        } catch (error) {
+            // Silently fail if no process is found
+        }
+    }
+};
+
+killProcessOnPort(PORT);
 
 app.listen(PORT, () => {
-    console.log("Server running");
-    
+    console.log(`Server running on port ${PORT}`);
 })

@@ -1080,11 +1080,11 @@
                                                         <% if (item.status==='Pending' || item.status==='Processing' ) {
                                                             %>
                                                             <button class="btn-danger"
-                                                                onclick="cancelSingleItem('<%= order._id %>', '<%= item._id %>')">Cancel
+                                                                onclick="cancelSingleItem('<%= order._id %>', '<%= item._id %>', this)" data-item-price="<%= item.totalPrice %>">Cancel
                                                                 Item</button>
                                                             <% } else if (item.status==='Delivered' ) { %>
                                                                 <button class="btn-secondary"
-                                                                    onclick="showReturnModal('<%= order._id %>', '<%= item.productId._id %>', '<%= item.productId.productName %>')">Return</button>
+                                                                    onclick="showReturnModal('<%= order._id %>', '<%= item.productId._id %>', '<%= item.productId.productName %>', this)" data-item-price="<%= item.totalPrice %>">Return</button>
                                                                 <% } else if (item.status==='Cancelled' ) { %>
                                                                     <span
                                                                         class="status-badge cancelled-badge">Cancelled</span>
@@ -1322,12 +1322,62 @@
                 let currentOrderId = '';
                 let currentItemsId = '';
                 let currentProductName = '';
+                let currentReturnButton = null;
+
+
+                function updateOrderSummary(amountToSubtract) {
+                    const subtotalEl = document.querySelector('.summary-row:first-child .summary-value');
+                    const totalEl = document.querySelector('.total-amount');
+
+                    if (!subtotalEl || !totalEl) return;
+
+                    // Function to parse currency string
+                    const parseCurrency = (str) => parseFloat(str.replace(/[^0-9.-]+/g, ''));
+
+                    // Update Subtotal
+                    let currentSubtotal = parseCurrency(subtotalEl.textContent);
+                    let newSubtotal = currentSubtotal - amountToSubtract;
+                    subtotalEl.textContent = `₹${newSubtotal.toLocaleString()}`;
+
+                    // Update Total
+                    let currentTotal = parseCurrency(totalEl.textContent);
+                    let newTotal = currentTotal - amountToSubtract;
+                    totalEl.textContent = `₹${newTotal.toLocaleString()}`;
+                }
+
+
+                function updateUIAfterItemRemoval(button, newStatus) {
+                    const itemCard = button.closest('.item-card');
+                    if (!itemCard) return;
+
+                    // Update status text
+                    const statusElement = itemCard.querySelector('.spec:last-child');
+                    if (statusElement) {
+                        statusElement.textContent = `Status: ${newStatus}`;
+                    }
+
+                    // Replace button with badge
+                    const actionsDiv = itemCard.querySelector('.item-actions');
+                    if (actionsDiv) {
+                        let badgeClass = newStatus === 'Cancelled' ? 'cancelled-badge' : 'return-requested-badge';
+                        let badgeText = newStatus === 'Cancelled' ? 'Cancelled' : 'Return Requested';
+                        actionsDiv.innerHTML = `<span class="status-badge ${badgeClass}">${badgeText}</span>`;
+                    }
+
+                    // Get item price and update summary
+                    const itemPrice = parseFloat(button.getAttribute('data-item-price'));
+                    if (!isNaN(itemPrice)) {
+                        updateOrderSummary(itemPrice);
+                    }
+                }
+
 
                 // Show return modal function
-                function showReturnModal(orderId, itemsId, productName) {
+                function showReturnModal(orderId, itemsId, productName, button) {
                     currentOrderId = orderId;
                     currentItemsId = itemsId;
                     currentProductName = productName;
+                    currentReturnButton = button;
 
                     // Update modal content
                     document.getElementById('returnItemName').textContent = productName;
@@ -1391,7 +1441,8 @@
 
                         if (data.success) {
                             closeReturnModal();
-                            updateItemStatus(currentItemsId, 'ReturnRequested');
+                            updateUIAfterItemRemoval(currentReturnButton, 'ReturnRequested');
+
 
                             Swal.fire({
                                 title: 'Return Request Submitted!',
@@ -1424,29 +1475,8 @@
                     }
                 }
 
-                // Update item status in UI
-                function updateItemStatus(itemsId, newStatus) {
-                    const itemCards = document.querySelectorAll('.item-card');
-
-                    itemCards.forEach((card, index) => {
-                        const returnButton = card.querySelector('.item-actions .btn-secondary');
-
-                        if (returnButton && returnButton.onclick && returnButton.onclick.toString().includes(itemsId)) {
-                            const statusElement = card.querySelector('.spec:last-child');
-                            if (statusElement) {
-                                statusElement.textContent = `Status: ${newStatus}`;
-                            }
-
-                            const actionsDiv = card.querySelector('.item-actions');
-                            if (actionsDiv) {
-                                actionsDiv.innerHTML = `<span class="status-badge return-requested-badge">Return Requested</span>`;
-                            }
-                        }
-                    });
-                }
-
                 // Cancel single item function
-                async function cancelSingleItem(orderId, itemsId) {
+                async function cancelSingleItem(orderId, itemsId, button) {
                     try {
                         const { value: reason, isConfirmed } = await Swal.fire({
                             title: 'Cancel Item?',
@@ -1497,9 +1527,8 @@
                                     text: data.message,
                                     icon: 'success',
                                     confirmButtonColor: '#2563eb'
-                                }).then(() => {
-                                    window.location.reload();
-                                });
+                                })
+                                updateUIAfterItemRemoval(button, 'Cancelled');
                             } else {
                                 Swal.fire({
                                     title: 'Error!',

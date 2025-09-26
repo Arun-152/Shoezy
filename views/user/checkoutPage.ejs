@@ -470,8 +470,7 @@
                         walletRadio.value = "Wallet";
                         walletRadio.nextElementSibling.querySelector('.payment-balance').textContent = "Full payment from wallet";
                         walletRadio.disabled = false; // Enable wallet option
-                        codRadio.disabled = true;
-                        onlineRadio.disabled = true;
+                       
                     } else {
                         // Wallet has insufficient balance, disable wallet option
                         walletRadio.value = "Wallet"; // Default value

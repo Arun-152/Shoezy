@@ -339,7 +339,6 @@ const deleteCoupon = async(req,res)=>{
 const couponToggle = async (req, res) => {
     try {
         const { id } = req.body;
-        console.log(id)
 
         if (!id) {
             return res.status(400).json({ success: false, message: "Coupon id is required" });

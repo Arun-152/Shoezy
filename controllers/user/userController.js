@@ -177,27 +177,20 @@ const postSignup = async (req, res) => {
         if (errors.length > 0) {
             return res.status(400).json({ success: false, message: errors.join(", ") });
         }
-        
-        console.log("postSignup: Starting user existence check for email:", email);
         const findUser = await User.findOne({ email });
 
         if (findUser) {
-            console.log("postSignup: User with this email already exists.");
             return res.status(400).json({ success: false, message: "User with this email already exists" });
         }
-        console.log("postSignup: User does not exist, proceeding with signup.");
         const hashedPassword = await bcrypt.hash(password, 10);
         const otp = generateOtp();
         console.log("postSignup: Generated OTP:", otp);
 
         try {
-            console.log("postSignup: Attempting to send verification email to:", email.trim());
             const emailSent = await sendVerificationEmail(email.trim(), otp);
             if (!emailSent) {
-                console.log("postSignup: Failed to send verification email.");
                 return res.status(400).json({ success: false, message: "Could not send verification email. Please check your email address and try again." });
             }
-            console.log("postSignup: Verification email sent successfully.");
         } catch (emailError) {
             console.error("postSignup: Signup email error:", emailError);
             return res.status(500).json({ success: false, message: "There was an issue with our email service. Please try again later." });

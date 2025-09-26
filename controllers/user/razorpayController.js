@@ -43,13 +43,26 @@ const createOrder = async (req, res) => {
     let totalAmount = 0;
 
     for (const item of cart.items) {
-      totalAmount += item.totalPrice;
+      const product = await Product.findById(item.productId);
+      if (!product) {
+        return res.status(404).json({ success: false, message: `Product with id ${item.productId} not found` });
+      }
+
+      const variant = product.variants.find(v => v.size === item.size);
+      if (!variant) {
+        return res.status(404).json({ success: false, message: `Variant with size ${item.size} for product ${item.productId} not found` });
+      }
+
+      const price = variant.salePrice || variant.regularPrice;
+      const totalPrice = price * item.quantity;
+      totalAmount += totalPrice;
+
       orderItems.push({
         productId: item.productId._id,
         size: item.size || "Default",
         quantity: item.quantity,
-        price: item.price,
-        totalPrice: item.totalPrice,
+        price: price,
+        totalPrice: totalPrice,
       });
     }
 
@@ -124,7 +137,7 @@ const createOrder = async (req, res) => {
         addressType: address.addressType,
       },
       // Ensure numeric total amount
-      totalAmount: Number(finalTotal),
+      totalAmount: totalAmount, // Use the calculated total amount
       paymentMethod: "Online",
       paymentStatus: "Failed",
       // Persist coupon details so that usage checks work later
@@ -137,7 +150,7 @@ const createOrder = async (req, res) => {
 
     const options = {
       // Razorpay expects amount in paise as an integer
-      amount: Math.round(Number(newOrder.totalAmount) * 100),
+      amount: Math.round(totalAmount * 100),
       currency: "INR",
       receipt: `order_rcpt_${newOrder._id}`,
       notes: { internalOrderId: newOrder._id.toString() },
@@ -163,12 +176,10 @@ const createOrder = async (req, res) => {
 
 const verifyPayment = async (req, res) => {
   try {
-    console.log("hi")
     const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body
     const { UserOrderId } = req.body
     const order = await Order.findById(UserOrderId)
     const userId = req.session.userId
-    console.log(razorpay_payment_id, razorpay_order_id, razorpay_signature)
     if (!order) {
       return res.status(400).json({ success: false, message: "Order not found" })
     }
@@ -284,9 +295,7 @@ const retryPayment = async(req,res)=>{
   try{
 
     const {orderId} = req.params
-    console.log(orderId)
     const order = await Order.findById(orderId)
-    console.log("hy",order)
 
     const options = {
       // Razorpay expects amount in paise as an integer
