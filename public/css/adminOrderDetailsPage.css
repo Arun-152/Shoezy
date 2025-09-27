@@ -298,13 +298,23 @@ body {
 }
 
 .status-badge.pending {
-    background-color: #fee2e2;
-    color: #991b1b;
+    background-color: #fef3c7;
+    color: #92400e;
 }
 
 .status-badge.delivered {
     background-color: #dbeafe;
     color: #1e40af;
+}
+
+.status-badge.paid {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.status-badge.failed {
+    background-color: #fee2e2;
+    color: #991b1b;
 }
 
 /* Table Section */
@@ -439,6 +449,46 @@ body {
 .update-btn:hover {
     background-color: #357abd;
     transform: scale(1.1);
+}
+
+/* Table Footer Styles */
+.table-footer {
+    background-color: #f8f9fa;
+    border-top: 2px solid #e5e7eb;
+}
+
+.table-footer td {
+    padding: 12px;
+    font-weight: 500;
+    border-bottom: none;
+}
+
+.footer-label {
+    text-align: right;
+    color: #6b7280;
+    font-weight: 600;
+}
+
+.footer-value {
+    text-align: left;
+    color: #111827;
+    font-weight: 600;
+}
+
+.footer-value.discount {
+    color: #dc2626;
+}
+
+.total-footer {
+    background-color: #f3f4f6;
+    border-top: 2px solid #d1d5db;
+}
+
+.total-footer .footer-label,
+.total-footer .footer-value {
+    font-weight: 700;
+    font-size: 16px;
+    color: #111827;
 }
 
 /* Timeline Section */

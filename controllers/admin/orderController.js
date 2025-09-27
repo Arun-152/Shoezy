@@ -188,13 +188,18 @@ const orderDetails = async (req, res) => {
     const order = await Order.findById(orderId)
       .populate('items.productId')
       .populate('userId')
+      .populate('couponId')
 
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
 
+    // Calculate order totals including coupon discount
+    const totals = calculateOrderTotals(order);
+
     res.render('adminOrderDetailsPage', {
-      order
+      order,
+      totals
     });
   } catch (error) {
     console.error('Error loading admin order details:', error);

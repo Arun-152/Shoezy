@@ -132,15 +132,21 @@
                         <div class="card-body">
                             <div class="info-row">
                                 <span class="label">Subtotal:</span>
-                                <span class="value">₹<%= order.items.reduce((sum, item) => sum + item.totalPrice, 0).toFixed(2) %></span>
+                                <span class="value">₹<%= totals.subtotal.toFixed(2) %></span>
+                            </div>
+                            <% if (order.couponId && order.discountAmount > 0) { %>
+                            <div class="info-row">
+                                <span class="label">Coupon Discount:</span>
+                                <span class="value discount">-₹<%= totals.couponDiscount.toFixed(2) %></span>
                             </div>
                             <div class="info-row">
-                                <span class="label">Shipping:</span>
-                                <span class="value">₹0</span>
+                                <span class="label">Coupon Code:</span>
+                                <span class="value"><%= order.couponCode || order.couponId.name %></span>
                             </div>
+                            <% } %>
                             <div class="info-row total-row">
                                 <span class="label">Total:</span>
-                                <span class="value">₹<%= order.totalAmount.toFixed(2) %></span>
+                                <span class="value">₹<%= totals.finalAmount.toFixed(2) %></span>
                             </div>
                         </div>
                     </div>
@@ -167,18 +173,18 @@
                                             <div class="product-info">
                                                 <% if (item.productId.image && item.productId.image.length > 0) { %>
                                                     <div class="product-image">
-                                                        <img src="<%= item.productId.image[0] %>" alt="<%= item.productId.name %>">
+                                                        <img src="<%= item.productId.image[0] %>" alt="<%= item.productId.productName %>">
                                                     </div>
                                                 <% } %>
                                                 <div class="product-details">
-                                                    <div class="product-name"><%= item.productId.name %></div>
+                                                    <div class="product-name"><%= item.productId.productName %></div>
                                                     <div class="product-sku">SKU: <%= item.productId.sku || 'N/A' %></div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td><span class="quantity"><%= item.quantity %></span></td>
                                         <td class="price">₹<%= item.price.toFixed(2) %></td>
-                                        <td class="total">₹<%= item.totalPrice.toFixed(2) %></td>
+                                        <td class="total">₹<%= totals.finalAmount.toFixed(2) %></td>
                                         <td>
                                             <span class="status-badge <%= item.status.toLowerCase() %>">
                                                 <%= item.status %>
@@ -195,6 +201,7 @@
                                     </tr>
                                 <% }) %>
                             </tbody>
+                          
                         </table>
                     </div>
                 </div>

@@ -123,10 +123,10 @@ const loadSalesReport = async (req, res) => {
 
     // Convert orders to front-end friendly salesData
     const salesData = orders.map(order => {
-      const isReturned = order.orderStatus === 'Returned';
-      const totalAmount = isReturned ? 0 : (Number(order.totalAmount) || 0);
-      const discount = Number(order.discountAmount) || 0;
-      const netPaidAmount = isReturned ? 0 : (Number(order.totalAmount - discount) || 0);
+      const isCancelledOrReturned = order.orderStatus === 'Cancelled' || order.orderStatus === 'Returned';
+      const totalAmount = isCancelledOrReturned ? 0 : (Number(order.totalAmount) || 0);
+      const discount = isCancelledOrReturned ? 0 : (Number(order.discountAmount) || 0);
+      const netPaidAmount = isCancelledOrReturned ? 0 : (Number(order.totalAmount - discount) || 0);
 
       return {
         id: order.orderNumber,
@@ -306,10 +306,10 @@ const exportPdfReport = async (req, res) => {
       .lean();
 
     const salesData = orders.map(order => {
-      const isReturned = order.orderStatus === 'Returned';
-      const totalAmount = isReturned ? 0 : (Number(order.totalAmount) || 0);
-      const discount = Number(order.discountAmount) || 0;
-      const netPaidAmount = isReturned ? 0 : (Number(order.totalAmount - discount) || 0);
+      const isCancelledOrReturned = order.orderStatus === 'Cancelled' || order.orderStatus === 'Returned';
+      const totalAmount = isCancelledOrReturned ? 0 : (Number(order.totalAmount) || 0);
+      const discount = isCancelledOrReturned ? 0 : (Number(order.discountAmount) || 0);
+      const netPaidAmount = isCancelledOrReturned ? 0 : (Number(order.totalAmount - discount) || 0);
 
       return {
         id: order.orderNumber,
@@ -434,10 +434,10 @@ const exportExcelReport = async (req, res) => {
       .lean();
 
     const salesData = orders.map(order => {
-      const isReturned = order.orderStatus === 'Returned';
-      const totalAmount = isReturned ? 0 : (Number(order.totalAmount) || 0);
-      const discount = Number(order.discountAmount) || 0;
-      const netPaidAmount = isReturned ? 0 : (Number(order.totalAmount - discount) || 0);
+      const isCancelledOrReturned = order.orderStatus === 'Cancelled' || order.orderStatus === 'Returned';
+      const totalAmount = isCancelledOrReturned ? 0 : (Number(order.totalAmount) || 0);
+      const discount = isCancelledOrReturned ? 0 : (Number(order.discountAmount) || 0);
+      const netPaidAmount = isCancelledOrReturned ? 0 : (Number(order.totalAmount - discount) || 0);
 
       return {
         id: order.orderNumber,
@@ -559,10 +559,10 @@ const exportCsvReport = async (req, res) => {
       .lean();
 
     const salesData = orders.map(order => {
-      const isReturned = order.orderStatus === 'Returned';
-      const totalAmount = isReturned ? 0 : (Number(order.totalAmount) || 0);
-      const discount = Number(order.discountAmount) || 0;
-      const netPaidAmount = isReturned ? 0 : (Number(order.totalAmount - discount) || 0);
+      const isCancelledOrReturned = order.orderStatus === 'Cancelled' || order.orderStatus === 'Returned';
+      const totalAmount = isCancelledOrReturned ? 0 : (Number(order.totalAmount) || 0);
+      const discount = isCancelledOrReturned ? 0 : (Number(order.discountAmount) || 0);
+      const netPaidAmount = isCancelledOrReturned ? 0 : (Number(order.totalAmount - discount) || 0);
 
       return {
         id: order.orderNumber,
