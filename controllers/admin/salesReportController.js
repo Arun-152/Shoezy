@@ -1,7 +1,7 @@
 const Order = require('../../models/orderSchema');
 const ExcelJS = require('exceljs');
 const { Stringifier } = require('csv-stringify');
-const PDFDocument = require('pdfkit');
+const PDFDocument = require("pdfkit-table");
 
 const formatPayment = (pm) => {
   switch (pm) {
@@ -77,6 +77,8 @@ const loadSalesReport = async (req, res) => {
         { orderNumber: regex },
       ];
     }
+
+
 
     // Date range filter
     if (effectiveStartDate || effectiveEndDate) {
@@ -232,7 +234,7 @@ const loadSalesReport = async (req, res) => {
 
 const exportPdfReport = async (req, res) => {
   try {
-    const { startDate, endDate, status, payment, search, sort, timeRange } = req.query;
+    const { startDate, endDate, status, payment, search, timeRange } = req.query;
 
     let effectiveStartDate = startDate;
     let effectiveEndDate = endDate;
@@ -315,39 +317,40 @@ const exportPdfReport = async (req, res) => {
         customerName: order.address?.fullName || (order.userId ? `${order.userId.firstName || ''} ${order.userId.lastName || ''}`.trim() : 'Unknown'),
         paymentMethod: formatPayment(order.paymentMethod),
         couponUsed: order.couponCode || 'N/A',
-        totalAmount: totalAmount.toFixed(2),
-        discount: discount.toFixed(2),
-        netPaidAmount: netPaidAmount.toFixed(2),
+        totalAmount: `₹${totalAmount.toFixed(2)}`,
+        discount: `₹${discount.toFixed(2)}`,
+        netPaidAmount: `₹${netPaidAmount.toFixed(2)}`,
         status: order.orderStatus,
-        products: order.items.map(item => `${item.productId?.productName || 'Unknown Product'} (Qty: ${item.quantity}, Price: ${item.totalPrice.toFixed(2)})`).join(', '),
+        products: order.items.map(item => `${item.productId?.productName || 'Unknown Product'} (Qty: ${item.quantity}, Price: ${item.totalPrice.toFixed(2)})`).join('\n'),
       };
     });
 
-    const doc = new PDFDocument();
+    const doc = new PDFDocument({ margin: 30, size: 'A4' });
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'attachment; filename="sales_report.pdf"');
     doc.pipe(res);
 
-    doc.fontSize(20).text('Sales Report', { align: 'center' });
-    doc.moveDown();
+    const table = {
+      title: 'Sales Report',
+      headers: [
+        { label: "Order ID", property: 'id', width: 40 },
+        { label: "Order Date", property: 'date', width: 40 },
+        { label: "Customer Name", property: 'customerName', width: 60 },
+        { label: "Payment Method", property: 'paymentMethod', width: 40 },
+        { label: "Coupon Used", property: 'couponUsed', width: 40 },
+        { label: "Total Amount", property: 'totalAmount', width: 45 },
+        { label: "Discount", property: 'discount', width: 40 },
+        { label: "Net Paid", property: 'netPaidAmount', width: 45 },
+        { label: "Order Status", property: 'status', width: 40 },
+        { label: "Products", property: 'products', width: 140 },
+      ],
+      datas: salesData,
+    };
 
-    salesData.forEach((row, index) => {
-      doc.fontSize(12).text(`Order ID: ${row.id}`);
-      doc.text(`Order Date: ${row.date}`);
-      doc.text(`Customer Name: ${row.customerName}`);
-      doc.text(`Payment Method: ${row.paymentMethod}`);
-      doc.text(`Coupon Used: ${row.couponUsed}`);
-      doc.text(`Total Amount: ₹${row.totalAmount}`);
-      doc.text(`Discount: ₹${row.discount}`);
-      doc.text(`Net Paid Amount: ₹${row.netPaidAmount}`);
-      doc.text(`Order Status: ${row.status}`);
-      doc.text(`Products: ${row.products}`);
-      doc.moveDown();
-      if (index < salesData.length - 1) {
-        doc.text('----------------------------------------------------');
-        doc.moveDown();
-      }
-    });
+    await doc.table(table, {
+        prepareHeader: () => doc.font('Helvetica-Bold'),
+        prepareRow: (row, i) => doc.font('Helvetica').fontSize(8),
+     });
 
     doc.end();
 
