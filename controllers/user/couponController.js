@@ -279,6 +279,27 @@ const markCouponUsed = async (couponId, userId) => {
     return false
   }
 }
+
+const resetCouponUsage = async (couponId, userId, orderId) => {
+  try {
+    await Coupon.findByIdAndUpdate(
+      couponId,
+      {
+        // Remove user from usedBy array
+        $pull: { 
+          userId: userId,
+          userUsage: { userId: userId, orderId: orderId }
+        },
+        // Decrease global usage count
+        $inc: { currentUsageCount: -1 }
+      }
+    );
+    return true
+  } catch (error) {
+    console.error("Error resetting coupon usage:", error);
+    return false
+  }
+}
 const getAvailableCoupon = async (req, res) => {
   try {
     const userId = req.session.userId;
@@ -338,6 +359,6 @@ module.exports = {
   removeCoupon,
   validateCouponForCheckout,
   markCouponUsed,
-  getAvailableCoupon,
-
+  resetCouponUsage,
+  getAvailableCoupon
 }

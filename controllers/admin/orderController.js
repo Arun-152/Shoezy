@@ -5,6 +5,7 @@ const Category = require("../../models/categorySchema");
 const Order = require("../../models/orderSchema");
 const Wallet = require("../../models/walletSchema")
 const Coupon = require("../../models/CouponSchema")
+const { resetCouponUsage } = require('../user/couponController');
 require("dotenv").config();
 
 const calculateOrderTotals = (order) => {
@@ -162,6 +163,16 @@ const updateOrderStatus = async (req, res) => {
     // Handle cancellation
     if (status.toLowerCase() === "cancelled") {
       order.cancellationReason = reason;
+      
+      // Reset coupon usage if order had a coupon
+      if (order.couponId && order.userId) {
+        try {
+          await resetCouponUsage(order.couponId, order.userId, order._id);
+          console.log(`Coupon usage reset for cancelled order ${order._id}`);
+        } catch (error) {
+          console.error("Error resetting coupon usage for cancelled order:", error);
+        }
+      }
     }
 
     // Add to status history
@@ -297,10 +308,15 @@ const approveReturnRequest = async (req, res) => {
     let allOrderReturn = order.items.every(item => item.status === "Returned" || item.status === "Cancelled");
     if (allOrderReturn) {
       order.orderStatus = "Returned";
+      
+      // Reset coupon usage if order had a coupon
       if (order.couponId && order.userId) {
-        await Coupon.findByIdAndUpdate(order.couponId, {
-          $pull: { usedBy: order.userId }
-        });
+        try {
+          await resetCouponUsage(order.couponId, order.userId, order._id);
+          console.log(`Coupon usage reset for returned order ${order._id}`);
+        } catch (error) {
+          console.error("Error resetting coupon usage for returned order:", error);
+        }
       }
     }
 

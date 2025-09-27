@@ -137,8 +137,9 @@ const loadCheckout = async (req, res) => {
       totalAmount: finalTotal,
       defaultAddress,
       allAddresses,
-      coupon,
       coupon: availableCouponsForPage, // Pass the correctly filtered coupons
+      appliedCoupon, // Pass the applied coupon data
+      couponDiscount, // Pass the coupon discount amount
       cart: { total: finalTotal },
       walletBalance: userWallet ? userWallet.balance : 0
     });

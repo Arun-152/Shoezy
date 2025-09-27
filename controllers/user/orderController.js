@@ -4,6 +4,7 @@ const Order = require("../../models/orderSchema");
 const Wallet = require("../../models/walletSchema");
 const generateInvoice = require("../../helpers/generateInvoice");
 const Coupon = require("../../models/CouponSchema");
+const { resetCouponUsage } = require('./couponController');
 
 
 const calculateOrderTotals = (order) => {
@@ -201,11 +202,14 @@ const cancelOrder = async (req, res) => {
           description: `Order cancelled. Reason: ${reason}`
         });
         order.totalAmount = 0;
-        // Remove userId from coupon's usedBy array if coupon was applied
+        // Reset coupon usage if order had a coupon
         if (order.couponId && order.userId) {
-          await Coupon.findByIdAndUpdate(order.couponId, {
-            $pull: { usedBy: order.userId }
-          });
+          try {
+            await resetCouponUsage(order.couponId, order.userId, order._id);
+            console.log(`Coupon usage reset for user-cancelled order ${order._id}`);
+          } catch (error) {
+            console.error("Error resetting coupon usage for user-cancelled order:", error);
+          }
         }
       } else {
         order.statusHistory.push({
@@ -251,11 +255,15 @@ const cancelOrder = async (req, res) => {
           order.orderStatus = 'Cancelled';
           order.cancellationReason = 'All items cancelled';
           order.totalAmount = 0;
-          // Remove userId from coupon's usedBy array if coupon was applied
+          
+          // Reset coupon usage if order had a coupon
           if (order.couponId && order.userId) {
-            await Coupon.findByIdAndUpdate(order.couponId, {
-              $pull: { usedBy: order.userId }
-            });
+            try {
+              await resetCouponUsage(order.couponId, order.userId, order._id);
+              console.log(`Coupon usage reset for user-cancelled order ${order._id}`);
+            } catch (error) {
+              console.error("Error resetting coupon usage for user-cancelled order:", error);
+            }
           }
         }
         order.statusHistory.push({

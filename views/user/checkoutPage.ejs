@@ -193,6 +193,33 @@
                             <i class="fas fa-eye"></i> View Available Coupons
                         </button>
                     </div>
+                    <% if (appliedCoupon && couponDiscount > 0) { %>
+                    <div class="applied-coupon-container" id="appliedCouponContainer">
+                        <div class="coupon-success-animation" id="couponSuccessAnimation">
+                            <div class="success-checkmark">
+                                <div class="check-icon">
+                                    <span class="icon-line line-tip"></span>
+                                    <span class="icon-line line-long"></span>
+                                    <div class="icon-circle"></div>
+                                    <div class="icon-fix"></div>
+                                </div>
+                            </div>
+                            <div class="success-text">
+                                <h3>Coupon Applied!</h3>
+                                <p>You're saving money!</p>
+                            </div>
+                        </div>
+                        <div class="applied-coupon-card">
+                            <div class="coupon-info">
+                                <span class="coupon-code-display" id="appliedCouponCode"><%= appliedCoupon.couponCode %></span>
+                                <span class="coupon-discount-display" id="appliedCouponDiscount">-₹<%= couponDiscount.toLocaleString() %></span>
+                            </div>
+                            <button type="button" class="remove-coupon-btn" onclick="removeCoupon()">
+                                <i class="fas fa-times"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                    <% } else { %>
                     <div class="applied-coupon-container" id="appliedCouponContainer" style="display: none;">
                         <div class="coupon-success-animation" id="couponSuccessAnimation">
                             <div class="success-checkmark">
@@ -218,6 +245,7 @@
                             </button>
                         </div>
                     </div>
+                    <% } %>
                 </div>
 
                 <div class="order-summary">
@@ -256,10 +284,17 @@
                             <span>Shipping</span>
                             <span class="free">FREE</span>
                         </div>
+                        <% if (appliedCoupon && couponDiscount > 0) { %>
+                        <div class="total-row coupon-discount-row" id="couponDiscountRow">
+                            <span>Coupon Discount (<%= appliedCoupon.couponCode %>)</span>
+                            <span class="discount" id="couponDiscountAmount">-₹<%= couponDiscount.toLocaleString() %></span>
+                        </div>
+                        <% } else { %>
                         <div class="total-row coupon-discount-row" id="couponDiscountRow" style="display: none;">
                             <span>Coupon Discount</span>
                             <span class="discount" id="couponDiscountAmount">-₹0</span>
                         </div>
+                        <% } %>
                         <div class="total-row final-total">
                             <span>Final Total</span>
                             <span id="finalTotalAmount">₹<%= totalAmount.toLocaleString() %></span>
@@ -414,6 +449,7 @@
                     currentDiscount = 0;
                     updateOrderSummaryWithBackend({ finalAmount: originalFinalTotal, discountAmount: 0, couponCode: "" });
                     hideAppliedCoupon();
+                    updatePaymentOptions(); // Update wallet options after removing coupon
                     Swal.fire({
                         icon: 'info',
                         title: 'Coupon Removed',
@@ -468,13 +504,13 @@
                     if (walletBalance >= currentFinalTotal) {
                         // Wallet can cover full amount
                         walletRadio.value = "Wallet";
-                        walletRadio.nextElementSibling.querySelector('.payment-balance').textContent = "Full payment from wallet";
+                        walletRadio.nextElementSibling.querySelector('.payment-balance').innerHTML = `Balance: ₹${walletBalance.toLocaleString()} <span style="color: #27ae60; font-weight: bold;">(Sufficient)</span>`;
                         walletRadio.disabled = false; // Enable wallet option
                        
                     } else {
                         // Wallet has insufficient balance, disable wallet option
                         walletRadio.value = "Wallet"; // Default value
-                        walletRadio.nextElementSibling.querySelector('.payment-balance').textContent = "Insufficient balance";
+                        walletRadio.nextElementSibling.querySelector('.payment-balance').innerHTML = `Balance: ₹${walletBalance.toLocaleString()} <span style="color: #e74c3c; font-weight: bold;">(Insufficient)</span>`;
                         walletRadio.disabled = true; // Disable wallet option
                         codRadio.disabled = false;
                         onlineRadio.disabled = false;
@@ -500,11 +536,11 @@
                 }
 
                 document.addEventListener('DOMContentLoaded', () => {
+                    // Initialize payment options on page load
+                    updatePaymentOptions();
 
                     const defaultAddress = document.querySelector('input[name="selectedAddress"]:checked');
                     if (defaultAddress) document.getElementById('selectedAddressInput').value = defaultAddress.value;
-
-                    updatePaymentOptions(); // Initial call to set up wallet options
 
                     document.getElementById('checkoutForm').addEventListener('submit', async e => {
                         e.preventDefault();
