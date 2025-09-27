@@ -44,8 +44,7 @@ const loadCheckout = async (req, res) => {
       if (couponItem.totalUsageLimit && couponItem.currentUsageCount >= couponItem.totalUsageLimit) {
         continue;
       }
-
-      // Check if user has already used this coupon
+      
       const userUsageCount = await Order.countDocuments({
         userId: userId,
         couponCode: couponItem.name,
@@ -57,7 +56,6 @@ const loadCheckout = async (req, res) => {
 
       availableCouponsForPage.push(couponItem);
     }
-    // --- End: Corrected Coupon Filtering Logic ---
     
     let subtotal = 0;
     let totalItems = 0;

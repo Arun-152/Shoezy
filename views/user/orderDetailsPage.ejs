@@ -1317,257 +1317,265 @@
 
         <%- include("../partials/user/userfooter") %>
 
-            <script>
-                // Global variables to store return request data
-                let currentOrderId = '';
-                let currentItemsId = '';
-                let currentProductName = '';
-                let currentReturnButton = null;
+           <script>
+    // Global variables to store return request data
+    let currentOrderId = '';
+    let currentItemsId = '';
+    let currentProductName = '';
+    let currentReturnButton = null;
 
+    function updateOrderSummary(amountToSubtract) {
+        const subtotalEl = document.querySelector('.summary-row:first-child .summary-value');
+        const totalEl = document.querySelector('.total-amount');
 
-                function updateOrderSummary(amountToSubtract) {
-                    const subtotalEl = document.querySelector('.summary-row:first-child .summary-value');
-                    const totalEl = document.querySelector('.total-amount');
+        if (!subtotalEl || !totalEl) return;
 
-                    if (!subtotalEl || !totalEl) return;
+        // Function to parse currency string
+        const parseCurrency = (str) => parseFloat(str.replace(/[^0-9.-]+/g, ''));
 
-                    // Function to parse currency string
-                    const parseCurrency = (str) => parseFloat(str.replace(/[^0-9.-]+/g, ''));
+        // Update Subtotal
+        let currentSubtotal = parseCurrency(subtotalEl.textContent);
+        let newSubtotal = currentSubtotal - amountToSubtract;
+        subtotalEl.textContent = `₹${newSubtotal.toLocaleString()}`;
 
-                    // Update Subtotal
-                    let currentSubtotal = parseCurrency(subtotalEl.textContent);
-                    let newSubtotal = currentSubtotal - amountToSubtract;
-                    subtotalEl.textContent = `₹${newSubtotal.toLocaleString()}`;
+        // Update Total
+        let currentTotal = parseCurrency(totalEl.textContent);
+        let newTotal = currentTotal - amountToSubtract;
+        totalEl.textContent = `₹${newTotal.toLocaleString()}`;
+    }
 
-                    // Update Total
-                    let currentTotal = parseCurrency(totalEl.textContent);
-                    let newTotal = currentTotal - amountToSubtract;
-                    totalEl.textContent = `₹${newTotal.toLocaleString()}`;
-                }
+  function updateUIAfterItemRemoval(button, newStatus, amountToSubtract = 0) {
+    const itemCard = button.closest('.item-card');
+    if (!itemCard) return;
 
+    // Update status text in the item details
+    const statusElement = itemCard.querySelector('.spec:last-child');
+    if (statusElement) {
+        statusElement.textContent = `Status: ${newStatus}`;
+    }
 
-                function updateUIAfterItemRemoval(button, newStatus) {
-                    const itemCard = button.closest('.item-card');
-                    if (!itemCard) return;
+    // Replace the button with a status badge
+    const actionsDiv = itemCard.querySelector('.item-actions');
+    if (actionsDiv) {
+        let badgeClass = '';
+        let badgeText = '';
 
-                    // Update status text
-                    const statusElement = itemCard.querySelector('.spec:last-child');
-                    if (statusElement) {
-                        statusElement.textContent = `Status: ${newStatus}`;
-                    }
+        if (newStatus === 'Cancelled') {
+            badgeClass = 'cancelled-badge';
+            badgeText = 'Cancelled';
+        } else if (newStatus === 'ReturnRequested') {
+            badgeClass = 'return-requested-badge';
+            badgeText = 'Return Requested';
+        } else if (newStatus === 'ReturnApproved') {
+            badgeClass = 'return-approved-badge';
+            badgeText = 'Return Approved';
+        }
 
-                    // Replace button with badge
-                    const actionsDiv = itemCard.querySelector('.item-actions');
-                    if (actionsDiv) {
-                        let badgeClass = newStatus === 'Cancelled' ? 'cancelled-badge' : 'return-requested-badge';
-                        let badgeText = newStatus === 'Cancelled' ? 'Cancelled' : 'Return Requested';
-                        actionsDiv.innerHTML = `<span class="status-badge ${badgeClass}">${badgeText}</span>`;
-                    }
+        actionsDiv.innerHTML = `<span class="status-badge ${badgeClass}">${badgeText}</span>`;
+    }
 
-                    // Get item price and update summary
-                    const itemPrice = parseFloat(button.getAttribute('data-item-price'));
-                    if (!isNaN(itemPrice)) {
-                        updateOrderSummary(itemPrice);
-                    }
-                }
+    // Update the order summary only for Cancelled or ReturnApproved items
+    if (newStatus === 'Cancelled' || newStatus === 'ReturnApproved') {
+        const itemPrice = amountToSubtract || parseFloat(button.getAttribute('data-item-price'));
+        if (!isNaN(itemPrice)) {
+            updateOrderSummary(itemPrice);
+        }
+    }
+}
 
+    // Show return modal function
+    function showReturnModal(orderId, itemsId, productName, button) {
+        currentOrderId = orderId;
+        currentItemsId = itemsId;
+        currentProductName = productName;
+        currentReturnButton = button;
 
-                // Show return modal function
-                function showReturnModal(orderId, itemsId, productName, button) {
-                    currentOrderId = orderId;
-                    currentItemsId = itemsId;
-                    currentProductName = productName;
-                    currentReturnButton = button;
+        // Update modal content
+        document.getElementById('returnItemName').textContent = productName;
+        // Clear form
+        document.getElementById('returnReason').value = '';
+        // Show modal
+        document.getElementById('returnModal').classList.add('show');
+        document.getElementById('modalOverlay').classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
 
-                    // Update modal content
-                    document.getElementById('returnItemName').textContent = productName;
+    // Close return modal function
+    function closeReturnModal() {
+        document.getElementById('returnModal').classList.remove('show');
+        document.getElementById('modalOverlay').classList.remove('show');
+        document.body.style.overflow = 'auto';
+    }
 
-                    // Clear form
-                    document.getElementById('returnReason').value = '';
+    // Submit return request function
+    async function submitReturnRequest() {
+        const returnReason = document.getElementById('returnReason').value;
+        if (!returnReason) {
+            Swal.fire({
+                title: 'Missing Information',
+                text: 'Please select a return reason.',
+                icon: 'warning',
+                confirmButtonColor: '#dc2626'
+            });
+            return;
+        }
 
-                    // Show modal
-                    document.getElementById('returnModal').classList.add('show');
-                    document.getElementById('modalOverlay').classList.add('show');
-                    document.body.style.overflow = 'hidden';
-                }
+        try {
+            const submitBtn = document.querySelector('.modal-footer .btn-primary');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Processing...';
+            submitBtn.disabled = true;
 
-                // Close return modal function
-                function closeReturnModal() {
-                    document.getElementById('returnModal').classList.remove('show');
-                    document.getElementById('modalOverlay').classList.remove('show');
-                    document.body.style.overflow = 'auto';
-                }
+            const requestData = {
+                orderId: currentOrderId,
+                itemsId: currentItemsId,
+                reason: returnReason
+            };
 
-                // Submit return request function
-                async function submitReturnRequest() {
-                    const returnReason = document.getElementById('returnReason').value;
+            const response = await fetch('/order/individualOrderReturn', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify(requestData)
+            });
 
-                    if (!returnReason) {
-                        Swal.fire({
-                            title: 'Missing Information',
-                            text: 'Please select a return reason.',
-                            icon: 'warning',
-                            confirmButtonColor: '#dc2626'
-                        });
-                        return;
-                    }
+            const data = await response.json();
+            // Reset button state
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
 
-                    try {
-                        const submitBtn = document.querySelector('.modal-footer .btn-primary');
-                        const originalText = submitBtn.textContent;
-                        submitBtn.textContent = 'Processing...';
-                        submitBtn.disabled = true;
+            if (data.success) {
+                closeReturnModal();
+                updateUIAfterItemRemoval(currentReturnButton, 'ReturnRequested'); // This will now correctly NOT change the total
 
-                        const requestData = {
-                            orderId: currentOrderId,
-                            itemsId: currentItemsId,
-                            reason: returnReason
-                        };
-
-                        const response = await fetch('/order/individualOrderReturn', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            credentials: 'include',
-                            body: JSON.stringify(requestData)
-                        });
-
-                        const data = await response.json();
-
-                        // Reset button state
-                        submitBtn.textContent = originalText;
-                        submitBtn.disabled = false;
-
-                        if (data.success) {
-                            closeReturnModal();
-                            updateUIAfterItemRemoval(currentReturnButton, 'ReturnRequested');
-
-
-                            Swal.fire({
-                                title: 'Return Request Submitted!',
-                                text: data.message,
-                                icon: 'success',
-                                confirmButtonColor: '#2563eb'
-                            });
-                        } else {
-                            Swal.fire({
-                                title: 'Error!',
-                                text: data.message || 'Failed to submit return request. Please try again.',
-                                icon: 'error',
-                                confirmButtonColor: '#dc2626'
-                            });
-                        }
-                    } catch (error) {
-                        console.error('Return request error:', error);
-
-                        // Reset button state in case of error
-                        const submitBtn = document.querySelector('.modal-footer .btn-primary');
-                        submitBtn.textContent = 'Submit Return Request';
-                        submitBtn.disabled = false;
-
-                        Swal.fire({
-                            title: 'Error!',
-                            text: 'Something went wrong. Please try again.',
-                            icon: 'error',
-                            confirmButtonColor: '#dc2626'
-                        });
-                    }
-                }
-
-                // Cancel single item function
-                async function cancelSingleItem(orderId, itemsId, button) {
-                    try {
-                        const { value: reason, isConfirmed } = await Swal.fire({
-                            title: 'Cancel Item?',
-                            text: 'Are you sure you want to cancel this item?',
-                            input: 'select',
-                            inputLabel: 'Cancellation Reason',
-                            inputPlaceholder: 'Select a reason for cancellation',
-                            inputOptions: {
-                                'changed-mind': 'Changed my mind',
-                                'found-better-price': 'Found a better price elsewhere',
-                                'ordered-by-mistake': 'Ordered by mistake',
-                                'wrong-size': 'Wrong size selected',
-                                'no-longer-needed': 'No longer needed',
-                                'other': 'Other reasons'
-                            },
-                            icon: 'warning',
-                            showCancelButton: true,
-                            confirmButtonColor: '#dc2626',
-                            cancelButtonColor: '#6b7280',
-                            confirmButtonText: 'Yes, cancel item',
-                            cancelButtonText: 'No, keep item',
-                            inputValidator: (value) => {
-                                if (!value) {
-                                    return 'Please select a cancellation reason';
-                                }
-                            }
-                        });
-
-                        if (isConfirmed) {
-                            const response = await fetch('/order/cancel', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                credentials: 'include',
-                                body: JSON.stringify({
-                                    orderId: orderId,
-                                    itemsId: itemsId,
-                                    reason: reason || 'Item cancelled by customer'
-                                })
-                            });
-
-                            const data = await response.json();
-
-                            if (data.success) {
-                                Swal.fire({
-                                    title: 'Item Cancelled!',
-                                    text: data.message,
-                                    icon: 'success',
-                                    confirmButtonColor: '#2563eb'
-                                })
-                                updateUIAfterItemRemoval(button, 'Cancelled');
-                            } else {
-                                Swal.fire({
-                                    title: 'Error!',
-                                    text: data.message || 'Failed to cancel item',
-                                    icon: 'error',
-                                    confirmButtonColor: '#dc2626'
-                                });
-                            }
-                        }
-                    } catch (error) {
-                        console.error('Cancel item error:', error);
-                        Swal.fire({
-                            title: 'Error!',
-                            text: 'Something went wrong. Please try again.',
-                            icon: 'error',
-                            confirmButtonColor: '#dc2626'
-                        });
-                    }
-                }
-
-                // Close modal when clicking outside
-                window.onclick = function (event) {
-                    const modal = document.getElementById('returnModal');
-                    const overlay = document.getElementById('modalOverlay');
-                    if (event.target === overlay) {
-                        closeReturnModal();
-                    }
-                }
-
-                // Close modal with Escape key
-                document.addEventListener('keydown', function (event) {
-                    if (event.key === 'Escape') {
-                        const modal = document.getElementById('returnModal');
-                        if (modal.classList.contains('show')) {
-                            closeReturnModal();
-                        }
-                    }
+                Swal.fire({
+                    title: 'Return Request Submitted!',
+                    text: data.message,
+                    icon: 'success',
+                    confirmButtonColor: '#2563eb'
                 });
-            </script>
+            } else {
+                Swal.fire({
+                    title: 'Error!',
+                    text: data.message || 'Failed to submit return request. Please try again.',
+                    icon: 'error',
+                    confirmButtonColor: '#dc2626'
+                });
+            }
+        } catch (error) {
+            console.error('Return request error:', error);
+            // Reset button state in case of error
+            const submitBtn = document.querySelector('.modal-footer .btn-primary');
+            submitBtn.textContent = 'Submit Return Request';
+            submitBtn.disabled = false;
+
+            Swal.fire({
+                title: 'Error!',
+                text: 'Something went wrong. Please try again.',
+                icon: 'error',
+                confirmButtonColor: '#dc2626'
+            });
+        }
+    }
+
+    // Cancel single item function
+    async function cancelSingleItem(orderId, itemsId, button) {
+        try {
+            const {
+                value: reason,
+                isConfirmed
+            } = await Swal.fire({
+                title: 'Cancel Item?',
+                text: 'Are you sure you want to cancel this item?',
+                input: 'select',
+                inputLabel: 'Cancellation Reason',
+                inputPlaceholder: 'Select a reason for cancellation',
+                inputOptions: {
+                    'changed-mind': 'Changed my mind',
+                    'found-better-price': 'Found a better price elsewhere',
+                    'ordered-by-mistake': 'Ordered by mistake',
+                    'wrong-size': 'Wrong size selected',
+                    'no-longer-needed': 'No longer needed',
+                    'other': 'Other reasons'
+                },
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Yes, cancel item',
+                cancelButtonText: 'No, keep item',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'Please select a cancellation reason';
+                    }
+                }
+            });
+
+            if (isConfirmed) {
+                const response = await fetch('/order/cancel', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        orderId: orderId,
+                        itemsId: itemsId,
+                        reason: reason || 'Item cancelled by customer'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Item Cancelled!',
+                        text: data.message,
+                        icon: 'success',
+                        confirmButtonColor: '#2563eb'
+                    })
+                    updateUIAfterItemRemoval(button, 'Cancelled'); // This will correctly change the total
+                } else {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: data.message || 'Failed to cancel item',
+                        icon: 'error',
+                        confirmButtonColor: '#dc2626'
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('Cancel item error:', error);
+            Swal.fire({
+                title: 'Error!',
+                text: 'Something went wrong. Please try again.',
+                icon: 'error',
+                confirmButtonColor: '#dc2626'
+            });
+        }
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('returnModal');
+        const overlay = document.getElementById('modalOverlay');
+        if (event.target === overlay) {
+            closeReturnModal();
+        }
+    }
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            const modal = document.getElementById('returnModal');
+            if (modal.classList.contains('show')) {
+                closeReturnModal();
+            }
+        }
+    });
+</script>
 </body>
 
 </html>

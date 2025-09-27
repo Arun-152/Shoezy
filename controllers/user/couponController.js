@@ -30,15 +30,12 @@ const loadCoupons = async (req, res) => {
       .limit(limit)
       .sort({ createdAt: -1 });
 
-    // Compute user-specific usage and status for each coupon
     const couponsWithUsage = coupons.map(coupon => {
-      // Check if userId is in the coupon's userId (usedBy) array
-      const isUsedByUser = coupon.userUsage.some(id => id.userId.toString() === req.session.userId.toString());
+      const isUsedByUser = coupon.userUsage?.some(u => u?.userId && u.userId.toString() === req.session.userId.toString()
+      ) || false;
+
       const isGloballyUsed = coupon.totalUsageLimit && coupon.currentUsageCount >= coupon.totalUsageLimit;
       const isExpired = coupon.expireOn < new Date();
-      console.log("used By",isUsedByUser)
-
-      // Update coupon status dynamically
       let status = 'Available';
       if (isExpired) {
         status = 'Expired';
@@ -65,7 +62,7 @@ const loadCoupons = async (req, res) => {
 
   } catch (error) {
     console.error("Error fetching user coupons:", error);
-    res.status(500).send("Server error");
+    res.render("user500");
   }
 };
 

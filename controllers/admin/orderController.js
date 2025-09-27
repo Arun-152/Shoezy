@@ -188,7 +188,7 @@ const approveReturnRequest = async (req, res) => {
     let updatedProducts = [];
     let productFound = false;
 
-    // Calculate total before discount (real price × quantity)
+    // Calculate total before discount
     const orderTotalBeforeDiscount = order.items.reduce(
       (sum, item) => sum + (item.price * item.quantity),
       0
@@ -200,32 +200,29 @@ const approveReturnRequest = async (req, res) => {
       coupon = await Coupon.findById(order.couponId);
     }
 
-    // Process only the specific product return request
+    // Process the specific return request
     order.items = order.items.map(item => {
       if (item.productId._id.toString() === productId && item.status === "ReturnRequested") {
         item.status = "Returned";
         productFound = true;
 
-        // COD Orders: No refund
-        if (order.paymentMethod === 'COD') {
-          refundAmount = 0;
-        } else {
-          // Online/Wallet Payment
-          let baseRefund = item.totalPrice;
-          if (order.couponId && order.discountAmount > 0) {
-            let discountShare = 0;
-            if (coupon && coupon.discountType === "flat") {
-              const itemCount = order.items.length || 1;
-              const flatPerItem = order.discountAmount / itemCount;
-              discountShare = flatPerItem;
-            } else if (orderTotalBeforeDiscount > 0) {
-              discountShare = ((item.price * item.quantity) / orderTotalBeforeDiscount) * order.discountAmount;
-            }
-            baseRefund -= discountShare;
-            if (baseRefund < 0) baseRefund = 0;
+        // Refund for all payment methods (COD + Online + Wallet)
+        let baseRefund = item.totalPrice;
+
+        if (order.couponId && order.discountAmount > 0) {
+          let discountShare = 0;
+          if (coupon && coupon.discountType === "flat") {
+            const itemCount = order.items.length || 1;
+            const flatPerItem = order.discountAmount / itemCount;
+            discountShare = flatPerItem;
+          } else if (orderTotalBeforeDiscount > 0) {
+            discountShare = ((item.price * item.quantity) / orderTotalBeforeDiscount) * order.discountAmount;
           }
-          refundAmount += baseRefund;
+          baseRefund -= discountShare;
+          if (baseRefund < 0) baseRefund = 0;
         }
+
+        refundAmount += baseRefund;
 
         updatedProducts.push({
           name: item.productId.productName || "Unknown Product",
@@ -244,11 +241,10 @@ const approveReturnRequest = async (req, res) => {
       });
     }
 
-    // Check if all items are returned or cancelled
+    // Check if all items are returned/cancelled
     let allOrderReturn = order.items.every(item => item.status === "Returned" || item.status === "Cancelled");
     if (allOrderReturn) {
       order.orderStatus = "Returned";
-      // Remove userId from coupon's usedBy array if coupon was applied
       if (order.couponId && order.userId) {
         await Coupon.findByIdAndUpdate(order.couponId, {
           $pull: { usedBy: order.userId }
@@ -267,11 +263,12 @@ const approveReturnRequest = async (req, res) => {
       }
     }
 
-    // Wallet refund
+    // Wallet refund (COD + Online)
     const wallet = await Wallet.findOne({ userId: order.userId });
     if (!wallet) {
       return res.status(404).json({ success: false, message: "Wallet not found for user" });
     }
+
     const newBalance = wallet.balance + refundAmount;
     const transaction = {
       transactionId: Date.now().toString() + Math.random().toString(36).slice(2, 7).toUpperCase(),
@@ -291,7 +288,7 @@ const approveReturnRequest = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Return request approved and refund processed",
+      message: "Return request approved and refund processed (added to wallet)",
       updatedProducts,
       refundAmount: refundAmount.toFixed(2)
     });
