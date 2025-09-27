@@ -1108,18 +1108,54 @@
                                 <div class="order-summary-section">
     <h2>Order Summary</h2>
     <div class="summary-card">
+        <% 
+            // 1. Calculate subtotal and count active items
+            let subtotal = 0;
+            let activeItemsCount = 0;
+            const originalItemsCount = order.items.length;
+
+            order.items.forEach(item => {
+                if (item.status !== 'Returned' && item.status !== 'Cancelled') {
+                    subtotal += item.totalPrice;
+                    activeItemsCount++;
+                }
+            });
+
+            // 2. Calculate coupon discount
+            let couponDiscount = 0;
+            if (order.discountAmount && order.discountAmount > 0) {
+                const wasFlatCoupon = order.couponCode && order.couponCode.discountType === 'flat';
+                const wasPercentageCoupon = order.couponCode && order.couponCode.discountType === 'percentage';
+
+                if (wasFlatCoupon) {
+                    const couponSharePerItem = order.discountAmount / originalItemsCount;
+                    couponDiscount = couponSharePerItem * activeItemsCount;
+                } else if (wasPercentageCoupon) {
+                    const percentage = order.couponCode.offerPrice;
+                    couponDiscount = (subtotal * percentage) / 100;
+                } else {
+                    // Fallback for older orders or if couponCode is not populated, assume flat.
+                    const couponSharePerItem = order.discountAmount / originalItemsCount;
+                    couponDiscount = couponSharePerItem * activeItemsCount;
+                }
+            }
+
+            // 3. Calculate final amount
+            const finalAmount = subtotal - couponDiscount;
+        %>
+
         <div class="summary-details">
             <!-- Subtotal -->
             <div class="summary-row">
                 <span class="summary-label">Subtotal</span>
-                <span class="summary-value">₹<%= (order.totalAmount + (order.discountAmount || 0)).toLocaleString() %></span>
+                <span class="summary-value">₹<%= subtotal.toLocaleString() %></span>
             </div>
 
             <!-- Coupon Discount -->
-            <% if (order.discountAmount && order.discountAmount > 0) { %>
+            <% if (couponDiscount > 0) { %>
             <div class="summary-row">
                 <span class="summary-label">Coupon Discount</span>
-                <span class="summary-value discount">- ₹<%= order.discountAmount.toLocaleString() %></span>
+                <span class="summary-value discount">- ₹<%= couponDiscount.toLocaleString() %></span>
             </div>
             <% } %>
 
@@ -1132,8 +1168,8 @@
 
         <!-- Total -->
         <div class="summary-total">
-            <span class="summary-label total-label">Total</span>
-            <span class="summary-value total-amount">₹<%= order.finalAmount ? order.finalAmount.toLocaleString() : order.totalAmount.toLocaleString() %></span>
+            <span class="total-label">Total</span>
+            <span class="total-amount">₹<%= finalAmount.toLocaleString() %></span>
         </div>
 
         <!-- Payment Method -->
