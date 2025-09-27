@@ -35,11 +35,6 @@ const loadCheckout = async (req, res) => {
 
     const availableCouponsForPage = [];
     for (const couponItem of allCoupons) {
-      // Skip if the coupon is the one currently applied
-      if (appliedCouponCode && couponItem.name === appliedCouponCode) {
-        continue;
-      }
-
       // Check global usage limit
       if (couponItem.totalUsageLimit && couponItem.currentUsageCount >= couponItem.totalUsageLimit) {
         continue;

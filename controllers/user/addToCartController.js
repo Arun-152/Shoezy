@@ -229,61 +229,69 @@ const addToCart = async(req,res)=>{
 const updateQuantity = async(req,res)=>{
     try {
         const userId = req.session.userId
-        const {productId, size, quantity} = req.body
-       
-  
-    
+        const { productId, size, quantity } = req.body;
 
         if (!userId) {
-            return res.status(401).json({success: false, message: "User not authenticated"})
+            return res.status(401).json({ success: false, message: "User not authenticated" });
         }
 
-        const cart = await Cart.findOne({userId})
+        const newQuantity = parseInt(quantity);
+        if (isNaN(newQuantity) || newQuantity <= 0 || newQuantity > 10) {
+            return res.status(400).json({ success: false, message: "Invalid quantity. Only 1-10 units are allowed." });
+        }
+
+        const cart = await Cart.findOne({ userId });
         if (!cart) {
-            return res.status(404).json({success: false, message: "Cart not found"})
+            return res.status(404).json({ success: false, message: "Cart not found" });
         }
 
-
-        const item = cart.items.find(item => 
-            item.productId.toString() === productId && (item.size || "Default") === (size || "Default")
-        )
+        const item = cart.items.find(i => 
+            i.productId.toString() === productId && (i.size || "Default") === (size || "Default")
+        );
         if (!item) {
-            return res.status(404).json({success: false, message: "Item not in cart"})
+            return res.status(404).json({ success: false, message: "Item not found in cart" });
         }
 
-        const product = await Product.findById({_id:productId})
-
-        const specificProduct = product.variants.find((item)=>item.size===size)
-        if(specificProduct.variantQuantity<quantity){
-            return res.status(404).json({success:false,message:`Only ${specificProduct.variantQuantity} stock left`})
+        const product = await Product.aggregate([{$unwind: "$variants"},{$match:{_id:item.productId,"variants.size":size}}]);
+        if (!product) {
+            return res.status(404).json({ success: false, message: "Product not found" });
+        }
+      
+        const variant = product[0].variants?.size===size
+      
+        if (!variant) {
+            return res.status(404).json({ success: false, message: "Product variant not found" });
         }
 
-        // Validate quantity
-        const newQuantity = parseInt(quantity)
-        if (newQuantity <= 0 || newQuantity > 10) {
-            return res.status(400).json({success: false, message: "Invalid quantity only 1-10 is limit"})
+        if (variant.variantQuantity < newQuantity) {
+            return res.status(400).json({ success: false, message: `Only ${variant.variantQuantity} units in stock.` });
         }
-
+      
         // Update quantity and total price
-        item.quantity = newQuantity
-        item.totalPrice = item.price * newQuantity
-
-        await cart.save()
+        item.quantity = newQuantity;
+   
+        item.totalPrice = item.price || product[0].variants.salePrice * newQuantity;
+   
+        // Save the updated cart
+        await cart.save();
 
         // Calculate new totals
-        let subtotal = 0
+        let subtotal = 0;
         cart.items.forEach(cartItem => {
-            subtotal += cartItem.totalPrice
-        })
+            subtotal += cartItem.totalPrice;
+        });
+  
 
         const shipping = subtotal > 500 ? 0 : 50
         const total = subtotal + shipping
+      
         let cartCount = 0
         if(cart && cart.items.length){
             cartCount =cart.items.length
         }
+        // Also calculate total quantity of all items in cart
+        const totalQuantity = cart.items.reduce((sum, currentItem) => sum + currentItem.quantity, 0);
        
-
         return res.status(200).json({
             success: true, 
             message: "Quantity updated",
@@ -291,11 +299,12 @@ const updateQuantity = async(req,res)=>{
             subtotal: subtotal,
             shipping: shipping,
             total: total,
-            cartCount
-        })
+            cartCount: cartCount,
+            totalQuantity: totalQuantity
+        });
     } catch (error) {
-        console.error(error)
-        return res.status(500).json({success: false, message: "Server error"})
+        console.error("Error updating quantity:", error);
+        return res.status(500).json({ success: false, message: "Server error" });
     }
 }
 

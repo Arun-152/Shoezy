@@ -223,7 +223,7 @@
                        
                         <div class="summary-row total-row">
                             <span>Total</span>
-                            <span class="total-amount" id="total">₹<%= total.toFixed(2) %></span>
+                            <span class="total-amount" id="total">₹<%= total %></span>
                         </div>
                        
                         <button class="checkout-btn" onclick="proceedToCheckout()">
@@ -277,7 +277,7 @@
             const cartCountElem = document.getElementById('cartCount');
             if (cartCountElem) {
                 const currentCount = parseInt(cartCountElem.textContent) || 0;
-                const newCount = Math.max(0,change);
+                const newCount = Math.max(0,change +currentCount);
                 cartCountElem.textContent = newCount;
                 
                 // Add animation to cart icon
