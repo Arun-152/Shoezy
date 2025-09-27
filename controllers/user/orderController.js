@@ -6,6 +6,44 @@ const generateInvoice = require("../../helpers/generateInvoice");
 const Coupon = require("../../models/CouponSchema");
 
 
+const calculateOrderTotals = (order) => {
+    let subtotal = 0;
+    let activeItemsCount = 0;
+    const originalItemsCount = order.items.length;
+
+    order.items.forEach(item => {
+        if (item.status !== 'Returned' && item.status !== 'Cancelled') {
+            subtotal += item.totalPrice;
+            activeItemsCount++;
+        }
+    });
+
+    let couponDiscount = 0;
+    if (order.discountAmount && order.discountAmount > 0) {
+        const wasFlatCoupon = order.couponCode && order.couponCode.discountType === 'flat';
+        const wasPercentageCoupon = order.couponCode && order.couponCode.discountType === 'percentage';
+
+        if (wasFlatCoupon) {
+            const couponSharePerItem = order.discountAmount / originalItemsCount;
+            couponDiscount = couponSharePerItem * activeItemsCount;
+        } else if (wasPercentageCoupon) {
+            const percentage = order.couponCode.offerPrice;
+            couponDiscount = (subtotal * percentage) / 100;
+        } else {
+            const couponSharePerItem = order.discountAmount / originalItemsCount;
+            couponDiscount = couponSharePerItem * activeItemsCount;
+        }
+    }
+
+    const finalAmount = subtotal - couponDiscount;
+
+    return {
+        subtotal,
+        couponDiscount,
+        finalAmount
+    };
+};
+
 const orderPage = async (req, res) => {
     try {
         const userId = req.session.userId;
@@ -16,11 +54,20 @@ const orderPage = async (req, res) => {
 
         const orders = await Order.find({ userId })
             .populate('items.productId')
+            .populate('couponCode')
             .sort({ createdAt: -1 });
+
+        const ordersWithTotals = orders.map(order => {
+            const totals = calculateOrderTotals(order);
+            return {
+                ...order.toObject(),
+                ...totals
+            };
+        });
 
         return res.render("orderPage", {
             user: user,
-            orders: orders,
+            orders: ordersWithTotals,
             isLandingPage: false,
         });
     } catch (error) {
@@ -39,15 +86,21 @@ const orderDetails = async (req, res) => {
         }
 
         const order = await Order.findOne({ _id: orderId, userId })
-            .populate('items.productId');
+            .populate('items.productId')
+            .populate('couponCode');
 
         if (!order) {
             return res.status(404).json({ success: false, message: "Order not found" });
         }
 
+        const totals = calculateOrderTotals(order);
+
         return res.render("orderDetailsPage", {
             user: userId,
-            order: order,
+            order: {
+                ...order.toObject(),
+                ...totals
+            },
             isLandingPage: false,
         });
     } catch (error) {

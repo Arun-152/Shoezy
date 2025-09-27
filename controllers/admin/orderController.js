@@ -7,6 +7,44 @@ const Wallet = require("../../models/walletSchema")
 const Coupon = require("../../models/CouponSchema")
 require("dotenv").config();
 
+const calculateOrderTotals = (order) => {
+    let subtotal = 0;
+    let activeItemsCount = 0;
+    const originalItemsCount = order.items.length;
+
+    order.items.forEach(item => {
+        if (item.status !== 'Returned' && item.status !== 'Cancelled') {
+            subtotal += item.totalPrice;
+            activeItemsCount++;
+        }
+    });
+
+    let couponDiscount = 0;
+    if (order.discountAmount && order.discountAmount > 0) {
+        const wasFlatCoupon = order.couponCode && order.couponCode.discountType === 'flat';
+        const wasPercentageCoupon = order.couponCode && order.couponCode.discountType === 'percentage';
+
+        if (wasFlatCoupon) {
+            const couponSharePerItem = order.discountAmount / originalItemsCount;
+            couponDiscount = couponSharePerItem * activeItemsCount;
+        } else if (wasPercentageCoupon) {
+            const percentage = order.couponCode.offerPrice;
+            couponDiscount = (subtotal * percentage) / 100;
+        } else {
+            const couponSharePerItem = order.discountAmount / originalItemsCount;
+            couponDiscount = couponSharePerItem * activeItemsCount;
+        }
+    }
+
+    const finalAmount = subtotal - couponDiscount;
+
+    return {
+        subtotal,
+        couponDiscount,
+        finalAmount
+    };
+};
+
 const ordersPage = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -18,12 +56,21 @@ const ordersPage = async (req, res) => {
 
     const orders = await Order.find({})
       .populate("userId", "fullname email")
+      .populate("couponCode")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
+    const ordersWithTotals = orders.map(order => {
+        const totals = calculateOrderTotals(order);
+        return {
+            ...order.toObject(),
+            ...totals
+        };
+    });
+
     res.render("admin/adminordersPage", {
-      orders,
+      orders: ordersWithTotals,
       currentPage: page,
       totalPages,
       totalOrders,

@@ -108,7 +108,7 @@
                                                         <%= new Date(orders[i].createdAt).toLocaleDateString('en-US', {
                                                             year: 'numeric' , month: 'short' , day: 'numeric' }) %>
                                                     </td>
-                                                    <td>₹<%= orders[i].totalAmount.toLocaleString() %>
+                                                    <td>₹<%= orders[i].finalAmount.toLocaleString() %>
                                                     </td>
                                                     <td class="status">
                                                         <% const statusIcons={ 'Pending'

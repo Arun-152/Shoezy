@@ -117,43 +117,8 @@
                                                                 <% } %>
                                                 </div>
                                                 <div class="order-footer">
-                                                    <%
-                                                    // 1. Calculate subtotal and count active items
-                                                    let subtotal = 0;
-                                                    let activeItemsCount = 0;
-                                                    const originalItemsCount = order.items.length;
-                                
-                                                    order.items.forEach(item => {
-                                                        if (item.status !== 'Returned' && item.status !== 'Cancelled') {
-                                                            subtotal += item.totalPrice;
-                                                            activeItemsCount++;
-                                                        }
-                                                    });
-                                
-                                                    // 2. Calculate coupon discount
-                                                    let couponDiscount = 0;
-                                                    if (order.discountAmount && order.discountAmount > 0) {
-                                                        const wasFlatCoupon = order.couponCode && order.couponCode.discountType === 'flat';
-                                                        const wasPercentageCoupon = order.couponCode && order.couponCode.discountType === 'percentage';
-                                
-                                                        if (wasFlatCoupon) {
-                                                            const couponSharePerItem = order.discountAmount / originalItemsCount;
-                                                            couponDiscount = couponSharePerItem * activeItemsCount;
-                                                        } else if (wasPercentageCoupon) {
-                                                            const percentage = order.couponCode.offerPrice;
-                                                            couponDiscount = (subtotal * percentage) / 100;
-                                                        } else {
-                                                            // Fallback for older orders or if couponCode is not populated, assume flat.
-                                                            const couponSharePerItem = order.discountAmount / originalItemsCount;
-                                                            couponDiscount = couponSharePerItem * activeItemsCount;
-                                                        }
-                                                    }
-                                
-                                                    // 3. Calculate final amount
-                                                    const finalAmount = subtotal - couponDiscount;
-                                                %>
                                                     <div class="order-total">
-                                                        <strong>Total: ₹<%= finalAmount.toLocaleString() %>
+                                                        <strong>Total: ₹<%= order.finalAmount.toLocaleString() %>
                                                         </strong>
                                                     </div>
                                                     <div class="order-actions">
