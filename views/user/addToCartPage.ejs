@@ -148,7 +148,7 @@
                     <div class="cart-items" id="cartItems">
                         <% if (cartItems && cartItems.length > 0) { %>
                             <% cartItems.forEach((item, index) => { %>
-                                <div class="cart-item" data-id="<%= item._id %>" data-product-id="<%= item.productId._id %>" data-price="<%= item.price %>">                            
+                                <div class="cart-item" data-id="<%= item._id %>" data-product-id="<%= item.productId._id %>" data-size="<%= item.size %>" data-price="<%= item.price %>">                            
                                     <div class="item-image">
                                         <% if (item.productId.images && item.productId.images.length > 0) { %>
                                             <img src="<%= item.productId.images[0] %>" alt="<%= item.productId.productName %>">
@@ -294,11 +294,15 @@
         // Dynamic cart functionality
 async function updateQuantity(productId, size, change) {
     try {
-                const cartItem = document.querySelector(`[data-product-id="${productId}"]`);
+        const cartItem = document.querySelector(`[data-product-id="${productId}"][data-size="${size}"]`);
         const qtyInput = cartItem.querySelector('.qty-input');
         let newQty = parseInt(qtyInput.value) + change;
 
-
+        // Prevent quantity from going below 1
+        if (newQty < 1) {
+            // Optionally show a message, but for a quick click, just returning is fine.
+            return; 
+        }
 
         const response = await fetch('/cart/update-quantity', {
             method: 'PATCH',
@@ -313,6 +317,7 @@ async function updateQuantity(productId, size, change) {
         });
 
         const data = await response.json();
+        console.log(data)
 
         if (data.success) {
                     updateCartCount(data.cartCount)
@@ -341,12 +346,12 @@ async function validateQuantity(productId, size, value) {
     if (qty > 10) qty = 10;
 
             if (qty !== parseInt(value)) {
-                const cartItem = document.querySelector(`[data-product-id="${productId}"]`);
-    const qtyInput = cartItem.querySelector('.qty-input');
+        const cartItem = document.querySelector(`[data-product-id="${productId}"][data-size="${size}"]`);
+        const qtyInput = cartItem.querySelector('.qty-input');
         qtyInput.value = qty;
     }
 
-            await updateQuantity(productId, size, 0); // Update with current quantity
+    await updateQuantity(productId, size, qty - parseInt(document.querySelector(`[data-product-id="${productId}"][data-size="${size}"] .qty-input`).value));
 }
 
         async function removeItem(productId, size) {
@@ -378,7 +383,7 @@ async function validateQuantity(productId, size, value) {
                     const data = await response.json();
 
                     if (data.success) {
-                        const item = document.querySelector(`[data-product-id="${productId}"]`);
+                        const item = document.querySelector(`[data-product-id="${productId}"][data-size="${size}"]`);
                             item.style.animation = 'slideOut 0.3s ease-in';
                        
                             setTimeout(() => {

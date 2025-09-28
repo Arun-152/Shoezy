@@ -3,6 +3,8 @@ const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
 const Cart = require("../../models/cartSchema")
 const Wishlist = require("../../models/wishlistSchema")
+const mongoose = require("mongoose");
+
 
 const loadAddToCart = async (req, res) => {
   try {
@@ -164,9 +166,7 @@ const addToCart = async(req,res)=>{
             userCart.items[existingItemIndex].quantity = desiredQty
             userCart.items[existingItemIndex].totalPrice = userCart.items[existingItemIndex].price * userCart.items[existingItemIndex].quantity
             // Ensure the size field is set for existing items
-            if (!userCart.items[existingItemIndex].size) {
-                userCart.items[existingItemIndex].size = size;
-            }
+            userCart.items[existingItemIndex].size = size;
         } else {
             // Add new item to cart only if it doesn't exist
             // Enforce stock for new item
@@ -181,13 +181,6 @@ const addToCart = async(req,res)=>{
                 totalPrice: parseFloat(price) * parseInt(quantity)
             })
         }
-
-        // Ensure all existing items have a size field before saving
-        userCart.items.forEach(item => {
-            if (!item.size) {
-                item.size = "Default";
-            }
-        });
 
         await userCart.save()
         const cartCount = userCart.items.length
@@ -226,9 +219,9 @@ const addToCart = async(req,res)=>{
         return res.redirect("/usererrorPage")
     }
 }
-const updateQuantity = async(req,res)=>{
+const updateQuantity = async (req, res) => {
     try {
-        const userId = req.session.userId
+        const userId = req.session.userId;
         const { productId, size, quantity } = req.body;
 
         if (!userId) {
@@ -245,69 +238,88 @@ const updateQuantity = async(req,res)=>{
             return res.status(404).json({ success: false, message: "Cart not found" });
         }
 
-        const item = cart.items.find(i => 
-            i.productId.toString() === productId && (i.size || "Default") === (size || "Default")
+        // Find the cart item
+        const item = cart.items.find(
+            i => i.productId.toString() === productId && (i.size || "Default") === (size || "Default")
         );
+
         if (!item) {
             return res.status(404).json({ success: false, message: "Item not found in cart" });
         }
 
-        const product = await Product.aggregate([{$unwind: "$variants"},{$match:{_id:item.productId,"variants.size":size}}]);
-        if (!product) {
+        // Find product variant
+        const product = await Product.aggregate([
+            { $unwind: "$variants" },
+            { $match: { _id: new mongoose.Types.ObjectId(productId), "variants.size": size } }
+        ]);
+
+        if (!product || product.length === 0) {
             return res.status(404).json({ success: false, message: "Product not found" });
         }
-      
-        const variant = product[0].variants?.size===size
-      
-        if (!variant) {
+
+        const variant = product[0].variants;
+
+        if (!variant || variant.size !== size) {
             return res.status(404).json({ success: false, message: "Product variant not found" });
         }
 
         if (variant.variantQuantity < newQuantity) {
             return res.status(400).json({ success: false, message: `Only ${variant.variantQuantity} units in stock.` });
         }
-      
-        // Update quantity and total price
+
+        // Update quantity
         item.quantity = newQuantity;
-   
-        item.totalPrice = item.price || product[0].variants.salePrice * newQuantity;
-   
-        // Save the updated cart
+
+        // Save updated cart
         await cart.save();
 
-        // Calculate new totals
-        let subtotal = 0;
-        cart.items.forEach(cartItem => {
-            subtotal += cartItem.totalPrice;
+        // After saving, re-fetch and populate the cart to calculate fresh totals
+        const updatedCart = await Cart.findOne({ userId }).populate({
+            path: "items.productId",
+            select: "variants" // Only need variants for price calculation
         });
-  
 
-        const shipping = subtotal > 500 ? 0 : 50
-        const total = subtotal + shipping
-      
-        let cartCount = 0
-        if(cart && cart.items.length){
-            cartCount =cart.items.length
-        }
-        // Also calculate total quantity of all items in cart
-        const totalQuantity = cart.items.reduce((sum, currentItem) => sum + currentItem.quantity, 0);
-       
+        let newSubtotal = 0;
+        let newItemTotal = 0;
+
+        updatedCart.items.forEach(cartItem => {
+            const productData = cartItem.productId;
+            if (productData && productData.variants) {
+                const itemVariant = productData.variants.find(v => v.size === cartItem.size);
+                if (itemVariant) {
+                    const itemPrice = itemVariant.salePrice || itemVariant.regularPrice;
+                    const currentItemTotal = itemPrice * cartItem.quantity;
+                    newSubtotal += currentItemTotal;
+
+                    // Find the total for the specific item that was just updated
+                    if (cartItem.productId._id.toString() === productId && cartItem.size === size) {
+                        newItemTotal = currentItemTotal;
+                    }
+                }
+            }
+        });
+
+        let subtotal = 0;
+        const shipping = newSubtotal > 500 ? 0 : 50;
+        const total = newSubtotal + shipping;
+        const cartCount = updatedCart.items.length;
+
+        // ✅ Send success response
         return res.status(200).json({
-            success: true, 
-            message: "Quantity updated",
-            itemTotal: item.totalPrice,
-            subtotal: subtotal,
+            success: true,
+            message: "Quantity updated successfully",
+            itemTotal: newItemTotal,
+            subtotal: newSubtotal,
             shipping: shipping,
             total: total,
             cartCount: cartCount,
-            totalQuantity: totalQuantity
         });
+
     } catch (error) {
         console.error("Error updating quantity:", error);
         return res.status(500).json({ success: false, message: "Server error" });
     }
-}
-
+};
 const removeCart = async(req,res)=>{
     try {
         const userId = req.session.userId
@@ -326,22 +338,37 @@ const removeCart = async(req,res)=>{
             !(item.productId.toString() === productId && (item.size || "Default") === (size || "Default"))
         )
         await cart.save()
-
-        let subtotal = 0
-        cart.items.forEach(cartItem => {
-            subtotal += cartItem.totalPrice
-        })
-
-        const shipping = subtotal > 500 ? 0 : 50
-        const total = subtotal + shipping
-
+ 
+        // After removing, re-fetch and populate to calculate fresh totals
+        const updatedCart = await Cart.findOne({ userId }).populate({
+            path: "items.productId",
+            select: "variants" // Only need variants for price calculation
+        });
+ 
+        let newSubtotal = 0;
+        if (updatedCart && updatedCart.items.length > 0) {
+            updatedCart.items.forEach(cartItem => {
+                const productData = cartItem.productId;
+                if (productData && productData.variants) {
+                    const itemVariant = productData.variants.find(v => v.size === cartItem.size);
+                    if (itemVariant) {
+                        const itemPrice = itemVariant.salePrice || itemVariant.regularPrice;
+                        newSubtotal += itemPrice * cartItem.quantity;
+                    }
+                }
+            });
+        }
+ 
+        const shipping = newSubtotal > 500 ? 0 : 50;
+        const total = newSubtotal + shipping;
+ 
         return res.status(200).json({
             success: true, 
             message: "Product removed successfully",
-            subtotal: subtotal,
+            subtotal: newSubtotal,
             shipping: shipping,
             total: total,
-            cartCount: cart.items.length
+            cartCount: updatedCart ? updatedCart.items.length : 0
         })
     } catch (error) {
         console.error(error)
