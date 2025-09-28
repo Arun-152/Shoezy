@@ -8,10 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="/css/adminordersPage.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-</head>
-
-<body>
-
     <style>
         .button-wrapper {
             display: flex;
@@ -33,7 +29,15 @@
         .view-request-btn:hover {
             background-color: #0056b3;
         }
+        .form-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
     </style>
+</head>
+
+<body>
     <div class="dashboard-container">
         <!-- Sidebar -->
         <%- include('../partials/admin/sidebar') %>
@@ -64,10 +68,33 @@
                         <!-- Orders Section -->
                         <div class="orders-section">
                             <h3>Orders Management</h3>
-                            <div class="button-wrapper">
-                                <a href="/admin/orders/returnRequests"><button class="view-request-btn">View
-                                        Request</button></a>
-                            </div>
+                            <form id="searchForm" class="search-section" method="GET" action="/admin/orders">
+                                <div class="search-container">
+                                    <i class="fas fa-search search-icon"></i>
+                                    <input type="text" id="searchInput" name="search" class="search-input" placeholder="   Search orders..." value='<%= search %>'>
+                                </div>
+                                <div class="form-actions">
+                                    <div class="sort-container">
+                                        <label for="sortSelect" class="sort-label">
+                                            <i class="fas fa-sort-alpha-down"></i> Sort:
+                                        </label>
+                                        <select id="sortSelect" class="sort-select" name="sort" onchange="this.form.submit()">
+                                            <option value="date_desc" <% if (sort === 'date_desc') { %>selected<% } %>>Newest</option>
+                                            <option value="date_asc" <% if (sort === 'date_asc') { %>selected<% } %>>Oldest</option>
+                                            <option value="amount_desc" <% if (sort === 'amount_desc') { %>selected<% } %>>Amount (High to Low)</option>
+                                            <option value="amount_asc" <% if (sort === 'amount_asc') { %>selected<% } %>>Amount (Low to High)</option>
+                                        </select>
+                                    </div>
+                                    <div class="search-buttons">
+                                        <button type="submit" class="search-btn">Apply</button>
+                                        <a href="/admin/orders" class="clear-btn">Clear</a>
+                                    </div>
+                                    <div class="button-wrapper">
+                                        <a href="/admin/orders/returnRequests"><button type="button" class="view-request-btn">View
+                                                Request</button></a>
+                                    </div>
+                                </div>
+                            </form>
 
                             <div class="table-container">
                                 <table class="orders-table">

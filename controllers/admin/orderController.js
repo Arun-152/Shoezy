@@ -51,14 +51,41 @@ const ordersPage = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = 5;
     const skip = (page - 1) * limit;
+    const search = req.query.search || '';
+    const sort = req.query.sort || 'date_desc';
 
-    const totalOrders = await Order.countDocuments();
+    const query = {};
+    if (search) {
+        query.$or = [
+            { orderNumber: { $regex: search, $options: 'i' } },
+            { 'userId.fullname': { $regex: search, $options: 'i' } },
+            { 'userId.email': { $regex: search, $options: 'i' } }
+        ];
+    }
+
+    const sortOptions = {};
+    switch (sort) {
+        case 'date_asc':
+            sortOptions.createdAt = 1;
+            break;
+        case 'amount_desc':
+            sortOptions.finalAmount = -1;
+            break;
+        case 'amount_asc':
+            sortOptions.finalAmount = 1;
+            break;
+        default:
+            sortOptions.createdAt = -1;
+            break;
+    }
+
+    const totalOrders = await Order.countDocuments(query);
     const totalPages = Math.ceil(totalOrders / limit);
 
-    const orders = await Order.find({})
+    const orders = await Order.find(query)
       .populate("userId", "fullname email")
       .populate("couponCode")
-      .sort({ createdAt: -1 })
+      .sort(sortOptions)
       .skip(skip)
       .limit(limit);
 
@@ -75,6 +102,8 @@ const ordersPage = async (req, res) => {
       currentPage: page,
       totalPages,
       totalOrders,
+      search,
+      sort
     });
   } catch (error) {
     console.error("Error rendering orders page:", error.message);

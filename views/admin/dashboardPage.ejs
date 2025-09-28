@@ -26,6 +26,54 @@
             min-height: 100vh;
         }
 
+        .chart-container {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            position: relative;
+            margin-top: 20px;
+        }
+
+        /* Y-axis */
+        .y-axis {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            margin-right: 10px;
+            font-size: 12px;
+            height: 200px;
+            /* same as chart height */
+        }
+
+        /* Chart bars container */
+        .chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 15px;
+            position: relative;
+            flex: 1;
+            height: 200px;
+            /* chart height */
+        }
+
+        /* Individual bars */
+        .bar {
+            width: 30px;
+            background-color: #4caf50;
+            border-radius: 5px 5px 0 0;
+            position: relative;
+        }
+
+        /* X-axis labels */
+        .chart .x-axis {
+            position: absolute;
+            bottom: -20px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+
         /* Sidebar Styles (aligned with adminproductsPage.css) */
         .sidebar {
             width: 250px;
@@ -146,13 +194,21 @@
             flex: 1;
         }
 
-        .right-column {
-            width: 300px;
+        .dashboard-bottom {
             display: flex;
-            flex-direction: column;
-            gap: 30px;
+            gap: 20px;
+            /* space between left and right */
+            margin-top: 40px;
+            /* optional spacing from content above */
         }
 
+        .left-column,
+        .right-column {
+            flex: 1;
+            /* equal width */
+        }
+
+        /* Reuse your existing card styles */
         .top-products,
         .top-categories {
             background: white;
@@ -171,6 +227,8 @@
         .top-products ul,
         .top-categories ul {
             list-style: none;
+            padding: 0;
+            margin: 0;
         }
 
         .top-products li,
@@ -398,8 +456,8 @@
             padding: 15px;
             border-radius: 8px;
             text-align: center;
-            background: #f8f9fa;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            background: #575f68;
+            box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
         }
 
         .status-icon {
@@ -408,19 +466,19 @@
 
         .status-icon i {
             font-size: 20px;
-            color: #666;
+            color: #ffffff;
         }
 
         .status-card h4 {
             font-size: 14px;
             margin-bottom: 5px;
-            color: #333;
+            color: #fffafa;
         }
 
         .status-card h2 {
             font-size: 20px;
             font-weight: 700;
-            color: #2c3e50;
+            color: #fcfdff;
         }
 
         /* Recent Orders */
@@ -470,9 +528,9 @@
         }
 
         .orders-table th {
-            background-color: #f8f9fa;
+            background-color: #3684d3;
             font-weight: 600;
-            color: #555;
+            color: #ffffff;
         }
 
         .orders-table td {
@@ -827,14 +885,25 @@
                                 <h3>Sales Overview</h3>
                                 <div class="chart-controls">
                                     <div class="chart-period">
-                                        <button class="period-btn active">Daily</button>
                                         <button class="period-btn">Weekly</button>
                                         <button class="period-btn">Monthly</button>
                                         <button class="period-btn">Yearly</button>
                                     </div>
                                 </div>
                             </div>
+
                             <div class="chart-container">
+                                <!-- Y-axis labels -->
+                                <div class="y-axis">
+                                    <div>100%</div>
+                                    <div>80%</div>
+                                    <div>60%</div>
+                                    <div>40%</div>
+                                    <div>20%</div>
+                                    <div>0%</div>
+                                </div>
+
+                                <!-- Chart bars -->
                                 <div class="chart" id="salesChart">
                                     <div class="bar" style="height: 40%;"></div>
                                     <div class="bar" style="height: 60%;"></div>
@@ -843,10 +912,21 @@
                                     <div class="bar" style="height: 90%;"></div>
                                     <div class="bar" style="height: 50%;"></div>
                                     <div class="bar" style="height: 75%;"></div>
+
+                                    <!-- X-axis labels -->
+                                    <div class="x-axis">
+                                        <span>Mon</span>
+                                        <span>Tue</span>
+                                        <span>Wed</span>
+                                        <span>Thu</span>
+                                        <span>Fri</span>
+                                        <span>Sat</span>
+                                        <span>Sun</span>
+                                    </div>
                                 </div>
                             </div>
-
                         </div>
+
                         <div class="orders-section">
                             <h3>Order Status</h3>
                             <div class="order-status-grid">
@@ -921,32 +1001,51 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="right-column">
-                            <div class="top-products">
-                                <h3>Top Products</h3>
-                                <ul>
-                                    <% mostOrderedProducts.forEach(p=> { %>
-                                        <li>
-                                            <%= p.name %> <span>
-                                                    <%= p.count %> orders
+                        <div class="dashboard-bottom">
+                            <!-- Top Categories -->
+                            <div class="left-column">
+                                <div class="top-categories">
+                                    <h3>Top Categories</h3>
+                                    <ul>
+                                        <% mostOrderedCategories.forEach(c=> { %>
+                                            <li>
+                                                <span class="name">
+                                                    <%= c.name %>
                                                 </span>
-                                        </li>
-                                        <% }) %>
-                                </ul>
-                            </div>
-                            <div class="top-categories">
-                                <h3>Top Categories</h3>
-                                <ul>
-                                    <% mostOrderedCategories.forEach(c=> { %>
-                                        <li>
-                                            <%= c.name %> <span>
+                                                <span class="count">
                                                     <%= c.count %> orders
                                                 </span>
-                                        </li>
-                                        <% }) %>
-                                </ul>
+                                                <span class="amount">₹<%= c.totalAmount ? c.totalAmount.toFixed(2)
+                                                        : '0.00' %></span>
+                                            </li>
+                                            <% }) %>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Top Products -->
+                            <div class="right-column">
+                                <div class="top-products">
+                                    <h3>Top Products</h3>
+                                    <ul>
+                                        <% mostOrderedProducts.forEach(p=> { %>
+                                            <li>
+                                                <span class="name">
+                                                    <%= p.name %>
+                                                </span>
+                                                <span class="count">
+                                                    <%= p.count %> orders
+                                                </span>
+                                                <span class="amount">₹<%= p.totalAmount ? p.totalAmount.toFixed(2)
+                                                        : '0.00' %></span>
+                                            </li>
+                                            <% }) %>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
+
+
 
                 </section>
             </div>

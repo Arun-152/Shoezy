@@ -10,13 +10,37 @@ require("dotenv").config();
 
 const couponPage = async (req, res) => {
     try {
-       const userId = req.session.userId;
-        const user = await User.findById(userId)
-        const coupons = await Coupon.find({})
-        res.render("admincoupenPage", { coupons });
+        const userId = req.session.userId;
+        const user = await User.findById(userId);
+        const search = req.query.search || '';
+        const sort = req.query.sort || 'name_asc'; // Default sort
+        const query = {};
+
+        if (search) {
+            query.name = { $regex: search, $options: 'i' };
+        }
+
+        const sortOptions = {};
+        switch (sort) {
+            case 'name_desc':
+                sortOptions.name = -1;
+                break;
+            case 'expiry_asc':
+                sortOptions.expireOn = 1;
+                break;
+            case 'expiry_desc':
+                sortOptions.expireOn = -1;
+                break;
+            default:
+                sortOptions.name = 1;
+                break;
+        }
+
+        const coupons = await Coupon.find(query).sort(sortOptions);
+        res.render("admincoupenPage", { coupons, search, sort });
     } catch (error) {
         console.error("Error rendering coupons page:", error.message);
-        res.redirect("/admin500")
+        res.redirect("/admin500");
     }
 };
 const getCreateCoponPage = async (req, res) => {
