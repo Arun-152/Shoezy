@@ -51,8 +51,8 @@ const loadSalesReport = async (req, res) => {
       }
     }
 
-    const pageNum = Math.max(parseInt(page, 10), 1);
-    const limitNum = Math.max(parseInt(limit, 10), 1);
+    const pageNum = Math.max(parseInt(page, 5), 1);
+    const limitNum = Math.max(parseInt(limit, 5), 1);
     const skip = (pageNum - 1) * limitNum;
 
     const match = {};

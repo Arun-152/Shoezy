@@ -596,6 +596,51 @@
             cursor: pointer;
         }
 
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: #fff;
+            border-top: 1px solid #f1f1f1;
+        }
+
+        .pagination-info {
+            font-size: 14px;
+            color: #555;
+        }
+
+        .pagination-links {
+            display: flex;
+            gap: 8px;
+        }
+
+        .pagination-links a,
+        .pagination-links span {
+            display: inline-block;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .pagination-links a:hover {
+            background-color: #f5f5f5;
+        }
+
+        .pagination-links .active {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .pagination-links .disabled {
+            color: #aaa;
+            pointer-events: none;
+        }
+
         /* Responsive Design */
         @media (max-width: 1024px) {
             .sales-summary {
@@ -880,6 +925,50 @@
                                     <button onclick="closeModal()">Close</button>
                                 </div>
                             </div>
+                            <!-- Pagination -->
+                            <% if (pagination.totalPages > 1) { %>
+                                <div class="pagination-container">
+                                    <div class="pagination-info">
+                                        Page <%= pagination.currentPage %> of <%= pagination.totalPages %> (<%= pagination.totalCount %> items)
+                                    </div>
+                                    <div class="pagination-links">
+                                        <% 
+                                            const createUrl = (page) => {
+                                                const params = new URLSearchParams();
+                                                if (filters.timeRange) params.set('timeRange', filters.timeRange);
+                                                if (filters.startDate) params.set('startDate', filters.startDate);
+                                                if (filters.endDate) params.set('endDate', filters.endDate);
+                                                if (filters.status) params.set('status', filters.status);
+                                                if (filters.payment) params.set('payment', filters.payment);
+                                                if (filters.search) params.set('search', filters.search);
+                                                if (filters.sort) params.set('sort', filters.sort);
+                                                params.set('page', page);
+                                                return `/admin/salesreport?${params.toString()}`;
+                                            };
+                                        %>
+
+                                        <% if (pagination.currentPage > 1) { %>
+                                            <a href="<%= createUrl(1) %>" class="pagination-link">« First</a>
+                                            <a href="<%= createUrl(pagination.currentPage - 1) %>" class="pagination-link">‹ Previous</a>
+                                        <% } %>
+                            
+                                        <% 
+                                        const maxPagesToShow = 5;
+                                        const startPage = Math.max(1, pagination.currentPage - Math.floor(maxPagesToShow / 2));
+                                        const endPage = Math.min(pagination.totalPages, startPage + maxPagesToShow - 1);
+                                        %>
+
+                                        <% for(let i = startPage; i <= endPage; i++) { %>
+                                            <a href="<%= createUrl(i) %>" class="pagination-link <%= i === pagination.currentPage ? 'active' : '' %>"><%= i %></a>
+                                        <% } %>
+                            
+                                        <% if (pagination.currentPage < pagination.totalPages) { %>
+                                            <a href="<%= createUrl(pagination.currentPage + 1) %>" class="pagination-link">Next ›</a>
+                                            <a href="<%= createUrl(pagination.totalPages) %>" class="pagination-link">Last »</a>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            <% } %>
                         </div>
                     </div>
                     <script>

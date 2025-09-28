@@ -297,19 +297,19 @@ async function updateQuantity(productId, size, change) {
                 const cartItem = document.querySelector(`[data-product-id="${productId}"]`);
         const qtyInput = cartItem.querySelector('.qty-input');
         let newQty = parseInt(qtyInput.value) + change;
-               
-                
+
+
 
         const response = await fetch('/cart/update-quantity', {
             method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        productId: productId,
-                        size: size,
-                        quantity: newQty
-                    })
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                productId: productId,
+                size: size,
+                quantity: newQty
+            })
         });
 
         const data = await response.json();
@@ -319,35 +319,35 @@ async function updateQuantity(productId, size, change) {
             qtyInput.value = newQty;
 
             // Update item total
-                    const itemTotal = cartItem.querySelector('.item-total small');
-                    itemTotal.textContent = `Total: ₹${data.itemTotal.toFixed(2)}`;
+            const itemTotal = cartItem.querySelector('.item-total small');
+                itemTotal.textContent = `Total: ₹${data.itemTotal.toFixed(2)}`;
 
                     // Update summary
             updateSummaryDisplay(data);
-                    
-                    showToast(`Quantity updated to ${newQty}`);
+            
+            showToast(`Quantity updated to ${newQty}`);
         } else {
             errorToast(data.message || 'Error updating quantity');
         }
     } catch (error) {
         console.error('Error updating quantity:', error);
-                showToast('Error updating quantity. Please try again.');
+        errorToast('Error updating quantity. Please try again.');
     }
 }
 
 async function validateQuantity(productId, size, value) {
     let qty = parseInt(value);
-            if (qty < 1) qty = 1;
+    if (qty < 1) qty = 1;
     if (qty > 10) qty = 10;
 
             if (qty !== parseInt(value)) {
                 const cartItem = document.querySelector(`[data-product-id="${productId}"]`);
     const qtyInput = cartItem.querySelector('.qty-input');
-    qtyInput.value = qty;
-}
+        qtyInput.value = qty;
+    }
 
             await updateQuantity(productId, size, 0); // Update with current quantity
-        }
+}
 
         async function removeItem(productId, size) {
             // Show SweetAlert confirmation dialog
@@ -379,28 +379,28 @@ async function validateQuantity(productId, size, value) {
 
                     if (data.success) {
                         const item = document.querySelector(`[data-product-id="${productId}"]`);
-                        item.style.animation = 'slideOut 0.3s ease-in';
+                            item.style.animation = 'slideOut 0.3s ease-in';
                        
-                        setTimeout(() => {
-                            item.remove();
+                            setTimeout(() => {
+                                item.remove();
                            
-                            // Update summary
-                            updateSummaryDisplay(data);
+                                // Update summary
+                                updateSummaryDisplay(data);
                            
-                            // Check if cart is empty
-                            if (data.cartCount === 0) {
-                                location.reload(); // Reload to show empty cart message
-                            }
+                                // Check if cart is empty
+                                if (data.cartCount === 0) {
+                                    location.reload(); // Reload to show empty cart message
+                                }
                            
-                            // Show success message with SweetAlert
-                            Swal.fire({
-                                title: 'Removed!',
-                                text: 'Item has been removed from your cart.',
-                                icon: 'success',
-                                timer: 2000,
-                                showConfirmButton: false
-                            });
-                        }, 300);
+                                // Show success message with SweetAlert
+                                Swal.fire({
+                                    title: 'Removed!',
+                                    text: 'Item has been removed from your cart.',
+                                    icon: 'success',
+                                    timer: 2000,
+                                    showConfirmButton: false
+                                });
+                            }, 300);
                     } else {
                         Swal.fire({
                             title: 'Error!',

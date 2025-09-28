@@ -201,6 +201,73 @@
                 overflow-y: visible;
             }
         }
+
+        /* Pagination Styles */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 0;
+            width: 100%;
+        }
+
+        .pagination {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .page-item {
+            margin: 0;
+        }
+
+        .page-link {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: #4b5563;
+            background-color: #ffffff;
+            border-left: 1px solid #e5e7eb;
+            text-decoration: none;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            font-weight: 500;
+        }
+
+        .page-item:first-child .page-link {
+            border-top-left-radius: 0.5rem;
+            border-bottom-left-radius: 0.5rem;
+            border-left: 0;
+        }
+
+        .page-item:last-child .page-link {
+            border-top-right-radius: 0.5rem;
+            border-bottom-right-radius: 0.5rem;
+        }
+
+        .page-link:hover {
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+
+        .page-item.active .page-link {
+            background-color: #10b981;
+            color: #ffffff;
+            border-color: #10b981;
+            cursor: default;
+        }
+
+        .page-item.active .page-link:hover {
+            background-color: #059669;
+        }
+
+        .page-item.disabled .page-link {
+            color: #9ca3af;
+            pointer-events: none;
+            background-color: #f9fafb;
+        }
     </style>
 </head>
 
@@ -252,7 +319,7 @@
                     <!-- Category Filter -->
                     <div class="filter-section">
                         <h4><i class="fas fa-tags"></i> Category</h4>
-                        <select id="category" onchange="filterProducts()">
+                        <select id="category">
                             <option value="">All Categories</option>
                             <% if (categories && categories.length> 0) { %>
                                 <% categories.forEach(category=> { %>
@@ -268,16 +335,16 @@
                     <div class="filter-section">
                         <h4><i class="fas fa-rupee-sign"></i> Price Range</h4>
                         <div class="price-inputs">
-                            <input type="number" id="minPrice" placeholder="Min" onchange="filterProducts()">
+                            <input type="number" id="minPrice" placeholder="Min">
                             <span class="price-separator">to</span>
-                            <input type="number" id="maxPrice" placeholder="Max" onchange="filterProducts()">
+                            <input type="number" id="maxPrice" placeholder="Max">
                         </div>
                     </div>
 
                     <!-- Sort Filter -->
                     <div class="filter-section">
                         <h4><i class="fas fa-sort"></i> Sort By</h4>
-                        <select id="sortBy" onchange="sortProducts()">
+                        <select id="sortBy">
                             <option value="name-asc">Name (A-Z)</option>
                             <option value="name-desc">Name (Z-A)</option>
                             <option value="price-asc">Price (Low to High)</option>
@@ -441,6 +508,49 @@
                                             </div>
                                             <% } %>
                     </div>
+
+                    <!-- Pagination -->
+                    <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
+                        <div class="pagination-container">
+                            <ul class="pagination">
+                                <% if (typeof hasPrevPage !== 'undefined' && hasPrevPage) { %>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=<%= prevPage %>&search=<%= query.search || '' %>&category=<%= query.category || '' %>&minPrice=<%= query.minPrice || '' %>&maxPrice=<%= query.maxPrice || '' %>&sortBy=<%= query.sortBy || '' %>" aria-label="Previous">
+                                            <span aria-hidden="true">&laquo;</span>
+                                        </a>
+                                    </li>
+                                <% } else { %>
+                                    <li class="page-item disabled">
+                                        <span class="page-link">&laquo;</span>
+                                    </li>
+                                <% } %>
+                    
+                                <% for (let i = 1; i <= totalPages; i++) { %>
+                                    <% if (i === currentPage) { %>
+                                        <li class="page-item active">
+                                            <span class="page-link"><%= i %></span>
+                                        </li>
+                                    <% } else { %>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=<%= i %>&search=<%= query.search || '' %>&category=<%= query.category || '' %>&minPrice=<%= query.minPrice || '' %>&maxPrice=<%= query.maxPrice || '' %>&sortBy=<%= query.sortBy || '' %>"><%= i %></a>
+                                        </li>
+                                    <% } %>
+                                <% } %>
+                    
+                                <% if (typeof hasNextPage !== 'undefined' && hasNextPage) { %>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=<%= nextPage %>&search=<%= query.search || '' %>&category=<%= query.category || '' %>&minPrice=<%= query.minPrice || '' %>&maxPrice=<%= query.maxPrice || '' %>&sortBy=<%= query.sortBy || '' %>" aria-label="Next">
+                                            <span aria-hidden="true">&raquo;</span>
+                                        </a>
+                                    </li>
+                                <% } else { %>
+                                    <li class="page-item disabled">
+                                        <span class="page-link">&raquo;</span>
+                                    </li>
+                                <% } %>
+                            </ul>
+                        </div>
+                    <% } %>
                 </main>
             </div>
         </section>
@@ -504,6 +614,21 @@
 
                 // Initialize wishlist state on page load
                 document.addEventListener('DOMContentLoaded', function () {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const query = {
+                        search: urlParams.get('search') || '',
+                        category: urlParams.get('category') || '',
+                        minPrice: urlParams.get('minPrice') || '',
+                        maxPrice: urlParams.get('maxPrice') || '',
+                        sortBy: urlParams.get('sortBy') || 'name-asc'
+                    };
+
+                    document.getElementById('searchInput').value = query.search;
+                    document.getElementById('category').value = query.category;
+                    document.getElementById('minPrice').value = query.minPrice;
+                    document.getElementById('maxPrice').value = query.maxPrice;
+                    document.getElementById('sortBy').value = query.sortBy;
+
                     initializeWishlistState();
                     setupSearchClearButton();
                 });
@@ -532,7 +657,7 @@
                         searchInput.value = '';
                         searchInput.focus();
                         clearBtn.classList.remove('show');
-                        filterProducts(); // Trigger filter update
+                        filterAndSort(); // Trigger filter update
                     }
                 }
 
@@ -694,159 +819,31 @@
                     }
                 }
 
-                // Enhanced product filtering with stable layout
-                const allProductCards = document.querySelectorAll('.product-card');
-
-                function filterProducts() {
-                    const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+                function filterAndSort() {
+                    const search = document.getElementById('searchInput').value.trim();
                     const category = document.getElementById('category').value;
-                    const minPrice = parseFloat(document.getElementById('minPrice').value) || 0;
-                    const maxPrice = parseFloat(document.getElementById('maxPrice').value) || Infinity;
-
-                    let visibleCount = 0;
-
-                    allProductCards.forEach(card => {
-                        const productName = card.dataset.name.toLowerCase();
-                        const productCategory = card.dataset.category;
-                        const productPrice = parseFloat(card.dataset.price) || 0;
-
-                        const matchesSearch = !searchQuery || productName.includes(searchQuery);
-                        const matchesCategory = !category || productCategory === category;
-                        const matchesPrice = productPrice >= minPrice && productPrice <= maxPrice;
-
-                        if (matchesSearch && matchesCategory && matchesPrice) {
-                            card.style.display = 'block';
-                            visibleCount++;
-                        } else {
-                            card.style.display = 'none';
-                        }
-                    });
-
-                    showNoResultsMessage(searchQuery, visibleCount);
-                    updateFilterHighlighting();
-                }
-
-                function sortProducts() {
+                    const minPrice = document.getElementById('minPrice').value;
+                    const maxPrice = document.getElementById('maxPrice').value;
                     const sortBy = document.getElementById('sortBy').value;
-                    const grid = document.getElementById('productsGrid');
-                    const productCards = Array.from(grid.querySelectorAll('.product-card:not([style*="display: none"])'));
 
-                    productCards.sort((a, b) => {
-                        switch (sortBy) {
-                            case 'name-asc':
-                                return a.dataset.name.localeCompare(b.dataset.name);
-                            case 'name-desc':
-                                return b.dataset.name.localeCompare(a.dataset.name);
-                            case 'price-asc':
-                                return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
-                            case 'price-desc':
-                                return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
-                            default:
-                                return 0;
-                        }
-                    });
+                    let url = '/shop?page=1';
+                    if (search) url += `&search=${encodeURIComponent(search)}`;
+                    if (category) url += `&category=${encodeURIComponent(category)}`;
+                    if (minPrice) url += `&minPrice=${encodeURIComponent(minPrice)}`;
+                    if (maxPrice) url += `&maxPrice=${encodeURIComponent(maxPrice)}`;
+                    if (sortBy) url += `&sortBy=${encodeURIComponent(sortBy)}`;
 
-                    productCards.forEach(card => card.remove());
-                    productCards.forEach(card => grid.appendChild(card));
+                    window.location.href = url;
                 }
 
-                function updateFilterHighlighting() {
-                    const searchInput = document.getElementById('searchInput');
-                    const categorySelect = document.getElementById('category');
-                    const minPriceInput = document.getElementById('minPrice');
-                    const maxPriceInput = document.getElementById('maxPrice');
-
-                    if (searchInput) {
-                        const searchGroup = searchInput.closest('.filter-section');
-                        if (searchInput.value.trim()) {
-                            searchGroup?.classList.add('filter-active');
-                        } else {
-                            searchGroup?.classList.remove('filter-active');
-                        }
+                // Replace old filterProducts and sortProducts with a single function
+                const filterInputs = ['searchInput', 'category', 'minPrice', 'maxPrice', 'sortBy'];
+                filterInputs.forEach(id => {
+                    const input = document.getElementById(id);
+                    if (input) {
+                        input.addEventListener('change', filterAndSort);
                     }
-
-                    if (categorySelect) {
-                        const categoryGroup = categorySelect.closest('.filter-section');
-                        if (categorySelect.value) {
-                            categoryGroup?.classList.add('filter-active');
-                        } else {
-                            categoryGroup?.classList.remove('filter-active');
-                        }
-                    }
-
-                    if (minPriceInput && maxPriceInput) {
-                        const priceGroup = minPriceInput.closest('.filter-section');
-                        if (minPriceInput.value || maxPriceInput.value) {
-                            priceGroup?.classList.add('filter-active');
-                        } else {
-                            priceGroup?.classList.remove('filter-active');
-                        }
-                    }
-                }
-
-                function showNoResultsMessage(searchQuery, visibleCount) {
-                    const productsGrid = document.querySelector('.products-grid');
-                    const existingMessage = document.querySelector('.no-results-message');
-
-                    if (existingMessage) {
-                        existingMessage.remove();
-                    }
-
-                    if (visibleCount === 0) {
-                        const messageDiv = document.createElement('div');
-                        messageDiv.className = 'no-results-message';
-
-                        let messageText = 'No products found';
-                        if (searchQuery) {
-                            messageText = `No products found for "${searchQuery}"`;
-                        }
-
-                        messageDiv.innerHTML = `
-                    <div class="no-results-content">
-                        <i class="fas fa-search"></i>
-                        <h3>${messageText}</h3>
-                        <p>Try adjusting your search terms or filters</p>
-                        <button onclick="clearFilters()" class="clear-search-btn">
-                            <i class="fas fa-times"></i>
-                            Clear All Filters
-                        </button>
-                    </div>
-                `;
-
-                        productsGrid.appendChild(messageDiv);
-                    }
-                }
-
-                function clearFilters() {
-                    const searchInput = document.getElementById('searchInput');
-                    const categorySelect = document.getElementById('category');
-                    const minPriceInput = document.getElementById('minPrice');
-                    const maxPriceInput = document.getElementById('maxPrice');
-                    const sortBySelect = document.getElementById('sortBy');
-                    const clearBtn = document.getElementById('searchClearBtn');
-
-                    if (searchInput) {
-                        searchInput.value = '';
-                        clearBtn.classList.remove('show');
-                    }
-                    if (categorySelect) categorySelect.value = '';
-                    if (minPriceInput) minPriceInput.value = '';
-                    if (maxPriceInput) maxPriceInput.value = '';
-                    if (sortBySelect) sortBySelect.value = 'name-asc';
-
-                    document.querySelectorAll('.filter-section').forEach(group => {
-                        group.classList.remove('filter-active');
-                    });
-
-                    allProductCards.forEach(card => {
-                        card.style.display = 'block';
-                    });
-
-                    const existingMessage = document.querySelector('.no-results-message');
-                    if (existingMessage) {
-                        existingMessage.remove();
-                    }
-                }
+                });
 
                 function showNotification(message, type = 'success') {
                     const existing = document.querySelectorAll('.notification');
@@ -872,27 +869,6 @@
                     window.location.href = '/login';
                     return false;
                 }
-
-                // Set up filter event listeners with instant search
-                const searchInput = document.getElementById('searchInput');
-                const categorySelect = document.getElementById('category');
-                const minPriceInput = document.getElementById('minPrice');
-                const maxPriceInput = document.getElementById('maxPrice');
-
-                if (searchInput) {
-                    searchInput.addEventListener('input', filterProducts);
-                }
-                if (categorySelect) {
-                    categorySelect.addEventListener('change', filterProducts);
-                }
-                if (minPriceInput) {
-                    minPriceInput.addEventListener('input', filterProducts);
-                }
-                if (maxPriceInput) {
-                    maxPriceInput.addEventListener('input', filterProducts);
-                }
-
-                updateFilterHighlighting();
 
                 // Re-sync wishlist state when page becomes visible
                 document.addEventListener('visibilitychange', function () {
