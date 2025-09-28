@@ -762,6 +762,46 @@ const loadCoupen = async (req, res) => {
     }
 };
 
+
+// Render Contact Page
+const getContactPage = async (req, res) => {
+    try {
+        const userId = req.session.userId;
+        if (!userId) {
+            return res.redirect('/login');
+        }
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.redirect('/login');
+        }
+        return res.render("contactPage", { user });
+    } catch (error) {
+        console.error("Error rendering Contact page:", error);
+        res.status(500).send("Server Error");
+    }
+};
+
+// Render About Page
+const getAboutPage = async (req, res) => {
+    try {
+        const userId = req.session.userId;
+        if (!userId) {
+            return res.redirect('/login');
+        }
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.redirect('/login');
+        }
+        res.render("aboutPage", { user });
+    } catch (error) {
+        console.error("Error rendering About page:", error);
+        res.status(500).send("Server Error");
+    }
+};
+
+
+
+
 module.exports = {
     signupPage,
     loginPage,
@@ -779,5 +819,7 @@ module.exports = {
     resendResetOTP,
     resetPasswordPage,
     postResetPassword,
-    loadCoupen
+    loadCoupen,
+    getContactPage,
+    getAboutPage
 };

@@ -70,7 +70,12 @@ router.get("/referral",userAuth,referralController.getReferralPage)
 
 
 
-router.get("/coupen",userController.loadCoupen)
+
+// Contact page route
+router.get("/contact",userAuth, userController.getContactPage);
+
+// About page route
+router.get("/about",userAuth, userController.getAboutPage);
 
 router.use("/auth",authRouter)
 router.use("/cart",cartRouter)
