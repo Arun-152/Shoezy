@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shoezy-Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         /* Reset and Base Styles */
@@ -735,6 +736,11 @@
             border-color: #4a90e2;
         }
 
+        /* Set a fixed height for the canvas container to prevent stretching */
+        .chart-canvas-container {
+            height: 350px; /* Fixed height for the chart */
+        }
+
         .chart-container {
             height: 250px;
             display: flex;
@@ -885,45 +891,14 @@
                                 <h3>Sales Overview</h3>
                                 <div class="chart-controls">
                                     <div class="chart-period">
-                                        <button class="period-btn">Weekly</button>
-                                        <button class="period-btn">Monthly</button>
-                                        <button class="period-btn">Yearly</button>
+                                        <button class="period-btn active" data-period="weekly">Weekly</button>
+                                        <button class="period-btn" data-period="monthly">Monthly</button>
+                                        <button class="period-btn" data-period="yearly">Yearly</button>
                                     </div>
                                 </div>
                             </div>
-
-                            <div class="chart-container">
-                                <!-- Y-axis labels -->
-                                <div class="y-axis">
-                                    <div>100%</div>
-                                    <div>80%</div>
-                                    <div>60%</div>
-                                    <div>40%</div>
-                                    <div>20%</div>
-                                    <div>0%</div>
-                                </div>
-
-                                <!-- Chart bars -->
-                                <div class="chart" id="salesChart">
-                                    <div class="bar" style="height: 40%;"></div>
-                                    <div class="bar" style="height: 60%;"></div>
-                                    <div class="bar" style="height: 80%;"></div>
-                                    <div class="bar" style="height: 70%;"></div>
-                                    <div class="bar" style="height: 90%;"></div>
-                                    <div class="bar" style="height: 50%;"></div>
-                                    <div class="bar" style="height: 75%;"></div>
-
-                                    <!-- X-axis labels -->
-                                    <div class="x-axis">
-                                        <span>Mon</span>
-                                        <span>Tue</span>
-                                        <span>Wed</span>
-                                        <span>Thu</span>
-                                        <span>Fri</span>
-                                        <span>Sat</span>
-                                        <span>Sun</span>
-                                    </div>
-                                </div>
+                            <div class="chart-canvas-container">
+                                <canvas id="salesChart"></canvas>
                             </div>
                         </div>
 
@@ -1051,246 +1026,102 @@
             </div>
     </div>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const periodBtns = document.querySelectorAll('.period-btn');
-            const chart = document.getElementById('salesChart');
+        // Data from EJS
+        const chartData = <%- JSON.stringify(chartData) %>;
 
-            // Update chart when a period is selected
+        document.addEventListener('DOMContentLoaded', function () {
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            const periodBtns = document.querySelectorAll('.period-btn');
+
+            const salesChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartData.weekly.labels,
+                    datasets: [{
+                        label: 'Sales',
+                        data: chartData.weekly.values,
+                        backgroundColor: 'rgba(74, 144, 226, 0.8)',
+                        borderColor: 'rgba(74, 144, 226, 1)',
+                        borderWidth: 1,
+                        hoverBackgroundColor: 'rgba(74, 144, 226, 1)',
+                        borderRadius: 4,
+                        barPercentage: 0.6,
+                        categoryPercentage: 0.7,
+
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            suggestedMax: 100, // Suggest a max for the 20,40,60,80,100 scale
+                            ticks: {
+                                stepSize: 20, // Suggest steps of 20
+                                callback: function (value) {
+                                    return '₹' + value.toLocaleString('en-IN');
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return `Sales: ₹${context.raw.toLocaleString('en-IN')}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // --- Percentage Conversion Logic ---
+            // Find the maximum value for each period to set the 100% mark dynamically.
+            const maxWeekly = Math.max(...chartData.weekly.values, 1); // Use 1 to avoid division by zero
+            const maxMonthly = Math.max(...chartData.monthly.values, 1);
+            const maxYearly = Math.max(...chartData.yearly.values, 1);
+
+            // Convert absolute sales values to percentages.
+            const weeklyPercentages = chartData.weekly.values.map(v => (v / maxWeekly) * 100);
+            const monthlyPercentages = chartData.monthly.values.map(v => (v / maxMonthly) * 100);
+            const yearlyPercentages = chartData.yearly.values.map(v => (v / maxYearly) * 100);
+            // --- End Percentage Conversion ---
+
+            function updateChart(period) {
+                salesChart.data.labels = chartData[period].labels;
+                salesChart.data.datasets[0].originalData = chartData[period].values; // Store original data for tooltip
+                if (period === 'weekly') salesChart.data.datasets[0].data = weeklyPercentages;
+                if (period === 'monthly') salesChart.data.datasets[0].data = monthlyPercentages;
+                if (period === 'yearly') salesChart.data.datasets[0].data = yearlyPercentages;
+                salesChart.update();
+            }
+
             periodBtns.forEach(btn => {
                 btn.addEventListener('click', function () {
                     periodBtns.forEach(b => b.classList.remove('active'));
                     this.classList.add('active');
-
-                    const period = this.textContent.toLowerCase(); // daily/weekly/monthly/yearly
+                    const period = this.dataset.period;
                     updateChart(period);
                 });
             });
 
-            function updateChart(period) {
-                const bars = chart.querySelectorAll('.bar');
-                let heights;
-
-                switch (period) {
-                    case 'daily':
-                        heights = ['40%', '65%', '80%', '55%', '70%', '85%', '75%'];
-                        break;
-                    case 'weekly':
-                        heights = ['60%', '80%', '95%', '70%', '45%', '30%', '25%'];
-                        break;
-                    case 'monthly':
-                        heights = ['75%', '90%', '85%', '60%', '95%', '80%', '70%'];
-                        break;
-                    case 'yearly':
-                        heights = ['85%', '70%', '90%', '95%', '80%', '75%', '88%'];
-                        break;
-                    default:
-                        heights = ['40%', '60%', '70%', '50%', '65%', '75%', '85%'];
-                }
-
-                bars.forEach((bar, index) => {
-                    if (heights[index]) {
-                        bar.style.height = heights[index];
-                    }
-                });
-            }
-
-            // Initialize with daily
-            updateChart('daily');
-        });
-
-        // Add some interactivity
-        document.addEventListener('DOMContentLoaded', function () {
-            // Period button functionality
-            const periodBtns = document.querySelectorAll('.period-btn');
-            periodBtns.forEach(btn => {
-                btn.addEventListener('click', function () {
-                    periodBtns.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                });
-            });
-
-            // Animate bars on load
-            const bars = document.querySelectorAll('.bar');
-            setTimeout(() => {
-                bars.forEach((bar, index) => {
-                    setTimeout(() => {
-                        bar.style.opacity = '1';
-                        bar.style.transform = 'scaleY(1)';
-                    }, index * 100);
-                });
-            }, 500);
-
-            // Animate counters
-            function animateCounter(element, target) {
-                let current = 0;
-                const increment = target / 50;
-                const timer = setInterval(() => {
-                    current += increment;
-                    if (current >= target) {
-                        current = target;
-                        clearInterval(timer);
-                    }
-                    if (target > 1000) {
-                        element.textContent = '₹' + Math.floor(current).toLocaleString('en-IN');
-                    } else {
-                        element.textContent = Math.floor(current);
-                    }
-                }, 20);
-            }
-
-            // Animate stat values
-            const statValues = document.querySelectorAll('.stat-value');
-            statValues.forEach(stat => {
-                const value = stat.textContent.replace(/[₹,]/g, '');
-                if (!isNaN(value) && value !== '') {
-                    stat.textContent = '0';
-                    setTimeout(() => animateCounter(stat, parseInt(value)), 300);
-                }
-            });
-
-            // Mobile menu toggle (if needed)
-            const menuToggle = document.getElementById('menu-toggle');
+            // Sidebar toggle logic
+            const menuToggle = document.querySelector('.menu-toggle');
             const sidebar = document.querySelector('.sidebar');
-
-            if (menuToggle) {
-                menuToggle.addEventListener('click', function () {
-                    sidebar.classList.toggle('active');
-                });
+            if (menuToggle && sidebar) {
+                menuToggle.addEventListener('click', () => sidebar.classList.toggle('sidebar-open'));
             }
-
-            // Close sidebar when clicking outside on mobile
-            document.addEventListener('click', function (e) {
-                if (window.innerWidth <= 768) {
-                    if (!sidebar.contains(e.target) && !menuToggle?.contains(e.target)) {
-                        sidebar.classList.remove('active');
-                    }
-                }
-            });
-            const dropdown = document.querySelector('.chart-dropdown');
-            const select = document.getElementById('periodSelect');
-            const chart = document.getElementById('salesChart');
-
-            // Add active class on focus
-            select.addEventListener('focus', () => {
-                dropdown.classList.add('active');
-            });
-
-            select.addEventListener('blur', () => {
-                dropdown.classList.remove('active');
-            });
-
-            // Update chart based on selection
-            select.addEventListener('change', function () {
-                const period = this.value;
-                updateChart(period);
-            });
-
-            function updateChart(period) {
-                const bars = chart.querySelectorAll('.bar');
-                let heights;
-
-                switch (period) {
-                    case 'daily':
-                        heights = ['40%', '65%', '80%', '55%', '70%', '85%', '75%'];
-                        break;
-                    case 'weekly':
-                        heights = ['60%', '80%', '95%', '70%', '45%', '30%', '25%'];
-                        break;
-                    case 'monthly':
-                        heights = ['75%', '90%', '85%', '60%', '95%', '80%', '70%'];
-                        break;
-                    case 'yearly':
-                        heights = ['85%', '70%', '90%', '95%', '80%', '75%', '88%'];
-                        break;
-                    default:
-                        heights = ['60%', '80%', '95%', '70%', '45%', '30%', '25%'];
-                }
-
-                bars.forEach((bar, index) => {
-                    if (heights[index]) {
-                        bar.style.height = heights[index];
-                    }
-                });
-            }
-            // Update chart based on period selection
-            function updateChart(period) {
-                const bars = document.querySelectorAll('.bar');
-                let heights;
-
-                if (period === 'WEEK') {
-                    heights = ['60%', '80%', '95%', '70%', '45%', '30%', '25%'];
-                } else {
-                    heights = ['40%', '60%', '75%', '90%', '85%', '70%', '95%', '80%', '65%', '55%', '45%', '35%'];
-                }
-
-                bars.forEach((bar, index) => {
-                    if (heights[index]) {
-                        bar.style.height = heights[index];
-                    }
-                });
-            }
-
-            // Add hover effects to stat cards
-            const statCards = document.querySelectorAll('.stat-card');
-            statCards.forEach(card => {
-                card.addEventListener('mouseenter', function () {
-                    this.style.transform = 'translateY(-4px)';
-                    this.style.boxShadow = '0 4px 15px rgba(0,0,0,0.15)';
-                });
-
-                card.addEventListener('mouseleave', function () {
-                    this.style.transform = 'translateY(-2px)';
-                    this.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
-                });
-            });
-
-            // Smooth scroll for navigation links
-            const navLinks = document.querySelectorAll('.nav-item');
-            navLinks.forEach(link => {
-                link.addEventListener('click', function (e) {
-                    // Remove active class from all links
-                    navLinks.forEach(l => l.classList.remove('active'));
-                    // Add active class to clicked link
-                    this.classList.add('active');
-                });
-            });
-
-            // Real-time clock update (optional)
-            function updateTime() {
-                const now = new Date();
-                const timeString = now.toLocaleTimeString('en-IN');
-                const dateString = now.toLocaleDateString('en-IN');
-
-                // If you want to show current time somewhere
-                const timeElement = document.getElementById('current-time');
-                if (timeElement) {
-                    timeElement.textContent = `${dateString} ${timeString}`;
-                }
-            }
-
-            // Update time every second
-            setInterval(updateTime, 1000);
-            updateTime(); // Initial call
-
-            // Add loading state to tables (simulate data loading)
-            function showLoadingState() {
-                const tables = document.querySelectorAll('table tbody');
-                tables.forEach(tbody => {
-                    const originalContent = tbody.innerHTML;
-                    tbody.innerHTML = '<tr><td colspan="100%" style="text-align: center; padding: 40px;"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>';
-
-                    // Restore content after 1 second (simulate loading)
-                    setTimeout(() => {
-                        tbody.innerHTML = originalContent;
-                    }, 1000);
-                });
-            }
-
-            // Refresh data button functionality
-            const refreshBtn = document.getElementById('refresh-data');
-            if (refreshBtn) {
-                refreshBtn.addEventListener('click', showLoadingState);
-            }
+            updateChart('weekly'); // Initialize chart with weekly data
         });
     </script>
 </body>

@@ -338,32 +338,103 @@ const dashboard = async (req, res) => {
       },
     ]);
 
-    // Sales Data for Chart (monthly sales over last 12 months)
-    const monthlySalesRaw = await Order.aggregate([
+    // --- Chart Data Aggregation ---
+
+    // Helper to get month name
+    const getMonthName = (monthNum) => {
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      return months[monthNum - 1];
+    };
+
+    // 1. Yearly Sales Data (for a fixed range of years: 2022-2026)
+    const yearlyLabels = [2022, 2023, 2024, 2025, 2026];
+    const yearlySalesData = await Order.aggregate([
       {
         $match: {
           orderStatus: "Delivered",
           paymentStatus: "Paid",
+          createdAt: {
+            $gte: new Date(yearlyLabels[0], 0, 1), // Start of the first year
+            $lt: new Date(yearlyLabels[yearlyLabels.length - 1] + 1, 0, 1) // Start of the year after the last year
+          }
         },
       },
       {
         $group: {
+          _id: { $year: "$createdAt" },
+          total: { $sum: "$totalAmount" },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    const salesByYear = new Map(yearlySalesData.map(d => [d._id, d.total]));
+    const yearlyValues = yearlyLabels.map(year => salesByYear.get(year) || 0);
+
+    // 2. Monthly Sales Data (current year)
+    const currentYear = new Date().getFullYear();
+    const monthlySalesData = await Order.aggregate([
+      {
+        $match: {
+          orderStatus: "Delivered",
+          paymentStatus: "Paid",
+          createdAt: { $gte: new Date(currentYear, 0, 1) }
+        },
+      },
+      {
+        $group: {
+          _id: { $month: "$createdAt" },
+          total: { $sum: "$totalAmount" },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    const monthlyLabels = Array.from({ length: 12 }, (_, i) => getMonthName(i + 1));
+    const monthlyValues = Array(12).fill(0);
+    monthlySalesData.forEach(d => {
+      monthlyValues[d._id - 1] = d.total;
+    });
+
+    // 3. Weekly Sales Data (current week, Mon-Sun)
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // Sunday = 0, Monday = 1, etc.
+    const startOfWeek = new Date(today);
+    // Adjust to Monday as the start of the week
+    startOfWeek.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
+
+    const weeklySalesData = await Order.aggregate([
+      {
+        $match: {
+          orderStatus: "Delivered",
+          paymentStatus: "Paid",
+          createdAt: { $gte: startOfWeek, $lte: endOfWeek }
+        }
+      },
+      {
+        $group: {
           _id: {
-            year: { $year: "$createdAt" },
-            month: { $month: "$createdAt" },
+            // Adjust day of week so Monday is 1, Sunday is 7
+            day: { $cond: [{ $eq: [{ $dayOfWeek: "$createdAt" }, 1] }, 7, { $subtract: [{ $dayOfWeek: "$createdAt" }, 1] }] }
           },
           total: { $sum: "$totalAmount" },
         },
       },
-      { $sort: { "_id.year": -1, "_id.month": -1 } },
-      { $limit: 12 },
+      { $sort: { "_id.day": 1 } }
     ]);
-    const monthlySales = monthlySalesRaw
-      .map((s) => ({
-        label: `${s._id.month}/${s._id.year % 100}`,
-        total: s.total,
-      }))
-      .reverse(); // Oldest to newest
+
+    const weeklyLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const weeklyValues = Array(7).fill(0);
+    weeklySalesData.forEach(d => {
+      weeklyValues[d._id.day - 1] = d.total;
+    });
+
+    // --- End Chart Data ---
 
     // Percentage Calculations (last 30 days vs previous 30 days)
     const now = new Date();
@@ -464,7 +535,11 @@ const dashboard = async (req, res) => {
   recentOrdersData,
   mostOrderedProducts, 
   mostOrderedCategories, 
-  monthlySales, 
+  chartData: {
+    weekly: { labels: weeklyLabels, values: weeklyValues },
+    monthly: { labels: monthlyLabels, values: monthlyValues },
+    yearly: { labels: yearlyLabels, values: yearlyValues },
+  },
 });
 
   } catch (error) {

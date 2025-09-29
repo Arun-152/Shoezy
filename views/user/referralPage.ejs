@@ -1,3 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shoezy - Referral</title>
+</head>
+<body>
+    
+</body>
+</html>
+
+
 <%- include('../partials/user/navbar') %>
 
     <div class="page-container">
@@ -96,46 +109,7 @@
                     </div>
 
                     <!-- Recent Referrals -->
-                    <div class="content-section">
-                        <h3 class="section-header">Recent Referrals</h3>
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Joined Date</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <% if (recentReferrals && recentReferrals.length> 0) { %>
-                                    <% recentReferrals.forEach(referral=> {
-                                        // Assuming referral.createdAt is a Date object or can be parsed
-                                        const joinDate = new Date(referral.createdAt).toLocaleDateString();
-                                        %>
-                                        <tr>
-                                            <td>
-                                                <%= referral.fullname %>
-                                            </td>
-                                            <td>
-                                                <%= referral.email %>
-                                            </td>
-                                            <td>
-                                                <%= joinDate %>
-                                            </td>
-                                            <td><span class="status-label status-success">Active</span></td>
-                                        </tr>
-                                        <% }) %>
-                                            <% } else { %>
-                                                <tr>
-                                                    <td colspan="4" style="text-align: center;">No recent referrals yet.
-                                                    </td>
-                                                </tr>
-                                                <% } %>
-                            </tbody>
-                        </table>
-                    </div>
-
+                  
                     <!-- How Referrals Work -->
                     <div class="content-section">
                         <h3 class="section-header">How Referrals Work</h3>
