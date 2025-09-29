@@ -196,13 +196,13 @@
                                         </div>
 
                                         <% const price=product.variants && product.variants.length> 0
-                                            ? Number(product.variants[0].salePrice)
+                                            ? Number(product.variants[0]?.salePrice)
                                             : 0; // fallback if no variants
 
                                             let ratingCount = product.ratings && product.ratings.count
                                             ? product.ratings.count
                                             : (price > 13000 ? 899 : price > 10000 ? 678 : 546);
-                                            %>
+                                            %> 
 
                                             <span class="rating-text">(<%= ratingCount %> reviews)</span>
                                     </div>

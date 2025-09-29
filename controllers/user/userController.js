@@ -322,7 +322,7 @@ const resendOTP = async (req, res) => {
     }
 };
 
-const postLogin = async (req, res) => {
+const userPostLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
 
@@ -479,17 +479,17 @@ async function sendPasswordResetOTP(email, otp) {
     }
 }
 
-const forgotPasswordPage = async (req, res) => {
+const forgotPasswordPage = (req, res) => {
     try {
-
-        return res.render("forgotEmail");
+        // This function correctly renders the page to enter the email.
+        res.render("forgotEmail");
     } catch (error) {
         console.error("Forgot password page not loading", error);
-        res.status(500).json({ success: false, message: "Internal server error" });
+        res.status(500).render("usererrorPage");
     }
 };
 
-const postForgotPassword = async (req, res) => {
+const sendResetLink = async (req, res) => {
     try {
         const { email } = req.body;
 
@@ -806,14 +806,13 @@ module.exports = {
     signupPage,
     loginPage,
     postSignup,
-    otpVerification,
+    otpVerification, 
     verifyOTP,
-    postLogin,
     logout,
     resendOTP,
     userErrorPage,
     forgotPasswordPage,
-    postForgotPassword,
+    sendResetLink, // Renamed for clarity
     verifyOTPPage,
     postVerifyOTP,
     resendResetOTP,
@@ -821,5 +820,6 @@ module.exports = {
     postResetPassword,
     loadCoupen,
     getContactPage,
-    getAboutPage
+    getAboutPage,
+    userPostLogin
 };

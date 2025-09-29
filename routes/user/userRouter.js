@@ -33,7 +33,7 @@ router.get("/signup", userController.signupPage);
 router.post("/signup",userController.postSignup);
 router.get("/otpVerification", userController.otpVerification);
 router.post("/verifyOtp", userController.verifyOTP);
-router.post("/login", userController.postLogin);
+router.post("/login", userController.userPostLogin);
 
 router.get("/", homepageController.homePage);
 router.get("/home", homepageController.homePage);
@@ -56,13 +56,13 @@ router.post("/wallet-order", userAuth, orderController. placeOrderWithWallet)
 
 
 // Forgot Password Routes
-router.get("/emailVerification",userAuth, userController.forgotPasswordPage);
-router.post("/forgotPassword", userAuth,userController.postForgotPassword);
-router.get("/verifyResetOtp",userAuth, userController.verifyOTPPage);
-router.post("/verifyResetOtp", userAuth,userController.postVerifyOTP);
-router.post("/resendResetOtp",userAuth, userController.resendResetOTP);
-router.get("/resetPassword", userAuth,userController.resetPasswordPage);
-router.post("/resetPassword",userAuth, userController.postResetPassword);
+router.get("/forgot-password", userController.forgotPasswordPage);
+router.post("/forgot-password", userController.sendResetLink);
+router.get("/verifyResetOtp", userController.verifyOTPPage);
+router.post("/verifyResetOtp", userController.postVerifyOTP);
+router.post("/resendResetOtp", userController.resendResetOTP);
+router.get("/reset-password", userController.resetPasswordPage);
+router.post("/reset-password", userController.postResetPassword);
 
 //referrral code
 
