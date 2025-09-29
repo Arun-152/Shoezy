@@ -222,6 +222,24 @@ const cancelOrder = async (req, res) => {
     } else {
       const itemToCancel = order.items.id(itemsId);
       if (itemToCancel && ['Pending', 'Processing'].includes(itemToCancel.status)) {
+        // --- Start: Coupon Minimum Purchase Validation on Partial Cancellation ---
+        if (order.couponId) {
+          const coupon = await Coupon.findById(order.couponId);
+          if (coupon) {
+            const remainingItems = order.items.filter(item =>
+              item._id.toString() !== itemToCancel._id.toString() &&
+              item.status !== 'Cancelled' &&
+              item.status !== 'Returned'
+            );
+            const remainingSubtotal = remainingItems.reduce((sum, item) => sum + item.totalPrice, 0);
+
+            if (remainingSubtotal < coupon.minimumPrice) {
+              return res.status(400).json({ success: false, message: `Cannot cancel this item. The remaining order value would be below the coupon's minimum purchase amount of ₹${coupon.minimumPrice}.` });
+            }
+          }
+        }
+        // --- End: Coupon Minimum Purchase Validation ---
+
         if (isFlatCoupon) {
           refundAmount = itemToCancel.price - flatDiscountPerItem;
         } else {
@@ -503,6 +521,25 @@ const returnSingleOrder = async (req, res) => {
                 message: 'This item is already in the return process'
             });
         }
+
+        // --- Start: Coupon Minimum Purchase Validation on Partial Return ---
+        if (order.couponId) {
+            const coupon = await Coupon.findById(order.couponId);
+            if (coupon) {
+                const remainingItems = order.items.filter(item =>
+                    item._id.toString() !== item._id.toString() &&
+                    item.status !== 'Cancelled' &&
+                    item.status !== 'Returned'
+                );
+                const remainingSubtotal = remainingItems.reduce((sum, item) => sum + item.totalPrice, 0);
+
+                if (remainingSubtotal < coupon.minimumPrice) {
+                    return res.status(400).json({ success: false, message: `Cannot return this item. The remaining order value would be below the coupon's minimum purchase amount of ₹${coupon.minimumPrice}.` });
+                }
+            }
+        }
+        // --- End: Coupon Minimum Purchase Validation ---
+
         order.items[itemIndex].status = 'ReturnRequested';
         
         order.items[itemIndex].returnReason = reason;

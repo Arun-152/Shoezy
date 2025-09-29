@@ -451,6 +451,8 @@ const postAdd = async(req,res)=>{
             errors.fullName = "Full name is required";
         } else if (fullName.trim().length < 2) {
             errors.fullName = "Full name must be at least 2 characters";
+        } else if (/\d/.test(fullName)) {
+            errors.fullName = "Full name cannot contain numbers";
         }
         
         if (!mobileNumber || mobileNumber.trim() === '') {
@@ -463,12 +465,16 @@ const postAdd = async(req,res)=>{
             errors.address = "Address is required";
         } else if (address.trim().length < 5) {
             errors.address = "Address must be at least 5 characters";
+        } else if (address.trim().split(/\s+/).length > 50) {
+            errors.address = "Address cannot exceed 50 words";
         }
         
         if (!city || city.trim() === '') {
             errors.city = "City is required";
         } else if (city.trim().length < 2) {
             errors.city = "City must be at least 2 characters";
+        } else if (/\d/.test(city)) {
+            errors.city = "City cannot contain numbers";
         }
         
         if (!district || district.trim() === '') {
@@ -494,10 +500,12 @@ const postAdd = async(req,res)=>{
         } else if (!['home', 'office', 'other'].includes(addressType.toLowerCase())) {
             errors.addressType = "Please select a valid address type";
         }
-            if (!landmark || landmark.trim() === '') {
+        if (!landmark || landmark.trim() === '') {
             errors.landmark = "landmark is required";
         } else if (landmark.trim().length < 4) {
             errors.landmark = "Landmark must be at least 4 characters";
+        } else if (/^\d+$/.test(landmark.trim())) {
+            errors.landmark = "Landmark cannot be only numbers";
         }
 
         const returnURL = req.body.returnUrl ||  '/profile/address'
@@ -598,6 +606,8 @@ const updateAddress = async(req, res) => {
             errors.fullName = 'Full name is required';
         } else if (fullName.trim().length < 2) {
             errors.fullName = 'Full name must be at least 2 characters';
+        } else if (/\d/.test(fullName)) {
+            errors.fullName = "Full name cannot contain numbers";
         }
         
         if (!mobileNumber || mobileNumber.trim() === '') {
@@ -612,12 +622,16 @@ const updateAddress = async(req, res) => {
             errors.address = 'Address is required';
         } else if (address.trim().length < 5) {
             errors.address = 'Address must be at least 5 characters';
+        } else if (address.trim().split(/\s+/).length > 50) {
+            errors.address = "Address cannot exceed 50 words";
         }
         
         if (!city || city.trim() === '') {
             errors.city = 'City is required';
         } else if (city.trim().length < 2) {
             errors.city = 'City must be at least 2 characters';
+        } else if (/\d/.test(city)) {
+            errors.city = "City cannot contain numbers";
         }
         
         if (!district || district.trim() === '') {
@@ -648,6 +662,8 @@ const updateAddress = async(req, res) => {
             errors.landmark = 'Landmark is required';
         } else if (landmark.trim().length < 4) {
             errors.landmark = 'Landmark must be at least 4 characters';
+        } else if (/^\d+$/.test(landmark.trim())) {
+            errors.landmark = "Landmark cannot be only numbers";
         }
 
         // If there are validation errors, return them
