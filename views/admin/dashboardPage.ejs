@@ -240,6 +240,35 @@
             justify-content: space-between;
         }
 
+        /* New styles for top product/category lists */
+        .top-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .top-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 5px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .top-list .name {
+            flex: 2; /* More space for name */
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding-right: 10px;
+        }
+        .top-list .count, .top-list .amount {
+            flex: 1;
+            text-align: right;
+            color: #555;
+        }
+
         .header {
             background: white;
             padding: 15px 30px;
@@ -981,38 +1010,38 @@
                             <div class="left-column">
                                 <div class="top-categories">
                                     <h3>Top Categories</h3>
-                                    <ul>
+                                    <ul class="top-list">
                                         <% mostOrderedCategories.forEach(c=> { %>
                                             <li>
                                                 <span class="name">
                                                     <%= c.name %>
                                                 </span>
                                                 <span class="count">
-                                                    <%= c.count %> orders
+                                                    <%= c.count %> sold
                                                 </span>
-                                                <span class="amount">₹<%= c.totalAmount ? c.totalAmount.toFixed(2)
-                                                        : '0.00' %></span>
+                                                <span class="amount">₹<%= c.totalAmount ? c.totalAmount.toLocaleString('en-IN') : '0' %></span>
                                             </li>
                                             <% }) %>
                                     </ul>
                                 </div>
                             </div>
-
+ 
                             <!-- Top Products -->
                             <div class="right-column">
                                 <div class="top-products">
                                     <h3>Top Products</h3>
-                                    <ul>
+                                    <ul class="top-list">
                                         <% mostOrderedProducts.forEach(p=> { %>
                                             <li>
                                                 <span class="name">
                                                     <%= p.name %>
                                                 </span>
                                                 <span class="count">
-                                                    <%= p.count %> orders
+                                                    <%= p.count %> sold
                                                 </span>
-                                                <span class="amount">₹<%= p.totalAmount ? p.totalAmount.toFixed(2)
-                                                        : '0.00' %></span>
+                                                <span class="amount">
+                                                    ₹<%= p.totalAmount ? p.totalAmount.toLocaleString('en-IN') : '0' %>
+                                                </span>
                                             </li>
                                             <% }) %>
                                     </ul>
@@ -1034,20 +1063,20 @@
             const periodBtns = document.querySelectorAll('.period-btn');
 
             const salesChart = new Chart(ctx, {
-                type: 'bar',
+                type: 'line',
                 data: {
                     labels: chartData.weekly.labels,
                     datasets: [{
                         label: 'Sales',
-                        data: chartData.weekly.values,
-                        backgroundColor: 'rgba(74, 144, 226, 0.8)',
+                        data: [], // Will be populated by updateChart
+                        backgroundColor: 'rgba(74, 144, 226, 0.2)',
                         borderColor: 'rgba(74, 144, 226, 1)',
-                        borderWidth: 1,
-                        hoverBackgroundColor: 'rgba(74, 144, 226, 1)',
-                        borderRadius: 4,
-                        barPercentage: 0.6,
-                        categoryPercentage: 0.7,
-
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(74, 144, 226, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverRadius: 6,
+                        fill: true, // Fills the area under the line
+                        tension: 0.4 // Creates smooth curves
                     }]
                 },
                 options: {
@@ -1056,11 +1085,11 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            suggestedMax: 100, // Suggest a max for the 20,40,60,80,100 scale
+                            max: 100, // Fix the Y-axis max at 100%
                             ticks: {
-                                stepSize: 20, // Suggest steps of 20
+                                stepSize: 20, // Set steps to 20
                                 callback: function (value) {
-                                    return '₹' + value.toLocaleString('en-IN');
+                                    return value + '%'; // Display as percentage
                                 }
                             }
                         },
@@ -1077,7 +1106,11 @@
                         tooltip: {
                             callbacks: {
                                 label: function (context) {
-                                    return `Sales: ₹${context.raw.toLocaleString('en-IN')}`;
+                                    // Access original value from the stored dataset property
+                                    const originalValue = context.dataset.originalData[context.dataIndex];
+                                    const percentage = context.parsed.y.toFixed(1);
+                                    const formattedValue = originalValue.toLocaleString('en-IN');
+                                    return `Sales: ₹${formattedValue} (${percentage}%)`;
                                 }
                             }
                         }

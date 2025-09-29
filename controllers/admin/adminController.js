@@ -269,15 +269,13 @@ const dashboard = async (req, res) => {
       {
         $group: {
           _id: "$items.productId",
-          orders: { $addToSet: "$_id" },
+          count: { $sum: 1 },
+          totalAmount: { $sum: "$items.totalPrice" }
         },
       },
       {
-        $project: {
-          count: { $size: "$orders" },
-        },
+        $sort: { count: -1 }
       },
-      { $sort: { count: -1 } },
       { $limit: 5 },
       {
         $lookup: {
@@ -292,6 +290,7 @@ const dashboard = async (req, res) => {
         $project: {
           name: "$product.productName",
           count: 1,
+          totalAmount: 1
         },
       },
     ]);
@@ -311,15 +310,13 @@ const dashboard = async (req, res) => {
       {
         $group: {
           _id: "$product.category",
-          orders: { $addToSet: "$_id" },
+          count: { $sum: 1 },
+          totalAmount: { $sum: "$items.totalPrice" }
         },
       },
       {
-        $project: {
-          count: { $size: "$orders" },
-        },
+        $sort: { count: -1 }
       },
-      { $sort: { count: -1 } },
       { $limit: 5 },
       {
         $lookup: {
@@ -334,6 +331,7 @@ const dashboard = async (req, res) => {
         $project: {
           name: "$category.name", // Assuming Category has a 'name' field
           count: 1,
+          totalAmount: 1
         },
       },
     ]);
