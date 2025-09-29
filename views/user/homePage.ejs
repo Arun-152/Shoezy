@@ -182,44 +182,50 @@
 
                                     <div class="product-rating">
                                         <div class="stars">
-                                            <% if (product.ratings && product.ratings.average> 0) { %>
-                                                <% const rating=product.ratings.average; %>
-                                                    <% for (let i=1; i <=5; i++) { %>
-                                                        <% if (i <=Math.floor(rating)) { %>
-                                                            <i class="fas fa-star"></i>
-                                                            <% } else if (i - 0.5 <=rating) { %>
-                                                                <i class="fas fa-star-half-alt"></i>
-                                                                <% } else { %>
-                                                                    <i class="far fa-star"></i>
+                                            <% const rating=product.ratings && product.ratings.average ?
+                                                product.ratings.average : 4.5; %>
+                                                <% for (let i=1; i <=5; i++) { %>
+                                                    <% if (i <=Math.floor(rating)) { %>
+                                                        <i class="fas fa-star"></i>
+                                                        <% } else if (i - 0.5 <=rating) { %>
+                                                            <i class="fas fa-star-half-alt"></i>
+                                                            <% } else { %>
+                                                                <i class="far fa-star"></i>
+                                                                <% } %>
                                                                     <% } %>
-                                                                        <% } %>
-                                                                            <% } else { %>
-                                                                                <i class="far fa-star"></i><i
-                                                                                    class="far fa-star"></i><i
-                                                                                    class="far fa-star"></i><i
-                                                                                    class="far fa-star"></i><i
-                                                                                    class="far fa-star"></i>
-                                                                                <% } %>
                                         </div>
-                                        <span class="rating-text">(<%= product.ratings && product.ratings.count ?
-                                                product.ratings.count : 0 %>)</span>
+
+                                        <% const price=product.variants && product.variants.length> 0
+                                            ? Number(product.variants[0].salePrice)
+                                            : 0; // fallback if no variants
+
+                                            let ratingCount = product.ratings && product.ratings.count
+                                            ? product.ratings.count
+                                            : (price > 13000 ? 899 : price > 10000 ? 678 : 546);
+                                            %>
+
+                                            <span class="rating-text">(<%= ratingCount %> reviews)</span>
                                     </div>
+
 
                                     <div class="product-price">
                                         <% if (product.variants && product.variants.length> 0) { %>
-                                            <% 
-                                                const availableVariants = product.variants.filter(v => v.variantQuantity > 0);
-                                                const variantsToConsider = availableVariants.length > 0 ? availableVariants : product.variants;
+                                            <% const availableVariants=product.variants.filter(v=> v.variantQuantity >
+                                                0);
+                                                const variantsToConsider = availableVariants.length > 0 ?
+                                                availableVariants : product.variants;
                                                 const prices = variantsToConsider.map(v => v.salePrice);
                                                 const originalPrices = variantsToConsider.map(v => v.regularPrice);
                                                 const minSalePrice = Math.min(...prices);
                                                 const minOriginalPrice = Math.min(...originalPrices);
-                                                const hasDiscount = minSalePrice < minOriginalPrice;
-                                            %>
-                                            <span class="current-price">₹<%= minSalePrice.toLocaleString('en-IN') %></span>
-                                            <% if (hasDiscount) { %>
-                                                <span class="original-price" style="text-decoration: line-through; font-weight: 400; font-size: larger; color: #db2525; margin-left: 5px;">₹<%= minOriginalPrice.toLocaleString('en-IN') %></span>
-                                            <% } %>
+                                                const hasDiscount = minSalePrice < minOriginalPrice; %>
+                                                    <span class="current-price">₹<%=
+                                                            minSalePrice.toLocaleString('en-IN') %></span>
+                                                    <% if (hasDiscount) { %>
+                                                        <span class="original-price"
+                                                            style="text-decoration: line-through; font-weight: 400; font-size: larger; color: #db2525; margin-left: 5px;">₹
+                                                            <%= minOriginalPrice.toLocaleString('en-IN') %></span>
+                                                        <% } %>
                                                             <% } else { %>
                                                                 <span class="current-price">Price not available</span>
                                                                 <% } %>
@@ -344,19 +350,22 @@
 
                                         <div class="product-price">
                                             <% if (product.variants && product.variants.length> 0) { %>
-                                                <% 
-                                                    const availableVariants = product.variants.filter(v => v.variantQuantity > 0);
-                                                    const variantsToConsider = availableVariants.length > 0 ? availableVariants : product.variants;
+                                                <% const availableVariants=product.variants.filter(v=> v.variantQuantity
+                                                    > 0);
+                                                    const variantsToConsider = availableVariants.length > 0 ?
+                                                    availableVariants : product.variants;
                                                     const prices = variantsToConsider.map(v => v.salePrice);
                                                     const originalPrices = variantsToConsider.map(v => v.regularPrice);
                                                     const minSalePrice = Math.min(...prices);
                                                     const minOriginalPrice = Math.min(...originalPrices);
-                                                    const hasDiscount = minSalePrice < minOriginalPrice;
-                                                %>
-                                                <span class="current-price">₹<%= minSalePrice.toLocaleString('en-IN') %></span>
-                                                <% if (hasDiscount) { %>
-                                                    <span class="original-price" style="text-decoration: line-through; font-weight: 400; font-size: larger; color: #db2525; margin-left: 5px;">₹<%= minOriginalPrice.toLocaleString('en-IN') %></span>
-                                                <% } %>
+                                                    const hasDiscount = minSalePrice < minOriginalPrice; %>
+                                                        <span class="current-price">₹<%=
+                                                                minSalePrice.toLocaleString('en-IN') %></span>
+                                                        <% if (hasDiscount) { %>
+                                                            <span class="original-price"
+                                                                style="text-decoration: line-through; font-weight: 400; font-size: larger; color: #db2525; margin-left: 5px;">₹
+                                                                <%= minOriginalPrice.toLocaleString('en-IN') %></span>
+                                                            <% } %>
                                                                 <% } else { %>
                                                                     <span class="current-price">Price not
                                                                         available</span>
@@ -486,19 +495,22 @@
 
                                         <div class="product-price">
                                             <% if (product.variants && product.variants.length> 0) { %>
-                                                <% 
-                                                    const availableVariants = product.variants.filter(v => v.variantQuantity > 0);
-                                                    const variantsToConsider = availableVariants.length > 0 ? availableVariants : product.variants;
+                                                <% const availableVariants=product.variants.filter(v=> v.variantQuantity
+                                                    > 0);
+                                                    const variantsToConsider = availableVariants.length > 0 ?
+                                                    availableVariants : product.variants;
                                                     const prices = variantsToConsider.map(v => v.salePrice);
                                                     const originalPrices = variantsToConsider.map(v => v.regularPrice);
                                                     const minSalePrice = Math.min(...prices);
                                                     const minOriginalPrice = Math.min(...originalPrices);
-                                                    const hasDiscount = minSalePrice < minOriginalPrice;
-                                                %>
-                                                <span class="current-price">₹<%= minSalePrice.toLocaleString('en-IN') %></span>
-                                                <% if (hasDiscount) { %>
-                                                    <span class="original-price" style="text-decoration: line-through; font-weight: 400; font-size: larger; color: #db2525; margin-left: 5px;">₹<%= minOriginalPrice.toLocaleString('en-IN') %></span>
-                                                <% } %>
+                                                    const hasDiscount = minSalePrice < minOriginalPrice; %>
+                                                        <span class="current-price">₹<%=
+                                                                minSalePrice.toLocaleString('en-IN') %></span>
+                                                        <% if (hasDiscount) { %>
+                                                            <span class="original-price"
+                                                                style="text-decoration: line-through; font-weight: 400; font-size: larger; color: #db2525; margin-left: 5px;">₹
+                                                                <%= minOriginalPrice.toLocaleString('en-IN') %></span>
+                                                            <% } %>
                                                                 <% } else { %>
                                                                     <span class="current-price">Price not
                                                                         available</span>

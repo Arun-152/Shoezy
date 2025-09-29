@@ -203,9 +203,10 @@ const verifyPayment = async (req, res) => {
     // If signature is invalid, we should not proceed with stock checks or order finalization.
     if (generatedSignature !== razorpay_signature) { return res.status(400).json({ success: false, message: "Invalid signature" }) }
     
+    let productsToUpdate = []; // Declare at a higher scope
+
     try {
       // --- START: Final Stock Check before finalizing order and deducting stock ---
-      const productsToUpdate = [];
       for (const item of order.items) {
         const product = await Product.findById(item.productId);
         if (!product) {

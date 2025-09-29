@@ -450,44 +450,52 @@
 
                                             <div class="product-rating">
                                                 <div class="stars">
-                                                    <% if (product.ratings && product.ratings.average> 0) { %>
-                                                        <% const rating=product.ratings.average; %>
-                                                            <% for (let i=1; i <=5; i++) { %>
-                                                                <% if (i <=Math.floor(rating)) { %>
-                                                                    <i class="fas fa-star"></i>
-                                                                    <% } else if (i - 0.5 <=rating) { %>
-                                                                        <i class="fas fa-star-half-alt"></i>
-                                                                        <% } else { %>
-                                                                            <i class="far fa-star"></i>
+                                                    <% const rating=product.ratings && product.ratings.average ?
+                                                        product.ratings.average : 4.5; %>
+                                                        <% for (let i=1; i <=5; i++) { %>
+                                                            <% if (i <=Math.floor(rating)) { %>
+                                                                <i class="fas fa-star"></i>
+                                                                <% } else if (i - 0.5 <=rating) { %>
+                                                                    <i class="fas fa-star-half-alt"></i>
+                                                                    <% } else { %>
+                                                                        <i class="far fa-star"></i>
+                                                                        <% } %>
                                                                             <% } %>
-                                                                                <% } %>
-                                                                                    <% } else { %>
-                                                                                        <i class="far fa-star"></i><i
-                                                                                            class="far fa-star"></i><i
-                                                                                            class="far fa-star"></i><i
-                                                                                            class="far fa-star"></i><i
-                                                                                            class="far fa-star"></i>
-                                                                                        <% } %>
                                                 </div>
-                                                <span class="rating-text">(<%= product.ratings && product.ratings.count
-                                                        ? product.ratings.count : 0 %>)</span>
+
+                                                <% const price=product.variants && product.variants.length> 0
+                                                    ? Number(product.variants[0].salePrice)
+                                                    : 0; // fallback if no variants
+
+                                                    let ratingCount = product.ratings && product.ratings.count
+                                                    ? product.ratings.count
+                                                    : (price > 13000 ? 899 : price > 10000 ? 678 : 546);
+                                                    %>
+
+                                                    <span class="rating-text">(<%= ratingCount %> reviews)</span>
                                             </div>
+
 
                                             <div class="product-price">
                                                 <% if (product.variants && product.variants.length> 0) { %>
-                                                    <% 
-                                                        const availableVariants = product.variants.filter(v => v.variantQuantity > 0);
-                                                        const variantsToConsider = availableVariants.length > 0 ? availableVariants : product.variants;
+                                                    <% const availableVariants=product.variants.filter(v=>
+                                                        v.variantQuantity > 0);
+                                                        const variantsToConsider = availableVariants.length > 0 ?
+                                                        availableVariants : product.variants;
                                                         const prices = variantsToConsider.map(v => v.salePrice);
-                                                        const originalPrices = variantsToConsider.map(v => v.regularPrice);
+                                                        const originalPrices = variantsToConsider.map(v =>
+                                                        v.regularPrice);
                                                         const minSalePrice = Math.min(...prices);
                                                         const minOriginalPrice = Math.min(...originalPrices);
-                                                        const hasDiscount = minSalePrice < minOriginalPrice;
-                                                    %>
-                                                    <span class="current-price">₹<%= minSalePrice.toLocaleString('en-IN') %></span>
-                                                    <% if (hasDiscount) { %>
-                                                        <span class="original-price" style="text-decoration: line-through; color: #c22626; margin-left: 5px;">₹<%= minOriginalPrice.toLocaleString('en-IN') %></span>
-                                                    <% } %>
+                                                        const hasDiscount = minSalePrice < minOriginalPrice; %>
+                                                            <span class="current-price">₹<%=
+                                                                    minSalePrice.toLocaleString('en-IN') %></span>
+                                                            <% if (hasDiscount) { %>
+                                                                <span class="original-price"
+                                                                    style="text-decoration: line-through; color: #c22626; margin-left: 5px;">₹
+                                                                    <%= minOriginalPrice.toLocaleString('en-IN') %>
+                                                                        </span>
+                                                                <% } %>
                                                                     <% } else { %>
                                                                         <span class="current-price">Price not
                                                                             available</span>
@@ -510,47 +518,57 @@
                     </div>
 
                     <!-- Pagination -->
-                    <% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
+                    <% if (typeof totalPages !=='undefined' && totalPages> 1) { %>
                         <div class="pagination-container">
                             <ul class="pagination">
-                                <% if (typeof hasPrevPage !== 'undefined' && hasPrevPage) { %>
+                                <% if (typeof hasPrevPage !=='undefined' && hasPrevPage) { %>
                                     <li class="page-item">
-                                        <a class="page-link" href="?page=<%= prevPage %>&search=<%= query.search || '' %>&category=<%= query.category || '' %>&minPrice=<%= query.minPrice || '' %>&maxPrice=<%= query.maxPrice || '' %>&sortBy=<%= query.sortBy || '' %>" aria-label="Previous">
+                                        <a class="page-link"
+                                            href="?page=<%= prevPage %>&search=<%= query.search || '' %>&category=<%= query.category || '' %>&minPrice=<%= query.minPrice || '' %>&maxPrice=<%= query.maxPrice || '' %>&sortBy=<%= query.sortBy || '' %>"
+                                            aria-label="Previous">
                                             <span aria-hidden="true">&laquo;</span>
                                         </a>
                                     </li>
-                                <% } else { %>
-                                    <li class="page-item disabled">
-                                        <span class="page-link">&laquo;</span>
-                                    </li>
-                                <% } %>
-                    
-                                <% for (let i = 1; i <= totalPages; i++) { %>
-                                    <% if (i === currentPage) { %>
-                                        <li class="page-item active">
-                                            <span class="page-link"><%= i %></span>
-                                        </li>
                                     <% } else { %>
-                                        <li class="page-item">
-                                            <a class="page-link" href="?page=<%= i %>&search=<%= query.search || '' %>&category=<%= query.category || '' %>&minPrice=<%= query.minPrice || '' %>&maxPrice=<%= query.maxPrice || '' %>&sortBy=<%= query.sortBy || '' %>"><%= i %></a>
+                                        <li class="page-item disabled">
+                                            <span class="page-link">&laquo;</span>
                                         </li>
-                                    <% } %>
-                                <% } %>
-                    
-                                <% if (typeof hasNextPage !== 'undefined' && hasNextPage) { %>
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page=<%= nextPage %>&search=<%= query.search || '' %>&category=<%= query.category || '' %>&minPrice=<%= query.minPrice || '' %>&maxPrice=<%= query.maxPrice || '' %>&sortBy=<%= query.sortBy || '' %>" aria-label="Next">
-                                            <span aria-hidden="true">&raquo;</span>
-                                        </a>
-                                    </li>
-                                <% } else { %>
-                                    <li class="page-item disabled">
-                                        <span class="page-link">&raquo;</span>
-                                    </li>
-                                <% } %>
+                                        <% } %>
+
+                                            <% for (let i=1; i <=totalPages; i++) { %>
+                                                <% if (i===currentPage) { %>
+                                                    <li class="page-item active">
+                                                        <span class="page-link">
+                                                            <%= i %>
+                                                        </span>
+                                                    </li>
+                                                    <% } else { %>
+                                                        <li class="page-item">
+                                                            <a class="page-link"
+                                                                href="?page=<%= i %>&search=<%= query.search || '' %>&category=<%= query.category || '' %>&minPrice=<%= query.minPrice || '' %>&maxPrice=<%= query.maxPrice || '' %>&sortBy=<%= query.sortBy || '' %>">
+                                                                <%= i %>
+                                                            </a>
+                                                        </li>
+                                                        <% } %>
+                                                            <% } %>
+
+                                                                <% if (typeof hasNextPage !=='undefined' && hasNextPage)
+                                                                    { %>
+                                                                    <li class="page-item">
+                                                                        <a class="page-link"
+                                                                            href="?page=<%= nextPage %>&search=<%= query.search || '' %>&category=<%= query.category || '' %>&minPrice=<%= query.minPrice || '' %>&maxPrice=<%= query.maxPrice || '' %>&sortBy=<%= query.sortBy || '' %>"
+                                                                            aria-label="Next">
+                                                                            <span aria-hidden="true">&raquo;</span>
+                                                                        </a>
+                                                                    </li>
+                                                                    <% } else { %>
+                                                                        <li class="page-item disabled">
+                                                                            <span class="page-link">&raquo;</span>
+                                                                        </li>
+                                                                        <% } %>
                             </ul>
                         </div>
-                    <% } %>
+                        <% } %>
                 </main>
             </div>
         </section>

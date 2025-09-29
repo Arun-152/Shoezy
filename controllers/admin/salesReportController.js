@@ -55,7 +55,11 @@ const loadSalesReport = async (req, res) => {
     const limitNum = Math.max(parseInt(limit, 5), 1);
     const skip = (pageNum - 1) * limitNum;
 
-    const match = {};
+    // Base match object to exclude failed online orders from all calculations
+    const match = {
+      orderStatus: { $nin: ["Failed", "payment-failed"] },
+      paymentStatus: { $ne: "Failed_Stock_Issue" }
+    };
 
     // Status filter (case-insensitive exact match)
     if (status && status !== 'all') {
@@ -269,7 +273,10 @@ const exportPdfReport = async (req, res) => {
       }
     }
 
-    const match = {};
+    const match = {
+      orderStatus: { $nin: ["Failed", "payment-failed"] },
+      paymentStatus: { $ne: "Failed_Stock_Issue" }
+    };
 
     if (status && status !== 'all') {
       match.orderStatus = new RegExp(`^${status}$`, 'i');
@@ -397,7 +404,10 @@ const exportExcelReport = async (req, res) => {
       }
     }
 
-    const match = {};
+    const match = {
+      orderStatus: { $nin: ["Failed", "payment-failed"] },
+      paymentStatus: { $ne: "Failed_Stock_Issue" }
+    };
 
     if (status && status !== 'all') {
       match.orderStatus = new RegExp(`^${status}$`, 'i');
@@ -522,7 +532,10 @@ const exportCsvReport = async (req, res) => {
       }
     }
 
-    const match = {};
+    const match = {
+      orderStatus: { $nin: ["Failed", "payment-failed"] },
+      paymentStatus: { $ne: "Failed_Stock_Issue" }
+    };
 
     if (status && status !== 'all') {
       match.orderStatus = new RegExp(`^${status}$`, 'i');

@@ -204,13 +204,20 @@ const dashboard = async (req, res) => {
       isBlocked: false,
     });
 
+    // Define a filter to exclude failed online orders
+    const excludeFailedOrdersFilter = {
+      orderStatus: { $nin: ["Failed", "payment-failed"] },
+      paymentStatus: { $ne: "Failed_Stock_Issue" }
+    };
+
     // Total Orders
-    const totalOrders = await Order.countDocuments();
+    const totalOrders = await Order.countDocuments(excludeFailedOrdersFilter);
 
     // Total Revenue (from delivered and paid orders)
     const revenueAgg = await Order.aggregate([
       {
         $match: {
+          ...excludeFailedOrdersFilter,
           orderStatus: "Delivered",
           paymentStatus: "Paid",
         },
@@ -226,6 +233,9 @@ const dashboard = async (req, res) => {
 
     // Order Status Counts
     const statusCounts = await Order.aggregate([
+      {
+        $match: excludeFailedOrdersFilter
+      },
       {
         $group: {
           _id: "$orderStatus",
@@ -249,10 +259,10 @@ const dashboard = async (req, res) => {
     const limit = 6; // 6 orders per page
     const skip = (page - 1) * limit;
 
-    const totalRecentOrders = await Order.countDocuments();
+    const totalRecentOrders = await Order.countDocuments(excludeFailedOrdersFilter);
     const totalPages = Math.ceil(totalRecentOrders / limit);
 
-    const recentOrders = await Order.find()
+    const recentOrders = await Order.find(excludeFailedOrdersFilter)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -273,6 +283,7 @@ const dashboard = async (req, res) => {
 
     // Most Ordered Products (top 5 by number of unique orders)
     const mostOrderedProducts = await Order.aggregate([
+      { $match: excludeFailedOrdersFilter },
       { $unwind: "$items" },
       {
         $group: {
@@ -305,6 +316,7 @@ const dashboard = async (req, res) => {
 
     // Most Ordered Categories (top 5 by number of unique orders containing products from category)
     const mostOrderedCategories = await Order.aggregate([
+      { $match: excludeFailedOrdersFilter },
       { $unwind: "$items" },
       {
         $lookup: {
@@ -357,6 +369,7 @@ const dashboard = async (req, res) => {
     const yearlySalesData = await Order.aggregate([
       {
         $match: {
+          ...excludeFailedOrdersFilter,
           orderStatus: "Delivered",
           paymentStatus: "Paid",
           createdAt: {
@@ -382,6 +395,7 @@ const dashboard = async (req, res) => {
     const monthlySalesData = await Order.aggregate([
       {
         $match: {
+          ...excludeFailedOrdersFilter,
           orderStatus: "Delivered",
           paymentStatus: "Paid",
           createdAt: { $gte: new Date(currentYear, 0, 1) }
@@ -417,6 +431,7 @@ const dashboard = async (req, res) => {
     const weeklySalesData = await Order.aggregate([
       {
         $match: {
+          ...excludeFailedOrdersFilter,
           orderStatus: "Delivered",
           paymentStatus: "Paid",
           createdAt: { $gte: startOfWeek, $lte: endOfWeek }
@@ -452,6 +467,7 @@ const dashboard = async (req, res) => {
       const agg = await Order.aggregate([
         {
           $match: {
+            ...excludeFailedOrdersFilter,
             orderStatus: "Delivered",
             paymentStatus: "Paid",
             createdAt: { $gte: start, $lt: end },
@@ -469,12 +485,14 @@ const dashboard = async (req, res) => {
 
     const getPeriodOrders = async (start, end) => {
       return await Order.countDocuments({
+        ...excludeFailedOrdersFilter,
         createdAt: { $gte: start, $lt: end },
       });
     };
 
     const getPeriodNewCustomers = async (start, end) => {
       return await User.countDocuments({
+        ...excludeFailedOrdersFilter,
         isAdmin: false,
         createdAt: { $gte: start, $lt: end },
       });
@@ -482,6 +500,7 @@ const dashboard = async (req, res) => {
 
     const getPeriodNewProducts = async (start, end) => {
       return await Product.countDocuments({
+        ...excludeFailedOrdersFilter,
         createdAt: { $gte: start, $lt: end },
       });
     };
