@@ -53,7 +53,7 @@ const orderPage = async (req, res) => {
         }
         const user = await User.findById(userId);
 
-        const orders = await Order.find({ userId })
+        const orders = await Order.find({ userId, paymentStatus: { $ne: "Failed_Stock_Issue" }, orderStatus: { $ne: "Failed" } }) // Exclude orders that failed due to stock or other general failures
             .populate('items.productId')
             .populate('couponCode')
             .sort({ createdAt: -1 });
@@ -86,7 +86,7 @@ const orderDetails = async (req, res) => {
             return res.redirect("/login");
         }
 
-        const order = await Order.findOne({ _id: orderId, userId })
+        const order = await Order.findOne({ _id: orderId, userId, paymentStatus: { $ne: "Failed_Stock_Issue" }, orderStatus: { $ne: "Failed" } }) // Exclude orders that failed due to stock or other general failures
             .populate('items.productId')
             .populate('couponCode');
 

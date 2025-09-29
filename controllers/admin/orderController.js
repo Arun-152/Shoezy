@@ -225,7 +225,7 @@ const orderDetails = async (req, res) => {
   const { orderId } = req.params
 
   try {
-    const order = await Order.findById(orderId)
+    const order = await Order.findOne({ _id: orderId, paymentStatus: { $ne: "Failed_Stock_Issue" }, orderStatus: { $ne: "Failed" } }) // Exclude orders that failed due to stock or other general failures
       .populate('items.productId')
       .populate('userId')
       .populate('couponId')

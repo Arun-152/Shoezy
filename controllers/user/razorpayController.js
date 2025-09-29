@@ -53,6 +53,20 @@ const createOrder = async (req, res) => {
         return res.status(404).json({ success: false, message: `Variant with size ${item.size} for product ${item.productId} not found` });
       }
 
+      // --- Start: Final Stock Check ---
+      // Re-fetch the product and variant to ensure latest stock data
+      const freshProduct = await Product.findById(item.productId);
+      const freshVariant = freshProduct.variants.find(v => v.size === item.size);
+
+      if (!freshVariant || freshVariant.variantQuantity < item.quantity) {
+        return res.status(400).json({
+          success: false,
+          stockError: true,
+          message: `Sorry, ${freshProduct.productName} (Size: ${item.size}) is out of stock or has insufficient quantity. Please remove it from your cart.`
+        });
+      }
+      // --- End: Final Stock Check ---
+
       const price = variant.salePrice || variant.regularPrice;
       const totalPrice = price * item.quantity;
       totalAmount += totalPrice;
@@ -184,14 +198,70 @@ const verifyPayment = async (req, res) => {
       return res.status(400).json({ success: false, message: "Order not found" })
     }
     const generatedSignature = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET).update(razorpay_order_id + "|" + razorpay_payment_id).digest("hex")
-    if (generatedSignature !== razorpay_signature) {
-      order.paymentStatus = "Failed"
-      return res.status(400).json({ success: false, message: "Invalid signature" })
+    // The order.paymentStatus = "Failed"; and await order.save(); were moved to the previous turn's diff
+    // and should be present here. If not, please ensure they are.
+    // If signature is invalid, we should not proceed with stock checks or order finalization.
+    if (generatedSignature !== razorpay_signature) { return res.status(400).json({ success: false, message: "Invalid signature" }) }
+    
+    try {
+      // --- START: Final Stock Check before finalizing order and deducting stock ---
+      const productsToUpdate = [];
+      for (const item of order.items) {
+        const product = await Product.findById(item.productId);
+        if (!product) {
+          // This scenario should be rare if createOrder already validated, but good to have.
+          order.paymentStatus = "Failed_Product_Missing";
+          order.orderStatus = "Failed"; // Mark overall order status as failed
+          await order.save();
+          return res.status(400).json({
+            success: false,
+            stockError: true, // Flag for frontend to show specific Swal message
+            message: `Order failed: Product ${item.productId} not found. Please try again.`
+          });
+        }
+
+        const variant = product.variants.find(v => v.size === item.size);
+        if (!variant) {
+          order.paymentStatus = "Failed_Variant_Missing";
+          order.orderStatus = "Failed"; // Mark overall order status as failed
+          await order.save();
+          return res.status(400).json({
+            success: false,
+            stockError: true,
+            message: `Order failed: Variant for ${product.productName} (Size: ${item.size}) not found. Please try again.`
+          });
+        }
+
+        if (variant.variantQuantity < item.quantity) {
+          // Stock is insufficient!
+          order.paymentStatus = "Failed_Stock_Issue"; 
+          order.orderStatus = "Failed";
+          await order.save(); 
+          return res.status(400).json({
+            success: false,
+            stockError: true,
+            message: `Order failed: ${product.productName} (Size: ${item.size}) is out of stock or has insufficient quantity. Please contact support.`
+          });
+        }
+        productsToUpdate.push({ product, variant, item }); 
+      }
+    
+    } catch (validationError) {
+      console.error('Error during stock validation save:', validationError);
+      return res.status(500).json({
+        success: false,
+        stockError: true, // Ensure frontend shows an error
+        message: 'An unexpected error occurred while validating your order. Please contact support.'
+      });
     }
-    order.paymentStatus = "Paid"
+
+    // If we reach here, signature is valid and stock is sufficient. Proceed to finalize the order.
+    order.paymentStatus = "Paid";
     order.paymentMethod = "Online"
     order.razorpayPaymentId = razorpay_payment_id
-    await order.save()
+    order.orderStatus = "Processing"; // Initial status for a successfully placed order
+    // Removed: const productsToUpdate = order.items.map(item => ({ product: null, variant: null, item })); // This line was incorrectly re-initializing productsToUpdate
+    await order.save();
 
     // If a coupon was applied to this online order, mark it as used now
     try {
@@ -210,19 +280,25 @@ const verifyPayment = async (req, res) => {
       console.error('Error updating coupon usage after payment:', couponErr);
     }
     try {
-      for (const item of order.items) {
-        const product = await Product.findById(item.productId);
-        if (product && product.variants) {
-          const variant = product.variants.find(v => v.size === item.size);
-          if (variant) {
-            variant.variantQuantity = Math.max(0, variant.variantQuantity - item.quantity);
-            const totalStock = product.variants.reduce((sum, v) => sum + v.variantQuantity, 0);
-            if (totalStock === 0) {
-              product.status = "out of stock";
-            }
-            await product.save();
+      // Deduct stock for all items
+      // Use the productsToUpdate array populated during the stock check
+      for (const { product, variant, item } of productsToUpdate) { 
+
+        // This check is redundant but safe
+        if (variant.variantQuantity < item.quantity) continue;
+
+        variant.variantQuantity = Math.max(0, variant.variantQuantity - item.quantity);
+        const totalStock = product.variants.reduce((sum, v) => sum + v.variantQuantity, 0);
+        if (totalStock === 0) {
+          product.status = "out of stock";
+        } else {
+          // If stock becomes > 0 after deduction (e.g., if it was 0 and we added some), mark as available
+          // This ensures product status is "Available" if there's stock.
+          if (product.status === "out of stock" && totalStock > 0) {
+              product.status = "Available";
           }
         }
+        await product.save();
       }
     } catch (stockError) {
       console.error("Stock update error:", stockError);
@@ -241,6 +317,7 @@ const verifyPayment = async (req, res) => {
 
   } catch (error) {
     console.error(error, "razorpay verify payment error")
+    return res.status(500).json({ success: false, message: "A critical server error occurred during payment verification." });
   }
 }
 const paymentFailed = async (req, res) => {
@@ -265,27 +342,14 @@ const paymentFailed = async (req, res) => {
 };
 const loadRetryPayment = async (req, res) => {
   try {
-    const { orderId } = req.params;
-    const order = await Order.findById(orderId).populate("items.productId"); 
-
-    if (!order) {
-      return res.status(400).json({
-        success: false,
-        message: "Order not found"
-      });
-    }
-    
-    order.paymentStatus = "Failed";
-    await order.save();
-
-    return res.render("retryPaymentPage", {
-      success: true,
-      order,
-    });
-
+    // This function is being deprecated in favor of direct AJAX calls from the order pages.
+    // If a user somehow lands here, redirect them to their orders.
+    console.log("loadRetryPayment was called, redirecting to /order");
+    return res.redirect('/order');
   } catch (error) {
     console.error("retry payment error:", error);
-    return res.status(500).render("errorPage", {
+    // Redirect to an error page or the main order page on error.
+    return res.status(500).render("user/errorPage", {
       success: false,
       message: "Internal server error"
     });
@@ -296,6 +360,13 @@ const retryPayment = async(req,res)=>{
 
     const {orderId} = req.params
     const order = await Order.findById(orderId)
+
+    if (!order || order.paymentStatus === "Failed_Stock_Issue" || order.orderStatus === "Failed") {
+      return res.status(400).json({
+        success: false,
+        message: "This order cannot be retried due to stock issues or other failures."
+      });
+    }
 
     const options = {
       // Razorpay expects amount in paise as an integer

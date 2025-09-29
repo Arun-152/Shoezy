@@ -578,17 +578,7 @@
                             confirmButtonColor: '#007bff',
                             cancelButtonColor: '#6b7280'
                         });
-
-                        if (!confirmPlace.isConfirmed) return;
-
-                        Swal.fire({
-                            title: 'Processing Order...',
-                            text: 'Please wait while we process your order',
-                            allowOutsideClick: false,
-                            allowEscapeKey: false,
-                            showConfirmButton: false,
-                            didOpen: () => Swal.showLoading()
-                        });
+                        if (confirmPlace.isDenied) return false;
 
                         if (payment === 'Online' || payment === 'Wallet_Online') {
                             // Prepare order on server
@@ -606,11 +596,20 @@
                                 .then(res => res.json())
                                 .then(orderData => {
                                     if (!orderData.success) {
+                                        // Handle stock error specifically
+                                        if (orderData.stockError) {
+                                            Swal.fire({
+                                                icon: 'error',
+                                                title: 'Order Failed: Product Out of Stock',
+                                                text: orderData.message,
+                                                confirmButtonColor: '#007bff'
+                                            });
+                                            return;
+                                        }
                                         Swal.fire({
                                             icon: 'error',
-                                            title: 'Error',
-                                            text: 'Failed to create payment order',
-                                            confirmButtonColor: '#007bff'
+                                            title: orderData.title || 'Error',
+                                            text: orderData.message || 'Failed to create payment order',
                                         });
                                         return;
                                     }
@@ -656,6 +655,16 @@
                                                             window.location.href = '/checkout/orderSuccess?orderId=' + verifyData.orderId;
                                                         });
                                                     } else {
+                                                        // Handle stock error specifically from verifyPayment
+                                                        if (verifyData.stockError) {
+                                                            Swal.fire({
+                                                                icon: 'error',
+                                                                title: 'Order Failed: Product Out of Stock',
+                                                                text: verifyData.message,
+                                                                confirmButtonColor: '#007bff'
+                                                            });
+                                                            return; // Stop further processing
+                                                        }
                                                         Swal.fire({
                                                             icon: 'error',
                                                             title: 'Payment Failed',
