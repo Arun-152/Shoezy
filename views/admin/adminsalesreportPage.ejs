@@ -8,20 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="/css/adminproductsPage.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
-
-        body {
-            display: flex;
-            min-height: 100vh;
-            background-color: #f4f6f9;
-        }
-
-
 
 
 
@@ -143,107 +129,112 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
         }
-/* Modal background */
-.modal {
-  display: none; /* Hidden by default */
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.6); /* Dark overlay */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 999;
-}
 
-/* Modal box */
-.modal-content {
-  background: #fff;
-  width: 500px;
-  max-width: 90%;
-  border-radius: 12px;
-  padding: 25px 30px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
-  animation: fadeIn 0.3s ease-in-out;
-  font-family: "Segoe UI", Tahoma, sans-serif;
-  color: #333;
-}
+        /* Modal background */
+        .modal {
+            display: none;
+            /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            /* Dark overlay */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
 
-/* Title */
-.modal-content h2 {
-  margin-top: 0;
-  margin-bottom: 15px;
-  font-size: 22px;
-  font-weight: 700;
-  color: #2c3e50;
-  text-align: center;
-}
+        /* Modal box */
+        .modal-content {
+            background: #fff;
+            width: 500px;
+            max-width: 90%;
+            border-radius: 12px;
+            padding: 25px 30px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+            animation: fadeIn 0.3s ease-in-out;
+            font-family: "Segoe UI", Tahoma, sans-serif;
+            color: #333;
+        }
 
-/* Sub-title */
-.modal-content h3 {
-  margin-top: 20px;
-  font-size: 18px;
-  color: #34495e;
-}
+        /* Title */
+        .modal-content h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 22px;
+            font-weight: 700;
+            color: #2c3e50;
+            text-align: center;
+        }
 
-/* Paragraphs */
-.modal-content p {
-  font-size: 15px;
-  margin: 8px 0;
-  line-height: 1.5;
-}
+        /* Sub-title */
+        .modal-content h3 {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #34495e;
+        }
 
-/* Product list */
-#modalProductList {
-  list-style: none;
-  padding: 0;
-  margin-top: 10px;
-}
+        /* Paragraphs */
+        .modal-content p {
+            font-size: 15px;
+            margin: 8px 0;
+            line-height: 1.5;
+        }
 
-#modalProductList li {
-  background: #f9f9f9;
-  margin: 6px 0;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 14px;
-  border-left: 4px solid #4CAF50; /* Accent color */
-}
+        /* Product list */
+        #modalProductList {
+            list-style: none;
+            padding: 0;
+            margin-top: 10px;
+        }
 
-/* Close button */
-.modal-content button {
-  margin-top: 20px;
-  background: #4CAF50;
-  color: #fff;
-  border: none;
-  padding: 10px 18px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
+        #modalProductList li {
+            background: #f9f9f9;
+            margin: 6px 0;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            border-left: 4px solid #4CAF50;
+            /* Accent color */
+        }
 
-.modal-content button:hover {
-  background: #45a049;
-  transform: scale(1.05);
-}
+        /* Close button */
+        .modal-content button {
+            margin-top: 20px;
+            background: #4CAF50;
+            color: #fff;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
 
-/* Animation */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+        .modal-content button:hover {
+            background: #45a049;
+            transform: scale(1.05);
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
         .filters-form {
             display: grid;
@@ -272,8 +263,10 @@
             justify-content: flex-start;
             margin-top: 10px;
         }
+
         .view-products-btn {
-            background-color: #4CAF50; /* Green */
+            background-color: #4CAF50;
+            /* Green */
             color: white;
             font-size: 12px;
             font-weight: 600;
@@ -289,13 +282,16 @@
         }
 
         .view-products-btn:hover {
-            background-color: #45a049; /* Darker green */
-            transform: scale(1.05);   /* Slight zoom effect */
+            background-color: #45a049;
+            /* Darker green */
+            transform: scale(1.05);
+            /* Slight zoom effect */
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
         }
 
         .view-products-btn:active {
-            transform: scale(0.95); /* Button press effect */
+            transform: scale(0.95);
+            /* Button press effect */
         }
 
 
@@ -471,53 +467,6 @@
             line-height: 1.2;
         }
 
-        /* Existing CSS styles preserved */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            display: flex;
-        }
-
-        .main-content {
-            flex: 1;
-            padding: 20px;
-        }
-
-        .navbar {
-            background: #34495e;
-            color: white;
-            padding: 10px 20px;
-        }
-
-        .navbar h1 {
-            margin: 0;
-            font-size: 24px;
-        }
-
-        .breadcrumbs {
-            margin: 10px 0;
-            font-size: 14px;
-        }
-
-        .breadcrumbs a {
-            color: #3498db;
-            text-decoration: none;
-        }
-
-        .stats {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .stat-box {
-            background: #ecf0f1;
-            padding: 20px;
-            border-radius: 5px;
-            flex: 1;
-            text-align: center;
-        }
-
         .filters {
             background: #ecf0f1;
             padding: 20px;
@@ -649,39 +598,6 @@
             }
         }
 
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 200px;
-            }
-
-            .navbar,
-            .main-content {
-                margin-left: 200px;
-                width: calc(100% - 200px);
-            }
-
-            .sales-summary {
-                grid-template-columns: 1fr;
-                /* 1 card per row */
-            }
-
-            .filters-form {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-
-            .filters-header {
-                flex-direction: column;
-                gap: 15px;
-                align-items: flex-start;
-            }
-
-            .export-buttons {
-                width: 100%;
-                justify-content: flex-start;
-            }
-        }
-
         @media (max-width: 576px) {
             .sidebar {
                 width: 100%;
@@ -689,7 +605,6 @@
                 position: relative;
             }
 
-            .navbar,
             .main-content {
                 margin-left: 0;
                 width: 100%;
@@ -727,10 +642,10 @@
 
 <body>
 
-
     <div class="dashboard-container">
         <!-- Sidebar -->
         <%- include('../partials/admin/sidebar') %>
+        <div class="main-wrapper">
 
             <!-- Main Content -->
             <main class="main-content">
@@ -752,10 +667,10 @@
                 </header>
 
                 <!-- Breadcrumb Navigation -->
-                <%- include('../partials/admin/breadcrumb', { currentPath: '/admin/salesreport' }) %>
+                <%- include('../partials/admin/breadcrumb', { currentPath: '/admin/salesReport' }) %>
 
                     <div class="page-content">
-                        <div class="page-header">
+                        <div class="page-header" style="margin-bottom: 30px;">
                             <h1>Sales Report</h1>
                         </div>
 
@@ -765,28 +680,34 @@
                                 <i class="fas fa-rupee-sign"></i>
                                 <div class="card-content">
                                     <h3>Total Sales</h3>
-                                    <p>₹<%= summary.totalSales.toFixed(2) %></p>
+                                    <p>₹<%= summary.totalSales.toFixed(2) %>
+                                    </p>
                                 </div>
                             </div>
                             <div class="summary-card">
                                 <i class="fas fa-shopping-cart"></i>
                                 <div class="card-content">
                                     <h3>Total Orders</h3>
-                                    <p><%= summary.totalOrders %></p>
+                                    <p>
+                                        <%= summary.totalOrders %>
+                                    </p>
                                 </div>
                             </div>
                             <div class="summary-card">
                                 <i class="fas fa-box"></i>
                                 <div class="card-content">
                                     <h3>Products Sold</h3>
-                                    <p><%= summary.productsSold %></p>
+                                    <p>
+                                        <%= summary.productsSold %>
+                                    </p>
                                 </div>
                             </div>
                             <div class="summary-card">
                                 <i class="fas fa-chart-line"></i>
                                 <div class="card-content">
                                     <h3>Net Revenue</h3>
-                                    <p>₹<%= summary.netRevenue.toFixed(2) %></p>
+                                    <p>₹<%= summary.netRevenue.toFixed(2) %>
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -804,74 +725,100 @@
                                     </button>
                                 </div>
                             </div>
-                            
+
                             <form id="filterForm" action="/admin/salesreport" method="GET">
                                 <div class="filters-form">
                                     <div class="filter-group">
                                         <label for="timeRangeSelect">Time Range</label>
                                         <select name="timeRange" id="timeRangeSelect">
-                                            <option value="" <%= filters.timeRange === '' ? 'selected' : '' %>>Select Time Range</option>
-                                            <option value="daily" <%= filters.timeRange === 'daily' ? 'selected' : '' %>>Daily</option>
-                                            <option value="weekly" <%= filters.timeRange === 'weekly' ? 'selected' : '' %>>Weekly</option>
-                                            <option value="monthly" <%= filters.timeRange === 'monthly' ? 'selected' : '' %>>Monthly</option>
-                                            <option value="yearly" <%= filters.timeRange === 'yearly' ? 'selected' : '' %>>Yearly</option>
+                                            <option value="" <%=filters.timeRange==='' ? 'selected' : '' %>>Select Time
+                                                Range</option>
+                                            <option value="daily" <%=filters.timeRange==='daily' ? 'selected' : '' %>
+                                                >Daily</option>
+                                            <option value="weekly" <%=filters.timeRange==='weekly' ? 'selected' : '' %>
+                                                >Weekly</option>
+                                            <option value="monthly" <%=filters.timeRange==='monthly' ? 'selected' : ''
+                                                %>>Monthly</option>
+                                            <option value="yearly" <%=filters.timeRange==='yearly' ? 'selected' : '' %>
+                                                >Yearly</option>
                                         </select>
                                     </div>
 
                                     <div class="filter-group">
                                         <label for="startDate">Start Date</label>
-                                        <input type="date" name="startDate" id="startDate" value="<%= filters.startDate || '' %>">
+                                        <input type="date" name="startDate" id="startDate"
+                                            value="<%= filters.startDate || '' %>">
                                     </div>
 
                                     <div class="filter-group">
                                         <label for="endDate">End Date</label>
-                                        <input type="date" name="endDate" id="endDate" value="<%= filters.endDate || '' %>">
+                                        <input type="date" name="endDate" id="endDate"
+                                            value="<%= filters.endDate || '' %>">
                                     </div>
 
                                     <div class="filter-group">
                                         <label for="status">Order Status</label>
                                         <select name="status" id="status">
-                                            <option value="all" <%= filters.status === 'all' ? 'selected' : '' %>>All Status</option>
-                                            <option value="Pending" <%= filters.status === 'Pending' ? 'selected' : '' %>>Pending</option>
-                                            <option value="Processing" <%= filters.status === 'Processing' ? 'selected' : '' %>>Processing</option>
-                                            <option value="Shipped" <%= filters.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
-                                            <option value="Delivered" <%= filters.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-                                            <option value="Cancelled" <%= filters.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
-                                            <option value="ReturnRequested" <%= filters.status === 'ReturnRequested' ? 'selected' : '' %>>Return Requested</option>
-                                            <option value="Returned" <%= filters.status === 'Returned' ? 'selected' : '' %>>Returned</option>
-                                            <option value="ReturnApproved" <%= filters.status === 'ReturnApproved' ? 'selected' : '' %>>Return Approved</option>
+                                            <option value="all" <%=filters.status==='all' ? 'selected' : '' %>>All
+                                                Status</option>
+                                            <option value="Pending" <%=filters.status==='Pending' ? 'selected' : '' %>
+                                                >Pending</option>
+                                            <option value="Processing" <%=filters.status==='Processing' ? 'selected'
+                                                : '' %>>Processing</option>
+                                            <option value="Shipped" <%=filters.status==='Shipped' ? 'selected' : '' %>
+                                                >Shipped</option>
+                                            <option value="Delivered" <%=filters.status==='Delivered' ? 'selected' : ''
+                                                %>>Delivered</option>
+                                            <option value="Cancelled" <%=filters.status==='Cancelled' ? 'selected' : ''
+                                                %>>Cancelled</option>
+                                            <option value="ReturnRequested" <%=filters.status==='ReturnRequested'
+                                                ? 'selected' : '' %>>Return Requested</option>
+                                            <option value="Returned" <%=filters.status==='Returned' ? 'selected' : '' %>
+                                                >Returned</option>
+                                            <option value="ReturnApproved" <%=filters.status==='ReturnApproved'
+                                                ? 'selected' : '' %>>Return Approved</option>
                                         </select>
                                     </div>
 
                                     <div class="filter-group">
                                         <label for="payment">Payment Method</label>
                                         <select name="payment" id="payment">
-                                            <option value="all" <%= filters.payment === 'all' ? 'selected' : '' %>>All Methods</option>
-                                            <option value="cod" <%= filters.payment === 'cod' ? 'selected' : '' %>>COD</option>
-                                            <option value="online" <%= filters.payment === 'online' ? 'selected' : '' %>>Online</option>
-                                            <option value="wallet" <%= filters.payment === 'wallet' ? 'selected' : '' %>>Wallet</option>
+                                            <option value="all" <%=filters.payment==='all' ? 'selected' : '' %>>All
+                                                Methods</option>
+                                            <option value="cod" <%=filters.payment==='cod' ? 'selected' : '' %>>COD
+                                            </option>
+                                            <option value="online" <%=filters.payment==='online' ? 'selected' : '' %>
+                                                >Online</option>
+                                            <option value="wallet" <%=filters.payment==='wallet' ? 'selected' : '' %>
+                                                >Wallet</option>
                                         </select>
                                     </div>
 
                                     <div class="filter-group">
                                         <label for="search">Search</label>
-                                        <input type="text" name="search" id="search" placeholder="Order ID or Customer Name" value="<%= filters.search || '' %>">
+                                        <input type="text" name="search" id="search"
+                                            placeholder="Order ID or Customer Name" value="<%= filters.search || '' %>">
                                     </div>
 
                                     <div class="filter-group">
                                         <label for="sort">Sort By</label>
                                         <select name="sort" id="sort">
-                                            <option value="date-newest" <%= filters.sort === 'date-newest' ? 'selected' : '' %>>Date (Newest First)</option>
-                                            <option value="date-oldest" <%= filters.sort === 'date-oldest' ? 'selected' : '' %>>Date (Oldest First)</option>
-                                            <option value="amount-low" <%= filters.sort === 'amount-low' ? 'selected' : '' %>>Amount (Low to High)</option>
-                                            <option value="amount-high" <%= filters.sort === 'amount-high' ? 'selected' : '' %>>Amount (High to Low)</option>
+                                            <option value="date-newest" <%=filters.sort==='date-newest' ? 'selected'
+                                                : '' %>>Date (Newest First)</option>
+                                            <option value="date-oldest" <%=filters.sort==='date-oldest' ? 'selected'
+                                                : '' %>>Date (Oldest First)</option>
+                                            <option value="amount-low" <%=filters.sort==='amount-low' ? 'selected' : ''
+                                                %>>Amount (Low to High)</option>
+                                            <option value="amount-high" <%=filters.sort==='amount-high' ? 'selected'
+                                                : '' %>>Amount (High to Low)</option>
                                         </select>
                                     </div>
                                 </div>
 
                                 <div class="filter-actions">
                                     <button type="submit">Apply Filters</button>
-                                    <button type="button" class="clear" onclick="window.location.href='/admin/salesreport'">Clear Filters</button>
+                                    <button type="button" class="clear"
+                                        onclick="window.location.href='/admin/salesreport'">Clear Filters</button>
                                 </div>
                             </form>
                         </div>
@@ -894,22 +841,42 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <% salesData.forEach(order => { %>
+                                    <% salesData.forEach(order=> { %>
                                         <tr>
-                                            <td><div class="order-id-cell"><%= order.id %></div></td>
-                                            <td><%= new Date(order.date).toLocaleDateString() %></td>
-                                            <td><div class="customer-name-cell"><%= order.customerName %></div></td>
-                                            <td><%= order.paymentMethod %></td>
-                                            <td><%= order.couponUsed || 'N/A' %></td>
-                                            <td>₹<%= order.totalAmount.toFixed(2) %></td>
-                                            <td>₹<%= order.discount.toFixed(2) %></td>
-                                            <td>₹<%= order.netPaidAmount.toFixed(2) %></td>
-                                            <td><%= order.status %></td>
                                             <td>
-                                                <button class="view-products-btn" data-order='<%= JSON.stringify(order) %>'>View Products</button>
+                                                <div class="order-id-cell">
+                                                    <%= order.id %>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <%= new Date(order.date).toLocaleDateString() %>
+                                            </td>
+                                            <td>
+                                                <div class="customer-name-cell">
+                                                    <%= order.customerName %>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <%= order.paymentMethod %>
+                                            </td>
+                                            <td>
+                                                <%= order.couponUsed || 'N/A' %>
+                                            </td>
+                                            <td>₹<%= order.totalAmount.toFixed(2) %>
+                                            </td>
+                                            <td>₹<%= order.discount.toFixed(2) %>
+                                            </td>
+                                            <td>₹<%= order.netPaidAmount.toFixed(2) %>
+                                            </td>
+                                            <td>
+                                                <%= order.status %>
+                                            </td>
+                                            <td>
+                                                <button class="view-products-btn"
+                                                    data-order='<%= JSON.stringify(order) %>'>View Products</button>
                                             </td>
                                         </tr>
-                                    <% }); %>
+                                        <% }); %>
                                 </tbody>
                             </table>
                             <div class="modal" id="orderModal">
@@ -926,57 +893,64 @@
                                 </div>
                             </div>
                             <!-- Pagination -->
-                            <% if (pagination.totalPages > 1) { %>
+                            <% if (pagination.totalPages> 1) { %>
                                 <div class="pagination-container">
                                     <div class="pagination-info">
-                                        Page <%= pagination.currentPage %> of <%= pagination.totalPages %> (<%= pagination.totalCount %> items)
+                                        Page <%= pagination.currentPage %> of <%= pagination.totalPages %> (<%=
+                                                    pagination.totalCount %> items)
                                     </div>
                                     <div class="pagination-links">
-                                        <% 
-                                            const createUrl = (page) => {
-                                                const params = new URLSearchParams();
-                                                if (filters.timeRange) params.set('timeRange', filters.timeRange);
-                                                if (filters.startDate) params.set('startDate', filters.startDate);
-                                                if (filters.endDate) params.set('endDate', filters.endDate);
-                                                if (filters.status) params.set('status', filters.status);
-                                                if (filters.payment) params.set('payment', filters.payment);
-                                                if (filters.search) params.set('search', filters.search);
-                                                if (filters.sort) params.set('sort', filters.sort);
-                                                params.set('page', page);
-                                                return `/admin/salesreport?${params.toString()}`;
+                                        <% const createUrl=(page)=> {
+                                            const params = new URLSearchParams();
+                                            if (filters.timeRange) params.set('timeRange', filters.timeRange);
+                                            if (filters.startDate) params.set('startDate', filters.startDate);
+                                            if (filters.endDate) params.set('endDate', filters.endDate);
+                                            if (filters.status) params.set('status', filters.status);
+                                            if (filters.payment) params.set('payment', filters.payment);
+                                            if (filters.search) params.set('search', filters.search);
+                                            if (filters.sort) params.set('sort', filters.sort);
+                                            params.set('page', page);
+                                            return `/admin/salesreport?${params.toString()}`;
                                             };
-                                        %>
+                                            %>
 
-                                        <% if (pagination.currentPage > 1) { %>
-                                            <a href="<%= createUrl(1) %>" class="pagination-link">« First</a>
-                                            <a href="<%= createUrl(pagination.currentPage - 1) %>" class="pagination-link">‹ Previous</a>
-                                        <% } %>
-                            
-                                        <% 
-                                        const maxPagesToShow = 5;
-                                        const startPage = Math.max(1, pagination.currentPage - Math.floor(maxPagesToShow / 2));
-                                        const endPage = Math.min(pagination.totalPages, startPage + maxPagesToShow - 1);
-                                        %>
+                                            <% if (pagination.currentPage> 1) { %>
+                                                <a href="<%= createUrl(1) %>" class="pagination-link">« First</a>
+                                                <a href="<%= createUrl(pagination.currentPage - 1) %>"
+                                                    class="pagination-link">‹ Previous</a>
+                                                <% } %>
 
-                                        <% for(let i = startPage; i <= endPage; i++) { %>
-                                            <a href="<%= createUrl(i) %>" class="pagination-link <%= i === pagination.currentPage ? 'active' : '' %>"><%= i %></a>
-                                        <% } %>
-                            
-                                        <% if (pagination.currentPage < pagination.totalPages) { %>
-                                            <a href="<%= createUrl(pagination.currentPage + 1) %>" class="pagination-link">Next ›</a>
-                                            <a href="<%= createUrl(pagination.totalPages) %>" class="pagination-link">Last »</a>
-                                        <% } %>
+                                                    <% const maxPagesToShow=5; const startPage=Math.max(1,
+                                                        pagination.currentPage - Math.floor(maxPagesToShow / 2)); const
+                                                        endPage=Math.min(pagination.totalPages, startPage +
+                                                        maxPagesToShow - 1); %>
+
+                                                        <% for(let i=startPage; i <=endPage; i++) { %>
+                                                            <a href="<%= createUrl(i) %>"
+                                                                class="pagination-link <%= i === pagination.currentPage ? 'active' : '' %>">
+                                                                <%= i %>
+                                                            </a>
+                                                            <% } %>
+
+                                                                <% if (pagination.currentPage < pagination.totalPages) {
+                                                                    %>
+                                                                    <a href="<%= createUrl(pagination.currentPage + 1) %>"
+                                                                        class="pagination-link">Next ›</a>
+                                                                    <a href="<%= createUrl(pagination.totalPages) %>"
+                                                                        class="pagination-link">Last »</a>
+                                                                    <% } %>
                                     </div>
                                 </div>
-                            <% } %>
+                                <% } %>
                         </div>
                     </div>
+            </main>
                     <script>
                         document.addEventListener('DOMContentLoaded', () => {
                             document.querySelectorAll('.view-products-btn').forEach(button => {
-                                button.addEventListener('click', function() {
+                                button.addEventListener('click', function () {
                                     const order = JSON.parse(this.dataset.order);
-                                    
+
                                     document.getElementById('modalOrderId').textContent = order.id;
                                     document.getElementById('modalOrderDate').textContent = new Date(order.date).toLocaleDateString();
                                     document.getElementById('modalCouponApplied').textContent = order.couponUsed || 'N/A';
@@ -997,7 +971,7 @@
 
                             // Time range filter buttons
                             document.querySelectorAll('.time-filter-btn').forEach(button => {
-                                button.addEventListener('click', function() {
+                                button.addEventListener('click', function () {
                                     document.getElementById('timeRangeInput').value = this.dataset.timeRange;
                                     document.getElementById('filterForm').submit();
                                 });
@@ -1038,8 +1012,7 @@
                             document.getElementById('orderModal').style.display = 'none';
                         }
                     </script>
+        </div>
 </body>
 
 </html>
-
-               

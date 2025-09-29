@@ -244,10 +244,18 @@ const dashboard = async (req, res) => {
       else if (s._id === "Delivered") delivered = s.count;
     });
 
-    // Recent Orders (last 5)
+    // --- Recent Orders with Pagination ---
+    const page = parseInt(req.query.page) || 1;
+    const limit = 6; // 6 orders per page
+    const skip = (page - 1) * limit;
+
+    const totalRecentOrders = await Order.countDocuments();
+    const totalPages = Math.ceil(totalRecentOrders / limit);
+
     const recentOrders = await Order.find()
       .sort({ createdAt: -1 })
-      .limit(5)
+      .skip(skip)
+      .limit(limit)
       .populate("userId", "fullname");
     const recentOrdersData = recentOrders.map((order) => ({
       orderNumber: order.orderNumber,
@@ -538,6 +546,10 @@ const dashboard = async (req, res) => {
     monthly: { labels: monthlyLabels, values: monthlyValues },
     yearly: { labels: yearlyLabels, values: yearlyValues },
   },
+  pagination: {
+    currentPage: page,
+    totalPages: totalPages,
+  }
 });
 
   } catch (error) {

@@ -854,6 +854,78 @@
         .chart-section {
             animation: fadeIn 0.5s ease-out;
         }
+
+        /* Pagination Styles */
+        .pagination-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 0;
+            margin-top: 20px;
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pagination-btn,
+        .page-btn {
+            border: 1px solid #ddd;
+            background: white;
+            padding: 8px 14px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #333;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .pagination-btn:hover,
+        .page-btn:hover {
+            background: #f0f0f0;
+            border-color: #4a90e2;
+        }
+
+        .page-btn.active {
+            background: #4a90e2;
+            color: white;
+            border-color: #4a90e2;
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #f9f9f9;
+        }
+
+        .page-numbers {
+            display: flex;
+            gap: 5px;
+        }
+
+        @media (max-width: 480px) {
+            .pagination-controls {
+                gap: 5px;
+            }
+
+            .pagination-btn,
+            .page-btn {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+        }
+
+        .recent-orders .table-container {
+            margin-bottom: 0;
+        }
+
+        .recent-orders {
+            padding-bottom: 0;
+        }
     </style>
 </head>
 
@@ -871,6 +943,7 @@
                         </div>
                     </div>
                 </header>
+                <%- include('../partials/admin/breadcrumb', { currentPath: '/admin/Dashboard' }) %>
                 <section class="dashboard-content">
                     <div class="main-column">
                         <div class="stats-grid">
@@ -1003,6 +1076,34 @@
                                         </tbody>
                                     </table>
                                 </div>
+                                <!-- Pagination for Recent Orders -->
+                                <% if (pagination.totalPages > 1) { %>
+                                    <div class="pagination-section">
+                                        <div class="pagination-controls">
+                                            <!-- Previous Button -->
+                                            <a href="/admin/dashboard?page=<%= pagination.currentPage - 1 %>"
+                                                class="pagination-btn" <%=pagination.currentPage===1 ? 'style="pointer-events: none; opacity: 0.5;"' : '' %>>
+                                                &laquo; Prev
+                                            </a>
+
+                                            <div class="page-numbers">
+                                                <% for(let i=1; i <=pagination.totalPages; i++) { %>
+                                                    <a href="/admin/dashboard?page=<%= i %>"
+                                                        class="page-btn <%= pagination.currentPage === i ? 'active' : '' %>">
+                                                        <%= i %>
+                                                    </a>
+                                                    <% } %>
+                                            </div>
+
+                                            <!-- Next Button -->
+                                            <a href="/admin/dashboard?page=<%= pagination.currentPage + 1 %>"
+                                                class="pagination-btn" <%=pagination.currentPage===pagination.totalPages
+                                                ? 'style="pointer-events: none; opacity: 0.5;"' : '' %>>
+                                                Next &raquo;
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <% } %>
                             </div>
                         </div>
                         <div class="dashboard-bottom">
