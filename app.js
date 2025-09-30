@@ -10,7 +10,7 @@ const passport = require("./config/passport")
 const {registerRoutes} = require("./routes/index")
 const db = require("./config/db")
 const navbarCount =require("./middlewares/navbarCount")
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 db()
 
 

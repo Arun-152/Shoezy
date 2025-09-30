@@ -333,11 +333,6 @@
         margin-bottom: 0;
     }
 
-    .order-timeline-section,
-    .order-actions-section {
-        grid-column: 1 / -1;
-    }
-
     .order-items-section h2,
     .order-summary-section h2,
     .delivery-address-section h2,
@@ -1101,85 +1096,41 @@
                                         </div>
                                         <% }); %>
                                 </div>
-                            </div>
 
-                            <div class="order-details-right-column">
-                                <!-- Order Summary -->
-                                <div class="order-summary-section">
-    <h2>Order Summary</h2>
-    <div class="summary-card">
-        <div class="summary-details">
-            <!-- Subtotal -->
-            <div class="summary-row">
-                <span class="summary-label">Subtotal</span>
-                <span class="summary-value">₹<%= order.subtotal.toLocaleString() %></span>
-            </div>
-
-            <!-- Coupon Discount -->
-            <% if (order.couponDiscount > 0) { %>
-            <div class="summary-row">
-                <span class="summary-label">Coupon Discount</span>
-                <span class="summary-value discount">- ₹<%= order.couponDiscount.toLocaleString() %></span>
-            </div>
-            <% } %>
-
-            <!-- Shipping -->
-            <div class="summary-row">
-                <span class="summary-label">Shipping</span>
-                <span class="summary-value free">FREE</span>
-            </div>
-        </div>
-
-        <!-- Total -->
-        <div class="summary-total">
-            <span class="total-label">Total</span>
-            <span class="total-amount">₹<%= order.finalAmount.toLocaleString() %></span>
-        </div>
-
-        <!-- Payment Method -->
-        <div class="payment-method">
-            <span class="payment-label">Payment Method:</span>
-            <span class="payment-value"><%= order.paymentMethod %></span>
-        </div>
-    </div>
-</div>
-
-
-
-                            <!-- Delivery Address -->
-                            <div class="delivery-address-section">
-                                <h2>Delivery Address</h2>
-                                <div class="address-card">
-                                    <div class="address-header">
-                                        <h3>
-                                            <%= order.address.addressType %>
-                                        </h3>
-                                    </div>
-                                    <div class="address-details">
-                                        <p><strong>
-                                                <%= order.address.fullName %>
-                                            </strong></p>
-                                        <p>
-                                            <%= order.address.address %>
-                                        </p>
-                                        <% if (order.address.landmark) { %>
-                                            <p>Landmark: <%= order.address.landmark %>
+                                <!-- Delivery Address -->
+                                <div class="delivery-address-section">
+                                    <h2>Delivery Address</h2>
+                                    <div class="address-card">
+                                        <div class="address-header">
+                                            <h3>
+                                                <%= order.address.addressType %>
+                                            </h3>
+                                        </div>
+                                        <div class="address-details">
+                                            <p><strong>
+                                                    <%= order.address.fullName %>
+                                                </strong></p>
+                                            <p>
+                                                <%= order.address.address %>
                                             </p>
-                                            <% } %>
-                                                <p>
-                                                    <%= order.address.city %>, <%= order.address.district %>
+                                            <% if (order.address.landmark) { %>
+                                                <p>Landmark: <%= order.address.landmark %>
                                                 </p>
-                                                <p>
-                                                    <%= order.address.state %> - <%= order.address.pinCode %>
-                                                </p>
-                                                <p>Phone: <%= order.address.mobileNumber %>
-                                                </p>
+                                                <% } %>
+                                                    <p>
+                                                        <%= order.address.city %>, <%= order.address.district %>
+                                                    </p>
+                                                    <p>
+                                                        <%= order.address.state %> - <%= order.address.pinCode %>
+                                                    </p>
+                                                    <p>Phone: <%= order.address.mobileNumber %>
+                                                    </p>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-</div>
 
-                            <!-- Order Timeline -->
-                            <div class="order-timeline-section">
+                                <!-- Order Timeline -->
+                                <div class="order-timeline-section">
                                 <h2>Order Timeline</h2>
                                 <div class="timeline">
                                     <!-- Order Placed -->
@@ -1245,21 +1196,64 @@
                                         </div>
                                         <% } %>
                                 </div>
+                                </div>
+
+                                <!-- Order Actions -->
+                                <div class="order-actions-section">
+                                    <div class="action-buttons">
+                                        <!-- Cancel Order Button for eligible orders -->
+                                        
+
+                                                <% if (order.orderStatus==='Shipped' ) { %>
+                                                    <button class="btn-primary">Track Package</button>
+                                                    <% } %>
+
+                                                        <a href="/order/<%= order._id %>/invoice">
+                                                            <button class="btn-secondary">Download Invoice</button>
+                                                        </a>
+                                    </div>
+                                </div>
                             </div>
 
-                            <!-- Order Actions -->
-                            <div class="order-actions-section">
-                                <div class="action-buttons">
-                                    <!-- Cancel Order Button for eligible orders -->
-                                    
+                            <div class="order-details-right-column">
+                                <!-- Order Summary -->
+                                <div class="order-summary-section">
+                                    <h2>Order Summary</h2>
+                                    <div class="summary-card">
+                                        <div class="summary-details">
+                                            <!-- Subtotal -->
+                                            <div class="summary-row">
+                                                <span class="summary-label">Subtotal</span>
+                                                <span class="summary-value">₹<%= order.subtotal.toLocaleString() %></span>
+                                            </div>
 
-                                            <% if (order.orderStatus==='Shipped' ) { %>
-                                                <button class="btn-primary">Track Package</button>
-                                                <% } %>
+                                            <!-- Coupon Discount -->
+                                            <% if (order.couponDiscount > 0) { %>
+                                            <div class="summary-row">
+                                                <span class="summary-label">Coupon Discount</span>
+                                                <span class="summary-value discount">- ₹<%= order.couponDiscount.toLocaleString() %></span>
+                                            </div>
+                                            <% } %>
 
-                                                    <a href="/order/<%= order._id %>/invoice">
-                                                        <button class="btn-secondary">Download Invoice</button>
-                                                    </a>
+                                            <!-- Shipping -->
+                                            <div class="summary-row">
+                                                <span class="summary-label">Shipping</span>
+                                                <span class="summary-value free">FREE</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Total -->
+                                        <div class="summary-total">
+                                            <span class="total-label">Total</span>
+                                            <span class="total-amount">₹<%= order.finalAmount.toLocaleString() %></span>
+                                        </div>
+
+                                        <!-- Payment Method -->
+                                        <div class="payment-method">
+                                            <span class="payment-label">Payment Method:</span>
+                                            <span class="payment-value"><%= order.paymentMethod %></span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
