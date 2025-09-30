@@ -1457,12 +1457,22 @@
                     confirmButtonColor: '#2563eb'
                 });
             } else {
-                Swal.fire({
-                    title: 'Error!',
-                    text: data.message || 'Failed to submit return request. Please try again.',
-                    icon: 'error',
-                    confirmButtonColor: '#dc2626'
-                });
+                if (data.showModalError) {
+                    closeReturnModal();
+                    Swal.fire({
+                        title: 'Return Not Possible',
+                        text: data.message, // Use the message directly from the backend response
+                        icon: 'error',
+                        confirmButtonColor: '#dc2626'
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: data.message || 'Failed to submit return request. Please try again.',
+                        icon: 'error',
+                        confirmButtonColor: '#dc2626'
+                    });
+                }
             }
         } catch (error) {
             console.error('Return request error:', error);

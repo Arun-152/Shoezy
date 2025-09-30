@@ -464,36 +464,15 @@ const returnSingleOrder = async (req, res) => {
                 message: 'Order not found or access denied'
             });
         }
-        let itemIndex = -1;
-        let foundItem = null;
-        itemIndex = order.items.findIndex(item => item._id.toString() === itemsId);
-        if (itemIndex !== -1) {
-            foundItem = order.items[itemIndex];
+        let foundItem = order.items.id(itemsId);
+
+        if (!foundItem) {
+            foundItem = order.items.find(item => item.productId?._id?.toString() === itemsId);
         }
-        if (itemIndex === -1) {
-            itemIndex = order.items.findIndex(item => item._id == itemsId);
-            if (itemIndex !== -1) {
-                foundItem = order.items[itemIndex];
-            }
-        }
-        if (itemIndex === -1) {
-            itemIndex = order.items.findIndex(item => item.productId?._id?.toString() === itemsId);
-            if (itemIndex !== -1) {
-                foundItem = order.items[itemIndex];
-            }
-        }
-        if (itemIndex === -1) {
-            const mongoose = require('mongoose');
-            try {
-                const objectIdItemsId = new mongoose.Types.ObjectId(itemsId);
-                itemIndex = order.items.findIndex(item => item._id.equals(objectIdItemsId));
-                if (itemIndex !== -1) {
-                    foundItem = order.items[itemIndex];
-                }
-            } catch (e) {
-            }
-        }
-        if (itemIndex === -1) {
+
+        const itemIndex = foundItem ? order.items.indexOf(foundItem) : -1;
+
+        if (!foundItem || itemIndex === -1) {
             return res.status(404).json({
                 success: false,
                 message: 'Item not found in this order',
@@ -522,35 +501,12 @@ const returnSingleOrder = async (req, res) => {
         }
 
         // --- Start: Coupon Minimum Purchase Validation on Partial Return ---
-        // This validation applies only to orders paid online/wallet where a coupon was used.
         if (order.couponId && ['Online', 'Wallet'].includes(order.paymentMethod.split(' + ')[0])) {
           const coupon = await Coupon.findById(order.couponId);
           if (coupon && coupon.minimumPrice > 0) {
             // Calculate the subtotal of items that would remain in the order (not cancelled or returned)
             const remainingItems = order.items.filter(i =>
-              i._id.toString() !== itemsId && // Exclude the item being returned
-              !['Cancelled', 'Returned', 'ReturnRequested'].includes(i.status) // Exclude other non-active items
-            );
-            const remainingSubtotal = remainingItems.reduce((sum, item) => sum + item.totalPrice, 0);
-
-            // If remaining subtotal is less than coupon's minimum, block return.
-            if (remainingSubtotal < coupon.minimumPrice) {
-              return res.status(400).json({
-                success: false,
-                showModalError: true, // Flag for frontend to show error on top of the modal
-                message: `Cannot return this item. The remaining order value would be below the coupon's minimum purchase amount of ₹${coupon.minimumPrice.toLocaleString('en-IN')}.`
-              });
-            }
-          }
-        }
-        // --- End: Coupon Minimum Purchase Validation ---
-        // --- Start: Coupon Minimum Purchase Validation on Partial Return ---
-        if (order.couponId && ['Online', 'Wallet'].includes(order.paymentMethod.split(' + ')[0])) {
-          const coupon = await Coupon.findById(order.couponId);
-          if (coupon && coupon.minimumPrice > 0) {
-            // Calculate the subtotal of items that would remain in the order (not cancelled or returned)
-            const remainingItems = order.items.filter(i =>
-              i._id.toString() !== itemsId && // Exclude the item being returned
+              i._id.toString() !== item._id.toString() && // Exclude the item being returned
               !['Cancelled', 'Returned', 'ReturnRequested'].includes(i.status) // Exclude other non-active items
             );
             const remainingSubtotal = remainingItems.reduce((sum, item) => sum + item.totalPrice, 0);
