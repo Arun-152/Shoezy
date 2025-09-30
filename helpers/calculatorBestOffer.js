@@ -1,4 +1,4 @@
-// Helper function: calculate best offer and sale price for a product variant
+
 const calculateBestOffer = (regularPrice, productOffer = 0, categoryOffer = 0) => {
     const offers = [];
 

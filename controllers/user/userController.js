@@ -812,7 +812,7 @@ module.exports = {
     resendOTP,
     userErrorPage,
     forgotPasswordPage,
-    sendResetLink, // Renamed for clarity
+    sendResetLink, 
     verifyOTPPage,
     postVerifyOTP,
     resendResetOTP,

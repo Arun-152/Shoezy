@@ -341,17 +341,29 @@ const changePassword = async (req, res) => {
             return res.status(401).json({ success: false, message: "User not authenticated" });
         }
 
+        const errors = [];
+
         // Validation
-        if (!currentPassword || !newPassword || !confirmPassword) {
-            return res.status(400).json({ success: false, message: "All password fields are required" });
+        if (!currentPassword || currentPassword.trim() === "") {
+            errors.push("Current password is required");
         }
 
-        if (newPassword.length < 8) {
-            return res.status(400).json({ success: false, message: "New password must be at least 8 characters long" });
+        if (!newPassword || newPassword.trim() === "") {
+            errors.push("New password is required");
+        } else if (newPassword.length < 5) {
+            errors.push("New password must be at least 5 characters long");
+        } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/.test(newPassword)) {
+            errors.push("New password must contain at least one uppercase letter, one lowercase letter, and one number");
         }
 
-        if (newPassword !== confirmPassword) {
-            return res.status(400).json({ success: false, message: "New password and confirm password do not match" });
+        if (!confirmPassword || confirmPassword.trim() === "") {
+            errors.push("Please confirm your new password");
+        } else if (newPassword !== confirmPassword) {
+            errors.push("New password and confirm password do not match");
+        }
+
+        if (errors.length > 0) {
+            return res.status(400).json({ success: false, message: errors.join(". ") });
         }
 
         // Get user from database
