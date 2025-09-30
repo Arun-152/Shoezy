@@ -34,13 +34,20 @@ const loadCoupons = async (req, res) => {
       const isUsedByUser = coupon.userUsage?.some(u => u?.userId && u.userId.toString() === req.session.userId.toString()
       ) || false;
 
+      const currentDate = new Date();
       const isGloballyUsed = coupon.totalUsageLimit && coupon.currentUsageCount >= coupon.totalUsageLimit;
-      const isExpired = coupon.expireOn < new Date();
-      let status = 'Available';
+      const isExpired = coupon.expireOn < currentDate;
+      const isNotStarted = coupon.startDate > currentDate;
+
+      let status;
       if (isExpired) {
         status = 'Expired';
+      } else if (isNotStarted) {
+        status = 'Not Started';
       } else if (isUsedByUser || isGloballyUsed) {
         status = 'Used';
+      } else {
+        status = 'Available';
       }
 
       return {
@@ -104,7 +111,7 @@ const applyCoupon = async (req, res) => {
     const userUsageCount = await Order.countDocuments({
       userId,
       couponCode: coupon.name,
-      orderStatus: { $ne: "Cancelled" }
+      orderStatus: { $nin: ["Cancelled", "Returned"] }
     });
     const maxUsesPerUser = coupon.maxUsesPerUser || 1;
     if (userUsageCount >= maxUsesPerUser) {
@@ -182,7 +189,7 @@ const validateCouponForCheckout = async (couponData, userId, req) => {
     const userUsageCount = await Order.countDocuments({
       userId: userId,
       couponCode: coupon.name,
-      orderStatus: { $ne: 'Cancelled' }
+      orderStatus: { $nin: ['Cancelled', 'Returned'] }
     });
     const maxUsesPerUser = coupon.maxUsesPerUser || 1;
 
@@ -282,22 +289,32 @@ const markCouponUsed = async (couponId, userId) => {
 
 const resetCouponUsage = async (couponId, userId, orderId) => {
   try {
-    await Coupon.findByIdAndUpdate(
-      couponId,
-      {
-        // Remove user from usedBy array
-        $pull: { 
-          userId: userId,
-          userUsage: { userId: userId, orderId: orderId }
-        },
-        // Decrease global usage count
-        $inc: { currentUsageCount: -1 }
+    const coupon = await Coupon.findById(couponId);
+    if (!coupon) {
+      console.error("Coupon not found for reset:", couponId);
+      return false;
+    }
+
+    // Prepare updates
+    const updates = {
+      $inc: { currentUsageCount: -1 },
+      $pull: {
+        userUsage: { userId: userId, orderId: orderId },
+        userId: userId // Also pull from legacy userId array if it exists
       }
-    );
-    return true
+    };
+
+    // If the coupon's status is 'Used', and it's not expired, set it back to 'Available'
+    if (coupon.status === 'Used' && coupon.expireOn >= new Date()) {
+      updates.status = 'Available';
+    }
+
+    await Coupon.findByIdAndUpdate(couponId, updates);
+
+    return true;
   } catch (error) {
     console.error("Error resetting coupon usage:", error);
-    return false
+    return false;
   }
 }
 const getAvailableCoupon = async (req, res) => {

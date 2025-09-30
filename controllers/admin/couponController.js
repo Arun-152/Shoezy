@@ -37,7 +37,29 @@ const couponPage = async (req, res) => {
         }
 
         const coupons = await Coupon.find(query).sort(sortOptions);
-        res.render("admincoupenPage", { coupons, search, sort });
+
+        const currentDate = new Date();
+        currentDate.setHours(0, 0, 0, 0); // Normalize to start of day for consistent comparison
+
+        const couponsWithStatus = coupons.map(coupon => {
+            const couponStartDate = new Date(coupon.startDate);
+            couponStartDate.setHours(0, 0, 0, 0);
+            const couponExpireDate = new Date(coupon.expireOn);
+            couponExpireDate.setHours(0, 0, 0, 0);
+
+            let status;
+            if (currentDate > couponExpireDate) {
+                status = 'Expired';
+            } else if (currentDate >= couponStartDate) {
+                status = 'Active';
+            } else {
+                status = 'Not Started';
+            }
+
+            return { ...coupon.toObject(), status };
+        });
+
+        res.render("admincoupenPage", { coupons: couponsWithStatus, search, sort });
     } catch (error) {
         console.error("Error rendering coupons page:", error.message);
         res.redirect("/admin500");

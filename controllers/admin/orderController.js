@@ -338,22 +338,6 @@ const approveReturnRequest = async (req, res) => {
       });
     }
 
-    // Check if all items are returned/cancelled
-    let allOrderReturn = order.items.every(item => item.status === "Returned" || item.status === "Cancelled");
-    if (allOrderReturn) {
-      order.orderStatus = "Returned";
-      
-      // Reset coupon usage if order had a coupon
-      if (order.couponId && order.userId) {
-        try {
-          await resetCouponUsage(order.couponId, order.userId, order._id);
-          console.log(`Coupon usage reset for returned order ${order._id}`);
-        } catch (error) {
-          console.error("Error resetting coupon usage for returned order:", error);
-        }
-      }
-    }
-
     // Restock products
     for (let prod of updatedProducts) {
       const productDoc = await Product.findOne({ productName: prod.name });
@@ -362,6 +346,24 @@ const approveReturnRequest = async (req, res) => {
           { _id: productDoc._id, "variants.size": prod.size },
           { $inc: { "variants.$.variantQuantity": prod.quantity } }
         );
+      }
+    }
+
+    // Check if all items are returned/cancelled AFTER saving item status
+    const allItemsReturnedOrCancelled = order.items.every(item =>
+      item.status === "Returned" || item.status === "Cancelled"
+    );
+
+    if (allItemsReturnedOrCancelled) {
+      order.orderStatus = "Returned";
+      // If the entire order is returned, reset the coupon usage
+      if (order.couponId && order.userId) {
+        try {
+          await resetCouponUsage(order.couponId, order.userId, order._id);
+          console.log(`Coupon usage reset for fully returned order ${order._id}`);
+        } catch (error) {
+          console.error("Error resetting coupon usage for returned order:", error);
+        }
       }
     }
 

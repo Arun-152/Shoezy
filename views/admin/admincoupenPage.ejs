@@ -572,12 +572,10 @@
                                     <tbody>
                                         <% if (coupons && coupons.length> 0) { %>
                                             <% coupons.forEach(coupon=> { %>
-                                                <% const now=new Date(); const expiryDate=new Date(coupon.expireOn);
-                                                    const startDate=new Date(coupon.startDate); const
-                                                    isExpired=expiryDate < now || (coupon.totalUsageLimit &&
-                                                    coupon.usageCount>= coupon.totalUsageLimit);
-                                                    const isNotStarted = startDate > now;
-                                                    const isActive = !isExpired && !isNotStarted;
+                                                <% 
+                                                    const isExpired = coupon.status === 'Expired' || (coupon.totalUsageLimit && coupon.currentUsageCount >= coupon.totalUsageLimit);
+                                                    const isNotStarted = coupon.status === 'Not Started';
+                                                    const isActive = coupon.status === 'Active' && coupon.islist;
                                                     %>
                                                     <tr class="table-row <%= isExpired ? 'expired-row' : '' %>">
                                                         <td>
@@ -602,25 +600,24 @@
                                                                     coupon.totalUsageLimit || 'Unlimited' %>
                                                         </td>
                                                         <td>
-                                                            <% if (coupon.status==='Expired' || (coupon.totalUsageLimit
-                                                                && coupon.currentUsageCount>= coupon.totalUsageLimit)) {
+                                                            <% if (isExpired) {
                                                                 %>
                                                                 <div class="expired-text">
                                                                     <i
                                                                         class="fas fa-exclamation-triangle expired-icon"></i>
                                                                     EXPIRED
                                                                 </div>
-                                                                <% } else if (isNotStarted) { %>
+                                                                <% } else if (coupon.status === 'Not Started') { %>
                                                                     <div class="coupon-status status-not-started">
                                                                         <i class="fas fa-clock"></i>
                                                                         Not Started
                                                                     </div>
-                                                                    <% } else if (!coupon.islist) { %>
+                                                                    <% } else if (!coupon.islist && coupon.status === 'Active') { %>
                                                                         <div class="coupon-status status-inactive">
                                                                             <i class="fas fa-times-circle"></i>
                                                                             Inactive
                                                                         </div>
-                                                                        <% } else { %>
+                                                                        <% } else if (coupon.status === 'Active' && coupon.islist) { %>
                                                                             <div class="coupon-status status-active">
                                                                                 <i class="fas fa-check-circle"></i>
                                                                                 Active

@@ -161,18 +161,10 @@ const cancelOrder = async (req, res) => {
       : 0;
 
     if (fullCancellationRequested) {
-      refundAmount = activeItems.reduce((sum, item) => {
-        if (isFlatCoupon) {
-          const itemRefund = item.price - flatDiscountPerItem;
-          return sum + itemRefund;
-        } else {
-          const itemTotal = item.price * item.quantity;
-          const itemDiscount = itemTotal * discountPercentage;
-          const net = order.couponCode ? (itemTotal - itemDiscount) : itemTotal;
-          return sum + net;
-        }
-      }, 0);
-
+      // For full cancellations, the refund amount is simply the final amount paid by the user.
+      // This correctly handles all coupon scenarios without recalculation.
+      refundAmount = order.totalAmount;
+      
       // Cancel only active items
       for (const item of activeItems) {
         item.status = 'Cancelled';
@@ -221,35 +213,42 @@ const cancelOrder = async (req, res) => {
       }
     } else {
       const itemToCancel = order.items.id(itemsId);
-      if (itemToCancel && ['Pending', 'Processing'].includes(itemToCancel.status)) {
+      if (itemToCancel && ['Pending', 'Processing', 'Shipped', 'Delivered'].includes(itemToCancel.status)) {
         // --- Start: Coupon Minimum Purchase Validation on Partial Cancellation ---
-        if (order.couponId) {
+        if (order.couponId && ['Online', 'Wallet'].includes(order.paymentMethod.split(' + ')[0])) {
           const coupon = await Coupon.findById(order.couponId);
-          if (coupon) {
+          if (coupon && coupon.minimumPrice > 0) {
             const remainingItems = order.items.filter(item =>
               item._id.toString() !== itemToCancel._id.toString() &&
-              item.status !== 'Cancelled' &&
-              item.status !== 'Returned'
+              !['Cancelled', 'Returned'].includes(item.status)
             );
             const remainingSubtotal = remainingItems.reduce((sum, item) => sum + item.totalPrice, 0);
 
             if (remainingSubtotal < coupon.minimumPrice) {
-              return res.status(400).json({ success: false, message: `Cannot cancel this item. The remaining order value would be below the coupon's minimum purchase amount of ₹${coupon.minimumPrice}.` });
+              return res.status(400).json({
+                success: false,
+                showModalError: true,
+                message: `Cannot cancel this item. The remaining order value would be below the coupon's minimum purchase amount of ₹${coupon.minimumPrice.toLocaleString('en-IN')}.`
+              });
             }
           }
         }
         // --- End: Coupon Minimum Purchase Validation ---
 
+        if (!reason) {
+          return res.status(400).json({ success: false, message: 'A reason for cancellation is required.' });
+        }
+
+        // Calculate refund amount
         if (isFlatCoupon) {
-          refundAmount = itemToCancel.price - flatDiscountPerItem;
+          refundAmount = itemToCancel.totalPrice - flatDiscountPerItem;
         } else {
-          const itemTotal = itemToCancel.price * itemToCancel.quantity;
+          const itemTotal = itemToCancel.totalPrice;
           const itemDiscount = itemTotal * discountPercentage;
-          refundAmount = order.couponCode ? (itemTotal - itemDiscount) : itemTotal;
+          refundAmount = itemTotal - itemDiscount;
         }
 
         itemToCancel.status = 'Cancelled';
-
         const product = await Product.findById(itemToCancel.productId);
         if (product && product.variants) {
           const variant = product.variants.find(v => v.size === (itemToCancel.size || "Default"));
@@ -264,9 +263,9 @@ const cancelOrder = async (req, res) => {
         }
 
         // Adjust order total
-        if (refundAmount > 0) {
-          order.totalAmount = Math.max(0, (order.totalAmount || 0) - refundAmount);
-        }
+        // The totalAmount on the order represents the final amount paid. We should adjust it.
+        // The refundAmount is what we give back to the user.
+        order.totalAmount = Math.max(0, order.totalAmount - refundAmount);
 
         const allItemsCancelled = order.items.every(item => item.status === 'Cancelled');
         if (allItemsCancelled) {
@@ -523,20 +522,48 @@ const returnSingleOrder = async (req, res) => {
         }
 
         // --- Start: Coupon Minimum Purchase Validation on Partial Return ---
-        if (order.couponId) {
-            const coupon = await Coupon.findById(order.couponId);
-            if (coupon) {
-                const remainingItems = order.items.filter(item =>
-                    item._id.toString() !== item._id.toString() &&
-                    item.status !== 'Cancelled' &&
-                    item.status !== 'Returned'
-                );
-                const remainingSubtotal = remainingItems.reduce((sum, item) => sum + item.totalPrice, 0);
+        // This validation applies only to orders paid online/wallet where a coupon was used.
+        if (order.couponId && ['Online', 'Wallet'].includes(order.paymentMethod.split(' + ')[0])) {
+          const coupon = await Coupon.findById(order.couponId);
+          if (coupon && coupon.minimumPrice > 0) {
+            // Calculate the subtotal of items that would remain in the order (not cancelled or returned)
+            const remainingItems = order.items.filter(i =>
+              i._id.toString() !== itemsId && // Exclude the item being returned
+              !['Cancelled', 'Returned', 'ReturnRequested'].includes(i.status) // Exclude other non-active items
+            );
+            const remainingSubtotal = remainingItems.reduce((sum, item) => sum + item.totalPrice, 0);
 
-                if (remainingSubtotal < coupon.minimumPrice) {
-                    return res.status(400).json({ success: false, message: `Cannot return this item. The remaining order value would be below the coupon's minimum purchase amount of ₹${coupon.minimumPrice}.` });
-                }
+            // If remaining subtotal is less than coupon's minimum, block return.
+            if (remainingSubtotal < coupon.minimumPrice) {
+              return res.status(400).json({
+                success: false,
+                showModalError: true, // Flag for frontend to show error on top of the modal
+                message: `Cannot return this item. The remaining order value would be below the coupon's minimum purchase amount of ₹${coupon.minimumPrice.toLocaleString('en-IN')}.`
+              });
             }
+          }
+        }
+        // --- End: Coupon Minimum Purchase Validation ---
+        // --- Start: Coupon Minimum Purchase Validation on Partial Return ---
+        if (order.couponId && ['Online', 'Wallet'].includes(order.paymentMethod.split(' + ')[0])) {
+          const coupon = await Coupon.findById(order.couponId);
+          if (coupon && coupon.minimumPrice > 0) {
+            // Calculate the subtotal of items that would remain in the order (not cancelled or returned)
+            const remainingItems = order.items.filter(i =>
+              i._id.toString() !== itemsId && // Exclude the item being returned
+              !['Cancelled', 'Returned', 'ReturnRequested'].includes(i.status) // Exclude other non-active items
+            );
+            const remainingSubtotal = remainingItems.reduce((sum, item) => sum + item.totalPrice, 0);
+
+            // If remaining subtotal is less than coupon's minimum, block return.
+            if (remainingSubtotal < coupon.minimumPrice) {
+              return res.status(400).json({
+                success: false,
+                showModalError: true, // Flag for frontend to show error on top of the modal
+                message: `Cannot return this item. The remaining order value would be below the coupon's minimum purchase amount of ₹${coupon.minimumPrice.toLocaleString('en-IN')}.`
+              });
+            }
+          }
         }
         // --- End: Coupon Minimum Purchase Validation ---
 

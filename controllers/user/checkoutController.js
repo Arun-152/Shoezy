@@ -21,37 +21,6 @@ const loadCheckout = async (req, res) => {
 
     const defaultAddress = await Address.findOne({ userId, isDefault: true });
     const allAddresses = await Address.find({ userId });
-
-    // --- Start: Corrected Coupon Filtering Logic ---
-    const appliedCouponInSession = req.session.appliedCoupon || null;
-    const appliedCouponCode = appliedCouponInSession ? appliedCouponInSession.couponCode : null;
-    const currentDate = new Date();
-
-    const allCoupons = await Coupon.find({
-      islist: true,
-      startDate: { $lte: currentDate }, // Only active coupons
-      expireOn: { $gte: currentDate }   // Only non-expired coupons
-    }).sort({ expireOn: 1 });
-
-    const availableCouponsForPage = [];
-    for (const couponItem of allCoupons) {
-      // Check global usage limit
-      if (couponItem.totalUsageLimit && couponItem.currentUsageCount >= couponItem.totalUsageLimit) {
-        continue;
-      }
-      
-      const userUsageCount = await Order.countDocuments({
-        userId: userId,
-        couponCode: couponItem.name,
-        orderStatus: { $ne: 'Cancelled' }
-      });
-      if (userUsageCount >= (couponItem.maxUsesPerUser || 1)) {
-        continue;
-      }
-
-      availableCouponsForPage.push(couponItem);
-    }
-    
     let subtotal = 0;
     let totalItems = 0;
     let allItems = [];
@@ -91,6 +60,38 @@ const loadCheckout = async (req, res) => {
       });
     });
     const shipping = 0;
+
+    // --- Start: Corrected Coupon Filtering Logic ---
+    const appliedCouponInSession = req.session.appliedCoupon || null;
+    const currentDate = new Date();
+
+    const allCoupons = await Coupon.find({
+      islist: true,
+      startDate: { $lte: currentDate }, // Only active coupons
+      expireOn: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) }   // Only non-expired coupons
+    }).sort({ expireOn: 1 });
+
+    const availableCouponsForPage = [];
+    for (const couponItem of allCoupons) {
+      // Check global usage limit
+      if (couponItem.totalUsageLimit && couponItem.currentUsageCount >= couponItem.totalUsageLimit) {
+        continue;
+      }
+      // Check if cart subtotal meets minimum purchase requirement
+      if (couponItem.minimumPrice > subtotal) {
+        continue;
+      }
+      
+      const userUsageCount = await Order.countDocuments({
+        userId: userId,
+        couponCode: couponItem.name,
+        orderStatus: { $nin: ['Cancelled', 'Returned'] }
+      });
+      if (userUsageCount >= (couponItem.maxUsesPerUser || 1)) {
+        continue;
+      }
+      availableCouponsForPage.push(couponItem);
+    }
     
     const appliedCoupon = req.session.appliedCoupon || null;
     let finalTotal = subtotal + shipping;
