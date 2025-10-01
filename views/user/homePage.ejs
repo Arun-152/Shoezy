@@ -66,16 +66,6 @@
                                     <span class="price">₹8,999</span>
                                     <span class="price-label">Starting from</span>
                                 </div>
-                                <div class="floating-card rating-card">
-                                    <div class="stars">
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                    </div>
-                                    <span>4.9 (2.1k reviews)</span>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -180,32 +170,7 @@
                                         <%= product.category ? product.category.name : 'Uncategorized' %>
                                     </p>
 
-                                    <div class="product-rating">
-                                        <div class="stars">
-                                            <% const rating=product.ratings && product.ratings.average ?
-                                                product.ratings.average : 4.5; %>
-                                                <% for (let i=1; i <=5; i++) { %>
-                                                    <% if (i <=Math.floor(rating)) { %>
-                                                        <i class="fas fa-star"></i>
-                                                        <% } else if (i - 0.5 <=rating) { %>
-                                                            <i class="fas fa-star-half-alt"></i>
-                                                            <% } else { %>
-                                                                <i class="far fa-star"></i>
-                                                                <% } %>
-                                                                    <% } %>
-                                        </div>
-
-                                        <% const price=product.variants && product.variants.length> 0
-                                            ? Number(product.variants[0]?.salePrice)
-                                            : 0; // fallback if no variants
-
-                                            let ratingCount = product.ratings && product.ratings.count
-                                            ? product.ratings.count
-                                            : (price > 13000 ? 899 : price > 10000 ? 678 : 546);
-                                            %> 
-
-                                            <span class="rating-text">(<%= ratingCount %> reviews)</span>
-                                    </div>
+                                    
 
 
                                     <div class="product-price">
@@ -322,30 +287,7 @@
                                             <%= product.category ? product.category.name : 'Uncategorized' %>
                                         </p>
 
-                                        <div class="product-rating">
-                                            <div class="stars">
-                                                <% if (product.ratings && product.ratings.average> 0) { %>
-                                                    <% const rating=product.ratings.average; %>
-                                                        <% for (let i=1; i <=5; i++) { %>
-                                                            <% if (i <=Math.floor(rating)) { %>
-                                                                <i class="fas fa-star"></i>
-                                                                <% } else if (i - 0.5 <=rating) { %>
-                                                                    <i class="fas fa-star-half-alt"></i>
-                                                                    <% } else { %>
-                                                                        <i class="far fa-star"></i>
-                                                                        <% } %>
-                                                                            <% } %>
-                                                                                <% } else { %>
-                                                                                    <i class="far fa-star"></i><i
-                                                                                        class="far fa-star"></i><i
-                                                                                        class="far fa-star"></i><i
-                                                                                        class="far fa-star"></i><i
-                                                                                        class="far fa-star"></i>
-                                                                                    <% } %>
-                                            </div>
-                                            <span class="rating-text">(<%= product.ratings && product.ratings.count ?
-                                                    product.ratings.count : 0 %>)</span>
-                                        </div>
+                                      
 
 
                                         <div class="product-price">
@@ -467,31 +409,7 @@
                                             <%= product.category ? product.category.name : 'Uncategorized' %>
                                         </p>
 
-                                        <div class="product-rating">
-                                            <div class="stars">
-                                                <% if (product.ratings && product.ratings.average> 0) { %>
-                                                    <% const rating=product.ratings.average; %>
-                                                        <% for (let i=1; i <=5; i++) { %>
-                                                            <% if (i <=Math.floor(rating)) { %>
-                                                                <i class="fas fa-star"></i>
-                                                                <% } else if (i - 0.5 <=rating) { %>
-                                                                    <i class="fas fa-star-half-alt"></i>
-                                                                    <% } else { %>
-                                                                        <i class="far fa-star"></i>
-                                                                        <% } %>
-                                                                            <% } %>
-                                                                                <% } else { %>
-                                                                                    <i class="far fa-star"></i><i
-                                                                                        class="far fa-star"></i><i
-                                                                                        class="far fa-star"></i><i
-                                                                                        class="far fa-star"></i><i
-                                                                                        class="far fa-star"></i>
-                                                                                    <% } %>
-                                            </div>
-                                            <span class="rating-text">(<%= product.ratings && product.ratings.count ?
-                                                    product.ratings.count : 0 %>)</span>
-                                        </div>
-
+                                     
 
                                         <div class="product-price">
                                             <% if (product.variants && product.variants.length> 0) { %>
@@ -530,74 +448,6 @@
                 <div class="section-header centered">
                     <h2>What Our Customers Say</h2>
                     <p>Real reviews from real sneaker enthusiasts</p>
-                </div>
-
-                <div class="testimonials-grid">
-                    <div class="testimonial-card">
-                        <div class="testimonial-rating">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <p class="testimonial-text">"Absolutely love my new sneakers from Shoezy! The quality is
-                            outstanding and they're incredibly comfortable. Will definitely be ordering more!"</p>
-                        <div class="testimonial-author">
-                            <div class="author-avatar">
-                                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&h=60&fit=crop&crop=face"
-                                    alt="Rahul">
-                            </div>
-                            <div class="author-info">
-                                <h4>Rahul Sharma</h4>
-                                <span>Verified Customer</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="testimonial-card">
-                        <div class="testimonial-rating">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <p class="testimonial-text">"Fast delivery and amazing customer service. The sneakers fit
-                            perfectly and look even better in person. Highly recommend Shoezy!"</p>
-                        <div class="testimonial-author">
-                            <div class="author-avatar">
-                                <img src="https://images.unsplash.com/photo-1494790108755-2616b612cf62?w=60&h=60&fit=crop&crop=face"
-                                    alt="Priya">
-                            </div>
-                            <div class="author-info">
-                                <h4>Priya Patel</h4>
-                                <span>Verified Customer</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="testimonial-card">
-                        <div class="testimonial-rating">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <p class="testimonial-text">"Best sneaker collection I've found online. Great prices, authentic
-                            products, and the website is so easy to use. Five stars!"</p>
-                        <div class="testimonial-author">
-                            <div class="author-avatar">
-                                <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=60&h=60&fit=crop&crop=face"
-                                    alt="Arjun">
-                            </div>
-                            <div class="author-info">
-                                <h4>Arjun Kumar</h4>
-                                <span>Verified Customer</span>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </section>

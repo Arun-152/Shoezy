@@ -930,32 +930,6 @@
                                             </span>
                                             <% } %>
                                 </div>
-                                <div class="product-rating">
-                                    <div class="stars">
-                                        <% const rating=product.ratings && product.ratings.average ?
-                                            product.ratings.average : 4.5; %>
-                                            <% for (let i=1; i <=5; i++) { %>
-                                                <% if (i <=Math.floor(rating)) { %>
-                                                    <i class="fas fa-star"></i>
-                                                    <% } else if (i - 0.5 <=rating) { %>
-                                                        <i class="fas fa-star-half-alt"></i>
-                                                        <% } else { %>
-                                                            <i class="far fa-star"></i>
-                                                            <% } %>
-                                                                <% } %>
-                                    </div>
-
-                                    <% const price=product.variants && product.variants.length> 0
-                                        ? Number(product.variants[0].salePrice)
-                                        : 0; // fallback if no variants
-
-                                        let ratingCount = product.ratings && product.ratings.count
-                                        ? product.ratings.count
-                                        : (price > 13000 ? 899 : price > 10000 ? 678 : 546);
-                                        %>
-
-                                        <span class="rating-text">(<%= ratingCount %> reviews)</span>
-                                </div>
 
 
 
