@@ -93,13 +93,19 @@
                                                         <%= products[i].category ? products[i].category.name
                                                             : 'No category' %>
                                                     </td>
-                                                      <td>
-                                                        <% let variant=products[i].variants[0]; %>
-                                                            ₹ <%= variant ? variant.regularPrice : 'N/A' %>
+                                                    <td>
+                                                        <% 
+                                                        let firstVariant = null;
+                                                        if (products[i].variants && products[i].variants.length > 0) {
+                                                            // Sort variants by size (as numbers) to find the smallest one
+                                                            const sortedVariants = [...products[i].variants].sort((a, b) => Number(a.size) - Number(b.size));
+                                                            firstVariant = sortedVariants[0];
+                                                        }
+                                                        %>
+                                                        ₹ <%= firstVariant ? firstVariant.regularPrice : 'N/A' %>
                                                     </td>
                                                     <td>
-                                                        
-                                                            ₹ <%= variant ? variant.salePrice : 'N/A' %>
+                                                        ₹ <%= firstVariant ? firstVariant.salePrice : 'N/A' %>
                                                     </td>
             
                                                     <td>

@@ -183,7 +183,7 @@
                                         </td>
                                         <td><span class="quantity"><%= item.quantity %></span></td>
                                         <td class="price">₹<%= item.price.toFixed(2) %></td>
-                                        <td class="total">₹<%= totals.finalAmount.toFixed(2) %></td>
+                                        <td class="total">₹<%= (item.price * item.quantity).toFixed(2) %></td>
                                         <td>
                                             <span class="status-badge <%= item.status.toLowerCase() %>">
                                                 <%= item.status %>
@@ -198,30 +198,51 @@
                     </div>
                 </div>
 
-                <!-- Order Timeline Section -->
+                <!-- Order Timeline Section -->  
                 <div class="timeline-section">
                     <div class="timeline-container">
                         <div class="section-header">
                             <h3>Order Timeline</h3>
                         </div>
                         <div class="timeline">
-                            <% order.statusHistory.forEach(history => { %>
-                                <div class="timeline-item <%= history.status.toLowerCase() === order.orderStatus.toLowerCase() ? 'active' : 'completed' %>">
+                            <% 
+                                const statuses = ['Ordered', 'Pending', 'Processing', 'Shipped', 'Delivered'];
+                                const itemStatuses = order.items.map(item => item.status);
+                                const hasDelivered = itemStatuses.includes('Delivered');
+                                const allReturned = itemStatuses.every(s => s === 'Returned');
+                                const hasReturnRequest = itemStatuses.some(s => ['ReturnRequested', 'ReturnApproved'].includes(s));
+                                
+                                let currentOverallStatus = order.orderStatus;
+                                if (hasDelivered) {
+                                    currentOverallStatus = 'Delivered';
+                                } else if (allReturned) {
+                                    currentOverallStatus = 'Returned';
+                                } else if (!hasDelivered && hasReturnRequest) {
+                                    // Keep the most relevant current status if returns are in progress but not all items are returned
+                                    // This prevents showing "Returned" prematurely.
+                                }
+
+                                const currentStatusIndex = statuses.indexOf(currentOverallStatus);
+                            %>
+                
+                            <% statuses.forEach((status, index) => { %>
+                                <div class="timeline-item <%= index < currentStatusIndex ? 'completed' : (index === currentStatusIndex ? 'active' : '') %>">
                                     <div class="timeline-marker"></div>
-                                    <div class="timeline-title"><%= history.status %></div>
-                                    <div class="timeline-date"><%= new Date(history.date).toLocaleString() %></div>
-                                    <% if (history.description) { %>
-                                        <div class="timeline-description"><%= history.description %></div>
+                                    <div class="timeline-title"><%= status %></div>
+                                    <% if (status === 'Ordered') { %>
+                                        <div class="timeline-date"><%= new Date(order.createdAt).toLocaleString() %></div>
+                                    <% } else { %>
+                                        <% 
+                                            const historyEntry = order.statusHistory.find(h => h.status === status);
+                                        %>
+                                        <% if (historyEntry) { %>
+                                            <div class="timeline-date"><%= new Date(historyEntry.date).toLocaleString() %></div>
+                                        <% } else if (index > currentStatusIndex) { %>
+                                            <div class="timeline-date">Pending</div>
+                                        <% } %>
                                     <% } %>
                                 </div>
                             <% }) %>
-                            <% if (order.orderStatus.toLowerCase() !== 'delivered') { %>
-                                <div class="timeline-item">
-                                    <div class="timeline-marker"></div>
-                                    <div class="timeline-title">Delivered</div>
-                                    <div class="timeline-date">Pending</div>
-                                </div>
-                            <% } %>
                         </div>
                     </div>
                 </div>
