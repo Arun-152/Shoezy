@@ -22,9 +22,16 @@ const shopPage = async (req, res) => {
         
         // Build the sort object
         const sort = {};
+        let sortByPrice = null;
         if (req.query.sortBy) {
             const [sortField, sortOrder] = req.query.sortBy.split('-');
-            sort[sortField === 'price' ? 'variants.salePrice' : sortField] = sortOrder === 'asc' ? 1 : -1;
+            if (sortField === 'price') {
+                sortByPrice = sortOrder; // 'asc' or 'desc'
+            } else if (sortField === 'name') {
+                sort['productName'] = sortOrder === 'asc' ? 1 : -1;
+            } else {
+                sort[sortField] = sortOrder === 'asc' ? 1 : -1;
+            }
         } else {
             sort.createdAt = -1;
         }
@@ -34,7 +41,8 @@ const shopPage = async (req, res) => {
                 path: "category",
                 match: { isListed: true, isDeleted: false }
             })
-            .sort(sort);
+            .sort(sort)
+            .collation({ locale: 'en', strength: 2 }); // strength: 2 for case-insensitivity
 
         const allProducts = await productsQuery;
         
@@ -49,6 +57,27 @@ const shopPage = async (req, res) => {
                     return minSalePrice >= minPrice && minSalePrice <= maxPrice;
                 }
                 return false;
+            });
+        }
+
+        // Manual price sorting after all filters are applied
+        if (sortByPrice) {
+            filteredProducts.sort((a, b) => {
+                const getMinPrice = (product) => {
+                    if (!product.variants || product.variants.length === 0) return null;
+                    const availableVariants = product.variants.filter(v => v.variantQuantity > 0);
+                    if (availableVariants.length === 0) return null;
+                    return Math.min(...availableVariants.map(v => v.salePrice));
+                };
+
+                const priceA = getMinPrice(a);
+                const priceB = getMinPrice(b);
+
+                if (sortByPrice === 'asc') {
+                    return (priceA ?? Infinity) - (priceB ?? Infinity);
+                } else { // 'desc'
+                    return (priceB ?? -Infinity) - (priceA ?? -Infinity);
+                }
             });
         }
 

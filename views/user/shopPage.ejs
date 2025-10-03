@@ -345,6 +345,7 @@
                     <div class="filter-section">
                         <h4><i class="fas fa-sort"></i> Sort By</h4>
                         <select id="sortBy">
+                            <option value="createdAt-desc">Newest</option>
                             <option value="name-asc">Name (A-Z)</option>
                             <option value="name-desc">Name (Z-A)</option>
                             <option value="price-asc">Price (Low to High)</option>
@@ -607,7 +608,7 @@
                         category: urlParams.get('category') || '',
                         minPrice: urlParams.get('minPrice') || '',
                         maxPrice: urlParams.get('maxPrice') || '',
-                        sortBy: urlParams.get('sortBy') || 'name-asc'
+                        sortBy: urlParams.get('sortBy') || 'createdAt-desc'
                     };
 
                     document.getElementById('searchInput').value = query.search;
@@ -643,8 +644,12 @@
                     if (searchInput) {
                         searchInput.value = '';
                         searchInput.focus();
-                        clearBtn.classList.remove('show');
-                        filterAndSort(); // Trigger filter update
+                        if (clearBtn) {
+                            clearBtn.classList.remove('show');
+                        }
+                        // The change event on the input will trigger filterAndSort,
+                        // so calling it here is redundant.
+                        filterAndSort();
                     }
                 }
 
@@ -831,6 +836,10 @@
                         input.addEventListener('change', filterAndSort);
                     }
                 });
+
+                function clearFilters() {
+                    window.location.href = '/shop';
+                }
 
                 function showNotification(message, type = 'success') {
                     const existing = document.querySelectorAll('.notification');
