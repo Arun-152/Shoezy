@@ -343,17 +343,19 @@ const paymentFailed = async (req, res) => {
 };
 const loadRetryPayment = async (req, res) => {
   try {
-    // This function is being deprecated in favor of direct AJAX calls from the order pages.
-    // If a user somehow lands here, redirect them to their orders.
-    console.log("loadRetryPayment was called, redirecting to /order");
-    return res.redirect('/order');
+    const { orderId } = req.params;
+    const order = await Order.findById(orderId).populate('items.productId');
+
+    if (!order) {
+      return res.status(404).render('user/errorPage', { message: 'Order not found' });
+    }
+
+    // Render the retry payment page with order details
+    return res.render('user/retryPaymentPage', { order });
+
   } catch (error) {
-    console.error("retry payment error:", error);
-    // Redirect to an error page or the main order page on error.
-    return res.status(500).render("user/errorPage", {
-      success: false,
-      message: "Internal server error"
-    });
+    console.error("Error loading retry payment page:", error);
+    return res.status(500).render('user/errorPage', { message: 'Internal server error' });
   }
 };
 const retryPayment = async(req,res)=>{
