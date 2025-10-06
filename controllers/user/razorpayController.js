@@ -77,6 +77,7 @@ const createOrder = async (req, res) => {
         quantity: item.quantity,
         price: price,
         totalPrice: totalPrice,
+        status: "Failed",
       });
     }
 
@@ -154,6 +155,8 @@ const createOrder = async (req, res) => {
       totalAmount: totalAmount, // Use the calculated total amount
       paymentMethod: "Online",
       paymentStatus: "Failed",
+      orderStatus: "Failed",
+
       // Persist coupon details so that usage checks work later
       couponCode: couponData.applied ? couponData.code : null,
       couponId: couponData.applied ? couponData.couponId : null,
@@ -179,8 +182,6 @@ const createOrder = async (req, res) => {
       orderId: newOrder._id,
       useraddress: address
     });
-
-
 
   } catch (error) {
     console.error("Razorpay create order error:", error);
@@ -212,7 +213,7 @@ const verifyPayment = async (req, res) => {
         if (!product) {
           // This scenario should be rare if createOrder already validated, but good to have.
           order.paymentStatus = "Failed_Product_Missing";
-          order.orderStatus = "Failed"; // Mark overall order status as failed
+          order.orderStatus = "Failed";// Mark overall order status as failed
           await order.save();
           return res.status(400).json({
             success: false,
@@ -224,7 +225,7 @@ const verifyPayment = async (req, res) => {
         const variant = product.variants.find(v => v.size === item.size);
         if (!variant) {
           order.paymentStatus = "Failed_Variant_Missing";
-          order.orderStatus = "Failed"; // Mark overall order status as failed
+          order.orderStatus = "Failed";// Mark overall order status as failed
           await order.save();
           return res.status(400).json({
             success: false,
@@ -261,6 +262,7 @@ const verifyPayment = async (req, res) => {
     order.paymentMethod = "Online"
     order.razorpayPaymentId = razorpay_payment_id
     order.orderStatus = "Processing"; // Initial status for a successfully placed order
+    order.items.forEach(item=>item.status = "Processing")
     // Removed: const productsToUpdate = order.items.map(item => ({ product: null, variant: null, item })); // This line was incorrectly re-initializing productsToUpdate
     await order.save();
 

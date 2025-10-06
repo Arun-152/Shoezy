@@ -45,7 +45,8 @@ const orderSchema = new Schema({
                 'Cancelled',
                 'Returned',
                 'ReturnRequested',
-                'ReturnApproved'
+                'ReturnApproved',
+                'Failed'
             ],
             default: 'Pending'
         }
@@ -83,7 +84,7 @@ const orderSchema = new Schema({
       "ReturnApproved",
       "Failed",
         ],
-    default: "Pending",
+    default: "Paid",
     },
     paymentStatus: {
         type: String,

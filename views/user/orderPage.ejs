@@ -39,33 +39,10 @@
                             <div class="orders-list">
                                 <% if (orders && orders.length> 0) { %>
                                     <% orders.forEach(order=> { %>
-                                        <% 
-                                            //  Calculate dynamic order status based on item statuses with correct priority
-                                            let itemStatuses=order.items.map(item=> item.status ||
-                                            order.orderStatus);
-                                            let hasDelivered = itemStatuses.some(status => status === 'Delivered');
-                                            let hasReturned = itemStatuses.some(status => status === 'Returned');
-                                            let hasCancelled = itemStatuses.some(status => status === 'Cancelled');
-                                            let hasReturnRequested = itemStatuses.some(status => status ===
-                                            'ReturnRequested');
-
+                                        <%
+                                            // Use the orderStatus directly from the backend for consistency.
                                             let displayStatus = order.orderStatus;
-
-                                            // Priority: Delivered > Returned > Cancelled > admin status
-                                            if (hasDelivered) {
-                                            displayStatus = 'Delivered';
-                                            } else if (hasReturned) {
-                                            displayStatus = 'Returned';
-                                            } else if (hasCancelled && itemStatuses.every(status => ['Cancelled',
-                                            'Returned'].includes(status))) {
-                                            displayStatus = 'Cancelled';
-                                            } else if (hasReturnRequested) {
-                                            displayStatus = 'Return Requested';
-                                            } else {
-                                            // Use admin-side status for the whole order
-                                            displayStatus = order.orderStatus;
-                                            }
-                                            %>
+                                        %>
 
                                             <div class="order-card"
                                                 data-status="<%= displayStatus.toLowerCase().replace(/\s+/g, '') %>"
@@ -125,7 +102,7 @@
                                                         <a href="/order/<%= order._id %>" class="btn btn-secondary">View
                                                             Details</a>
 
-                                                        <% if (order.paymentStatus==='Failed' ) { %>
+                                                        <% if (order.paymentStatus==='Failed' || order.orderStatus === 'Payment Failed' ) { %>
                                                             <!-- Retry Payment Button -->
                                                             <form action="/payment/retryPayment/<%= order._id %>"
                                                                 method="get" style="display:inline;">
@@ -358,6 +335,10 @@
                     background-color: #10b981;
                     color: white;
                 }
+                .failed{
+                    background-color: #b91010;
+                    color: white;
+                }
 
                 .processing {
                     background-color: #3b82f6;
@@ -383,61 +364,16 @@
                     background-color: #dc2626;
                     color: white;
                 }
+
+                .paymentfailed {
+                    background-color: #ef4444; /* A slightly different red for payment failure */
+                    color: white;
+                }
+
             </style>
             <script>
                 let currentOrderId = null;
                 let currentProductIds = [];
-
-                // Function to determine order status based on item statuses
-                function determineOrderStatus(items) {
-                    if (!items || items.length === 0) return 'Pending';
-
-                    const statuses = items.map(item => item.status);
-
-                    // Priority: Delivered > Returned > Cancelled > admin status
-                    if (statuses.some(status => status === 'Delivered')) {
-                        return 'Delivered';
-                    } else if (statuses.some(status => status === 'Returned')) {
-                        return 'Returned';
-                    } else if (statuses.every(status => ['Cancelled', 'Returned'].includes(status))) {
-                        return 'Cancelled';
-                    } else if (statuses.some(status => status === 'ReturnRequested')) {
-                        return 'Return Requested';
-                    } else if (statuses.every(status => status === 'Shipped')) {
-                        return 'Shipped';
-                    } else if (statuses.every(status => status === 'Processing')) {
-                        return 'Processing';
-                    } else if (statuses.every(status => status === 'Pending')) {
-                        return 'Pending';
-                    }
-
-                    return 'Processing'; // Default fallback
-                }
-
-                // Update order statuses on page load
-                document.addEventListener('DOMContentLoaded', function () {
-                    document.querySelectorAll('.order-card').forEach(card => {
-                        const itemsData = card.getAttribute('data-order-items');
-                        if (itemsData) {
-                            try {
-                                const items = JSON.parse(itemsData);
-                                const calculatedStatus = determineOrderStatus(items);
-
-                                // Update the status badge
-                                const statusBadge = card.querySelector('.status-badge');
-                                const statusDiv = card.querySelector('.order-status');
-
-                                if (statusBadge && statusDiv) {
-                                    statusBadge.textContent = calculatedStatus;
-                                    statusDiv.className = `order-status ${calculatedStatus.toLowerCase().replace(/\s+/g, '')}`;
-                                    card.setAttribute('data-status', calculatedStatus.toLowerCase().replace(/\s+/g, ''));
-                                }
-                            } catch (e) {
-                                console.error('Error parsing order items:', e);
-                            }
-                        }
-                    });
-                });
 
                 // Filter functionality
                 document.querySelectorAll('.filter-btn').forEach(btn => {

@@ -53,7 +53,7 @@ const orderPage = async (req, res) => {
         }
         const user = await User.findById(userId);
 
-        const orders = await Order.find({ userId, paymentStatus: { $ne: "Failed_Stock_Issue" }, orderStatus: { $ne: "Failed" } }) // Exclude orders that failed due to stock or other general failures
+        const orders = await Order.find({ userId, paymentStatus: { $ne: "Failed_Stock_Issue" }}) // Exclude orders that failed due to stock or other general failures
             .populate('items.productId')
             .populate('couponCode')
             .sort({ createdAt: -1 });
@@ -86,7 +86,7 @@ const orderDetails = async (req, res) => {
             return res.redirect("/login");
         }
 
-        const order = await Order.findOne({ _id: orderId, userId, paymentStatus: { $ne: "Failed_Stock_Issue" }, orderStatus: { $ne: "Failed" } }) // Exclude orders that failed due to stock or other general failures
+        const order = await Order.findOne({ _id: orderId, userId}) // Exclude orders that failed due to stock or other general failures
             .populate('items.productId')
             .populate('couponCode');
 
@@ -122,7 +122,7 @@ const cancelOrder = async (req, res) => {
     const order = await Order.findById(orderId).populate('items.productId');
 
     if (!order) {
-      return res.status(404).json({ success: false, message: 'Order not found' });
+      return res.render("user404");
     }
 
     // Track refund and determine scope

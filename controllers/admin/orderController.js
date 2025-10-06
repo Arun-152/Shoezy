@@ -55,10 +55,7 @@ const ordersPage = async (req, res) => {
     const sort = req.query.sort || 'date_desc';
 
     // Base query to exclude failed online orders
-    const query = {
-      orderStatus: { $nin: ["Failed", "payment-failed"] },
-      paymentStatus: { $ne: "Failed_Stock_Issue" }
-    };
+    const query = {};
 
     if (search) {
         query.$or = [
