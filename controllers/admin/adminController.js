@@ -210,16 +210,31 @@ const dashboard = async (req, res) => {
       paymentStatus: { $ne: "Failed_Stock_Issue" }
     };
 
-    // Total Orders
-    const totalOrders = await Order.countDocuments(excludeFailedOrdersFilter);
+    // Total Sold Products (Quantity)
+    const soldProductsAgg = await Order.aggregate([
+      { $unwind: "$items" },
+      {
+        $match: {
+          orderStatus: { $nin: ["Cancelled", "Returned", "Failed", "payment-failed"] },
+          "items.status": { $in: ["Delivered", "Shipped", "Processing"] }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          count: { $sum: "$items.quantity" }
+        }
+      }
+    ]);
+    const totalSoldProducts = soldProductsAgg.length > 0 ? soldProductsAgg[0].count : 0;
+
 
     // Total Revenue (from delivered and paid orders)
     const revenueAgg = await Order.aggregate([
       {
         $match: {
-          ...excludeFailedOrdersFilter,
-          orderStatus: "Delivered",
-          paymentStatus: "Paid",
+          ...excludeFailedOrdersFilter, // Use the base filter
+          orderStatus: { $nin: ["Cancelled", "Returned", "Failed", "payment-failed"] } // Count revenue from all successful, non-returned orders
         },
       },
       {
@@ -230,6 +245,9 @@ const dashboard = async (req, res) => {
       },
     ]);
     const totalRevenue = revenueAgg.length > 0 ? revenueAgg[0].total : 0;
+
+    // Total Orders
+    const totalOrders = await Order.countDocuments(excludeFailedOrdersFilter);
 
     // Order Status Counts
     const statusCounts = await Order.aggregate([
@@ -283,8 +301,12 @@ const dashboard = async (req, res) => {
 
     // Most Ordered Products (top 5 by number of unique orders)
     const mostOrderedProducts = await Order.aggregate([
-      { $match: excludeFailedOrdersFilter },
       { $unwind: "$items" },
+      {
+        $match: {
+          "items.status": { $in: ["Delivered", "Shipped", "Processing"] }
+        }
+      },
       {
         $group: {
           _id: "$items.productId",
@@ -316,8 +338,12 @@ const dashboard = async (req, res) => {
 
     // Most Ordered Categories (top 5 by number of unique orders containing products from category)
     const mostOrderedCategories = await Order.aggregate([
-      { $match: excludeFailedOrdersFilter },
       { $unwind: "$items" },
+      {
+        $match: {
+          "items.status": { $in: ["Delivered", "Shipped", "Processing"] }
+        }
+      },
       {
         $lookup: {
           from: "products",
@@ -370,8 +396,7 @@ const dashboard = async (req, res) => {
       {
         $match: {
           ...excludeFailedOrdersFilter,
-          orderStatus: "Delivered",
-          paymentStatus: "Paid",
+          orderStatus: { $nin: ["Cancelled", "Returned", "Failed", "payment-failed"] },
           createdAt: {
             $gte: new Date(yearlyLabels[0], 0, 1), // Start of the first year
             $lt: new Date(yearlyLabels[yearlyLabels.length - 1] + 1, 0, 1) // Start of the year after the last year
@@ -396,8 +421,7 @@ const dashboard = async (req, res) => {
       {
         $match: {
           ...excludeFailedOrdersFilter,
-          orderStatus: "Delivered",
-          paymentStatus: "Paid",
+          orderStatus: { $nin: ["Cancelled", "Returned", "Failed", "payment-failed"] },
           createdAt: { $gte: new Date(currentYear, 0, 1) }
         },
       },
@@ -432,8 +456,7 @@ const dashboard = async (req, res) => {
       {
         $match: {
           ...excludeFailedOrdersFilter,
-          orderStatus: "Delivered",
-          paymentStatus: "Paid",
+          orderStatus: { $nin: ["Cancelled", "Returned", "Failed", "payment-failed"] },
           createdAt: { $gte: startOfWeek, $lte: endOfWeek }
         }
       },
@@ -468,8 +491,7 @@ const dashboard = async (req, res) => {
         {
           $match: {
             ...excludeFailedOrdersFilter,
-            orderStatus: "Delivered",
-            paymentStatus: "Paid",
+            orderStatus: { $nin: ["Cancelled", "Returned", "Failed", "payment-failed"] },
             createdAt: { $gte: start, $lt: end },
           },
         },
@@ -552,6 +574,7 @@ const dashboard = async (req, res) => {
   totalOrders,
   ordersPercentage: `${ordersPercentage > 0 ? "+" : ""}${ordersPercentage}%`,
   totalProducts,
+  soldProducts: totalSoldProducts,
   productsPercentage: `${productsPercentage > 0 ? "+" : ""}${productsPercentage}%`,
   pending,
   processing,

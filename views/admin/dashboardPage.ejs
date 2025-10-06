@@ -976,7 +976,15 @@
                                 </div>
                                 <i class="fas fa-shopping-cart"></i>
                             </div>
-
+<div class="stat-card total-products">
+                                <div class="stat-info">
+                                    <h3>Sold Products</h3>
+                                    <h2 class="stat-value">
+                                        <%= soldProducts ? soldProducts.toLocaleString('en-IN') : 0 %>
+                                    </h2>
+                                </div>
+                                <i class="fas fa-box"></i>
+                            </div>
                             <div class="stat-card total-products">
                                 <div class="stat-info">
                                     <h3>Total Products</h3>

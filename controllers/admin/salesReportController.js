@@ -125,31 +125,56 @@ const loadSalesReport = async (req, res) => {
       .limit(limitNum)
       .lean();
 
-    // Convert orders to front-end friendly salesData
-    const salesData = orders.map(order => {
-      const isCancelledOrReturned = order.orderStatus === 'Cancelled' || order.orderStatus === 'Returned';
-      const totalAmount = isCancelledOrReturned ? 0 : (Number(order.totalAmount) || 0);
-      const discount = isCancelledOrReturned ? 0 : (Number(order.discountAmount) || 0);
-      const netPaidAmount = isCancelledOrReturned ? 0 : (Number(order.totalAmount - discount) || 0);
+    // Flatten orders into sales data where each row is a product item
+    const salesData = orders.flatMap(order => {
+      const orderDiscount = Number(order.discountAmount) || 0;
+      const orderSubtotal = order.items.reduce((sum, item) => sum + (Number(item.totalPrice) || 0), 0);
 
-      return {
-        id: order.orderNumber,
-        date: order.createdAt,
-        customerName: order.address?.fullName || (order.userId ? `${order.userId.firstName || ''} ${order.userId.lastName || ''}`.trim() : 'Unknown'),
-        customerEmail: order.userId?.email || 'N/A',
-        paymentMethod: formatPayment(order.paymentMethod),
-        couponUsed: order.couponCode || '',
-        totalAmount: totalAmount,
-        discount: discount,
-        netPaidAmount: netPaidAmount,
-        status: order.orderStatus,
-        products: order.items.map(item => ({
-          name: item.productId?.productName || 'Unknown Product',
-          quantity: Number(item.quantity) || 0,
-          price: Number(item.totalPrice) || 0,
-        })),
-      };
+      return order.items.map(item => {
+        let itemPrice = Number(item.totalPrice) || 0;
+        // Distribute discount proportionally
+        const itemDiscount = orderSubtotal > 0 ? (itemPrice / orderSubtotal) * orderDiscount : 0;
+        let netItemPrice = itemPrice - itemDiscount;
+
+        const isCancelledOrReturned = ['Cancelled', 'Returned'].includes(item.status || order.orderStatus);
+        if (isCancelledOrReturned) {
+          itemPrice = -Math.abs(itemPrice);
+          netItemPrice = -Math.abs(netItemPrice);
+        }
+
+        return {
+          id: order.orderNumber,
+          date: order.createdAt,
+          customerName: order.address?.fullName || (order.userId ? `${order.userId.firstName || ''} ${order.userId.lastName || ''}`.trim() : 'Unknown'),
+          paymentMethod: formatPayment(order.paymentMethod),
+          couponUsed: order.couponCode || 'N/A',
+          status: order.orderStatus,
+          // Item-specific details
+          productName: item.productId?.productName || 'Unknown Product',
+          productQuantity: Number(item.quantity) || 0,
+          productPrice: itemPrice,
+          productDiscount: itemDiscount,
+          productNetPrice: netItemPrice,
+          itemStatus: item.status || order.orderStatus,
+        };
+      });
     });
+
+    // Calculate Total Sales from the 'Price' column for eligible items
+    const totalSales = salesData.reduce((acc, item) => {
+      if (['Delivered', 'Shipped', 'Processing'].includes(item.itemStatus)) {
+        return acc + item.productPrice;
+      }
+      return acc;
+    }, 0);
+
+    // Calculate Net Revenue from the flattened salesData
+    const netRevenue = salesData.reduce((acc, item) => {
+      if (['Delivered', 'Shipped', 'Processing'].includes(item.itemStatus)) {
+        return acc + item.productNetPrice;
+      }
+      return acc;
+    }, 0);
 
     // Aggregate summary data
     const [agg] = await Order.aggregate([
@@ -163,20 +188,11 @@ const loadSalesReport = async (req, res) => {
                 _id: null,
                 totalAmount: { $sum: { $ifNull: ['$totalAmount', 0] } },
                 totalDiscounts: { $sum: { $ifNull: ['$discountAmount', 0] } },
-                totalSalesAmount: {
-                  $sum: {
-                    $cond: [
-                      { $not: { $in: ['$orderStatus', ['Cancelled', 'Returned']] } },
-                      { $ifNull: ['$totalAmount', 0] },
-                      0
-                    ]
-                  }
-                },
                 totalNetRevenueAmount: {
                   $sum: {
                     $cond: [
-                      { $not: { $in: ['$orderStatus', ['Cancelled', 'Returned']] } },
-                      { $subtract: [{ $ifNull: ['$totalAmount', 0] }, { $ifNull: ['$discountAmount', 0] }] },
+                      { $in: ['$orderStatus', ['Delivered', 'Shipped', 'Processing']] },
+                      { $ifNull: ['$totalAmount', 0] },
                       0
                     ]
                   }
@@ -186,9 +202,10 @@ const loadSalesReport = async (req, res) => {
             },
           ],
           productsSold: [
-            { $match: { orderStatus: { $nin: ['Cancelled', 'Returned'] } } },
             { $unwind: '$items' },
-            { $group: { _id: null, qty: { $sum: '$items.quantity' } } },
+            // Only count items that are actually delivered
+            { $match: { 'items.status': {$in:['Delivered','Processing','Shipped']} } },
+            { $group: { _id: null, qty: { $sum: '$items.quantity' } } }
           ],
         },
       },
@@ -199,12 +216,11 @@ const loadSalesReport = async (req, res) => {
     const productsSoldAll = agg?.productsSold?.[0]?.qty || 0;
 
     const summary = {
-      totalSales: Number(totals.totalSalesAmount || 0),
+      totalSales: totalSales,
       totalOrders: totalOrdersAll,
       productsSold: productsSoldAll,
       totalDiscounts: Number(totals.totalDiscounts || 0),
-      totalReturns: 0,
-      netRevenue: Number(totals.totalNetRevenueAmount || 0),
+      netRevenue: netRevenue,
     };
 
     const totalPages = Math.max(1, Math.ceil(totalCount / limitNum));
@@ -312,25 +328,56 @@ const exportPdfReport = async (req, res) => {
       .sort({ createdAt: -1 }) // Default sort for exports
       .lean();
 
-    const salesData = orders.map(order => {
-      const isCancelledOrReturned = order.orderStatus === 'Cancelled' || order.orderStatus === 'Returned';
-      const totalAmount = isCancelledOrReturned ? 0 : (Number(order.totalAmount) || 0);
-      const discount = isCancelledOrReturned ? 0 : (Number(order.discountAmount) || 0);
-      const netPaidAmount = isCancelledOrReturned ? 0 : (Number(order.totalAmount - discount) || 0);
+    // Flatten data for PDF export
+    const salesData = orders.flatMap(order => {
+      const orderDiscount = Number(order.discountAmount) || 0;
+      const orderSubtotal = order.items.reduce((sum, item) => sum + (Number(item.totalPrice) || 0), 0);
 
-      return {
-        id: order.orderNumber,
-        date: new Date(order.createdAt).toLocaleDateString(),
-        customerName: order.address?.fullName || (order.userId ? `${order.userId.firstName || ''} ${order.userId.lastName || ''}`.trim() : 'Unknown'),
-        paymentMethod: formatPayment(order.paymentMethod),
-        couponUsed: order.couponCode || 'N/A',
-        totalAmount: `₹${totalAmount.toFixed(2)}`,
-        discount: `₹${discount.toFixed(2)}`,
-        netPaidAmount: `₹${netPaidAmount.toFixed(2)}`,
-        status: order.orderStatus,
-        products: order.items.map(item => `${item.productId?.productName || 'Unknown Product'} (Qty: ${item.quantity}, Price: ${item.totalPrice.toFixed(2)})`).join('\n'),
-      };
+      return order.items.map(item => {
+        let itemPrice = Number(item.totalPrice) || 0;
+        const itemDiscount = orderSubtotal > 0 ? (itemPrice / orderSubtotal) * orderDiscount : 0;
+        let netItemPrice = itemPrice - itemDiscount;
+        const isCancelledOrReturned = ['Cancelled', 'Returned'].includes(item.status || order.orderStatus);
+        if (isCancelledOrReturned) netItemPrice = -Math.abs(netItemPrice);
+
+        return {
+          id: order.orderNumber,
+          date: new Date(order.createdAt).toLocaleDateString(),
+          customerName: order.address?.fullName || (order.userId ? `${order.userId.firstName || ''} ${order.userId.lastName || ''}`.trim() : 'Unknown'),
+          productName: item.productId?.productName || 'Unknown Product',
+          productQuantity: item.quantity,
+          productNetPrice: `₹${netItemPrice.toFixed(2)}`,
+          couponUsed: order.couponCode || 'N/A',
+          paymentMethod: formatPayment(order.paymentMethod),
+          itemStatus: item.status || order.orderStatus,
+        };
+      });
     });
+
+    // Calculate Net Revenue from the flattened salesData for the summary
+    const netRevenue = salesData.reduce((acc, item) => {
+      // Only include items that are considered part of revenue
+      if (['Delivered', 'Shipped', 'Processing'].includes(item.itemStatus)) {
+        // The productNetPrice is already a string like '₹-123.45' or '₹123.45'
+        return acc + parseFloat(item.productNetPrice.replace('₹'));
+      }
+      return acc;
+    }, 0);
+
+    // Add the total revenue summary row
+    if (salesData.length > 0) {
+      salesData.push({
+        id: '',
+        date: '',
+        customerName: '',
+        productName: 'Net Revenue',
+        productQuantity: '',
+        productNetPrice: `₹${netRevenue.toFixed(2)}`,
+        couponUsed: '',
+        paymentMethod: '',
+        itemStatus: '',
+      });
+    }
 
     const doc = new PDFDocument({ margin: 30, size: 'A4' });
     res.setHeader('Content-Type', 'application/pdf');
@@ -340,23 +387,28 @@ const exportPdfReport = async (req, res) => {
     const table = {
       title: 'Sales Report',
       headers: [
-        { label: "Order ID", property: 'id', width: 40 },
-        { label: "Order Date", property: 'date', width: 40 },
-        { label: "Customer Name", property: 'customerName', width: 60 },
-        { label: "Payment Method", property: 'paymentMethod', width: 40 },
-        { label: "Coupon Used", property: 'couponUsed', width: 40 },
-        { label: "Total Amount", property: 'totalAmount', width: 45 },
-        { label: "Discount", property: 'discount', width: 40 },
-        { label: "Net Paid", property: 'netPaidAmount', width: 45 },
-        { label: "Order Status", property: 'status', width: 40 },
-        { label: "Products", property: 'products', width: 140 },
+        { label: "Order ID", property: 'id', width: 60 },
+        { label: "Date", property: 'date', width: 60 },
+        { label: "Customer", property: 'customerName', width: 80 },
+        { label: "Product", property: 'productName', width: 100 },
+        { label: "Qty", property: 'productQuantity', width: 30, renderer: (value) => String(value) },
+        { label: "Coupon", property: 'couponUsed', width: 50 },
+        { label: "Net Price", property: 'productNetPrice', width: 60 },
+        { label: "Payment", property: 'paymentMethod', width: 50 },
+        { label: "Status", property: 'itemStatus', width: 60 },
       ],
       datas: salesData,
     };
 
     await doc.table(table, {
-        prepareHeader: () => doc.font('Helvetica-Bold'),
-        prepareRow: (row, i) => doc.font('Helvetica').fontSize(8),
+        prepareHeader: () => doc.font('Helvetica-Bold').fontSize(8),
+        prepareRow: (row, i) => {
+          doc.font('Helvetica').fontSize(8);
+          // Bold the total revenue row
+          if (row.productName === 'Net Revenue') {
+            doc.font('Helvetica-Bold');
+          }
+        },
      });
 
     doc.end();
@@ -443,25 +495,40 @@ const exportExcelReport = async (req, res) => {
       .sort({ createdAt: -1 })
       .lean();
 
-    const salesData = orders.map(order => {
-      const isCancelledOrReturned = order.orderStatus === 'Cancelled' || order.orderStatus === 'Returned';
-      const totalAmount = isCancelledOrReturned ? 0 : (Number(order.totalAmount) || 0);
-      const discount = isCancelledOrReturned ? 0 : (Number(order.discountAmount) || 0);
-      const netPaidAmount = isCancelledOrReturned ? 0 : (Number(order.totalAmount - discount) || 0);
+    // Flatten data for Excel export
+    const salesData = orders.flatMap(order => {
+      const orderDiscount = Number(order.discountAmount) || 0;
+      const orderSubtotal = order.items.reduce((sum, item) => sum + (Number(item.totalPrice) || 0), 0);
 
-      return {
-        id: order.orderNumber,
-        date: new Date(order.createdAt).toLocaleDateString(),
-        customerName: order.address?.fullName || (order.userId ? `${order.userId.firstName || ''} ${order.userId.lastName || ''}`.trim() : 'Unknown'),
-        paymentMethod: formatPayment(order.paymentMethod),
-        couponUsed: order.couponCode || 'N/A',
-        totalAmount: totalAmount.toFixed(2),
-        discount: discount.toFixed(2),
-        netPaidAmount: netPaidAmount.toFixed(2),
-        status: order.orderStatus,
-        products: order.items.map(item => `${item.productId?.productName || 'Unknown Product'} (Qty: ${item.quantity}, Price: ${item.totalPrice.toFixed(2)})`).join(', '),
-      };
+      return order.items.map(item => {
+        let itemPrice = Number(item.totalPrice) || 0;
+        const itemDiscount = orderSubtotal > 0 ? (itemPrice / orderSubtotal) * orderDiscount : 0;
+        let netItemPrice = itemPrice - itemDiscount;
+        const isCancelledOrReturned = ['Cancelled', 'Returned'].includes(item.status || order.orderStatus);
+        if (isCancelledOrReturned) netItemPrice = -Math.abs(netItemPrice);
+
+        return {
+          id: order.orderNumber,
+          date: new Date(order.createdAt).toLocaleDateString(),
+          customerName: order.address?.fullName || (order.userId ? `${order.userId.firstName || ''} ${order.userId.lastName || ''}`.trim() : 'Unknown'),
+          productName: item.productId?.productName || 'Unknown Product',
+          productQuantity: Number(item.quantity) || 0,
+          productNetPrice: Number(netItemPrice.toFixed(2)),
+          couponUsed: order.couponCode || 'N/A',
+          paymentMethod: formatPayment(order.paymentMethod),
+          itemStatus: item.status || order.orderStatus,
+        };
+      });
     });
+
+    // Calculate Net Revenue from the flattened salesData for the summary
+    const netRevenue = salesData.reduce((acc, item) => {
+      // Only include items that are considered part of revenue
+      if (['Delivered', 'Shipped', 'Processing'].includes(item.itemStatus)) {
+        return acc + item.productNetPrice;
+      }
+      return acc;
+    }, 0);
 
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Sales Report');
@@ -470,18 +537,29 @@ const exportExcelReport = async (req, res) => {
       { header: 'Order ID', key: 'id', width: 20 },
       { header: 'Order Date', key: 'date', width: 15 },
       { header: 'Customer Name', key: 'customerName', width: 25 },
-      { header: 'Payment Method', key: 'paymentMethod', width: 20 },
+      { header: 'Product Name', key: 'productName', width: 30 },
+      { header: 'Quantity', key: 'productQuantity', width: 10 },
       { header: 'Coupon Used', key: 'couponUsed', width: 15 },
-      { header: 'Total Amount (₹)', key: 'totalAmount', width: 15 },
-      { header: 'Discount (₹)', key: 'discount', width: 15 },
-      { header: 'Net Paid Amount (₹)', key: 'netPaidAmount', width: 20 },
-      { header: 'Order Status', key: 'status', width: 15 },
-      { header: 'Products List', key: 'products', width: 50 },
+      { header: 'Net Price (₹)', key: 'productNetPrice', width: 15, style: { numFmt: '"₹"#,##0.00' } },
+      { header: 'Payment Method', key: 'paymentMethod', width: 15 },
+      { header: 'Status', key: 'itemStatus', width: 15 },
     ];
 
     salesData.forEach(row => {
       worksheet.addRow(row);
     });
+
+    // Add and style the total revenue row
+    if (salesData.length > 0) {
+      worksheet.addRow([]); // Add a spacer row
+      const totalRow = worksheet.addRow({
+        productName: 'Net Revenue',
+        productNetPrice: netRevenue,
+      });
+      totalRow.font = { bold: true, size: 12 };
+      totalRow.getCell('F').alignment = { horizontal: 'right' };
+      totalRow.getCell('G').numFmt = '"₹"#,##0.00';
+    }
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', 'attachment; filename="sales_report.xlsx"');
@@ -571,29 +649,35 @@ const exportCsvReport = async (req, res) => {
       .sort({ createdAt: -1 })
       .lean();
 
-    const salesData = orders.map(order => {
-      const isCancelledOrReturned = order.orderStatus === 'Cancelled' || order.orderStatus === 'Returned';
-      const totalAmount = isCancelledOrReturned ? 0 : (Number(order.totalAmount) || 0);
-      const discount = isCancelledOrReturned ? 0 : (Number(order.discountAmount) || 0);
-      const netPaidAmount = isCancelledOrReturned ? 0 : (Number(order.totalAmount - discount) || 0);
+    // Flatten data for CSV export
+    const salesData = orders.flatMap(order => {
+      const orderDiscount = Number(order.discountAmount) || 0;
+      const orderSubtotal = order.items.reduce((sum, item) => sum + (Number(item.totalPrice) || 0), 0);
 
-      return {
-        id: order.orderNumber,
-        date: new Date(order.createdAt).toLocaleDateString(),
-        customerName: order.address?.fullName || (order.userId ? `${order.userId.firstName || ''} ${order.userId.lastName || ''}`.trim() : 'Unknown'),
-        paymentMethod: formatPayment(order.paymentMethod),
-        couponUsed: order.couponCode || 'N/A',
-        totalAmount: totalAmount.toFixed(2),
-        discount: discount.toFixed(2),
-        netPaidAmount: netPaidAmount.toFixed(2),
-        status: order.orderStatus,
-        products: order.items.map(item => `${item.productId?.productName || 'Unknown Product'} (Qty: ${item.quantity}, Price: ${item.totalPrice.toFixed(2)})`).join(', '),
-      };
+      return order.items.map(item => {
+        let itemPrice = Number(item.totalPrice) || 0;
+        const itemDiscount = orderSubtotal > 0 ? (itemPrice / orderSubtotal) * orderDiscount : 0;
+        let netItemPrice = itemPrice - itemDiscount;
+        const isCancelledOrReturned = ['Cancelled', 'Returned'].includes(item.status || order.orderStatus);
+        if (isCancelledOrReturned) netItemPrice = -Math.abs(netItemPrice);
+
+        return [
+          order.orderNumber,
+          new Date(order.createdAt).toLocaleDateString(),
+          order.address?.fullName || (order.userId ? `${order.userId.firstName || ''} ${order.userId.lastName || ''}`.trim() : 'Unknown'),
+          item.productId?.productName || 'Unknown Product',
+          item.quantity,
+          netItemPrice.toFixed(2),
+          order.couponCode || 'N/A',
+          formatPayment(order.paymentMethod),
+          item.status || order.orderStatus,
+        ];
+      });
     });
 
     const columns = [
-      'Order ID', 'Order Date', 'Customer Name', 'Payment Method', 'Coupon Used',
-      'Total Amount (₹)', 'Discount (₹)', 'Net Paid Amount (₹)', 'Order Status', 'Products List'
+      'Order ID', 'Order Date', 'Customer Name', 'Product Name', 'Quantity', 'Coupon Used',
+      'Net Price (₹)', 'Payment Method', 'Status'
     ];
     const stringifier = new Stringifier({ header: true, columns: columns });
 
@@ -602,10 +686,7 @@ const exportCsvReport = async (req, res) => {
 
     stringifier.pipe(res);
     salesData.forEach(row => {
-      stringifier.write([
-        row.id, row.date, row.customerName, row.paymentMethod, row.couponUsed,
-        row.totalAmount, row.discount, row.netPaidAmount, row.status, row.products
-      ]);
+      stringifier.write(row);
     });
     stringifier.end();
 
