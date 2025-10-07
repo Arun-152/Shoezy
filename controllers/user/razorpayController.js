@@ -154,8 +154,8 @@ const createOrder = async (req, res) => {
       // Ensure numeric total amount
       totalAmount: totalAmount, // Use the calculated total amount
       paymentMethod: "Online",
-      paymentStatus: "Failed",
-      orderStatus: "Failed",
+      paymentStatus: "Pending", // Use "Pending" as the initial status for online payments
+      orderStatus: "Failed", // Use "Pending" as the initial status
 
       // Persist coupon details so that usage checks work later
       couponCode: couponData.applied ? couponData.code : null,
@@ -366,7 +366,8 @@ const retryPayment = async(req,res)=>{
     const {orderId} = req.params
     const order = await Order.findById(orderId)
 
-    if (!order || order.paymentStatus === "Failed_Stock_Issue" || order.orderStatus === "Failed") {
+    // Allow retry if paymentStatus is 'Failed' but not if it's a stock issue or the order itself has a 'Failed' status
+    if (!order || order.paymentStatus === "Failed_Stock_Issue" || (order.orderStatus === "Failed" && order.paymentStatus !== "Failed")) {
       return res.status(400).json({
         success: false,
         message: "This order cannot be retried due to stock issues or other failures."
