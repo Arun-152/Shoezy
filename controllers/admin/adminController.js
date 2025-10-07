@@ -229,26 +229,6 @@ const dashboard = async (req, res) => {
     const totalSoldProducts = soldProductsAgg.length > 0 ? soldProductsAgg[0].count : 0;
 
 
-    // Total Revenue (from delivered and paid orders)
-    const revenueAgg = await Order.aggregate([
-      {
-        $match: {
-          ...excludeFailedOrdersFilter, // Use the base filter
-          orderStatus: { $nin: ["Cancelled", "Returned", "Failed", "payment-failed"] } // Count revenue from all successful, non-returned orders
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: "$totalAmount" },
-        },
-      },
-    ]);
-    const totalRevenue = revenueAgg.length > 0 ? revenueAgg[0].total : 0;
-
-    // Total Orders
-    const totalOrders = await Order.countDocuments(excludeFailedOrdersFilter);
-
     // Order Status Counts
     const statusCounts = await Order.aggregate([
       {
@@ -272,30 +252,66 @@ const dashboard = async (req, res) => {
       else if (s._id === "Delivered") delivered = s.count;
     });
 
-    // --- Recent Orders with Pagination ---
+    // --- Fetch all relevant orders to calculate revenue and populate the table ---
+    const allOrders = await Order.find(excludeFailedOrdersFilter)
+      .populate('userId', 'fullname')
+      .populate('items.productId', 'productName')
+      .populate('couponId', 'discountType')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    // --- Flatten orders into sales data (like sales report) ---
+    const salesData = allOrders.flatMap(order => {
+      const orderDiscount = Number(order.discountAmount) || 0;
+      const orderSubtotal = order.items.reduce((sum, item) => sum + (Number(item.totalPrice) || 0), 0);
+      const isFlatCoupon = order.couponId?.discountType === 'flat';
+      const totalItemsInOrder = order.items.length > 0 ? order.items.length : 1;
+
+      return order.items.map(item => {
+        const itemPrice = Number(item.totalPrice) || 0;
+        let itemDiscount = 0;
+
+        if (isFlatCoupon) {
+          itemDiscount = orderDiscount / totalItemsInOrder;
+        } else {
+          itemDiscount = orderSubtotal > 0 ? (itemPrice / orderSubtotal) * orderDiscount : 0;
+        }
+        const netItemPrice = itemPrice - itemDiscount;
+
+        return {
+          orderNumber: order.orderNumber,
+          customer: order.userId ? order.userId.fullname : "Unknown",
+          productName: item.productId?.productName || 'Unknown Product',
+          status: item.status || order.orderStatus,
+          amount: netItemPrice,
+          date: order.createdAt,
+        };
+      });
+    });
+
+    // --- Filter for items that contribute to revenue and should be displayed ---
+    const revenueItems = salesData.filter(item =>
+      ['Delivered', 'Shipped', 'Processing'].includes(item.status)
+    );
+
+    // --- Calculate Net Revenue and Total Orders ---
+    const totalRevenue = revenueItems.reduce((acc, item) => acc + item.amount, 0);
+    const totalOrders = await Order.countDocuments(excludeFailedOrdersFilter);
+
+    // --- Paginate the filtered items for the dashboard table ---
     const page = parseInt(req.query.page) || 1;
     const limit = 6; // 6 orders per page
     const skip = (page - 1) * limit;
 
-    const totalRecentOrders = await Order.countDocuments(excludeFailedOrdersFilter);
-    const totalPages = Math.ceil(totalRecentOrders / limit);
+    const paginatedItems = revenueItems.slice(skip, skip + limit);
+    const totalPages = Math.ceil(revenueItems.length / limit);
 
-    const recentOrders = await Order.find(excludeFailedOrdersFilter)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .populate("userId", "fullname");
-    const recentOrdersData = recentOrders.map((order) => ({
-      orderNumber: order.orderNumber,
-      customer: order.userId ? order.userId.fullname : "Unknown",
-      status: order.orderStatus,
-      amount: order.totalAmount,
-      date: order.createdAt.toLocaleString("en-IN", {
+    const recentSalesData = paginatedItems.map(item => ({
+      ...item,
+      date: item.date.toLocaleString("en-IN", {
         year: "numeric",
         month: "short",
         day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
       }),
     }));
 
@@ -580,7 +596,7 @@ const dashboard = async (req, res) => {
   processing,
   shipped,
   delivered,
-  recentOrdersData,
+  recentOrdersData: recentSalesData,
   mostOrderedProducts, 
   mostOrderedCategories, 
   chartData: {

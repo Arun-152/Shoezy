@@ -120,20 +120,66 @@ const loadSalesReport = async (req, res) => {
     const orders = await Order.find(match)
       .populate('userId', 'firstName lastName email')
       .populate('items.productId')
+      .populate('couponId', 'discountType') // Populate coupon to check discountType
       .sort(sortOption)
       .skip(skip)
       .limit(limitNum)
       .lean();
 
+    // --- START: Calculate totals across ALL filtered pages ---
+    const allFilteredOrders = await Order.find(match)
+      .populate('couponId', 'discountType')
+      .populate('items.productId')
+      .lean();
+
+    const allSalesData = allFilteredOrders.flatMap(order => {
+      const orderDiscount = Number(order.discountAmount) || 0;
+      const orderSubtotal = order.items.reduce((sum, item) => sum + (Number(item.totalPrice) || 0), 0);
+      const isFlatCoupon = order.couponId?.discountType === 'flat';
+      const totalItemsInOrder = order.items.length > 0 ? order.items.length : 1;
+
+      return order.items.map(item => {
+        const itemPrice = Number(item.totalPrice) || 0;
+        let itemDiscount = 0;
+
+        if (isFlatCoupon) {
+          itemDiscount = orderDiscount / totalItemsInOrder;
+        } else {
+          itemDiscount = orderSubtotal > 0 ? (itemPrice / orderSubtotal) * orderDiscount : 0;
+        }
+        const netItemPrice = itemPrice - itemDiscount;
+
+        return {
+          productPrice: itemPrice,
+          productNetPrice: netItemPrice,
+          itemStatus: item.status || order.orderStatus,
+        };
+      });
+    });
+
+    const allRevenueItems = allSalesData.filter(item => ['Delivered', 'Shipped', 'Processing'].includes(item.itemStatus));
+    const totalSalesAllPages = allRevenueItems.reduce((acc, item) => acc + item.productPrice, 0);
+    const netRevenueAllPages = allRevenueItems.reduce((acc, item) => acc + item.productNetPrice, 0);
+    // --- END: Total calculation ---
+
     // Flatten orders into sales data where each row is a product item
     const salesData = orders.flatMap(order => {
       const orderDiscount = Number(order.discountAmount) || 0;
       const orderSubtotal = order.items.reduce((sum, item) => sum + (Number(item.totalPrice) || 0), 0);
+      const isFlatCoupon = order.couponId?.discountType === 'flat';
+      const totalItemsInOrder = order.items.length > 0 ? order.items.length : 1;
 
       return order.items.map(item => {
         let itemPrice = Number(item.totalPrice) || 0;
-        // Distribute discount proportionally
-        const itemDiscount = orderSubtotal > 0 ? (itemPrice / orderSubtotal) * orderDiscount : 0;
+        let itemDiscount = 0;
+
+        if (isFlatCoupon) {
+          // For flat coupons, split the discount equally among all items.
+          itemDiscount = orderDiscount / totalItemsInOrder;
+        } else {
+          // For percentage coupons, distribute discount proportionally.
+          itemDiscount = orderSubtotal > 0 ? (itemPrice / orderSubtotal) * orderDiscount : 0;
+        }
         let netItemPrice = itemPrice - itemDiscount;
 
         const isCancelledOrReturned = ['Cancelled', 'Returned'].includes(item.status || order.orderStatus);
@@ -160,21 +206,6 @@ const loadSalesReport = async (req, res) => {
       });
     });
 
-    // Calculate Total Sales from the 'Price' column for eligible items
-    const totalSales = salesData.reduce((acc, item) => {
-      if (['Delivered', 'Shipped', 'Processing'].includes(item.itemStatus)) {
-        return acc + item.productPrice;
-      }
-      return acc;
-    }, 0);
-
-    // Calculate Net Revenue from the flattened salesData
-    const netRevenue = salesData.reduce((acc, item) => {
-      if (['Delivered', 'Shipped', 'Processing'].includes(item.itemStatus)) {
-        return acc + item.productNetPrice;
-      }
-      return acc;
-    }, 0);
 
     // Aggregate summary data
     const [agg] = await Order.aggregate([
@@ -216,11 +247,11 @@ const loadSalesReport = async (req, res) => {
     const productsSoldAll = agg?.productsSold?.[0]?.qty || 0;
 
     const summary = {
-      totalSales: totalSales,
+      totalSales: totalSalesAllPages,
       totalOrders: totalOrdersAll,
       productsSold: productsSoldAll,
       totalDiscounts: Number(totals.totalDiscounts || 0),
-      netRevenue: netRevenue,
+      netRevenue: netRevenueAllPages,
     };
 
     const totalPages = Math.max(1, Math.ceil(totalCount / limitNum));
@@ -325,6 +356,7 @@ const exportPdfReport = async (req, res) => {
     const orders = await Order.find(match)
       .populate('userId', 'firstName lastName email')
       .populate('items.productId')
+      .populate('couponId', 'discountType') // Populate coupon to check discountType
       .sort({ createdAt: -1 }) // Default sort for exports
       .lean();
 
@@ -332,10 +364,19 @@ const exportPdfReport = async (req, res) => {
     const salesData = orders.flatMap(order => {
       const orderDiscount = Number(order.discountAmount) || 0;
       const orderSubtotal = order.items.reduce((sum, item) => sum + (Number(item.totalPrice) || 0), 0);
+      const isFlatCoupon = order.couponId?.discountType === 'flat';
+      const totalItemsInOrder = order.items.length > 0 ? order.items.length : 1;
 
       return order.items.map(item => {
         let itemPrice = Number(item.totalPrice) || 0;
-        const itemDiscount = orderSubtotal > 0 ? (itemPrice / orderSubtotal) * orderDiscount : 0;
+        let itemDiscount = 0;
+        if (isFlatCoupon) {
+          // For flat coupons, split the discount equally among all items.
+          itemDiscount = orderDiscount / totalItemsInOrder;
+        } else {
+          // For percentage coupons, distribute discount proportionally.
+          itemDiscount = orderSubtotal > 0 ? (itemPrice / orderSubtotal) * orderDiscount : 0;
+        }
         let netItemPrice = itemPrice - itemDiscount;
         const isCancelledOrReturned = ['Cancelled', 'Returned'].includes(item.status || order.orderStatus);
         if (isCancelledOrReturned) netItemPrice = -Math.abs(netItemPrice);
@@ -354,15 +395,11 @@ const exportPdfReport = async (req, res) => {
       });
     });
 
+    // Filter for items that contribute to revenue
+    const revenueItems = salesData.filter(item => ['Delivered', 'Shipped', 'Processing'].includes(item.itemStatus));
+
     // Calculate Net Revenue from the flattened salesData for the summary
-    const netRevenue = salesData.reduce((acc, item) => {
-      // Only include items that are considered part of revenue
-      if (['Delivered', 'Shipped', 'Processing'].includes(item.itemStatus)) {
-        // The productNetPrice is already a string like '₹-123.45' or '₹123.45'
-        return acc + parseFloat(item.productNetPrice.replace('₹'));
-      }
-      return acc;
-    }, 0);
+    const netRevenue = revenueItems.reduce((acc, item) => acc + parseFloat(item.productNetPrice.replace('₹', '')), 0);
 
     // Add the total revenue summary row
     if (salesData.length > 0) {
@@ -492,6 +529,7 @@ const exportExcelReport = async (req, res) => {
     const orders = await Order.find(match)
       .populate('userId', 'firstName lastName email')
       .populate('items.productId')
+      .populate('couponId', 'discountType') // Populate coupon to check discountType
       .sort({ createdAt: -1 })
       .lean();
 
@@ -499,10 +537,19 @@ const exportExcelReport = async (req, res) => {
     const salesData = orders.flatMap(order => {
       const orderDiscount = Number(order.discountAmount) || 0;
       const orderSubtotal = order.items.reduce((sum, item) => sum + (Number(item.totalPrice) || 0), 0);
+      const isFlatCoupon = order.couponId?.discountType === 'flat';
+      const totalItemsInOrder = order.items.length > 0 ? order.items.length : 1;
 
       return order.items.map(item => {
         let itemPrice = Number(item.totalPrice) || 0;
-        const itemDiscount = orderSubtotal > 0 ? (itemPrice / orderSubtotal) * orderDiscount : 0;
+        let itemDiscount = 0;
+        if (isFlatCoupon) {
+          // For flat coupons, split the discount equally among all items.
+          itemDiscount = orderDiscount / totalItemsInOrder;
+        } else {
+          // For percentage coupons, distribute discount proportionally.
+          itemDiscount = orderSubtotal > 0 ? (itemPrice / orderSubtotal) * orderDiscount : 0;
+        }
         let netItemPrice = itemPrice - itemDiscount;
         const isCancelledOrReturned = ['Cancelled', 'Returned'].includes(item.status || order.orderStatus);
         if (isCancelledOrReturned) netItemPrice = -Math.abs(netItemPrice);
