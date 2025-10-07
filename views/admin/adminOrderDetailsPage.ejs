@@ -117,7 +117,48 @@
                         </div>
                     </div>
                 </div>
-
+  <div class="table-section">
+                    <div class="table-container">
+                        <table class="customers-table order-table">
+                            <thead>
+                                <tr>
+                                    <th class="table-header">Product</th>
+                                    <th class="table-header">Quantity</th>
+                                    <th class="table-header">Price</th>
+                                    <th class="table-header">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% order.items.forEach(item => { %>
+                                    <tr class="table-row">
+                                        <td>
+                                            <div class="product-info">
+                                                <% if (item.productId.image && item.productId.image.length > 0) { %>
+                                                    <div class="product-image">
+                                                        <img src="<%= item.productId.image[0] %>" alt="<%= item.productId.productName %>">
+                                                    </div>
+                                                <% } %>
+                                                <div class="product-details">
+                                                    <div class="product-name"><%= item.productId.productName %></div>
+                                                    <div class="product-sku">SKU: <%= item.productId.sku || 'N/A' %></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="quantity"><%= item.quantity %></span></td>
+                                        <td class="price">₹<%= item.price.toFixed(2) %></td>
+                                        <td>
+                                            <span class="status-badge <%= item.status.toLowerCase() %>">
+                                                <%= item.status %>
+                                            </span>
+                                        </td>
+                                        
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                          
+                        </table>
+                    </div>
+                </div>
                 <!-- Payment Summary Section -->
                 <div class="controls-section">
                     <div class="info-card">
@@ -153,50 +194,7 @@
                 </div>
 
                 <!-- Order Items Section -->
-                <div class="table-section">
-                    <div class="table-container">
-                        <table class="customers-table order-table">
-                            <thead>
-                                <tr>
-                                    <th class="table-header">Product</th>
-                                    <th class="table-header">Quantity</th>
-                                    <th class="table-header">Price</th>
-                                    <th class="table-header">Total</th>
-                                    <th class="table-header">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <% order.items.forEach(item => { %>
-                                    <tr class="table-row">
-                                        <td>
-                                            <div class="product-info">
-                                                <% if (item.productId.image && item.productId.image.length > 0) { %>
-                                                    <div class="product-image">
-                                                        <img src="<%= item.productId.image[0] %>" alt="<%= item.productId.productName %>">
-                                                    </div>
-                                                <% } %>
-                                                <div class="product-details">
-                                                    <div class="product-name"><%= item.productId.productName %></div>
-                                                    <div class="product-sku">SKU: <%= item.productId.sku || 'N/A' %></div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td><span class="quantity"><%= item.quantity %></span></td>
-                                        <td class="price">₹<%= item.price.toFixed(2) %></td>
-                                        <td class="total">₹<%= (item.price * item.quantity).toFixed(2) %></td>
-                                        <td>
-                                            <span class="status-badge <%= item.status.toLowerCase() %>">
-                                                <%= item.status %>
-                                            </span>
-                                        </td>
-                                        
-                                    </tr>
-                                <% }) %>
-                            </tbody>
-                          
-                        </table>
-                    </div>
-                </div>
+              
 
                 <!-- Order Timeline Section -->  
                 <div class="timeline-section">

@@ -260,7 +260,8 @@
                 <span id="retryText">Retry Payment</span>
             </button>
 
-            <a href="#" class="btn btn-secondary" onclick="goBack()">Go Back</a>
+           <a href="/checkout" class="btn btn-secondary">Go Back</a>
+
         </div>
 
         <div class="support-info">
@@ -282,9 +283,6 @@
     window.location.href = `/payment/retryPayment/${orderId}`;
 }
 
-function goBack() {
-    window.history.back();
-}
 </script>
    
 </body>

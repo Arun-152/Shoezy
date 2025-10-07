@@ -231,13 +231,13 @@ const orderDetails = async (req, res) => {
   const { orderId } = req.params
 
   try {
-    const order = await Order.findOne({ _id: orderId, paymentStatus: { $ne: "Failed_Stock_Issue" }, orderStatus: { $ne: "Failed" } }) // Exclude orders that failed due to stock or other general failures
+    const order = await Order.findById(orderId)
       .populate('items.productId')
       .populate('userId')
       .populate('couponId')
 
     if (!order) {
-      return res.status(404).json({ success: false, message: 'Order not found' });
+      return res.status(404).render('admin/adminerrorPage', { message: 'Order not found' });
     }
 
     // Calculate order totals including coupon discount

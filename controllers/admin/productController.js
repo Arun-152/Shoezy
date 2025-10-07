@@ -292,13 +292,18 @@ const editProducts = async (req, res) => {
             variantData.push({ size, regularPrice, salePrice, variantQuantity, appliedOffer });
         }
 
-        // Images
-        let imagePaths = [];
-        if (req.files?.length === 3) {
-            imagePaths = req.files.map(f => '/uploads/products/' + f.filename);
-        } else {
-            imagePaths = req.body.existingImages || [];
+        // Handle image updates
+        let existingImages = req.body.existingImages || [];
+        if (typeof existingImages === 'string') {
+            existingImages = [existingImages];
         }
+
+        let newImagePaths = [];
+        if (req.files && req.files.length > 0) {
+            newImagePaths = req.files.map(file => `/uploads/products/${file.filename}`);
+        }
+
+        const imagePaths = [...existingImages, ...newImagePaths];
 
         // Update product
         const updatedProduct = await Products.findByIdAndUpdate(
