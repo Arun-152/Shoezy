@@ -21,17 +21,21 @@ const calculateOrderTotals = (order) => {
     });
 
     let couponDiscount = 0;
-    if (order.discountAmount && order.discountAmount > 0) {
-        const wasFlatCoupon = order.couponCode && order.couponCode.discountType === 'flat';
-        const wasPercentageCoupon = order.couponCode && order.couponCode.discountType === 'percentage';
-
-        if (wasFlatCoupon) {
+    // Populate coupon details if they exist to check discountType
+    if (order.discountAmount && order.discountAmount > 0 && order.couponId) {
+        if (order.couponId.discountType === 'flat') {
+            // For flat coupons, distribute the discount based on the number of active items
             const couponSharePerItem = order.discountAmount / originalItemsCount;
             couponDiscount = couponSharePerItem * activeItemsCount;
-        } else if (wasPercentageCoupon) {
-            const percentage = order.couponCode.offerPrice;
-            couponDiscount = (subtotal * percentage) / 100;
+        } else if (order.couponId.discountType === 'percentage') {
+            // For percentage coupons, calculate the discount on the subtotal of active items
+            const percentage = order.couponId.offerPrice;
+            const activeItemsSubtotal = order.items
+                .filter(item => item.status !== 'Returned' && item.status !== 'Cancelled')
+                .reduce((sum, item) => sum + item.totalPrice, 0);
+            couponDiscount = (activeItemsSubtotal * percentage) / 100;
         } else {
+            // Fallback for older orders or if coupon type is unknown: distribute proportionally
             const couponSharePerItem = order.discountAmount / originalItemsCount;
             couponDiscount = couponSharePerItem * activeItemsCount;
         }
@@ -86,7 +90,7 @@ const ordersPage = async (req, res) => {
 
     const orders = await Order.find(query)
       .populate("userId", "fullname email")
-      .populate("couponCode")
+      .populate("couponId") // Switched from couponCode to couponId to get the full coupon document
       .sort(sortOptions)
       .skip(skip)
       .limit(limit);
