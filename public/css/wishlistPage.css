@@ -359,6 +359,29 @@ body {
     font-size: 18px;
 }
 
+/* Stock Badge */
+.stock-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 600;
+    z-index: 2;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.stock-badge.in-stock {
+    background-color: #28a745; /* Green for available */
+}
+
+.stock-badge.out-of-stock {
+    background-color: #dc3545; /* Red for out of stock */
+}
 /* Product Info */
 .product-info {
     flex: 1;

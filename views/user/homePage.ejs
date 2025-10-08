@@ -147,11 +147,16 @@
 
                                             <!-- Quick Actions -->
                                             <div class="quick-actions">
-                                                <button class="quick-action-btn"
-                                                    onclick="event.stopPropagation(); addToCart('<%= product._id %>')"
-                                                    title="Add to Cart">
-                                                    <i class="fas fa-shopping-cart"></i>
-                                                </button>
+                                                <% 
+                                                    const totalStockNew = product.variants.reduce((sum, v) => sum + v.variantQuantity, 0);
+                                                %>
+                                                <% if (totalStockNew > 0) { %>
+                                                    <button class="quick-action-btn"
+                                                        onclick="event.stopPropagation(); addToCart('<%= product._id %>')"
+                                                        title="Add to Cart" >
+                                                        <i class="fas fa-shopping-cart"></i>
+                                                    </button>
+                                                <% } %>
                                                 <% if (typeof user !=='undefined' && user) { %>
                                                     <button class="quick-action-btn"
                                                         onclick="event.stopPropagation(); window.location.href='/product/<%= product._id %>'"
@@ -265,11 +270,16 @@
                                                 </div>
 
                                                 <div class="quick-actions">
-                                                    <button class="quick-action-btn"
-                                                        onclick="event.stopPropagation(); addToCart('<%= product._id %>')"
-                                                        title="Add to Cart">
-                                                        <i class="fas fa-shopping-cart"></i>
-                                                    </button>
+                                                    <% 
+                                                        const totalStockTrending = product.variants.reduce((sum, v) => sum + v.variantQuantity, 0);
+                                                    %>
+                                                    <% if (totalStockTrending > 0) { %>
+                                                        <button class="quick-action-btn"
+                                                            onclick="event.stopPropagation(); addToCart('<%= product._id %>')"
+                                                            title="Add to Cart" >
+                                                            <i class="fas fa-shopping-cart"></i>
+                                                        </button>
+                                                    <% } %>
                                                     <% if (typeof user !=='undefined' && user) { %>
                                                         <button class="quick-action-btn"
                                                             onclick="event.stopPropagation(); window.location.href='/product/<%= product._id %>'"
@@ -388,11 +398,16 @@
                                                 </div>
 
                                                 <div class="quick-actions">
-                                                    <button class="quick-action-btn"
-                                                        onclick="event.stopPropagation(); addToCart('<%= product._id %>')"
-                                                        title="Add to Cart">
-                                                        <i class="fas fa-shopping-cart"></i>
-                                                    </button>
+                                                    <% 
+                                                        const totalStockPremium = product.variants.reduce((sum, v) => sum + v.variantQuantity, 0);
+                                                    %>
+                                                    <% if (totalStockPremium > 0) { %>
+                                                        <button class="quick-action-btn"
+                                                            onclick="event.stopPropagation(); addToCart('<%= product._id %>')"
+                                                            title="Add to Cart" >
+                                                            <i class="fas fa-shopping-cart"></i>
+                                                        </button>
+                                                    <% } %>
                                                     <% if (typeof user !=='undefined' && user) { %>
                                                         <button class="quick-action-btn"
                                                             onclick="event.stopPropagation(); window.location.href='/product/<%= product._id %>'"

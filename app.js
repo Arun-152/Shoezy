@@ -127,9 +127,7 @@ const killProcessOnPort = (port) => {
                 const parts = line.trim().split(/\s+/);
                 const pid = parts[parts.length - 1];
                 if (pid && pid !== '0') {
-                    console.log(`Terminating process with PID ${pid} using port ${port}`);
                     execSync(`taskkill /PID ${pid} /F`);
-                    console.log(`Process ${pid} terminated.`);
                 }
             });
         } catch (error) {

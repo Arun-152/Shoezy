@@ -279,7 +279,6 @@ const addToCartFromWishlist = async(req,res)=>{
             return res.status(400).json({success: false, message: "This product category is unavailable"})
         }
 
-        // Find the variant with the selected size
         const selectedVariant = product.variants.find(v => v.size === size);
         if (!selectedVariant) {
             return res.status(400).json({success: false, message: "Selected size not available"})

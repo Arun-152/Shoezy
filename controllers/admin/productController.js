@@ -60,7 +60,6 @@ const addProduct = async (req, res) => {
             productName,
             description,
             productOffer,
-            status,
             color,
             category,
             variants,
@@ -102,10 +101,6 @@ const addProduct = async (req, res) => {
 
         const parsedCategoryOffer = categoryDoc.categoryOffer || 0;
 
-        // 6️⃣ Validate status
-        if (!status || !['Available', 'out of stock'].includes(status))
-            return res.status(400).json({ error: 'Valid product status is required' });
-
         // 7️⃣ Validate variants
         if (!variants || !variants.size || !Array.isArray(variants.size) || variants.size.length === 0)
             return res.status(400).json({ error: 'At least one valid variant is required' });
@@ -142,6 +137,10 @@ const addProduct = async (req, res) => {
             };
         });
 
+        // 6️⃣ Determine product status based on total quantity
+        const totalQuantity = quantities.reduce((sum, qty) => sum + qty, 0);
+        const newStatus = totalQuantity > 0 ? 'Available' : 'out of stock';
+
         // 8️⃣ Validate images
         if (!req.files || req.files.length !== 3)
             return res.status(400).json({ error: 'Exactly 3 images are required' });
@@ -156,7 +155,7 @@ const addProduct = async (req, res) => {
             bestOffer: Math.max(parsedProductOffer, parsedCategoryOffer),
             color: color.trim(),
             category: categoryDoc._id,
-            status,
+            status: newStatus,
             variants: formattedVariants,
             images: imagePaths,
             isBlocked: false,
@@ -255,10 +254,7 @@ const editProducts = async (req, res) => {
         if (!data.color || !/^[A-Za-z, ]{1,50}$/.test(data.color.trim())) {
             return res.status(400).json({ success: false, error: "Invalid color" });
         }
-        if (!["Available","out of stock"].includes(data.status)) {
-            return res.status(400).json({ success: false, error: "Invalid status" });
-        }
-
+        
         const variants = data.variants;
         if (!variants?.size?.length) return res.status(400).json({ success: false, error: "At least one variant required" });
 
@@ -271,6 +267,7 @@ const editProducts = async (req, res) => {
         const variantData = [];
         const selectedSizes = new Set();
         let overallBestOfferValue = 0;
+        let totalQuantity = 0;
 
         for (let i = 0; i < variants.size.length; i++) {
             const size = variants.size[i];
@@ -286,11 +283,15 @@ const editProducts = async (req, res) => {
                 return res.status(400).json({ success: false, error: "Invalid variant details" });
             }
 
+            totalQuantity += variantQuantity;
+
             const { salePrice, appliedOffer } = calculateBestOffer(regularPrice, parsedProductOffer, categoryDoc.categoryOffer || 0);
             overallBestOfferValue = Math.max(overallBestOfferValue, appliedOffer?.value || 0);
 
             variantData.push({ size, regularPrice, salePrice, variantQuantity, appliedOffer });
         }
+
+        const newStatus = totalQuantity > 0 ? 'Available' : 'out of stock';
 
         // Handle image updates
         let existingImages = req.body.existingImages || [];
@@ -317,7 +318,7 @@ const editProducts = async (req, res) => {
                 category: categoryDoc._id,
                 variants: variantData,
                 images: imagePaths,
-                status: data.status
+                status: newStatus
             },
             { new: true, runValidators: true }
         );

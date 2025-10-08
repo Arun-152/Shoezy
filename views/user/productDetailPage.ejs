@@ -1124,12 +1124,18 @@
                 let selectedOriginalPrice = 0;
                 let availableStock = 0;
                 const productStatus = '<%= product.status %>';
+                const totalStock = <% 
+                    let totalProductStock = 0;
+                    if (product.variants && product.variants.length > 0) {
+                        totalProductStock = product.variants.reduce((sum, v) => sum + v.variantQuantity, 0);
+                    }
+                %> <%= totalProductStock %>;
 
                 function warnToast(message) {
                     Swal.fire({
                         toast: true,
                         position: 'top-end',
-                        icon: 'warning',
+                        icon: 'error',
                         title: message,
                         showConfirmButton: false,
                         timer: 1500,
@@ -1203,8 +1209,13 @@
                             stockInfo.style.color = '#dc3545';
                         }
                     } else {
-                        stockInfo.textContent = 'Please select a size';
-                        stockInfo.style.color = '#6c757d';
+                        if (totalStock > 0) {
+                            stockInfo.textContent = 'Please select a size';
+                            stockInfo.style.color = '#6c757d';
+                        } else {
+                            stockInfo.textContent = 'Out of Stock';
+                            stockInfo.style.color = '#dc3545';
+                        }
                     }
                 }
 
@@ -1280,7 +1291,7 @@
                             Swal.fire({
                                 toast: true,
                                 position: 'top-end',
-                                icon: 'warning',
+                                icon: 'error',
                                 title: 'Please select a size first',
                                 showConfirmButton: false,
                                 timer: 2000,
@@ -1524,6 +1535,16 @@
                     autoSelectDefaultSize();
                     updateStockInfo();
                     updatePriceDisplay();
+
+                    // Check total stock on page load
+                    if (totalStock <= 0) {
+                        const quantityBtns = document.querySelectorAll('.quantity-btn');
+                        const quantityInput = document.getElementById('quantityInput');
+                        quantityBtns.forEach(btn => btn.disabled = true);
+                        if (quantityInput) {
+                            quantityInput.disabled = true;
+                        }
+                    }
 
                     const quantityInput = document.getElementById('quantityInput');
                     quantityInput.addEventListener('input', function () {
