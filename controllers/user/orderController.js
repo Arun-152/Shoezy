@@ -48,9 +48,14 @@ const orderPage = async (req, res) => {
     }
     const user = await User.findById(userId);
 
-    const orders = await Order.find({ userId, paymentStatus: { $ne: "Failed_Stock_Issue" } }) // Exclude orders that failed due to stock or other general failures
-      .populate('items.productId')
-      .populate('couponId')
+    const orders = await Order.find({ userId, paymentStatus: { $ne: "Failed_Stock_Issue" } })
+      .populate({
+        path: 'items.productId',
+        populate: {
+          path: 'category' // Also populate the category for each product
+        }
+      })
+      .populate('couponId') // Populate coupon details
       .sort({ createdAt: -1 });
 
     const ordersWithTotals = orders.map(order => {
@@ -81,9 +86,14 @@ const orderDetails = async (req, res) => {
       return res.redirect("/login");
     }
 
-    const order = await Order.findOne({ _id: orderId, userId }) // Exclude orders that failed due to stock or other general failures
-      .populate('items.productId')
-      .populate('couponId');
+    const order = await Order.findOne({ _id: orderId, userId })
+      .populate({
+        path: 'items.productId',
+        populate: {
+          path: 'category' 
+        }
+      })
+      .populate('couponId'); 
 
     if (!order) {
       return res.status(404).json({ success: false, message: "Order not found" });
@@ -156,8 +166,6 @@ const cancelOrder = async (req, res) => {
       : 0;
 
     if (fullCancellationRequested) {
-      // For full cancellations, the refund amount is simply the final amount paid by the user.
-      // This correctly handles all coupon scenarios without recalculation.
       refundAmount = order.totalAmount;
 
       // Cancel only active items
@@ -228,7 +236,6 @@ const cancelOrder = async (req, res) => {
             }
           }
         }
-        // --- End: Coupon Minimum Purchase Validation ---
 
         if (!reason) {
           return res.status(400).json({ success: false, message: 'A reason for cancellation is required.' });
@@ -256,10 +263,6 @@ const cancelOrder = async (req, res) => {
             await product.save();
           }
         }
-
-        // Adjust order total
-        // The totalAmount on the order represents the final amount paid. We should adjust it.
-        // The refundAmount is what we give back to the user.
         order.totalAmount = Math.max(0, order.totalAmount - refundAmount);
 
         const allItemsCancelled = order.items.every(item => item.status === 'Cancelled');
@@ -268,7 +271,6 @@ const cancelOrder = async (req, res) => {
           order.cancellationReason = 'All items cancelled';
           order.totalAmount = 0;
 
-          // Reset coupon usage if order had a coupon
           if (order.couponId && order.userId) {
             try {
               await resetCouponUsage(order.couponId, order.userId, order._id);
@@ -391,8 +393,6 @@ const returnOrder = async (req, res) => {
       }
     }
 
-    // Coupon usage is not reset when an order is returned.
-    // The coupon remains marked as 'Used' for the user.
     await order.save();
 
     return res.status(200).json({

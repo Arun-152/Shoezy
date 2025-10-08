@@ -132,9 +132,7 @@
                                                                                 <button class="btn btn-secondary"
                                                                                     disabled>Cancelled</button>
                                                                                 <% } else { %>
-                                                                                    <button
-                                                                                        class="btn btn-secondary">Track
-                                                                                        Order</button>
+                                                                                 <a href="/contact" class="contact-btn">Contact Us</a>
                                                                                     <% } %>
                                                     </div>
 
@@ -216,6 +214,21 @@
             </div>
         </div>
         <%- include("../partials/user/userfooter") %>
+        <style>
+.contact-btn {
+    background-color: black; /* Black background */
+    color: white;            /* White text */
+    padding: 10px 10px;      /* Some padding */
+    text-decoration: none;   /* Remove underline */
+    border-radius: 5px;      /* Rounded corners */
+    display: inline-block;
+    transition: 0.3s;
+}
+
+.contact-btn:hover {
+    background-color: #333;  /* Darker black on hover */
+}
+</style>
             <style>
                 .btn-retry {
                     background-color: #ff9800;

@@ -199,49 +199,105 @@
                 <!-- Order Timeline Section -->  
                 <div class="timeline-section">
                     <div class="timeline-container">
-                        <div class="section-header">
-                            <h3>Order Timeline</h3>
-                        </div>
-                        <div class="timeline">
-                            <% 
-                                const statuses = ['Ordered', 'Pending', 'Processing', 'Shipped', 'Delivered'];
-                                const itemStatuses = order.items.map(item => item.status);
-                                const hasDelivered = itemStatuses.includes('Delivered');
-                                const allReturned = itemStatuses.every(s => s === 'Returned');
-                                const hasReturnRequest = itemStatuses.some(s => ['ReturnRequested', 'ReturnApproved'].includes(s));
-                                
-                                let currentOverallStatus = order.orderStatus;
-                                if (hasDelivered) {
-                                    currentOverallStatus = 'Delivered';
-                                } else if (allReturned) {
-                                    currentOverallStatus = 'Returned';
-                                } else if (!hasDelivered && hasReturnRequest) {
-                                    // Keep the most relevant current status if returns are in progress but not all items are returned
-                                    // This prevents showing "Returned" prematurely.
-                                }
+                         <div class="section-header">
+                             <h3>Order Timeline</h3>
+                         </div>
+                         <div class="timeline">
+                             <%
+                                 // Helper to get status date from history or creation date
+                                 const getStatusDate = (status) => {
+                                     if (status.toLowerCase() === 'ordered') {
+                                         return order.createdAt;
+                                     }
+                                     // Find the latest entry for a given status
+                                     const historyEntries = order.statusHistory.filter(h => h.status.toLowerCase() === status.toLowerCase());
+                                     if (historyEntries.length > 0) {
+                                         return historyEntries.sort((a, b) => new Date(b.date) - new Date(a.date))[0].date;
+                                     }
+                                     return null;
+                                 };
+ 
+                                 // Helper to get an icon for a status
+                                 const getStatusIcon = (status) => {
+                                     const icons = {
+                                         'ordered': 'fas fa-box',
+                                         'processing': 'fas fa-cogs',
+                                         'shipped': 'fas fa-truck',
+                                         'delivered': 'fas fa-check-circle',
+                                         'cancelled': 'fas fa-times-circle',
+                                         'returned': 'fas fa-undo',
+                                         'failed': 'fas fa-exclamation-triangle'
+                                     };
+                                     return icons[status.toLowerCase()] || 'fas fa-question-circle';
+                                 };
 
-                                const currentStatusIndex = statuses.indexOf(currentOverallStatus);
-                            %>
-                
-                            <% statuses.forEach((status, index) => { %>
-                                <div class="timeline-item <%= index < currentStatusIndex ? 'completed' : (index === currentStatusIndex ? 'active' : '') %>">
-                                    <div class="timeline-marker"></div>
-                                    <div class="timeline-title"><%= status %></div>
-                                    <% if (status === 'Ordered') { %>
-                                        <div class="timeline-date"><%= new Date(order.createdAt).toLocaleString() %></div>
-                                    <% } else { %>
-                                        <% 
-                                            const historyEntry = order.statusHistory.find(h => h.status === status);
-                                        %>
-                                        <% if (historyEntry) { %>
-                                            <div class="timeline-date"><%= new Date(historyEntry.date).toLocaleString() %></div>
-                                        <% } else if (index > currentStatusIndex) { %>
-                                            <div class="timeline-date">Pending</div>
-                                        <% } %>
-                                    <% } %>
-                                </div>
-                            <% }) %>
-                        </div>
+                                 let statuses = [];
+                                 const finalStatus = order.orderStatus.toLowerCase();
+ 
+                                 if (finalStatus === 'failed' || order.paymentStatus.toLowerCase().includes('failed')) {
+                                     statuses = ['Ordered', 'Failed'];
+                                 } else if (finalStatus === 'cancelled') {
+                                     statuses = ['Ordered', 'Processing', 'Cancelled'];
+                                 } else if (finalStatus === 'processing') {
+                                     statuses = ['Ordered', 'Processing', 'Shipped', 'Delivered'];
+                                 }else if (finalStatus === 'returned') {
+                                     statuses = ['Ordered', 'Processing', 'Shipped', 'Delivered', 'Returned'];
+                                 } else {
+                                     statuses = ['Ordered', 'Processing', 'Shipped', 'Delivered'];
+                                 }
+ 
+                                 const currentStatusIndex = statuses.findIndex(s => s.toLowerCase() === finalStatus);
+                             %>
+ 
+                             <% statuses.forEach((status, i) => { %>
+                                 <%
+                                     const statusDate = getStatusDate(status);
+                                     const statusIcon = getStatusIcon(status);
+                                     let itemClass = '';
+                                     const isFinalState = ['failed', 'cancelled', 'returned'].includes(status.toLowerCase());
+ 
+                                     if (currentStatusIndex > -1) { // Normal flow
+                                         if (i < currentStatusIndex) {
+                                             itemClass = 'completed';
+                                         } else if (i === currentStatusIndex) {
+                                             itemClass = 'completed active';
+                                             if (isFinalState) {
+                                                 itemClass = status.toLowerCase() + ' active';
+                                             }
+                                         }
+                                     } else if (statusDate) { // Fallback for statuses like 'Pending' not in the main array
+                                         itemClass = 'completed';
+                                     }
+                                 %>
+                                 <div class="timeline-item <%= itemClass %>">
+                                     <div class="timeline-marker">
+                                        <i class="<%= statusIcon %>"></i>
+                                     </div>
+                                     <div class="timeline-title"><%= status %></div>
+                                     <div class="timeline-date">
+                                         <%= statusDate ? new Date(statusDate).toLocaleString() : 'Pending' %>
+                                     </div>
+                                 </div>
+                             <% }) %>
+                         </div>
+                     </div>
+                 </div>
+ 
+                 
+             </section>
+         </main>
+     </div>
+ 
+     <script>
+         // Toggle sidebar
+         const menuToggle = document.querySelector('.menu-toggle');
+         const sidebar = document.querySelector('.sidebar');
+         menuToggle.addEventListener('click', () => {
+             sidebar.classList.toggle('sidebar-open');
+         });
+     </script>
+ </body>
+ </html>
                     </div>
                 </div>
 
