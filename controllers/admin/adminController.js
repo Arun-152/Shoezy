@@ -35,10 +35,8 @@ const postLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Check if this is an AJAX request
     const isAjax = req.headers['content-type'] === 'application/json' || req.headers['x-requested-with'] === 'XMLHttpRequest';
 
-    // Email format validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email || !emailRegex.test(email.trim())) {
       if (isAjax) {
@@ -57,7 +55,6 @@ const postLogin = async (req, res) => {
       });
     }
 
-    // Password validation
     if (!password || password.trim().length === 0) {
       if (isAjax) {
         return res.status(400).json({
@@ -195,22 +192,18 @@ const adminLogout = (req, res) => {
 };
 const dashboard = async (req, res) => {
   try {
-    // Total Customers (non-admin users)
     const totalCustomers = await User.countDocuments({ isAdmin: false });
 
-    // Total Products (active products)
     const totalProducts = await Product.countDocuments({
       isDeleted: false,
       isBlocked: false,
     });
 
-    // Define a filter to exclude failed online orders
     const excludeFailedOrdersFilter = {
       orderStatus: { $nin: ["Failed", "payment-failed"] },
       paymentStatus: { $ne: "Failed_Stock_Issue" }
     };
 
-    // Total Sold Products (Quantity)
     const soldProductsAgg = await Order.aggregate([
       { $unwind: "$items" },
       {
@@ -229,7 +222,6 @@ const dashboard = async (req, res) => {
     const totalSoldProducts = soldProductsAgg.length > 0 ? soldProductsAgg[0].count : 0;
 
 
-    // Order Status Counts
     const statusCounts = await Order.aggregate([
       {
         $match: excludeFailedOrdersFilter
@@ -252,7 +244,6 @@ const dashboard = async (req, res) => {
       else if (s._id === "Delivered") delivered = s.count;
     });
 
-    // --- Fetch all relevant orders to calculate revenue and populate the table ---
     const allOrders = await Order.find(excludeFailedOrdersFilter)
       .populate('userId', 'fullname')
       .populate('items.productId', 'productName')
@@ -260,7 +251,6 @@ const dashboard = async (req, res) => {
       .sort({ createdAt: -1 })
       .lean();
 
-    // --- Flatten orders into sales data (like sales report) ---
     const salesData = allOrders.flatMap(order => {
       const orderDiscount = Number(order.discountAmount) || 0;
       const orderSubtotal = order.items.reduce((sum, item) => sum + (Number(item.totalPrice) || 0), 0);
@@ -289,18 +279,15 @@ const dashboard = async (req, res) => {
       });
     });
 
-    // --- Filter for items that contribute to revenue and should be displayed ---
     const revenueItems = salesData.filter(item =>
       ['Delivered', 'Shipped', 'Processing'].includes(item.status)
     );
 
-    // --- Calculate Net Revenue and Total Orders ---
     const totalRevenue = revenueItems.reduce((acc, item) => acc + item.amount, 0);
     const totalOrders = await Order.countDocuments(excludeFailedOrdersFilter);
 
-    // --- Paginate the filtered items for the dashboard table ---
     const page = parseInt(req.query.page) || 1;
-    const limit = 6; // 6 orders per page
+    const limit = 6; 
     const skip = (page - 1) * limit;
 
     const paginatedItems = revenueItems.slice(skip, skip + limit);
@@ -315,7 +302,6 @@ const dashboard = async (req, res) => {
       }),
     }));
 
-    // Most Ordered Products (top 5 by number of unique orders)
     const mostOrderedProducts = await Order.aggregate([
       { $unwind: "$items" },
       {
@@ -352,7 +338,6 @@ const dashboard = async (req, res) => {
       },
     ]);
 
-    // Most Ordered Categories (top 5 by number of unique orders containing products from category)
     const mostOrderedCategories = await Order.aggregate([
       { $unwind: "$items" },
       {
@@ -391,22 +376,19 @@ const dashboard = async (req, res) => {
       { $unwind: "$category" },
       {
         $project: {
-          name: "$category.name", // Assuming Category has a 'name' field
+          name: "$category.name", 
           count: 1,
           totalAmount: 1
         },
       },
     ]);
 
-    // --- Chart Data Aggregation ---
 
-    // Helper to get month name
     const getMonthName = (monthNum) => {
       const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
       return months[monthNum - 1];
     };
 
-    // 1. Yearly Sales Data (for a fixed range of years: 2022-2026)
     const yearlyLabels = [2022, 2023, 2024, 2025, 2026];
     const yearlySalesData = await Order.aggregate([
       {
@@ -414,8 +396,8 @@ const dashboard = async (req, res) => {
           ...excludeFailedOrdersFilter,
           orderStatus: { $nin: ["Cancelled", "Returned", "Failed", "payment-failed"] },
           createdAt: {
-            $gte: new Date(yearlyLabels[0], 0, 1), // Start of the first year
-            $lt: new Date(yearlyLabels[yearlyLabels.length - 1] + 1, 0, 1) // Start of the year after the last year
+            $gte: new Date(yearlyLabels[0], 0, 1), 
+            $lt: new Date(yearlyLabels[yearlyLabels.length - 1] + 1, 0, 1) 
           }
         },
       },
@@ -431,7 +413,6 @@ const dashboard = async (req, res) => {
     const salesByYear = new Map(yearlySalesData.map(d => [d._id, d.total]));
     const yearlyValues = yearlyLabels.map(year => salesByYear.get(year) || 0);
 
-    // 2. Monthly Sales Data (current year)
     const currentYear = new Date().getFullYear();
     const monthlySalesData = await Order.aggregate([
       {
@@ -456,11 +437,11 @@ const dashboard = async (req, res) => {
       monthlyValues[d._id - 1] = d.total;
     });
 
-    // 3. Weekly Sales Data (current week, Mon-Sun)
+ 
     const today = new Date();
-    const dayOfWeek = today.getDay(); // Sunday = 0, Monday = 1, etc.
+    const dayOfWeek = today.getDay();
     const startOfWeek = new Date(today);
-    // Adjust to Monday as the start of the week
+
     startOfWeek.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
     startOfWeek.setHours(0, 0, 0, 0);
 
@@ -479,7 +460,6 @@ const dashboard = async (req, res) => {
       {
         $group: {
           _id: {
-            // Adjust day of week so Monday is 1, Sunday is 7
             day: { $cond: [{ $eq: [{ $dayOfWeek: "$createdAt" }, 1] }, 7, { $subtract: [{ $dayOfWeek: "$createdAt" }, 1] }] }
           },
           total: { $sum: "$totalAmount" },
@@ -494,14 +474,11 @@ const dashboard = async (req, res) => {
       weeklyValues[d._id.day - 1] = d.total;
     });
 
-    // --- End Chart Data ---
 
-    // Percentage Calculations (last 30 days vs previous 30 days)
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
 
-    // Helper functions
     const getPeriodRevenue = async (start, end) => {
       const agg = await Order.aggregate([
         {
@@ -581,7 +558,6 @@ const dashboard = async (req, res) => {
           ).toFixed(1)
         : 0;
 
-    // Render the dashboard with dynamic data
    res.render("dashboardPage", {
   totalCustomers,
   customersPercentage: `${customersPercentage > 0 ? "+" : ""}${customersPercentage}%`,

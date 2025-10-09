@@ -1,4 +1,4 @@
-const User=require("../../models/userSchema")
+const User = require("../../models/userSchema")
 
 
 const customerPage=async (req,res)=>{

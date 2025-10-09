@@ -13,7 +13,7 @@ const couponPage = async (req, res) => {
         const userId = req.session.userId;
         const user = await User.findById(userId);
         const search = req.query.search || '';
-        const sort = req.query.sort || 'name_asc'; // Default sort
+        const sort = req.query.sort || 'name_asc'; 
         const query = {};
 
         if (search) {
@@ -39,7 +39,7 @@ const couponPage = async (req, res) => {
         const coupons = await Coupon.find(query).sort(sortOptions);
 
         const currentDate = new Date();
-        currentDate.setHours(0, 0, 0, 0); // Normalize to start of day for consistent comparison
+        currentDate.setHours(0, 0, 0, 0); 
 
         const couponsWithStatus = coupons.map(coupon => {
             const couponStartDate = new Date(coupon.startDate);
@@ -165,7 +165,6 @@ const createCoupon = async (req, res) => {
 
     const totalUsageLimitNum = totalUsageLimit ? parseInt(totalUsageLimit) : null;
     
-    // Enhanced Total Usage Limit validation with specific prompts
     if (!totalUsageLimit || totalUsageLimit.trim() === '') {
       return res.status(400).json({ success: false, message: "Total Usage Limit is required. Please enter a valid number." });
     }
@@ -190,7 +189,6 @@ const createCoupon = async (req, res) => {
       return res.status(400).json({ success: false, message: "Please select at least one product or choose 'Apply to All Products'" });
     }
 
-    // Final validation check for Total Usage Limit
     if (!totalUsageLimitNum) {
       return res.status(400).json({ success: false, message: "Coupon cannot be added without a valid Total Usage Limit." });
     }
@@ -236,7 +234,6 @@ const loadEditCoupon = async(req,res)=>{
             return res.redirect("/admin/coupons");
         }
 
-        // Load categories and products for the edit form
         const categories = await Category.find({isDeleted:false,isListed:true});
         const products = await Product.find({isDeleted:false,isBlocked:false});
 
@@ -275,7 +272,6 @@ const editCoupon = async(req,res)=>{
           return res.status(400).json({success:false,message:"All required fields must be filled"})
         }
 
-        // Check if coupon exists but exclude the current coupon being edited
         const existingCoupon = await Coupon.findOne({name, _id: { $ne: couponId }});
 
         if(existingCoupon){

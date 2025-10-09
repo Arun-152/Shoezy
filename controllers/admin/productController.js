@@ -65,7 +65,6 @@ const addProduct = async (req, res) => {
             variants,
         } = req.body;
 
-        // 1️⃣ Validate product name
         const trimmedProductName = productName ? productName.trim() : '';
         if (!trimmedProductName) return res.status(400).json({ error: 'Product name cannot be empty.' });
         if (trimmedProductName.length < 2 || trimmedProductName.length > 100)
@@ -81,27 +80,22 @@ const addProduct = async (req, res) => {
         });
         if (existingProduct) return res.status(400).json({ error: 'This product already exists.' });
 
-        // 2️⃣ Validate description
         if (!description || description.trim().length < 10 || description.trim().length > 500)
             return res.status(400).json({ error: 'Description must be 10-500 characters' });
 
-        // 3️⃣ Validate product offer
         let parsedProductOffer = productOffer ? parseFloat(productOffer) : 0;
         if (productOffer && (isNaN(parsedProductOffer) || parsedProductOffer < 0 || parsedProductOffer > 100))
             return res.status(400).json({ error: 'Product offer must be between 0-100' });
 
-        // 4️⃣ Validate color
         if (!color || !/^[A-Za-z, ]{1,50}$/.test(color.trim()))
             return res.status(400).json({ error: 'Color must be letters, spaces, or commas (max 50 chars)' });
 
-        // 5️⃣ Validate category
         const categoryDoc = await Category.findById(category);
         if (!categoryDoc || categoryDoc.isDeleted || !categoryDoc.isListed)
             return res.status(400).json({ error: 'Invalid category' });
 
         const parsedCategoryOffer = categoryDoc.categoryOffer || 0;
 
-        // 7️⃣ Validate variants
         if (!variants || !variants.size || !Array.isArray(variants.size) || variants.size.length === 0)
             return res.status(400).json({ error: 'At least one valid variant is required' });
 
@@ -125,7 +119,6 @@ const addProduct = async (req, res) => {
 
             selectedSizes.add(size);
 
-            // ✅ Calculate best offer using helper
             const { salePrice, appliedOffer } = calculateBestOffer(regularPrice, parsedProductOffer, parsedCategoryOffer);
 
             return {
@@ -137,17 +130,14 @@ const addProduct = async (req, res) => {
             };
         });
 
-        // 6️⃣ Determine product status based on total quantity
         const totalQuantity = quantities.reduce((sum, qty) => sum + qty, 0);
         const newStatus = totalQuantity > 0 ? 'Available' : 'out of stock';
 
-        // 8️⃣ Validate images
         if (!req.files || req.files.length !== 3)
             return res.status(400).json({ error: 'Exactly 3 images are required' });
 
         const imagePaths = req.files.map(file => `/uploads/products/${file.filename}`);
 
-        // 9️⃣ Create new product
         const newProduct = new Products({
             productName: trimmedProductName,
             description: description.trim(),
@@ -225,7 +215,6 @@ const editProducts = async (req, res) => {
 
         if (!data) return res.status(400).json({ success: false, message: "All fields required" });
 
-        // Validate productName
         const trimmedName = data.productName?.trim();
         if (!trimmedName || trimmedName.length < 2 || trimmedName.length > 100) {
             return res.status(400).json({ success: false, error: "Invalid product name" });
@@ -239,18 +228,15 @@ const editProducts = async (req, res) => {
         const existingProduct = await Products.findOne({ productName: { $regex: `^${trimmedName}$`, $options: 'i' }, _id: { $ne: id }, isDeleted: false });
         if (existingProduct) return res.status(400).json({ success: false, error: "This product already exists" });
 
-        // Description validation
         if (!data.description || data.description.length < 10 || data.description.length > 500) {
             return res.status(400).json({ success: false, error: "Description must be 10-500 characters" });
         }
 
-        // Product offer
         let parsedProductOffer = data.productOffer ? parseFloat(data.productOffer) : 0;
         if (data.productOffer && (isNaN(parsedProductOffer) || parsedProductOffer < 0 || parsedProductOffer > 100)) {
             return res.status(400).json({ success: false, error: "Product offer must be 0-100%" });
         }
 
-        // Color & status
         if (!data.color || !/^[A-Za-z, ]{1,50}$/.test(data.color.trim())) {
             return res.status(400).json({ success: false, error: "Invalid color" });
         }
@@ -258,7 +244,6 @@ const editProducts = async (req, res) => {
         const variants = data.variants;
         if (!variants?.size?.length) return res.status(400).json({ success: false, error: "At least one variant required" });
 
-        // Category validation
         const categoryDoc = await Category.findById(data.category);
         if (!categoryDoc || categoryDoc.isDeleted || !categoryDoc.isListed) {
             return res.status(400).json({ success: false, error: "Invalid category" });
@@ -293,7 +278,6 @@ const editProducts = async (req, res) => {
 
         const newStatus = totalQuantity > 0 ? 'Available' : 'out of stock';
 
-        // Handle image updates
         let existingImages = req.body.existingImages || [];
         if (typeof existingImages === 'string') {
             existingImages = [existingImages];
@@ -306,7 +290,6 @@ const editProducts = async (req, res) => {
 
         const imagePaths = [...existingImages, ...newImagePaths];
 
-        // Update product
         const updatedProduct = await Products.findByIdAndUpdate(
             id,
             {

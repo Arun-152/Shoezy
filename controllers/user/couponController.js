@@ -17,12 +17,10 @@ const loadCoupons = async (req, res) => {
     const limit = 6;
     const skip = (page - 1) * limit;
 
-    // Count all listed coupons (including expired ones)
     const totalCoupons = await Coupon.countDocuments({
       islist: true
     });
 
-    // Fetch all listed coupons, including expired ones
     const coupons = await Coupon.find({
       islist: true
     })
@@ -273,9 +271,7 @@ const markCouponUsed = async (couponId, userId) => {
     await Coupon.findByIdAndUpdate(
       couponId,
       {
-        // Track that this user has used the coupon at least once
         $addToSet: { userId: userId },
-        // Maintain global usage count
         $inc: { currentUsageCount: 1 }
       }
     );
@@ -295,16 +291,14 @@ const resetCouponUsage = async (couponId, userId, orderId) => {
       return false;
     }
 
-    // Prepare updates
     const updates = {
       $inc: { currentUsageCount: -1 },
       $pull: {
         userUsage: { userId: userId, orderId: orderId },
-        userId: userId // Also pull from legacy userId array if it exists
+        userId: userId 
       }
     };
 
-    // If the coupon's status is 'Used', and it's not expired, set it back to 'Available'
     if (coupon.status === 'Used' && coupon.expireOn >= new Date()) {
       updates.status = 'Available';
     }

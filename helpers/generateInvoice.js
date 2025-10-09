@@ -1,90 +1,119 @@
 const PDFDocument = require("pdfkit");
 
-function drawRow(doc, x, y, row, widths, fontSize = 12) {
-  row.forEach((text, i) => {
-    doc.fontSize(fontSize)
-      .text(text, x, y, { width: widths[i], align: "left" });
-    x += widths[i];
-  });
-}
-
 function generateInvoice(order, res) {
   const doc = new PDFDocument({ margin: 50 });
 
-  // Set response headers for PDF
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader("Content-Disposition", `attachment; filename=invoice_${order.orderNumber}.pdf`);
 
-  // Pipe PDF to response
   doc.pipe(res);
 
-  // ---- Invoice Header ----
-  doc.fontSize(20).text("INVOICE", { align: "center" }).moveDown();
+  // --- Helper Functions ---
+  const drawLine = (y) => doc.strokeColor("#dddddd").lineWidth(1).moveTo(50, y).lineTo(550, y).stroke();
+  const formatCurrency = (amount) => `₹${amount.toFixed(2)}`;
 
-  doc.fontSize(12)
-    .text(`Order Number: ${order.orderNumber}`)
-    .text(`Order Date: ${order.createdAt.toDateString()}`)
-    .text(`Payment Method: ${order.paymentMethod}`)
-    .moveDown();
+  // --- Header ---
+  doc.fontSize(20).font('Helvetica-Bold').text("Shoezy", 50, 50);
+  doc.fontSize(10).font('Helvetica').text("123 Shoe Lane, Sneaker City, ST 12345");
+  doc.text("contact@shoezy.com | +91 98765 43210").moveDown(2);
 
-  // ---- Customer Details ----
-  doc.fontSize(14).text("Billing To:", { underline: true }).moveDown(0.5);
+  doc.fontSize(20).font('Helvetica-Bold').text("INVOICE", 400, 50, { align: "right" });
+  doc.fontSize(10).font('Helvetica').text(`Invoice #: ${order.orderNumber}`, { align: "right" });
+  doc.text(`Date: ${order.createdAt.toLocaleDateString('en-IN')}`, { align: "right" }).moveDown(2);
 
-  doc.fontSize(12)
-    .text(order.address.fullName)
-    .text(order.address.address)
-    .text(`${order.address.city}, ${order.address.state}`)
-    .text(`Pin Code: ${order.address.pinCode}`)
-    .text(`Mobile: ${order.address.mobileNumber}`)
-    .moveDown();
+  // --- Customer Details ---
+  doc.fontSize(12).font('Helvetica-Bold').text("Bill To");
+  drawLine(doc.y + 5);
+  doc.moveDown();
+  doc.fontSize(10).font('Helvetica').text(order.address.fullName);
+  doc.text(order.address.address);
+  doc.text(`${order.address.city}, ${order.address.state} - ${order.address.pinCode}`);
+  if (order.userId && order.userId.email) {
+    doc.text(order.userId.email);
+  }
+  doc.text(order.address.mobileNumber).moveDown(2);
 
-  // ---- Order Items Table ----
-  doc.fontSize(14).text("Order Items", { underline: true }).moveDown(0.5);
-
-  // Table columns set-up
+  // --- Order Items Table ---
   const tableTop = doc.y;
-  const colWidths = [180, 60, 60, 70, 70];
-  const startX = 50;
+  doc.fontSize(12).font('Helvetica-Bold').text("Order Summary");
+  drawLine(doc.y + 5);
+  doc.moveDown();
 
-  // Table Header
-  drawRow(
-    doc,
-    startX,
-    tableTop,
-    ["Product", "Size", "Qty", "Price", "Total"],
-    colWidths,
-    12
-  );
-  let rowY = tableTop + 20;
+  const tableHeaders = ["Product", "Size", "Qty", "Price", "Total"];
+  const columnWidths = [200, 60, 50, 90, 90];
+  let currentY = doc.y;
+  let currentX = 50;
 
-  // Table Rows
-  (order.items || []).forEach(item => {
-    drawRow(
-      doc,
-      startX,
-      rowY,
-      [
-        item.productId.productName,
-        item.size,
-        item.quantity.toString(),
-        `₹${item.price}`,
-        `₹${item.totalPrice}`
-      ],
-      colWidths,
-      12
-    );
-    rowY += 20;
+  // Draw table headers
+  tableHeaders.forEach((header, i) => {
+    doc.font('Helvetica-Bold').fontSize(10).text(header, currentX, currentY, { width: columnWidths[i] });
+    currentX += columnWidths[i];
+  });
+  currentY += 20;
+  drawLine(currentY);
+
+  let subtotal = 0;
+
+  // Draw table rows
+  order.items.forEach(item => {
+    currentY += 10;
+    currentX = 50;
+    const itemSubtotal = item.price * item.quantity;
+    subtotal += itemSubtotal;
+
+    const rowData = [
+      item.productId.productName,
+      item.size,
+      item.quantity.toString(),
+      formatCurrency(item.price),
+      formatCurrency(itemSubtotal)
+    ];
+
+    rowData.forEach((cell, i) => {
+      doc.font('Helvetica').fontSize(10).text(cell, currentX, currentY, { width: columnWidths[i] });
+      currentX += columnWidths[i];
+    });
+    currentY += 20; // Move to next line
   });
 
-  // ---- Total ----
-  doc.y = rowY + 10;
-  doc.fontSize(14).text(`Total Amount: ₹${order.totalAmount}`, { align: "right" });
+  drawLine(currentY);
 
-  // Footer
-  doc.moveDown(2);
-  doc.fontSize(10).text("Thank you for shopping with us!", { align: "center" });
+  // --- Totals Section ---
+  let totalsY = currentY + 20;
+  const totalsX = 400;
+  const labelWidth = 80;
+  const valueWidth = 70;
 
-  // End PDF (this closes response stream)
+  const drawTotalRow = (label, value) => {
+    doc.font('Helvetica').fontSize(10).text(label, totalsX, totalsY, { width: labelWidth, align: 'right' });
+    doc.text(value, totalsX + labelWidth + 10, totalsY, { width: valueWidth, align: 'right' });
+    totalsY += 15;
+  };
+
+  drawTotalRow("Subtotal:", formatCurrency(subtotal));
+
+  if (order.discountAmount && order.discountAmount > 0) {
+    doc.font('Helvetica-Bold').fillColor('#28a745');
+    drawTotalRow(`Discount (${order.couponCode}):`, `- ${formatCurrency(order.discountAmount)}`);
+    doc.fillColor('black'); // Reset color
+  }
+
+  // You can add shipping here if it's ever non-zero
+  // drawTotalRow("Shipping:", formatCurrency(0));
+
+  doc.strokeColor("#333333").lineWidth(1).moveTo(totalsX, totalsY).lineTo(550, totalsY).stroke();
+  totalsY += 10;
+
+  doc.font('Helvetica-Bold').fontSize(12);
+  drawTotalRow("Grand Total:", formatCurrency(order.totalAmount));
+
+  // --- Footer ---
+  const pageHeight = doc.page.height;
+  doc.font('Helvetica-Oblique').fontSize(10).text("Thank you for your purchase!", 50, pageHeight - 50, {
+    align: 'center',
+    width: 500
+  });
+
   doc.end();
 }
 

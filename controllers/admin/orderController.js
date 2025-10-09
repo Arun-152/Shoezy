@@ -21,21 +21,17 @@ const calculateOrderTotals = (order) => {
     });
 
     let couponDiscount = 0;
-    // Populate coupon details if they exist to check discountType
     if (order.discountAmount && order.discountAmount > 0 && order.couponId) {
         if (order.couponId.discountType === 'flat') {
-            // For flat coupons, distribute the discount based on the number of active items
             const couponSharePerItem = order.discountAmount / originalItemsCount;
             couponDiscount = couponSharePerItem * activeItemsCount;
         } else if (order.couponId.discountType === 'percentage') {
-            // For percentage coupons, calculate the discount on the subtotal of active items
             const percentage = order.couponId.offerPrice;
             const activeItemsSubtotal = order.items
                 .filter(item => item.status !== 'Returned' && item.status !== 'Cancelled')
                 .reduce((sum, item) => sum + item.totalPrice, 0);
             couponDiscount = (activeItemsSubtotal * percentage) / 100;
         } else {
-            // Fallback for older orders or if coupon type is unknown: distribute proportionally
             const couponSharePerItem = order.discountAmount / originalItemsCount;
             couponDiscount = couponSharePerItem * activeItemsCount;
         }
@@ -58,7 +54,6 @@ const ordersPage = async (req, res) => {
     const search = req.query.search || '';
     const sort = req.query.sort || 'date_desc';
 
-    // Base query to exclude failed online orders
     const query = {};
 
     if (search) {
@@ -90,7 +85,7 @@ const ordersPage = async (req, res) => {
 
     const orders = await Order.find(query)
       .populate("userId", "fullname email")
-      .populate("couponId") // Switched from couponCode to couponId to get the full coupon document
+      .populate("couponId") 
       .sort(sortOptions)
       .skip(skip)
       .limit(limit);
@@ -122,18 +117,16 @@ const updateOrderStatus = async (req, res) => {
     const { status, reason } = req.body; 
     const orderId = req.params.orderId;
 
-    // Validate order ID
+
     if (!orderId || !mongoose.Types.ObjectId.isValid(orderId)) {
       return res.status(400).json({ success: false, message: "Invalid or missing order ID" });
     }
 
-    // Find the order
     const order = await Order.findById(orderId);
     if (!order) {
       return res.status(404).json({ success: false, message: "Order not found" });
     }
 
-    // Check if order is locked (payment failed orders)
     if (order.isLocked) {
       return res.status(400).json({
         success: false,
@@ -141,7 +134,6 @@ const updateOrderStatus = async (req, res) => {
       });
     }
 
-    // Check if order has payment-failed status
     if (order.orderStatus === "payment-failed") {
       return res.status(400).json({
         success: false,
@@ -149,7 +141,6 @@ const updateOrderStatus = async (req, res) => {
       });
     }
 
-    // Check if online payment is pending or failed
     if (order.paymentMethod && order.paymentMethod.toLowerCase() === "online") {
       if (order.paymentStatus === "pending" || order.paymentStatus === "failed") {
         return res.status(400).json({
@@ -159,7 +150,6 @@ const updateOrderStatus = async (req, res) => {
       }
     }
 
-    // Check if order is already delivered
     if (order.orderStatus.toLowerCase() === "delivered") {
       return res.status(400).json({
         success: false,
@@ -167,13 +157,11 @@ const updateOrderStatus = async (req, res) => {
       });
     }
 
-    // Validate status
     const validStatuses = ["pending", "processing", "shipped", "delivered", "cancelled", "Paid"];
     if (!validStatuses.includes(status.toLowerCase())) {
       return res.status(400).json({ success: false, message: "Invalid status" });
     }
 
-    // For cancellation, ensure reason is provided
     if (status.toLowerCase() === "cancelled" && !reason) {
       return res.status(400).json({ success: false, message: "Cancellation reason is required" });
     }
@@ -181,25 +169,22 @@ const updateOrderStatus = async (req, res) => {
     // Update order status
     order.orderStatus = status;
 
-    // Update item statuses
+ 
     order.items.forEach((item) => {
       if (!["Cancelled", "Returned", "cancelled", "returned"].includes(item.status)) {
         item.status = status;
       }
     });
 
-    // Handle delivered status
     if (status.toLowerCase() === "delivered") {
       order.paymentStatus = "Paid";
       order.deliveryDate = new Date();
     }
     
 
-    // Handle cancellation
     if (status.toLowerCase() === "cancelled") {
       order.cancellationReason = reason;
       
-      // Reset coupon usage if order had a coupon
       if (order.couponId && order.userId) {
         try {
           await resetCouponUsage(order.couponId, order.userId, order._id);
@@ -210,14 +195,12 @@ const updateOrderStatus = async (req, res) => {
       }
     }
 
-    // Add to status history
     order.statusHistory.push({
       status,
       date: new Date(),
       description: status.toLowerCase() === "cancelled" ? reason : undefined,
     });
 
-    // Save the order
     await order.save();
 
     res.json({ success: true, message: "Status updated successfully" });
@@ -240,7 +223,6 @@ const orderDetails = async (req, res) => {
       return res.status(404).render('admin/adminerrorPage', { message: 'Order not found' });
     }
 
-    // Calculate order totals including coupon discount
     const totals = calculateOrderTotals(order);
 
     res.render('adminOrderDetailsPage', {
@@ -254,7 +236,6 @@ const orderDetails = async (req, res) => {
 }
 const viewReturnRequests = async (req, res) => {
   try {
-    // Fetch orders that contain at least one item with return requested
     const returnedOrders = await Order.find({ "items.status": "ReturnRequested" })
       .populate("userId")
       .populate("items.productId")
@@ -286,25 +267,21 @@ const approveReturnRequest = async (req, res) => {
     let updatedProducts = [];
     let productFound = false;
 
-    // Calculate total before discount
     const orderTotalBeforeDiscount = order.items.reduce(
       (sum, item) => sum + (item.price * item.quantity),
       0
     );
 
-    // Fetch coupon if applied
     let coupon = null;
     if (order.couponId) {
       coupon = await Coupon.findById(order.couponId);
     }
 
-    // Process the specific return request
     order.items = order.items.map(item => {
       if (item.productId._id.toString() === productId && item.status === "ReturnRequested") {
         item.status = "Returned";
         productFound = true;
 
-        // Refund for all payment methods (COD + Online + Wallet)
         let baseRefund = item.totalPrice;
 
         if (order.couponId && order.discountAmount > 0) {
@@ -350,14 +327,12 @@ const approveReturnRequest = async (req, res) => {
       }
     }
 
-    // Check if all items are returned/cancelled AFTER saving item status
     const allItemsReturnedOrCancelled = order.items.every(item =>
       item.status === "Returned" || item.status === "Cancelled"
     );
 
     if (allItemsReturnedOrCancelled) {
       order.orderStatus = "Returned";
-      // If the entire order is returned, reset the coupon usage
       if (order.couponId && order.userId) {
         try {
           await resetCouponUsage(order.couponId, order.userId, order._id);
@@ -368,7 +343,6 @@ const approveReturnRequest = async (req, res) => {
       }
     }
 
-    // Wallet refund (COD + Online)
     const wallet = await Wallet.findOne({ userId: order.userId });
     if (!wallet) {
       return res.status(404).json({ success: false, message: "Wallet not found for user" });
@@ -410,7 +384,6 @@ const rejectReturnRequest = async (req, res) => {
   try {
     const { orderId, productId } = req.params;
     
-    // Fix: Use findOne with orderNumber instead of findById
     const order = await Order.findOne({ orderNumber: orderId });
     
     if (!order) {
@@ -420,7 +393,6 @@ const rejectReturnRequest = async (req, res) => {
     let itemFound = false;
     order.items = order.items.map(item => {
       const itemProductId = item.productId._id?.toString?.() || item.productId?.toString?.();
-      // Fix: Use === instead of = for comparison
       if (itemProductId === productId && item.status === 'ReturnRequested') {
         item.status = 'Delivered'; 
         item.returnReason = null;

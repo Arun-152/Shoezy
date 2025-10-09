@@ -41,12 +41,10 @@ const addCategory = async (req, res) => {
     try {
         const { name, description, categoryOffer } = req.body;
 
-        // 1️⃣ Validation for required fields
         if (!name || !description) {
             return res.status(400).json({ error: "Name and description are required" });
         }
 
-        // 2️⃣ Validate name length and allowed characters
         const trimmedName = name.trim();
         if (trimmedName.length < 2 || trimmedName.length > 100) {
             return res.status(400).json({ error: "Category name must be 2-100 characters" });
@@ -57,13 +55,11 @@ const addCategory = async (req, res) => {
             return res.status(400).json({ error: "Category name contains invalid characters" });
         }
 
-        // 3️⃣ Validate description length
         const trimmedDescription = description.trim();
         if (trimmedDescription.length < 10 || trimmedDescription.length > 500) {
             return res.status(400).json({ error: "Description must be 10-500 characters" });
         }
 
-        // 4️⃣ Validate category offer
         let parsedCategoryOffer = null;
         if (categoryOffer !== undefined && categoryOffer !== '') {
             parsedCategoryOffer = parseFloat(categoryOffer);
@@ -72,13 +68,11 @@ const addCategory = async (req, res) => {
             }
         }
 
-        // 5️⃣ Check for existing category with same name
         const existingCategory = await Category.findOne({ name: trimmedName });
         if (existingCategory) {
             return res.status(400).json({ error: "Category already exists" });
         }
 
-        // 6️⃣ Create new category
         const category = new Category({
             name: trimmedName,
             description: trimmedDescription,
@@ -148,7 +142,6 @@ const categoryEdit = async (req, res) => {
         const { id } = req.params;
         const { name, description, categoryOffer } = req.body;
 
-        // Validation
         if (!name || !description) {
             return res.status(400).json({ message: "All fields are required" });
         }

@@ -86,6 +86,8 @@ const orderDetails = async (req, res) => {
       return res.redirect("/login");
     }
 
+    const user = await User.findById(userId);
+
     const order = await Order.findOne({ _id: orderId, userId })
       .populate({
         path: 'items.productId',
@@ -102,7 +104,7 @@ const orderDetails = async (req, res) => {
     const totals = calculateOrderTotals(order);
 
     return res.render("orderDetailsPage", {
-      user: userId,
+      user: user,
       order: {
         ...order.toObject(),
         ...totals
@@ -408,7 +410,9 @@ const returnOrder = async (req, res) => {
 const getInvoice = async (req, res) => {
   try {
     const { orderId } = req.params;
-    const order = await Order.findById(orderId).populate("items.productId");
+    const order = await Order.findById(orderId)
+      .populate("items.productId")
+      .populate("userId", "email"); // Populate user to get email
     if (!order) {
       return res.status(404).json({ success: false, message: "Order not found" });
     }
