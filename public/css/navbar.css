@@ -8,6 +8,8 @@
 /* Header Styles */
 .header {
   background: #000000;
+  /* The body padding-top will handle the spacing, so this can be removed if it was for that purpose */
+  /* position: fixed; */
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   width: 100%;
   top: 0;
@@ -57,6 +59,11 @@
   background-color: black;
   position: fixed;
   top: 0;
+  /* Add padding-top to the body instead of setting a fixed height on the navbar wrapper */
+  /* This prevents content from being hidden underneath the fixed navbar */
+  body {
+    padding-top: 80px; /* Adjust this value based on your navbar's height */
+  }
   left: 0;
   right: 0;
   z-index: 1000;
@@ -72,6 +79,12 @@
   margin: 0 auto;
   background-color: black;
   width: 100%;
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* Space between hamburger and logo */
 }
 
 .logo h1 {
@@ -103,6 +116,7 @@
 .nav-icons {
   display: flex;
   align-items: center;
+  gap: 15px;
 }
 
 .nav-icon, .login-icon {
@@ -111,6 +125,17 @@
   margin: 0 10px;
   font-size: 20px;
   color: #ffffff;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.hamburger-menu {
+  display: none; /* Hidden by default */
+  cursor: pointer;
 }
 
 .nav-icon:hover, .login-icon:hover {
@@ -199,16 +224,70 @@
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (max-width: 992px) {
   .navbar {
     padding: 10px 20px;
   }
-  
-  /* .nav-links {
-    display: none;
-  } */
-  
+
+  .hamburger-menu {
+    display: block;
+    font-size: 24px;
+    color: white;
+    z-index: 1002; /* Above the overlay */
+  }
+
+  .hamburger-menu.active i::before {
+    content: '\f00d'; /* Font Awesome close icon */
+  }
+
+  .nav-content {
+    position: fixed;
+    top: 0;
+    left: -100%; /* Start off-screen */
+    width: 100%;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: left 0.3s ease-in-out;
+    z-index: 1001;
+  }
+
+  .nav-content.active {
+    left: 0; /* Slide in */
+  }
+
+  .nav-links {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+  }
+
+  .nav-links li {
+    margin: 15px 0;
+  }
+
+  .nav-links a {
+    font-size: 24px;
+  }
+
+  .nav-icon.login-icon {
+    display: block;
+    margin-top: 20px;
+  }
+
   .nav-icons {
     gap: 10px;
+  }
+
+  .nav-right {
+    /* This is no longer needed as justify-content on .navbar handles the spacing */
+  }
+
+  .nav-left {
+    flex-grow: 1; /* Allow the left container to grow */
   }
 }
