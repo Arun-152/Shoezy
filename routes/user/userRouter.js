@@ -4,9 +4,8 @@ const userController = require("../../controllers/user/userController");
 const homepageController = require("../../controllers/user/homepageController");
 const shopPageController = require("../../controllers/user/shopPageController");
 const orderController = require("../../controllers/user/orderController");
-const productController = require("../../controllers/user/productController");
-const wishlistController = require("../../controllers/user/wishlistController")
-const showUserController = require("../../controllers/user/showUserController")
+const productController = require("../../controllers/user/productController")
+const referralController = require("../../controllers/user/referralController")
 
 const { userAuth } = require("../../middlewares/auth");
 const passport = require("../../config/passport");
@@ -24,20 +23,22 @@ const walletRouter = require("./walletRouter")
 
 const couponRouter = require("./couponRouter")
 
+const razorpayRouter = require("./razorpayRouter")
+
 
 
 
 router.get("/login", userController.loginPage);
 router.get("/signup", userController.signupPage);
-router.post("/signup", userController.postSignup);
+router.post("/signup",userController.postSignup);
 router.get("/otpVerification", userController.otpVerification);
 router.post("/verifyOtp", userController.verifyOTP);
-router.post("/login", userController.postLogin);
+router.post("/login", userController.userPostLogin);
 
 router.get("/", homepageController.homePage);
 router.get("/home", homepageController.homePage);
 router.get("/logout", userController.logout);
-router.get("/shop", shopPageController.shopPage);
+router.get("/shop", userAuth,shopPageController.shopPage);
 router.get("/product/:id", userAuth,productController.productDetailPage);
 router.post("/resendOtp", userController.resendOTP);
 
@@ -46,26 +47,35 @@ router.post("/resendOtp", userController.resendOTP);
 
 router.get("/order",userAuth, orderController.orderPage);
 router.get("/order/:orderId",userAuth, orderController.orderDetails);
-router.patch("/order/:orderId/cancel",userAuth, orderController.cancelOrder);
-router.get("/userErrorPage", userController.userErrorPage)
+router.post("/order/cancel",userAuth, orderController.cancelOrder);
+router.get("/userErrorPage", userAuth,userController.userErrorPage)
 router.patch("/order/:orderId/return", userAuth, orderController.returnOrder);
 router.get("/order/:orderId/invoice",userAuth,orderController.getInvoice)
 router.post('/order/individualOrderReturn',userAuth,orderController.returnSingleOrder)
-router.post('/order/cancelSingleItem', userAuth, orderController.cancelSingleOrder);
+router.post("/wallet-order", userAuth, orderController. placeOrderWithWallet)
 
 
 // Forgot Password Routes
-router.get("/emailVerification", userController.forgotPasswordPage);
-router.post("/forgotPassword", userController.postForgotPassword);
+router.get("/forgot-password", userController.forgotPasswordPage);
+router.post("/forgot-password", userController.sendResetLink);
 router.get("/verifyResetOtp", userController.verifyOTPPage);
 router.post("/verifyResetOtp", userController.postVerifyOTP);
 router.post("/resendResetOtp", userController.resendResetOTP);
-router.get("/resetPassword", userController.resetPasswordPage);
-router.post("/resetPassword", userController.postResetPassword);
+router.get("/reset-password", userController.resetPasswordPage);
+router.post("/reset-password", userController.postResetPassword);
 
-//coupen
+//referrral code
 
-router.get("/coupen",userController.loadCoupen)
+router.get("/referral",userAuth,referralController.getReferralPage)
+
+
+
+
+// Contact page route
+router.get("/contact",userAuth, userController.getContactPage);
+
+// About page route
+router.get("/about",userAuth, userController.getAboutPage);
 
 router.use("/auth",authRouter)
 router.use("/cart",cartRouter)
@@ -74,5 +84,6 @@ router.use("/profile",profileRouter)
 router.use("/checkout",checkoutRouter)
 router.use("/wallet",walletRouter)
 router.use("/coupon",couponRouter)
+router.use("/payment",razorpayRouter)
 
 module.exports = router;

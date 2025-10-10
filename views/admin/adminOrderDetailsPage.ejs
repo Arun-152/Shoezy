@@ -117,7 +117,48 @@
                         </div>
                     </div>
                 </div>
-
+  <div class="table-section">
+                    <div class="table-container">
+                        <table class="customers-table order-table">
+                            <thead>
+                                <tr>
+                                    <th class="table-header">Product</th>
+                                    <th class="table-header">Quantity</th>
+                                    <th class="table-header">Price</th>
+                                    <th class="table-header">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% order.items.forEach(item => { %>
+                                    <tr class="table-row">
+                                        <td>
+                                            <div class="product-info">
+                                                <% if (item.productId.image && item.productId.image.length > 0) { %>
+                                                    <div class="product-image">
+                                                        <img src="<%= item.productId.image[0] %>" alt="<%= item.productId.productName %>">
+                                                    </div>
+                                                <% } %>
+                                                <div class="product-details">
+                                                    <div class="product-name"><%= item.productId.productName %></div>
+                                                    <div class="product-sku">SKU: <%= item.productId.sku || 'N/A' %></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="quantity"><%= item.quantity %></span></td>
+                                        <td class="price">₹<%= item.price.toFixed(2) %></td>
+                                        <td>
+                                            <span class="status-badge <%= item.status.toLowerCase() %>">
+                                                <%= item.status %>
+                                            </span>
+                                        </td>
+                                        
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                          
+                        </table>
+                    </div>
+                </div>
                 <!-- Payment Summary Section -->
                 <div class="controls-section">
                     <div class="info-card">
@@ -132,98 +173,131 @@
                         <div class="card-body">
                             <div class="info-row">
                                 <span class="label">Subtotal:</span>
-                                <span class="value">₹<%= order.items.reduce((sum, item) => sum + item.totalPrice, 0).toFixed(2) %></span>
+                                <span class="value">₹<%= totals.subtotal.toFixed(2) %></span>
+                            </div>
+                            <% if (order.couponId && order.discountAmount > 0) { %>
+                            <div class="info-row">
+                                <span class="label">Coupon Discount:</span>
+                                <span class="value discount">-₹<%= totals.couponDiscount.toFixed(2) %></span>
                             </div>
                             <div class="info-row">
-                                <span class="label">Shipping:</span>
-                                <span class="value">₹0</span>
+                                <span class="label">Coupon Code:</span>
+                                <span class="value"><%= order.couponCode || order.couponId.name %></span>
                             </div>
+                            <% } %>
                             <div class="info-row total-row">
                                 <span class="label">Total:</span>
-                                <span class="value">₹<%= order.totalAmount.toFixed(2) %></span>
+                                <span class="value">₹<%= totals.finalAmount.toFixed(2) %></span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Order Items Section -->
-                <div class="table-section">
-                    <div class="table-container">
-                        <table class="customers-table order-table">
-                            <thead>
-                                <tr>
-                                    <th class="table-header">Product</th>
-                                    <th class="table-header">Quantity</th>
-                                    <th class="table-header">Price</th>
-                                    <th class="table-header">Total</th>
-                                    <th class="table-header">Status</th>
-                                    <th class="table-header">Details</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <% order.items.forEach(item => { %>
-                                    <tr class="table-row">
-                                        <td>
-                                            <div class="product-info">
-                                                <% if (item.productId.image && item.productId.image.length > 0) { %>
-                                                    <div class="product-image">
-                                                        <img src="<%= item.productId.image[0] %>" alt="<%= item.productId.name %>">
-                                                    </div>
-                                                <% } %>
-                                                <div class="product-details">
-                                                    <div class="product-name"><%= item.productId.name %></div>
-                                                    <div class="product-sku">SKU: <%= item.productId.sku || 'N/A' %></div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td><span class="quantity"><%= item.quantity %></span></td>
-                                        <td class="price">₹<%= item.price.toFixed(2) %></td>
-                                        <td class="total">₹<%= item.totalPrice.toFixed(2) %></td>
-                                        <td>
-                                            <span class="status-badge <%= item.status.toLowerCase() %>">
-                                                <%= item.status %>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <button class="btn-icon update-btn" onclick="window.location.href='/admin/products/<%= item.productId._id %>'">
-                                                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                                </svg>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                <% }) %>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+              
 
-                <!-- Order Timeline Section -->
+                <!-- Order Timeline Section -->  
                 <div class="timeline-section">
                     <div class="timeline-container">
-                        <div class="section-header">
-                            <h3>Order Timeline</h3>
-                        </div>
-                        <div class="timeline">
-                            <% order.statusHistory.forEach(history => { %>
-                                <div class="timeline-item <%= history.status.toLowerCase() === order.orderStatus.toLowerCase() ? 'active' : 'completed' %>">
-                                    <div class="timeline-marker"></div>
-                                    <div class="timeline-title"><%= history.status %></div>
-                                    <div class="timeline-date"><%= new Date(history.date).toLocaleString() %></div>
-                                    <% if (history.description) { %>
-                                        <div class="timeline-description"><%= history.description %></div>
-                                    <% } %>
-                                </div>
-                            <% }) %>
-                            <% if (order.orderStatus.toLowerCase() !== 'delivered') { %>
-                                <div class="timeline-item">
-                                    <div class="timeline-marker"></div>
-                                    <div class="timeline-title">Delivered</div>
-                                    <div class="timeline-date">Pending</div>
-                                </div>
-                            <% } %>
-                        </div>
+                         <div class="section-header">
+                             <h3>Order Timeline</h3>
+                         </div>
+                         <div class="timeline">
+                             <%
+                                 // Helper to get status date from history or creation date
+                                 const getStatusDate = (status) => {
+                                     if (status.toLowerCase() === 'ordered') {
+                                         return order.createdAt;
+                                     }
+                                     // Find the latest entry for a given status
+                                     const historyEntries = order.statusHistory.filter(h => h.status.toLowerCase() === status.toLowerCase());
+                                     if (historyEntries.length > 0) {
+                                         return historyEntries.sort((a, b) => new Date(b.date) - new Date(a.date))[0].date;
+                                     }
+                                     return null;
+                                 };
+ 
+                                 // Helper to get an icon for a status
+                                 const getStatusIcon = (status) => {
+                                     const icons = {
+                                         'ordered': 'fas fa-box',
+                                         'processing': 'fas fa-cogs',
+                                         'shipped': 'fas fa-truck',
+                                         'delivered': 'fas fa-check-circle',
+                                         'cancelled': 'fas fa-times-circle',
+                                         'returned': 'fas fa-undo',
+                                         'failed': 'fas fa-exclamation-triangle'
+                                     };
+                                     return icons[status.toLowerCase()] || 'fas fa-question-circle';
+                                 };
+
+                                 let statuses = [];
+                                 const finalStatus = order.orderStatus.toLowerCase();
+ 
+                                 if (finalStatus === 'failed' || order.paymentStatus.toLowerCase().includes('failed')) {
+                                     statuses = ['Ordered', 'Failed'];
+                                 } else if (finalStatus === 'cancelled') {
+                                     statuses = ['Ordered', 'Processing', 'Cancelled'];
+                                 } else if (finalStatus === 'processing') {
+                                     statuses = ['Ordered', 'Processing', 'Shipped', 'Delivered'];
+                                 }else if (finalStatus === 'returned') {
+                                     statuses = ['Ordered', 'Processing', 'Shipped', 'Delivered', 'Returned'];
+                                 } else {
+                                     statuses = ['Ordered', 'Processing', 'Shipped', 'Delivered'];
+                                 }
+ 
+                                 const currentStatusIndex = statuses.findIndex(s => s.toLowerCase() === finalStatus);
+                             %>
+ 
+                             <% statuses.forEach((status, i) => { %>
+                                 <%
+                                     const statusDate = getStatusDate(status);
+                                     const statusIcon = getStatusIcon(status);
+                                     let itemClass = '';
+                                     const isFinalState = ['failed', 'cancelled', 'returned'].includes(status.toLowerCase());
+ 
+                                     if (currentStatusIndex > -1) { // Normal flow
+                                         if (i < currentStatusIndex) {
+                                             itemClass = 'completed';
+                                         } else if (i === currentStatusIndex) {
+                                             itemClass = 'completed active';
+                                             if (isFinalState) {
+                                                 itemClass = status.toLowerCase() + ' active';
+                                             }
+                                         }
+                                     } else if (statusDate) { // Fallback for statuses like 'Pending' not in the main array
+                                         itemClass = 'completed';
+                                     }
+                                 %>
+                                 <div class="timeline-item <%= itemClass %>">
+                                     <div class="timeline-marker">
+                                        <i class="<%= statusIcon %>"></i>
+                                     </div>
+                                     <div class="timeline-title"><%= status %></div>
+                                     <div class="timeline-date">
+                                         <%= statusDate ? new Date(statusDate).toLocaleString() : 'Pending' %>
+                                     </div>
+                                 </div>
+                             <% }) %>
+                         </div>
+                     </div>
+                 </div>
+ 
+                 
+             </section>
+         </main>
+     </div>
+ 
+     <script>
+         // Toggle sidebar
+         const menuToggle = document.querySelector('.menu-toggle');
+         const sidebar = document.querySelector('.sidebar');
+         menuToggle.addEventListener('click', () => {
+             sidebar.classList.toggle('sidebar-open');
+         });
+     </script>
+ </body>
+ </html>
                     </div>
                 </div>
 

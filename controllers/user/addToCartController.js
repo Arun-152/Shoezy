@@ -3,83 +3,77 @@ const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
 const Cart = require("../../models/cartSchema")
 const Wishlist = require("../../models/wishlistSchema")
-
-const loadAddToCart= async (req, res) => {
-    try {
-        const userId = req.session.userId
-        if (!userId) {
-            return res.redirect("/login");
-        }
-
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.redirect("/login");
-        }
-
-        const userCart = await Cart.findOne({ userId }).populate({
-            path: 'items.productId',
-           
-            populate: {
-                path: 'category',
-                match: { isListed: true, isDeleted: false }
-            }
-        });
-
-        let cartItems = [];
-        let subtotal = 0;
-
-        if (userCart && userCart.items.length > 0) {
-            let cartUpdated = false;
-            userCart.items.forEach(item => {
-                if (!item.size) {
-                    item.size = "Default";
-                    cartUpdated = true;
-                }
-            });
-
-            if (cartUpdated) {
-                await userCart.save();
-            }
-
-            cartItems = userCart.items
-                .filter(item => item.productId && item.productId.category)
-                .map(item => {
-                    const itemTotal = item.price * item.quantity;
-                    subtotal += itemTotal;
-                    return {
-                        ...item.toObject(),
-                        itemTotal: itemTotal
-                    };
-                });
-            
-        }
-        const userWishlist = await Wishlist.findOne({ userId }).populate({
-            path: 'products.productId',
-            match: { isDeleted: false, isBlocked: false },
-            populate: {
-                path: 'category',
-                match: { isListed: true, isDeleted: false }
-            }
-        });
-
-        const shipping = subtotal > 500 ? 0 : 50;
-        const total = subtotal + shipping;
-
-        return res.render("addToCartPage", {
-            user: user,
-            cartItems: cartItems,
-            subtotal: subtotal,
-            shipping: shipping,
-            total: total
-        });
-    } catch (error) {
-        console.error("Add to cart page error:", error);
-        res.redirect("/usererrorPage");
-    }        
-}   
+const mongoose = require("mongoose");
 
 
- const addToCart = async(req,res)=>{
+const loadAddToCart = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    if (!userId) return res.redirect("/login");
+
+    const user = await User.findById(userId);
+    if (!user) return res.redirect("/login");
+
+    const userCart = await Cart.findOne({ userId }).populate({
+      path: "items.productId",
+      match: { isDeleted: false, isBlocked: false },
+      populate: {
+        path: "category",
+        match: { isListed: true, isDeleted: false },
+      },
+    });
+
+    let cartItems = [];
+    let subtotal = 0;
+
+    if (userCart && userCart.items.length > 0) {
+      cartItems = userCart.items
+        .filter(item => item.productId && item.productId.category)
+        .map(item => {
+          const variant = item.productId.variants.find(v => v.size === item.size);
+          if (!variant) {
+            return null; 
+          }
+          const currentPrice = variant.salePrice;
+          const regularPrice = variant.regularPrice;
+          const itemTotal = currentPrice * item.quantity;
+          subtotal += itemTotal;
+          return {
+            ...item.toObject(),
+            price: currentPrice,
+            regularPrice,
+            itemTotal,
+          };
+        })
+        .filter(item => item !== null); 
+    }
+
+    const userWishlist = await Wishlist.findOne({ userId }).populate({
+      path: "products.productId",
+      match: { isDeleted: false, isBlocked: false },
+      populate: {
+        path: "category",
+        match: { isListed: true, isDeleted: false },
+      },
+    });
+
+    const shipping = subtotal > 500 ? 0 : 50;
+    const total = subtotal + shipping;
+
+    return res.render("addToCartPage", {
+      user,
+      cartItems,
+      subtotal,
+      shipping,
+      total,
+    });
+  } catch (error) {
+    console.error("Add to cart page error:", error);
+    res.redirect("/usererrorPage");
+  }
+};
+
+const addToCart = async(req,res)=>{
     try {
         const userId = req.session.userId
         let {productId, size, price, quantity} = req.body
@@ -125,27 +119,60 @@ const loadAddToCart= async (req, res) => {
             return res.status(400).json({success: false, message: "Missing required product information"})
         }
 
+        // Validate requested quantity bounds (client may send any number)
+        quantity = parseInt(quantity)
+        if (isNaN(quantity) || quantity <= 0) quantity = 1
+        if (quantity > 10) {
+            return res.status(400).json({success: false, message: "You can only add up to 10 units per product"})
+        }
+
+        // Find variant stock for the selected size
+        let variantStock = Infinity
+        if (product.variants && product.variants.length > 0) {
+            const variant = product.variants.find(v => (v.size || "Default") === (size || "Default"))
+            if (!variant) {
+                return res.status(400).json({success: false, message: "Selected size is unavailable"})
+            }
+            variantStock = parseInt(variant.variantQuantity) || 0
+            if (variantStock <= 0) {
+                return res.status(400).json({success: false, message: "This size is out of stock"})
+            }
+        }
+
         // Find or create user's cart
         let userCart = await Cart.findOne({userId})
         if (!userCart) {
             userCart = new Cart({userId, items: []})
         }
 
- 
         const existingItemIndex = userCart.items.findIndex(item => 
             item.productId.toString() === productId && (item.size || "Default") === size
         )
 
         if (existingItemIndex > -1) {
-          
-            userCart.items[existingItemIndex].quantity += parseInt(quantity)
+            const currentQty = parseInt(userCart.items[existingItemIndex].quantity) || 0
+            const desiredQty = currentQty + quantity
+
+            // Enforce per-item maximum of 10
+            if (desiredQty > 10) {
+                return res.status(400).json({success: false, message: "You can only add up to 10 units of this product in your cart"})
+            }
+
+            // Enforce stock
+            if (desiredQty > variantStock) {
+                return res.status(400).json({success: false, message: `Only ${variantStock} stock left`})
+            }
+
+            userCart.items[existingItemIndex].quantity = desiredQty
             userCart.items[existingItemIndex].totalPrice = userCart.items[existingItemIndex].price * userCart.items[existingItemIndex].quantity
             // Ensure the size field is set for existing items
-            if (!userCart.items[existingItemIndex].size) {
-                userCart.items[existingItemIndex].size = size;
-            }
+            userCart.items[existingItemIndex].size = size;
         } else {
             // Add new item to cart only if it doesn't exist
+            // Enforce stock for new item
+            if (quantity > variantStock) {
+                return res.status(400).json({success: false, message: `Only ${variantStock} stock left`})
+            }
             userCart.items.push({
                 productId: productId,
                 size: size,
@@ -154,13 +181,6 @@ const loadAddToCart= async (req, res) => {
                 totalPrice: parseFloat(price) * parseInt(quantity)
             })
         }
-
-        // Ensure all existing items have a size field before saving
-        userCart.items.forEach(item => {
-            if (!item.size) {
-                item.size = "Default";
-            }
-        });
 
         await userCart.save()
         const cartCount = userCart.items.length
@@ -199,79 +219,107 @@ const loadAddToCart= async (req, res) => {
         return res.redirect("/usererrorPage")
     }
 }
-const updateQuantity = async(req,res)=>{
+const updateQuantity = async (req, res) => {
     try {
-        const userId = req.session.userId
-        const {productId, size, quantity} = req.body
-       
-  
-    
+        const userId = req.session.userId;
+        const { productId, size, quantity } = req.body;
 
         if (!userId) {
-            return res.status(401).json({success: false, message: "User not authenticated"})
+            return res.status(401).json({ success: false, message: "User not authenticated" });
         }
 
-        const cart = await Cart.findOne({userId})
+        const newQuantity = parseInt(quantity);
+        if (isNaN(newQuantity) || newQuantity <= 0 || newQuantity > 10) {
+            return res.status(400).json({ success: false, message: "Invalid quantity. Only 1-10 units are allowed." });
+        }
+
+        const cart = await Cart.findOne({ userId });
         if (!cart) {
-            return res.status(404).json({success: false, message: "Cart not found"})
+            return res.status(404).json({ success: false, message: "Cart not found" });
         }
 
+        // Find the cart item
+        const item = cart.items.find(
+            i => i.productId.toString() === productId && (i.size || "Default") === (size || "Default")
+        );
 
-        const item = cart.items.find(item => 
-            item.productId.toString() === productId && (item.size || "Default") === (size || "Default")
-        )
         if (!item) {
-            return res.status(404).json({success: false, message: "Item not in cart"})
+            return res.status(404).json({ success: false, message: "Item not found in cart" });
         }
 
-        const product = await Product.findById({_id:productId})
+        // Find product variant
+        const product = await Product.aggregate([
+            { $unwind: "$variants" },
+            { $match: { _id: new mongoose.Types.ObjectId(productId), "variants.size": size } }
+        ]);
 
-        const specificProduct = product.variants.find((item)=>item.size===size)
-        if(specificProduct.variantQuantity<quantity){
-            return res.status(404).json({success:false,message:`Only ${specificProduct.variantQuantity} stock left`})
+        if (!product || product.length === 0) {
+            return res.status(404).json({ success: false, message: "Product not found" });
         }
 
-        // Validate quantity
-        const newQuantity = parseInt(quantity)
-        if (newQuantity <= 0 || newQuantity > 10) {
-            return res.status(400).json({success: false, message: "Invalid quantity only 1-10 is limit"})
+        const variant = product[0].variants;
+
+        if (!variant || variant.size !== size) {
+            return res.status(404).json({ success: false, message: "Product variant not found" });
         }
 
-        // Update quantity and total price
-        item.quantity = newQuantity
-        item.totalPrice = item.price * newQuantity
-
-        await cart.save()
-
-        // Calculate new totals
-        let subtotal = 0
-        cart.items.forEach(cartItem => {
-            subtotal += cartItem.totalPrice
-        })
-
-        const shipping = subtotal > 500 ? 0 : 50
-        const total = subtotal + shipping
-        let cartCount = 0
-        if(cart && cart.items.length){
-            cartCount =cart.items.length
+        if (variant.variantQuantity < newQuantity) {
+            return res.status(400).json({ success: false, message: `Only ${variant.variantQuantity} units in stock.` });
         }
-       
 
+        // Update quantity
+        item.quantity = newQuantity;
+
+        // Save updated cart
+        await cart.save();
+
+        // After saving, re-fetch and populate the cart to calculate fresh totals
+        const updatedCart = await Cart.findOne({ userId }).populate({
+            path: "items.productId",
+            select: "variants" // Only need variants for price calculation
+        });
+
+        let newSubtotal = 0;
+        let newItemTotal = 0;
+
+        updatedCart.items.forEach(cartItem => {
+            const productData = cartItem.productId;
+            if (productData && productData.variants) {
+                const itemVariant = productData.variants.find(v => v.size === cartItem.size);
+                if (itemVariant) {
+                    const itemPrice = itemVariant.salePrice || itemVariant.regularPrice;
+                    const currentItemTotal = itemPrice * cartItem.quantity;
+                    newSubtotal += currentItemTotal;
+
+                    // Find the total for the specific item that was just updated
+                    if (cartItem.productId._id.toString() === productId && cartItem.size === size) {
+                        newItemTotal = currentItemTotal;
+                    }
+                }
+            }
+        });
+
+        let subtotal = 0;
+        const shipping = newSubtotal > 500 ? 0 : 50;
+        const total = newSubtotal + shipping;
+        const cartCount = updatedCart.items.length;
+
+        // ✅ Send success response
         return res.status(200).json({
-            success: true, 
-            message: "Quantity updated",
-            itemTotal: item.totalPrice,
-            subtotal: subtotal,
+            success: true,
+            message: "Quantity updated successfully",
+            itemTotal: newItemTotal,
+            subtotal: newSubtotal,
             shipping: shipping,
             total: total,
-            cartCount
-        })
-    } catch (error) {
-        console.error(error)
-        return res.status(500).json({success: false, message: "Server error"})
-    }
-}
+            cartCount: cartCount,
+        });
 
+    } catch (error) {
+        console.error("Error updating quantity:", error);
+        return res.status(500).json({ success: false, message: "Server error" });
+    }
+};
 const removeCart = async(req,res)=>{
     try {
         const userId = req.session.userId
@@ -290,22 +338,37 @@ const removeCart = async(req,res)=>{
             !(item.productId.toString() === productId && (item.size || "Default") === (size || "Default"))
         )
         await cart.save()
-
-        let subtotal = 0
-        cart.items.forEach(cartItem => {
-            subtotal += cartItem.totalPrice
-        })
-
-        const shipping = subtotal > 500 ? 0 : 50
-        const total = subtotal + shipping
-
+ 
+        // After removing, re-fetch and populate to calculate fresh totals
+        const updatedCart = await Cart.findOne({ userId }).populate({
+            path: "items.productId",
+            select: "variants" // Only need variants for price calculation
+        });
+ 
+        let newSubtotal = 0;
+        if (updatedCart && updatedCart.items.length > 0) {
+            updatedCart.items.forEach(cartItem => {
+                const productData = cartItem.productId;
+                if (productData && productData.variants) {
+                    const itemVariant = productData.variants.find(v => v.size === cartItem.size);
+                    if (itemVariant) {
+                        const itemPrice = itemVariant.salePrice || itemVariant.regularPrice;
+                        newSubtotal += itemPrice * cartItem.quantity;
+                    }
+                }
+            });
+        }
+ 
+        const shipping = newSubtotal > 500 ? 0 : 50;
+        const total = newSubtotal + shipping;
+ 
         return res.status(200).json({
             success: true, 
             message: "Product removed successfully",
-            subtotal: subtotal,
+            subtotal: newSubtotal,
             shipping: shipping,
             total: total,
-            cartCount: cart.items.length
+            cartCount: updatedCart ? updatedCart.items.length : 0
         })
     } catch (error) {
         console.error(error)

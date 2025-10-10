@@ -7,7 +7,13 @@
     <title>Shoezy-Coupon</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
     <link rel="stylesheet" href="/css/admincoupenPage.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
+        .form-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
         .error-msg {
             color: red;
             font-size: 0.85rem;
@@ -128,6 +134,10 @@
             color: #155724;
         }
 
+        .status-inactive {
+            color: #dc3545;
+        }
+
         .status-expired {
             background-color: #f8d7da;
             color: #721c24;
@@ -144,7 +154,6 @@
             border-left: 4px solid #2196f3;
         }
 
-        /* Customer Details Section */
         .customer-section {
             margin-top: 30px;
             border-top: 2px solid #e9ecef;
@@ -309,9 +318,127 @@
             color: white;
         }
 
+        .coupon-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-active {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-expired {
+            background: linear-gradient(135deg, #f8d7da 0%, #f1aeb5 100%);
+            color: #721c24;
+            border: 1px solid #f1aeb5;
+            animation: pulse-red 2s infinite;
+        }
+
+        .status-not-started {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        @keyframes pulse-red {
+            0% {
+                box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+            }
+        }
+
+        .expired-text {
+            color: #dc3545;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            animation: glow-red 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow-red {
+            from {
+                text-shadow: 0 0 5px #dc3545, 0 0 10px #dc3545, 0 0 15px #dc3545;
+            }
+
+            to {
+                text-shadow: 0 0 10px #dc3545, 0 0 20px #dc3545, 0 0 30px #dc3545;
+            }
+        }
+
+        .expired-icon {
+            color: #dc3545;
+            animation: rotate 2s linear infinite;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .expired-row .edit-btn,
+        .expired-row .delete-btn {
+            display: none;
+        }
+
+        .expired-row {
+            background-color: rgba(248, 215, 218, 0.1);
+        }
+
+        .list-btn i {
+            font-size: 1.4rem;
+            color: #28a745;
+            transition: transform 0.3s, color 0.3s;
+        }
+
+        .unlist-btn i {
+            font-size: 1.4rem;
+            color: #dc3545;
+            transition: transform 0.3s, color 0.3s;
+        }
+
+        .list-btn:hover i {
+            color: #218838;
+            transform: scale(1.2) rotate(10deg);
+        }
+
+        .unlist-btn:hover i {
+            color: #c82333;
+            transform: scale(1.2) rotate(-10deg);
+        }
+
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         @keyframes slideIn {
@@ -319,6 +446,7 @@
                 transform: translateY(-50px);
                 opacity: 0;
             }
+
             to {
                 transform: translateY(0);
                 opacity: 1;
@@ -329,7 +457,7 @@
             .coupon-details {
                 grid-template-columns: 1fr;
             }
-            
+
             .modal-content {
                 width: 98%;
                 margin: 5% auto;
@@ -348,7 +476,6 @@
             }
         }
 
-        /* Scrollbar Styling */
         .modal-content::-webkit-scrollbar {
             width: 8px;
         }
@@ -371,10 +498,7 @@
 
 <body>
     <div class="dashboard-container">
-        <!-- Sidebar -->
         <%- include('../partials/admin/sidebar') %>
-
-            <!-- Main Content -->
             <main class="main-content">
                 <header class="header">
                     <div class="header-left">
@@ -393,7 +517,6 @@
                     </div>
                 </header>
 
-                <!-- Breadcrumb Navigation -->
                 <%- include('../partials/admin/breadcrumb', { currentPath: '/admin/coupons' }) %>
 
                     <section class="page-content">
@@ -401,53 +524,47 @@
                             <h1>Coupon Management</h1>
                         </div>
 
-                        <!-- Controls Section -->
-                        <div class="controls-section">
-                            <div class="left-controls">
-                                <div class="sort-control">
-                                    <label>Sort:</label>
-                                    <select class="sort-select">
-                                        <option>Coupon Code</option>
-                                        <option>Expiry Date</option>
+                        <form id="searchForm" class="search-section" method="GET" action="/admin/coupons">
+                            <div class="search-container">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" id="searchInput" name="search" class="search-input" placeholder="Search coupons..." value='<%= search %>'>
+                            </div>
+                            <div class="form-actions">
+                                <div class="sort-container">
+                                    <label for="sortSelect" class="sort-label">
+                                        <i class="fas fa-sort-alpha-down"></i> Sort:
+                                    </label>
+                                    <select id="sortSelect" class="sort-select" name="sort" onchange="this.form.submit()">
+                                        <option value="name_asc" <% if (sort === 'name_asc') { %>selected<% } %>>Coupon Code (A-Z)</option>
+                                        <option value="name_desc" <% if (sort === 'name_desc') { %>selected<% } %>>Coupon Code (Z-A)</option>
+                                        <option value="expiry_asc" <% if (sort === 'expiry_asc') { %>selected<% } %>>Expiry Date (Asc)</option>
+                                        <option value="expiry_desc" <% if (sort === 'expiry_desc') { %>selected<% } %>>Expiry Date (Desc)</option>
                                     </select>
                                 </div>
-                                <div class="items-control">
-                                    <label>by:</label>
-                                    <select class="items-select">
-                                        <option>10</option>
-                                        <option>25</option>
-                                        <option>50</option>
-                                        <option>100</option>
-                                    </select>
+                                <div class="search-buttons">
+                                    <button type="submit" class="search-btn">Apply</button>
+                                    <a href="/admin/coupons" class="clear-btn">Clear</a>
                                 </div>
-                                <div class="filter-control">
-                                    <label>Filter:</label>
-                                    <select class="filter-select">
-                                        <option>All</option>
-                                        <option>Active</option>
-                                        <option>Expired</option>
-                                    </select>
+                                <div class="right-controls">
+                                    <button type="button" class="btn btn-primary"
+                                        onclick="window.location.href='/admin/coupons/addCoupon'">
+                                        <i class="fas fa-plus"></i> Add Coupon
+                                    </button>
                                 </div>
                             </div>
-                            <div class="right-controls">
-                                <button class="btn btn-primary"
-                                    onclick="window.location.href='/admin/coupons/addCoupon'">
-                                    <i class="fas fa-plus"></i> Add Coupon
-                                </button>
-                            </div>
-                        </div>
+                        </form>
 
-                        <!-- Table Section -->
                         <div class="table-section">
                             <div class="table-container">
                                 <table class="customers-table">
                                     <thead>
                                         <tr>
                                             <th class="table-header">Code</th>
+                                            <th class="table-header">Discount Value</th>
                                             <th class="table-header">Expiry Date</th>
                                             <th class="table-header">Discount Type</th>
                                             <th class="table-header">Min Order</th>
-                                            <th class="table-header">Total Usage Limit</th>
+                                            <th class="table-header">Usage</th>
                                             <th class="table-header">Status</th>
                                             <th class="table-header">Action</th>
                                         </tr>
@@ -455,57 +572,107 @@
                                     <tbody>
                                         <% if (coupons && coupons.length> 0) { %>
                                             <% coupons.forEach(coupon=> { %>
-                                                <tr class="table-row">
-                                                    <td>
-                                                        <%= coupon.name %>
-                                                    </td>
-                                                    <td>
-                                                        <%= new Date(coupon.expireOn).toLocaleDateString() %>
-                                                    </td>
-                                                    <td>
-                                                        <%= coupon.discountType.charAt(0).toUpperCase() +
-                                                            coupon.discountType.slice(1) %>
-                                                    </td>
-                                                    <td>₹<%= coupon.minimumPrice %>
-                                                    </td>
-                                                    <td>
-                                                        <%= coupon.totalUsageLimit || 'Unlimited' %>
-                                                    </td>
-                                                    <td>
-                                                        <% if (new Date(coupon.expireOn) < new Date()) { %>
-                                                            Expired
-                                                            <% } else if (new Date(coupon.startDate)> new Date()) { %>
-                                                                Not Started
-                                                                <% } else { %>
-                                                                    Active
+                                                <% 
+                                                    const isExpired = coupon.status === 'Expired' || (coupon.totalUsageLimit && coupon.currentUsageCount >= coupon.totalUsageLimit);
+                                                    const isNotStarted = coupon.status === 'Not Started';
+                                                    const isActive = coupon.status === 'Active' && coupon.islist;
+                                                    %>
+                                                    <tr class="table-row <%= isExpired ? 'expired-row' : '' %>">
+                                                        <td>
+                                                            <%= coupon.name %>
+                                                        </td>
+                                                        <td>
+                                                            <%= coupon.discountType.toLowerCase()==='percentage' ?
+                                                                coupon.offerPrice + '%' : '₹' + coupon.offerPrice %>
+                                                        </td>
+
+                                                        <td>
+                                                            <%= new Date(coupon.expireOn).toLocaleDateString() %>
+                                                        </td>
+                                                        <td>
+                                                            <%= coupon.discountType.charAt(0).toUpperCase() +
+                                                                coupon.discountType.slice(1) %>
+                                                        </td>
+                                                        <td>₹<%= coupon.minimumPrice %>
+                                                        </td>
+                                                        <td>
+                                                            <%= coupon.currentUsageCount || 0 %> / <%=
+                                                                    coupon.totalUsageLimit || 'Unlimited' %>
+                                                        </td>
+                                                        <td>
+                                                            <% if (isExpired) {
+                                                                %>
+                                                                <div class="expired-text">
+                                                                    <i
+                                                                        class="fas fa-exclamation-triangle expired-icon"></i>
+                                                                    EXPIRED
+                                                                </div>
+                                                                <% } else if (coupon.status === 'Not Started') { %>
+                                                                    <div class="coupon-status status-not-started">
+                                                                        <i class="fas fa-clock"></i>
+                                                                        Not Started
+                                                                    </div>
+                                                                    <% } else if (!coupon.islist && coupon.status === 'Active') { %>
+                                                                        <div class="coupon-status status-inactive">
+                                                                            <i class="fas fa-times-circle"></i>
+                                                                            Inactive
+                                                                        </div>
+                                                                        <% } else if (coupon.status === 'Active' && coupon.islist) { %>
+                                                                            <div class="coupon-status status-active">
+                                                                                <i class="fas fa-check-circle"></i>
+                                                                                Active
+                                                                            </div>
+                                                                            <% } %>
+                                                        </td>
+                                                        <td>
+                                                            <div class="action-buttons">
+                                                                <button class="action-btn view-btn"
+                                                                    onclick="openModal('<%= coupon._id %>')">
+                                                                    <i class="fas fa-eye"></i>
+                                                                </button>
+                                                                <% if (!isExpired) { %>
+                                                                    <a href="/admin/coupons/editCoupon?id=<%= coupon._id %>"
+                                                                        class="action-btn edit-btn">
+                                                                        <i class="fas fa-edit"></i>
+                                                                    </a>
+                                                                    <a href="javascript:void(0)" class="toggle-list"
+                                                                        data-coupon-id="<%= coupon._id %>"
+                                                                        data-is-listed="<%= coupon.islist %>">
+                                                                        <% if (coupon.islist) { %>
+                                                                            <button class="action-btn list-btn"
+                                                                                title="Unlist Coupon"
+                                                                                onclick="toggleCoupon('<%= coupon._id %>', true)">
+                                                                                <i class="fas fa-toggle-on"
+                                                                                    style="color: green;"></i>
+                                                                            </button>
+                                                                            <% } else { %>
+                                                                                <button class="action-btn unlist-btn"
+                                                                                    title="List Coupon"
+                                                                                    onclick="toggleCoupon('<%= coupon._id %>', false)">
+                                                                                    <i class="fas fa-toggle-off"
+                                                                                        style="color: red;"></i>
+                                                                                </button>
+                                                                                <% } %>
+                                                                    </a>
+                                                                    <button class="action-btn delete-btn"
+                                                                        onclick="deleteCoupon('<%= coupon._id %>', '<%= coupon.name %>')">
+                                                                        <i class="fas fa-trash"></i>
+                                                                    </button>
                                                                     <% } %>
-                                                    </td>
-                                                    <td>
-                                                        <div class="action-buttons">
-                                                            <button class="action-btn view-btn" onclick="openModal('<%= coupon._id %>')">
-                                                                <i class="fas fa-eye"></i>
-                                                            </button>
-                                                            <a href="/coupons/edit/<%= coupon._id %>" class="action-btn edit-btn">
-                                                                <i class="fas fa-edit"></i>
-                                                            </a>
-                                                            <a href="/coupons/delete/<%= coupon._id %>" class="action-btn delete-btn">
-                                                                <i class="fas fa-trash"></i>
-                                                            </a>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                                <% }); %>
-                                                    <% } else { %>
-                                                        <tr>
-                                                            <td colspan="7">No coupons found</td>
-                                                        </tr>
-                                                        <% } %>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <% }); %>
+                                                        <% } else { %>
+                                                            <tr>
+                                                                <td colspan="8">No coupons found</td>
+                                                            </tr>
+                                                            <% } %>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
 
-                        <!-- Pagination Section -->
                         <div class="pagination-section">
                             <div class="pagination-info">1 of 10 Pages</div>
                             <div class="pagination-controls">
@@ -524,7 +691,6 @@
             </main>
     </div>
 
-    <!-- Enhanced Modal with Customer Details -->
     <div id="couponModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -532,7 +698,6 @@
                 <span class="close" onclick="closeModal()">&times;</span>
             </div>
             <div class="modal-body">
-                <!-- Coupon Information -->
                 <div class="coupon-details">
                     <div class="detail-item">
                         <div class="detail-label">Coupon Code</div>
@@ -572,285 +737,418 @@
                     </div>
                 </div>
 
-                <!-- Customer Usage Details Section -->
-                <div class="customer-section">
-                    <div class="section-title">
-                        <i class="fas fa-users"></i>
-                        Customer Usage Details
-                    </div>
-
-                    <!-- Usage Statistics -->
-                    <div class="customer-stats">
-                        <div class="stat-card">
-                            <div class="stat-number" id="totalCustomers">0</div>
-                            <div class="stat-label">Total Customers</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number" id="totalSavings">₹0</div>
-                            <div class="stat-label">Total Savings</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number" id="avgOrderValue">₹0</div>
-                            <div class="stat-label">Avg Order Value</div>
-                        </div>
-                    </div>
-
-                    <!-- Customer Table -->
-                    <div class="customer-table-container">
-                        <table class="customer-table">
-                            <thead>
-                                <tr>
-                                    <th>Customer Name</th>
-                                    <th>Email</th>
-                                    <th>Order ID</th>
-                                    <th>Usage Date</th>
-                                    <th>Order Amount</th>
-                                    <th>Discount Applied</th>
-                                </tr>
-                            </thead>
-                            <tbody id="customerTableBody">
-                                <tr class="no-customers">
-                                    <td colspan="6">
-                                        <i class="fas fa-info-circle"></i>
-                                        Loading customer data...
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+               
             </div>
         </div>
     </div>
 
-    <script>
-        // Store coupon data for easy access
-        const couponsData = {};
-        
-        <% if (coupons && coupons.length > 0) { %>
-            <% coupons.forEach(coupon => { %>
-                couponsData['<%= coupon._id %>'] = {
-                    _id: '<%= coupon._id %>',
-                    name: '<%= coupon.name %>',
-                    expireOn: '<%= new Date(coupon.expireOn).toLocaleDateString() %>',
-                    discountType: '<%= coupon.discountType.charAt(0).toUpperCase() + coupon.discountType.slice(1) %>',
-                    minimumPrice: '<%= coupon.minimumPrice %>',
-                    totalUsageLimit: '<%= coupon.totalUsageLimit || "Unlimited" %>',
-                    startDate: '<%= new Date(coupon.startDate).toLocaleDateString() %>',
-                    discountValue: '<%= coupon.discountValue || 0 %>',
-                    usageCount: '<%= coupon.usageCount || 0 %>'
-                };
-            <% }); %>
-        <% } %>
+<script>
+    const couponsData = {};
+    <% if (coupons && coupons.length > 0) { %>
+        <% coupons.forEach(coupon => { %>
+        couponsData['<%= coupon._id %>'] = {
+            _id: '<%= coupon._id %>',
+            name: '<%= coupon.name %>',
+            expireOn: '<%= new Date(coupon.expireOn).toLocaleDateString() %>',
+            discountType: '<%= coupon.discountType.charAt(0).toUpperCase() + coupon.discountType.slice(1) %>',
+            offerPrice: '<%= coupon.offerPrice || 0 %>', // Changed from discountValue to offerPrice to match EJS
+            minimumPrice: '<%= coupon.minimumPrice %>',
+            totalUsageLimit: '<%= coupon.totalUsageLimit || "Unlimited" %>',
+            startDate: '<%= new Date(coupon.startDate).toLocaleDateString() %>',
+            usageCount: '<%= coupon.currentUsageCount || 0 %>', // Changed from usageCount to currentUsageCount to match EJS
+            islist: <%= coupon.islist %>
+        };
+        <% }); %>
+    <% } %>
 
-        async function openModal(couponId) {
-            const coupon = couponsData[couponId];
-            
-            if (!coupon) {
-                alert('Coupon data not found');
-                return;
-            }
+    async function openModal(couponId) {
+        const coupon = couponsData[couponId];
 
-            // Set basic coupon information
-            document.getElementById('modalCouponCode').textContent = coupon.name;
-            document.getElementById('modalDiscountType').textContent = coupon.discountType;
-            document.getElementById('modalDiscountValue').textContent = 
-                coupon.discountType.toLowerCase() === 'percentage' ? 
-                coupon.discountValue + '%' : '₹' + coupon.discountValue;
-            document.getElementById('modalMinOrder').textContent = '₹' + coupon.minimumPrice;
-            document.getElementById('modalStartDate').textContent = coupon.startDate;
-            document.getElementById('modalExpiryDate').textContent = coupon.expireOn;
-            document.getElementById('modalUsageLimit').textContent = coupon.totalUsageLimit;
-            document.getElementById('modalUsageCount').textContent = coupon.usageCount;
-            
-            // Determine status
-            const now = new Date();
-            const expiryDate = new Date(coupon.expireOn);
-            const startDateObj = new Date(coupon.startDate);
-            let status = 'Active';
-            let statusClass = 'status-active';
-            
-            if (expiryDate < now) {
-                status = 'Expired';
-                statusClass = 'status-expired';
-            } else if (startDateObj > now) {
-                status = 'Not Started';
-                statusClass = 'status-not-started';
-            }
-            
-            const statusElement = document.getElementById('modalStatus');
-            statusElement.innerHTML = `<span class="status-badge ${statusClass}">${status}</span>`;
-            
-            // Show modal
-            document.getElementById('couponModal').style.display = 'block';
-            
-            // Load customer data
-            await loadCustomerData(couponId);
+        if (!coupon) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Coupon data not found!',
+                confirmButtonColor: '#dc3545'
+            });
+            return;
         }
 
-        async function loadCustomerData(couponId) {
-            try {
-                // Show loading state
-                const tableBody = document.getElementById('customerTableBody');
-                tableBody.innerHTML = `
-                    <tr class="no-customers">
-                        <td colspan="6">
-                            <i class="fas fa-spinner fa-spin"></i>
-                            Loading customer data...
-                        </td>
-                    </tr>
-                `;
+        // Populate modal fields
+        document.getElementById('modalCouponCode').textContent = coupon.name || 'N/A';
+        document.getElementById('modalDiscountType').textContent = coupon.discountType || 'N/A';
+        document.getElementById('modalDiscountValue').textContent =
+            coupon.discountType.toLowerCase() === 'percentage'
+                ? `${coupon.offerPrice}%`
+                : `₹${coupon.offerPrice}`;
+        document.getElementById('modalMinOrder').textContent = `₹${coupon.minimumPrice || 0}`;
+        document.getElementById('modalStartDate').textContent = coupon.startDate || 'N/A';
+        document.getElementById('modalExpiryDate').textContent = coupon.expireOn || 'N/A';
+        document.getElementById('modalUsageLimit').textContent = coupon.totalUsageLimit || 'Unlimited';
+        document.getElementById('modalUsageCount').textContent = coupon.usageCount || 0;
 
-                // Fetch customer usage data from your backend
-                // Replace this URL with your actual endpoint
-                const response = await fetch(`/admin/coupons/${couponId}/customers`);
-                
-                if (!response.ok) {
-                    throw new Error('Failed to fetch customer data');
-                }
-                
-                const data = await response.json();
-                
-                // Update statistics
-                updateCustomerStats(data.customers || []);
-                
-                // Update customer table
-                updateCustomerTable(data.customers || []);
-                
-            } catch (error) {
-                console.error('Error loading customer data:', error);
-                
-                // Show error state
-                const tableBody = document.getElementById('customerTableBody');
-                tableBody.innerHTML = `
-                    <tr class="no-customers">
-                        <td colspan="6">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            Failed to load customer data. Please try again.
-                        </td>
-                    </tr>
-                `;
-                
-                // Reset statistics
-                document.getElementById('totalCustomers').textContent = '0';
-                document.getElementById('totalSavings').textContent = '₹0';
-                document.getElementById('avgOrderValue').textContent = '₹0';
-            }
+        // Determine coupon status
+        const now = new Date();
+        const expiryDate = new Date(coupon.expireOn);
+        const startDateObj = new Date(coupon.startDate);
+        const isMaxUsageReached =
+            coupon.totalUsageLimit !== 'Unlimited' &&
+            parseInt(coupon.usageCount) >= parseInt(coupon.totalUsageLimit);
+        let status = 'Active';
+        let statusClass = 'status-active';
+
+        if (expiryDate < now || isMaxUsageReached) {
+            status = 'Expired';
+            statusClass = 'status-expired';
+        } else if (startDateObj > now) {
+            status = 'Not Started';
+            statusClass = 'status-not-started';
+        } else if (!coupon.islist) {
+            status = 'Inactive';
+            statusClass = 'status-inactive';
         }
 
-        function updateCustomerStats(customers) {
-            const totalCustomers = customers.length;
-            const totalSavings = customers.reduce((sum, customer) => sum + (customer.discountApplied || 0), 0);
-            const avgOrderValue = totalCustomers > 0 ? 
-                customers.reduce((sum, customer) => sum + (customer.orderAmount || 0), 0) / totalCustomers : 0;
+        const statusElement = document.getElementById('modalStatus');
+        statusElement.innerHTML = `<span class="status-badge ${statusClass}">${status}</span>`;
 
-            document.getElementById('totalCustomers').textContent = totalCustomers;
-            document.getElementById('totalSavings').textContent = '₹' + totalSavings.toLocaleString();
-            document.getElementById('avgOrderValue').textContent = '₹' + Math.round(avgOrderValue).toLocaleString();
-        }
+        // Show the modal
+        document.getElementById('couponModal').style.display = 'block';
 
-        function updateCustomerTable(customers) {
+        // Load customer data
+        await loadCustomerData(couponId);
+    }
+
+    async function loadCustomerData(couponId) {
+        try {
             const tableBody = document.getElementById('customerTableBody');
-            
-            if (customers.length === 0) {
-                tableBody.innerHTML = `
-                    <tr class="no-customers">
-                        <td colspan="6">
-                            <i class="fas fa-info-circle"></i>
-                            No customers have used this coupon yet.
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-
-            const rows = customers.map(customer => `
-                <tr>
-                    <td>
-                        <div class="customer-name">${customer.name || 'N/A'}</div>
-                    </td>
-                    <td>
-                        <div class="customer-email">${customer.email || 'N/A'}</div>
-                    </td>
-                    <td>#${customer.orderId || 'N/A'}</td>
-                    <td>
-                        <div class="usage-date">
-                            ${customer.usageDate ? new Date(customer.usageDate).toLocaleDateString() : 'N/A'}
-                        </div>
-                    </td>
-                    <td>
-                        <div class="order-amount">₹${(customer.orderAmount || 0).toLocaleString()}</div>
-                    </td>
-                    <td>
-                        <div class="discount-applied">₹${(customer.discountApplied || 0).toLocaleString()}</div>
+            tableBody.innerHTML = `
+                <tr class="no-customers">
+                    <td colspan="6">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        Loading customer data...
                     </td>
                 </tr>
-            `).join('');
+            `;
 
-            tableBody.innerHTML = rows;
-        }
+            const response = await fetch(`/admin/coupons/${couponId}/customers`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
 
-        function closeModal() {
-            document.getElementById('couponModal').style.display = 'none';
-        }
-
-        // Close modal when clicking outside of it
-        window.onclick = function(event) {
-            const modal = document.getElementById('couponModal');
-            if (event.target === modal) {
-                modal.style.display = 'none';
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
+
+            const data = await response.json();
+            const customers = data.customers || [];
+
+            updateCustomerStats(customers);
+            updateCustomerTable(customers);
+        } catch (error) {
+            console.error('Error loading customer data:', error);
+            const tableBody = document.getElementById('customerTableBody');
+            tableBody.innerHTML = `
+                <tr class="no-customers">
+                    <td colspan="6">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Failed to load customer data. Please try again.
+                    </td>
+                </tr>
+            `;
+            document.getElementById('totalCustomers').textContent = '0';
+            document.getElementById('totalSavings').textContent = '₹0';
+            document.getElementById('avgOrderValue').textContent = '₹0';
+        }
+    }
+
+    function updateCustomerStats(customers) {
+        const totalCustomers = customers.length;
+        const totalSavings = customers.reduce((sum, customer) => sum + (customer.discountApplied || 0), 0);
+        const avgOrderValue = totalCustomers > 0
+            ? customers.reduce((sum, customer) => sum + (customer.orderAmount || 0), 0) / totalCustomers
+            : 0;
+
+        document.getElementById('totalCustomers').textContent = totalCustomers.toLocaleString();
+        document.getElementById('totalSavings').textContent = `₹${totalSavings.toLocaleString()}`;
+        document.getElementById('avgOrderValue').textContent = `₹${Math.round(avgOrderValue).toLocaleString()}`;
+    }
+
+    function updateCustomerTable(customers) {
+        const tableBody = document.getElementById('customerTableBody');
+
+        if (customers.length === 0) {
+            tableBody.innerHTML = `
+                <tr class="no-customers">
+                    <td colspan="6">
+                        <i class="fas fa-info-circle"></i>
+                        No customers have used this coupon yet.
+                    </td>
+                </tr>
+            `;
+            return;
         }
 
-        // Close modal with Escape key
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                closeModal();
+        const rows = customers.map(customer => `
+            <tr>
+                <td>
+                    <div class="customer-name">${customer.name || 'N/A'}</div>
+                </td>
+                <td>
+                    <div class="customer-email">${customer.email || 'N/A'}</div>
+                </td>
+                <td>#${customer.orderId || 'N/A'}</td>
+                <td>
+                    <div class="usage-date">
+                        ${customer.usageDate ? new Date(customer.usageDate).toLocaleDateString() : 'N/A'}
+                    </div>
+                </td>
+                <td>
+                    <div class="order-amount">₹${(customer.orderAmount || 0).toLocaleString()}</div>
+                </td>
+                <td>
+                    <div class="discount-applied">₹${(customer.discountApplied || 0).toLocaleString()}</div>
+                </td>
+            </tr>
+        `).join('');
+
+        tableBody.innerHTML = rows;
+    }
+
+    function closeModal() {
+        document.getElementById('couponModal').style.display = 'none';
+    }
+
+    window.onclick = function (event) {
+        const modal = document.getElementById('couponModal');
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    };
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            closeModal();
+        }
+    });
+
+    async function deleteCoupon(couponId, couponName) {
+        try {
+            const result = await Swal.fire({
+                title: 'Delete Coupon?',
+                html: `Are you sure you want to delete the coupon <strong>"${couponName}"</strong>?<br><br>This action cannot be undone.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="fas fa-trash"></i> Yes, Delete',
+                cancelButtonText: '<i class="fas fa-times"></i> Cancel',
+                reverseButtons: true,
+                focusCancel: true,
+                customClass: {
+                    confirmButton: 'btn btn-danger',
+                    cancelButton: 'btn btn-secondary'
+                }
+            });
+
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Deleting Coupon...',
+                    html: 'Please wait while we delete the coupon.',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                const response = await fetch(`/admin/coupons/deleteCoupon/${couponId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    const deleteButton = document.querySelector(`button[onclick="deleteCoupon('${couponId}', '${couponName}')"]`);
+                    const couponRow = deleteButton ? deleteButton.closest('tr') : null;
+
+                    if (couponRow) {
+                        couponRow.style.transition = 'all 0.4s ease-out';
+                        couponRow.style.opacity = '0';
+                        couponRow.style.transform = 'translateX(-20px)';
+                        couponRow.style.backgroundColor = '#f8d7da';
+
+                        setTimeout(() => {
+                            couponRow.remove();
+                            const tbody = document.querySelector('.customers-table tbody');
+                            const remainingRows = tbody.querySelectorAll('tr:not(.no-coupons-row)');
+
+                            if (remainingRows.length === 0) {
+                                tbody.innerHTML = `
+                                    <tr class="no-coupons-row">
+                                        <td colspan="8" style="text-align: center; padding: 40px; color: #6c757d; font-style: italic;">
+                                            <i class="fas fa-info-circle" style="margin-right: 8px;"></i>
+                                            No coupons found
+                                        </td>
+                                    </tr>
+                                `;
+                            }
+                        }, 400);
+
+                        delete couponsData[couponId];
+                    }
+
+                    setTimeout(async () => {
+                        await Swal.fire({
+                            title: 'Deleted!',
+                            text: 'Coupon has been successfully deleted.',
+                            icon: 'success',
+                            confirmButtonColor: '#28a745',
+                            confirmButtonText: 'OK',
+                            timer: 2000,
+                            timerProgressBar: true
+                        });
+                    }, 100);
+                } else {
+                    await Swal.fire({
+                        title: 'Error!',
+                        text: data.message || 'Failed to delete coupon. Please try again.',
+                        icon: 'error',
+                        confirmButtonColor: '#dc3545',
+                        confirmButtonText: 'OK'
+                    });
+                }
             }
+        } catch (error) {
+            console.error('Error deleting coupon:', error);
+            await Swal.fire({
+                title: 'Error!',
+                text: 'Something went wrong. Please try again.',
+                icon: 'error',
+                confirmButtonColor: '#dc3545',
+                confirmButtonText: 'OK'
+            });
+        }
+    }
+
+    async function toggleCoupon(couponId, isCurrentlyListed) {
+        const action = isCurrentlyListed ? 'unlist' : 'list';
+
+        const result = await Swal.fire({
+            title: `${action.charAt(0).toUpperCase() + action.slice(1)} Coupon?`,
+            text: `Are you sure you want to ${action} this coupon?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: `Yes, ${action}!`
         });
 
-        // Mock data for demonstration (remove this in production)
-        // This simulates the API response structure
-        if (typeof fetch === 'undefined' || window.location.hostname === 'localhost') {
-            window.fetch = async function(url) {
-                // Mock customer data - replace with real API call
-                const mockData = {
-                    customers: [
-                        {
-                            name: 'John Doe',
-                            email: 'john.doe@example.com',
-                            orderId: 'ORD001',
-                            usageDate: new Date().toISOString(),
-                            orderAmount: 2500,
-                            discountApplied: 250
-                        },
-                        {
-                            name: 'Jane Smith',
-                            email: 'jane.smith@example.com',
-                            orderId: 'ORD002',
-                            usageDate: new Date(Date.now() - 86400000).toISOString(),
-                            orderAmount: 1800,
-                            discountApplied: 180
-                        },
-                        {
-                            name: 'Mike Johnson',
-                            email: 'mike.johnson@example.com',
-                            orderId: 'ORD003',
-                            usageDate: new Date(Date.now() - 172800000).toISOString(),
-                            orderAmount: 3200,
-                            discountApplied: 320
-                        }
-                    ]
-                };
-                
-                return {
-                    ok: true,
-                    json: async () => mockData
-                };
-            };
-        }
-    </script>
+        if (result.isConfirmed) {
+            try {
+                const response = await fetch(`/admin/coupons/list`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: couponId }),
+                });
 
+                const data = await response.json();
+
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: `Coupon ${action}ed successfully`,
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+
+                    const btn = document.querySelector(
+                        `button[onclick="toggleCoupon('${couponId}', ${isCurrentlyListed})"]`
+                    );
+
+                    if (btn) {
+                        if (isCurrentlyListed) {
+                            btn.outerHTML = `
+                                <button class="action-btn unlist-btn" title="List Coupon"
+                                    onclick="toggleCoupon('${couponId}', false)">
+                                    <i class="fas fa-toggle-off" style="color: red;"></i>
+                                </button>
+                            `;
+                        } else {
+                            btn.outerHTML = `
+                                <button class="action-btn list-btn" title="Unlist Coupon"
+                                    onclick="toggleCoupon('${couponId}', true)">
+                                    <i class="fas fa-toggle-on" style="color: green;"></i>
+                                </button>
+                            `;
+                        }
+                    }
+
+                    couponsData[couponId].islist = !isCurrentlyListed;
+
+                    // Update status display
+                    const row = btn ? btn.closest('tr') : null;
+                    if (row) {
+                        const statusCell = row.querySelector('td:nth-child(7)');
+                        const isMaxUsageReached = couponsData[couponId].totalUsageLimit !== 'Unlimited' &&
+                            parseInt(couponsData[couponId].usageCount) >= parseInt(couponsData[couponId].totalUsageLimit);
+                        const now = new Date();
+                        const expiryDate = new Date(couponsData[couponId].expireOn);
+                        const startDate = new Date(couponsData[couponId].startDate);
+
+                        if (expiryDate < now || isMaxUsageReached) {
+                            statusCell.innerHTML = `
+                                <div class="expired-text">
+                                    <i class="fas fa-exclamation-triangle expired-icon"></i>
+                                    EXPIRED
+                                </div>
+                            `;
+                            row.classList.add('expired-row');
+                        } else if (startDate > now) {
+                            statusCell.innerHTML = `
+                                <div class="coupon-status status-not-started">
+                                    <i class="fas fa-clock"></i>
+                                    Not Started
+                                </div>
+                            `;
+                        } else if (!couponsData[couponId].islist) {
+                            statusCell.innerHTML = `
+                                <div class="coupon-status status-inactive">
+                                    <i class="fas fa-times-circle"></i>
+                                    Inactive
+                                </div>
+                            `;
+                        } else {
+                            statusCell.innerHTML = `
+                                <div class="coupon-status status-active">
+                                    <i class="fas fa-check-circle"></i>
+                                    Active
+                                </div>
+                            `;
+                        }
+                    }
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: data.message || 'Something went wrong!'
+                    });
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Internal server error'
+                });
+            }
+        }
+    }
+</script>
 </body>
 
 </html>

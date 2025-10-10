@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const User = require("./userSchema");
 const { Schema } = mongoose;
 
 const couponSchema = new Schema({
@@ -48,6 +49,11 @@ const couponSchema = new Schema({
     type: Boolean,
     default: true
   },
+  status:  {
+    type:String,
+    enum:["Available","Used","Expired"],
+    default:"Available"
+  },
   isAllProducts: {
     type: Boolean,
     default: true
@@ -70,6 +76,15 @@ const couponSchema = new Schema({
     type: Boolean,
     default: true
   },
+  userUsage:[
+    {
+      userId:{
+        type:mongoose.Schema.Types.ObjectId,ref:"User"
+      },
+      orderId:{type:mongoose.Schema.Types.ObjectId,ref:"Order"}
+
+    }
+  ],
   userId: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "User"

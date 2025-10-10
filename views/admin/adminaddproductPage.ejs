@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,132 +9,137 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
 </head>
+
 <body>
     <div class="container">
         <!-- Breadcrumb Navigation -->
         <%- include('../partials/admin/breadcrumb', { currentPath: '/admin/products/add' }) %>
 
-        <h1>Add New Product</h1>
-        <p class="subtitle">Create and manage your product inventory with ease</p>
+            <h1>Add New Product</h1>
+            <p class="subtitle">Create and manage your product inventory with ease</p>
 
-        <form id="productForm" method="POST" action="/admin/addproduct" enctype="multipart/form-data">
-            <!-- Product Name -->
-            <div class="form-group">
-                <label for="productName">Product Name *</label>
-                <input type="text" id="productName" name="productName">
-                <span class="error" id="productNameError"></span>
-            </div>
+            <form id="productForm" method="POST" action="/admin/addproduct" enctype="multipart/form-data">
+                <!-- Product Name -->
+                <div class="form-group">
+                    <label for="productName">Product Name *</label>
+                    <input type="text" id="productName" name="productName">
+                    <span class="error" id="productNameError"></span>
+                </div>
 
-            <!-- Product Description -->
-            <div class="form-group">
-                <label for="description">Product Description *</label>
-                <textarea id="description" name="description"></textarea>
-                <span class="error" id="descriptionError"></span>
-            </div>
+                <!-- Product Description -->
+                <div class="form-group">
+                    <label for="description">Product Description *</label>
+                    <textarea id="description" name="description"></textarea>
+                    <span class="error" id="descriptionError"></span>
+                </div>
 
-            <!-- Product Offer -->
-            <div class="form-group">
-                <label for="productOffer">Product Offer (%)</label>
-                <input type="number" id="productOffer" name="productOffer" min="0" max="100">
-                <span class="error" id="productOfferError"></span>
-            </div>
+                <!-- Product Offer -->
+                <div class="form-group">
+                    <label for="productOffer">Product Offer (%)</label>
+                    <input type="number" id="productOffer" name="productOffer" min="0" max="100">
+                    <span class="error" id="productOfferError"></span>
+                </div>
 
-            <!-- Product Status -->
-            <div class="form-group">
-                <label for="status">Product Status *</label>
-                <select id="status" name="status" >
-                    <option value="" disabled selected>Select product status</option>
-                    <option value="Available">Available</option>
-                    <option value="out of stock">Out of Stock</option>
-                </select>
-                <span class="error" id="statusError"></span>
-            </div>
+                <!-- Product Status -->
+                <div class="form-group">
+                    <label for="status">Product Status *</label>
+                    <select id="status" name="status">
+                        <option value="" disabled selected>Select product status</option>
+                        <option value="Available">Available</option>
+                        <option value="out of stock">Out of Stock</option>
+                    </select>
+                    <span class="error" id="statusError"></span>
+                </div>
 
-            <!-- Product Images -->
-            <div class="form-group">
-                <label>Product Images * (Upload exactly 3 images)</label>
-                <p class="image-note">Upload high-quality images of your product</p>
-                <div class="image-upload">
-                    <div class="image-slot">
-                        <input type="file" id="image1" name="images" accept="image/*">
-                        <label for="image1">Choose Image 1</label>
-                        <img id="preview1" style="display: none; max-width: 100%;">
+                <!-- Product Images -->
+                <div class="form-group">
+                    <label>Product Images * (Upload exactly 3 images)</label>
+                    <p class="image-note">Upload high-quality images of your product</p>
+                    <div class="image-upload">
+                        <div class="image-slot">
+                            <input type="file" id="image1" name="images" accept="image/*">
+                            <label for="image1">Choose Image 1</label>
+                            <img id="preview1" style="display: none; max-width: 100%;">
+                        </div>
+                        <div class="image-slot">
+                            <input type="file" id="image2" name="images" accept="image/*">
+                            <label for="image2">Choose Image 2</label>
+                            <img id="preview2" style="display: none; max-width: 100%;">
+                        </div>
+                        <div class="image-slot">
+                            <input type="file" id="image3" name="images" accept="image/*">
+                            <label for="image3">Choose Image 3</label>
+                            <img id="preview3" style="display: none; max-width: 100%;">
+                        </div>
                     </div>
-                    <div class="image-slot">
-                        <input type="file" id="image2" name="images" accept="image/*">
-                        <label for="image2">Choose Image 2</label>
-                        <img id="preview2" style="display: none; max-width: 100%;">
-                    </div>
-                    <div class="image-slot">
-                        <input type="file" id="image3" name="images" accept="image/*">
-                        <label for="image3">Choose Image 3</label>
-                        <img id="preview3" style="display: none; max-width: 100%;">
+                    <span class="error" id="imagesError"></span>
+                </div>
+
+                <!-- Crop Modal -->
+                <div id="cropModal" class="modal" style="display: none;">
+                    <div class="modal-content">
+                        <h3>Crop Image</h3>
+                        <div class="modal-image-container">
+                            <img id="imageToCrop">
+                        </div>
+                        <div class="modal-buttons">
+                            <button type="button" id="cropButton">Crop</button>
+                            <button type="button" id="cancelCrop">Cancel</button>
+                        </div>
                     </div>
                 </div>
-                <span class="error" id="imagesError"></span>
-            </div>
 
-            <!-- Crop Modal -->
-            <div id="cropModal" class="modal" style="display: none;">
-                <div class="modal-content">
-                    <h3>Crop Image</h3>
-                    <div class="modal-image-container">
-                        <img id="imageToCrop">
-                    </div>
-                    <div class="modal-buttons">
-                        <button type="button" id="cropButton">Crop</button>
-                        <button type="button" id="cancelCrop">Cancel</button>
-                    </div>
+                <!-- Color -->
+                <div class="form-group">
+                    <label for="color">Color *</label>
+                    <input type="text" id="color" name="color" placeholder="Enter colors (e.g., Red, Blue)">
+                    <span class="error" id="colorError"></span>
                 </div>
-            </div>
 
-            <!-- Color -->
-            <div class="form-group">
-                <label for="color">Color *</label>
-                <input type="text" id="color" name="color" placeholder="Enter colors (e.g., Red, Blue)">
-                <span class="error" id="colorError"></span>
-            </div>
-
-            <!-- Variants (Size, Variant Price, Sale Price, Quantity) -->
-            <div class="form-group">
-                <label>Variants *</label>
-                <div id="variantContainer">
-                    <div class="variant-field-group">
-                        <select name="variants[size][]" class="size-select" >
-                            <option value="" disabled selected>Select size</option>
-                            <option value="6">6</option>
-                            <option value="7">7</option>
-                            <option value="8">8</option>
-                            <option value="9">9</option>
-                            <option value="10">10</option>
-                        </select>
-                        <input type="number" name="variants[variantPrice][]" class="variant-price-input" placeholder="Variant Price" min="0" step="0.01" >
-                        <input type="number" name="variants[salePrice][]" class="sale-price-input" placeholder="Sale Price" min="0" step="0.01" >
-                        <input type="number" name="variants[variantQuantity][]" class="quantity-input" placeholder="Quantity" min="0" >
-                        <button type="button" class="remove-variant" style="display: none;">Remove</button>
+                <!-- Variants (Size, Variant Price, Sale Price, Quantity) -->
+                <!-- Variants (Size, Regular Price, Quantity) -->
+                <div class="form-group">
+                    <label>Variants *</label>
+                    <div id="variantContainer">
+                        <div class="variant-field-group">
+                            <select name="variants[size][]" class="size-select" >
+                                <option value="" disabled selected>Select size</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                            </select>
+                            <input type="number" name="variants[regularPrice][]" class="regular-price-input"
+                                placeholder="Regular Price" min="0" step="0.01" >
+                            <input type="number" name="variants[variantQuantity][]" class="quantity-input"
+                                placeholder="Quantity" min="0" >
+                            <button type="button" class="remove-variant" style="display: none;">Remove</button>
+                        </div>
                     </div>
+                    <button type="button" id="add-variant">Add Another Variant</button>
+                    <span class="error" id="variantsError"></span>
                 </div>
-                <button type="button" id="add-variant">Add Another Variant</button>
-                <span class="error" id="variantsError"></span>
-            </div>
 
-            <!-- Category -->
-            <div class="form-group">
-                <label for="category">Category *</label>
-                <select id="category" name="category" >
-                    <option value="" disabled selected>Select category</option>
-                    <% if (cat && cat.length > 0) { %>
-                        <% cat.forEach(category => { %>
-                            <option value="<%= category._id %>"><%= category.name %></option>
-                        <% }) %>
-                    <% } %>
-                </select>
-                <span class="error" id="categoryError"></span>
-            </div>
+                <!-- Category -->
+                <div class="form-group">
+                    <label for="category">Category *</label>
+                    <select id="category" name="category">
+                        <option value="" disabled selected>Select category</option>
+                        <% if (cat && cat.length> 0) { %>
+                            <% cat.forEach(category=> { %>
+                                <option value="<%= category._id %>">
+                                    <%= category.name %>
+                                </option>
+                                <% }) %>
+                                    <% } %>
+                    </select>
+                    <span class="error" id="categoryError"></span>
+                </div>
 
-            <!-- Submit Button -->
-            <button type="submit" class="submit-btn">Add Product</button>
-        </form>
+                <!-- Submit Button -->
+                <button type="submit" class="submit-btn">Add Product</button>
+            </form>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
@@ -141,249 +147,240 @@
 
     <script>
         // Image Preview and Crop Functionality
-           let currentImageInput = null;
-    let cropper = null;
-    const croppedImages = new Map();
+        let currentImageInput = null;
+        let cropper = null;
+        const croppedImages = new Map();
 
-    ['image1', 'image2', 'image3'].forEach((id, index) => {
-        const input = document.getElementById(id);
-        if (!input) return;
+        ['image1', 'image2', 'image3'].forEach((id, index) => {
+            const input = document.getElementById(id);
+            if (!input) return;
 
-        const preview = document.getElementById(`preview${index + 1}`);
+            const preview = document.getElementById(`preview${index + 1}`);
 
-        input.addEventListener('change', function (e) {
-            const file = e.target.files[0];
-            if (file) {
-                if (file.size > 5 * 1024 * 1024) {
-                    document.getElementById('imagesError').textContent = 'Image size must be less than 5MB';
-                    input.value = '';
-                    return;
+            input.addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    if (file.size > 5 * 1024 * 1024) {
+                        document.getElementById('imagesError').textContent = 'Image size must be less than 5MB';
+                        input.value = '';
+                        return;
+                    }
+
+                    if (!file.type.startsWith('image/')) {
+                        document.getElementById('imagesError').textContent = 'Please upload valid image files';
+                        input.value = '';
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        currentImageInput = input;
+                        const imageToCrop = document.getElementById('imageToCrop');
+                        imageToCrop.src = e.target.result;
+                        document.getElementById('cropModal').style.display = 'block';
+
+                        if (cropper) cropper.destroy();
+                        cropper = new Cropper(imageToCrop, {
+                            aspectRatio: 1,
+                            viewMode: 1,
+                        });
+                    };
+                    reader.readAsDataURL(file);
                 }
-
-                if (!file.type.startsWith('image/')) {
-                    document.getElementById('imagesError').textContent = 'Please upload valid image files';
-                    input.value = '';
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    currentImageInput = input;
-                    const imageToCrop = document.getElementById('imageToCrop');
-                    imageToCrop.src = e.target.result;
-                    document.getElementById('cropModal').style.display = 'block';
-
-                    if (cropper) cropper.destroy();
-                    cropper = new Cropper(imageToCrop, {
-                        aspectRatio: 1,
-                        viewMode: 1,
-                    });
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    });
-
-    document.getElementById('cropButton').addEventListener('click', function () {
-        const canvas = cropper.getCroppedCanvas({
-            width: 500,
-            height: 500
+            });
         });
 
-        canvas.toBlob(blob => {
-            const url = URL.createObjectURL(blob);
-            const previewId = `preview${currentImageInput.id.slice(-1)}`;
-            document.getElementById(previewId).src = url;
-            document.getElementById(previewId).style.display = 'block';
+        document.getElementById('cropButton').addEventListener('click', function () {
+            const canvas = cropper.getCroppedCanvas({
+                width: 500,
+                height: 500
+            });
 
-            croppedImages.set(currentImageInput.id, blob);
+            canvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const previewId = `preview${currentImageInput.id.slice(-1)}`;
+                document.getElementById(previewId).src = url;
+                document.getElementById(previewId).style.display = 'block';
 
-            currentImageInput.value = '';
-            currentImageInput.removeAttribute('name'); // prevents MulterError
+                croppedImages.set(currentImageInput.id, blob);
+
+                currentImageInput.value = '';
+                currentImageInput.removeAttribute('name'); // prevents MulterError
+                document.getElementById('cropModal').style.display = 'none';
+                cropper.destroy();
+            }, 'image/jpeg', 0.8);
+        });
+
+        document.getElementById('cancelCrop').addEventListener('click', function () {
             document.getElementById('cropModal').style.display = 'none';
-            cropper.destroy();
-        }, 'image/jpeg', 0.8);
-    });
+            currentImageInput.value = '';
+            croppedImages.delete(currentImageInput.id);
+            const previewId = `preview${currentImageInput.id.slice(-1)}`;
+            document.getElementById(previewId).style.display = 'none';
+            if (cropper) cropper.destroy();
+        });
 
-    document.getElementById('cancelCrop').addEventListener('click', function () {
-        document.getElementById('cropModal').style.display = 'none';
-        currentImageInput.value = '';
-        croppedImages.delete(currentImageInput.id);
-        const previewId = `preview${currentImageInput.id.slice(-1)}`;
-        document.getElementById(previewId).style.display = 'none';
-        if (cropper) cropper.destroy();
-    });
+        // Add/Remove Variant Fields
+        document.getElementById('add-variant').addEventListener('click', function () {
+            const container = document.getElementById('variantContainer');
+            const newField = document.createElement('div');
+            newField.className = 'variant-field-group';
+            newField.innerHTML = `
+        <select name="variants[size][]" class="size-select" required>
+            <option value="" disabled selected>Select size</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+        </select>
+        <input type="number" name="variants[regularPrice][]" class="regular-price-input" placeholder="Regular Price" min="0" step="0.01" required>
+        <input type="number" name="variants[variantQuantity][]" class="quantity-input" placeholder="Quantity" min="0" required>
+        <button type="button" class="remove-variant">Remove</button>
+    `;
+            container.appendChild(newField);
+            updateRemoveButtons('variant-field-group', 'remove-variant');
+        });
 
-    // Add/Remove Variant Fields
-    document.getElementById('add-variant').addEventListener('click', function () {
-        const container = document.getElementById('variantContainer');
-        const newField = document.createElement('div');
-        newField.className = 'variant-field-group';
-        newField.innerHTML = `
-            <select name="variants[size][]" class="size-select" required>
-                <option value="" disabled selected>Select size</option>
-                <option value="6">6</option>
-                <option value="7">7</option>
-                <option value="8">8</option>
-                <option value="9">9</option>
-                <option value="10">10</option>
-            </select>
-            <input type="number" name="variants[variantPrice][]" class="variant-price-input" placeholder="Variant Price" min="0" step="0.01" required>
-            <input type="number" name="variants[salePrice][]" class="sale-price-input" placeholder="Sale Price" min="0" step="0.01" required>
-            <input type="number" name="variants[variantQuantity][]" class="quantity-input" placeholder="Quantity" min="0" required>
-            <button type="button" class="remove-variant">Remove</button>
-        `;
-        container.appendChild(newField);
-        updateRemoveButtons('variant-field-group', 'remove-variant');
-    });
-
-    function updateRemoveButtons(containerClass, buttonClass) {
-        const containers = document.getElementsByClassName(containerClass);
-        const buttons = document.getElementsByClassName(buttonClass);
-        for (let i = 0; i < buttons.length; i++) {
-            buttons[i].style.display = containers.length > 1 ? 'inline-block' : 'none';
-            buttons[i].onclick = function () {
-                this.parentElement.remove();
-                updateRemoveButtons(containerClass, buttonClass);
-            };
-        }
-    }
-
-    // Form Submission
-    document.getElementById('productForm').addEventListener('submit', async function (e) {
-        e.preventDefault();
-        let isValid = true;
-        document.querySelectorAll('.error').forEach(error => error.textContent = '');
-
-        const productName = document.getElementById('productName').value.trim();
-        if (!productName || productName.length === 0) {
-            document.getElementById('productNameError').textContent = 'Product name cannot be empty or only spaces.';
-            isValid = false;
-        } else if (productName.length < 2 || productName.length > 100) {
-            document.getElementById('productNameError').textContent = 'Product name must be 2-100 characters';
-            isValid = false;
-        }
-        const description = document.getElementById('description').value.trim();
-        if (!description || description.length < 10 || description.length > 500) {
-            document.getElementById('descriptionError').textContent = 'Description must be 10-500 characters';
-            isValid = false;
-        }
-
-        const productOffer = document.getElementById('productOffer').value;
-        if (productOffer && (isNaN(productOffer) || productOffer < 0 || productOffer > 100)) {
-            document.getElementById('productOfferError').textContent = 'Offer must be between 0-100';
-            isValid = false;
-        }
-
-        const color = document.getElementById('color').value.trim();
-        if (!/^[A-Za-z, ]{1,50}$/.test(color)) {
-            document.getElementById('colorError').textContent = 'Color must be letters, spaces, or commas (max 50 characters)';
-            isValid = false;
-        }
-
-        const category = document.getElementById('category').value;
-        if (!category) {
-            document.getElementById('categoryError').textContent = 'Please select a category';
-            isValid = false;
-        }
-
-        const status = document.getElementById('status').value;
-        if (!status) {
-            document.getElementById('statusError').textContent = 'Please select a product status';
-            isValid = false;
-        }
-
-        const sizes = document.querySelectorAll('select[name="variants[size][]"]');
-        const variantPrices = document.querySelectorAll('input[name="variants[variantPrice][]"]');
-        const salePrices = document.querySelectorAll('input[name="variants[salePrice][]"]');
-        const quantities = document.querySelectorAll('input[name="variants[variantQuantity][]"]');
-        let validVariants = false;
-        const selectedSizes = new Set();
-
-        for (let i = 0; i < sizes.length; i++) {
-            const size = sizes[i].value;
-            const variantPrice = parseFloat(variantPrices[i].value);
-            const salePrice = parseFloat(salePrices[i].value);
-            const quantity = parseInt(quantities[i].value);
-
-            if (
-                size &&
-                !isNaN(variantPrice) && variantPrice > 0 &&
-                !isNaN(salePrice) && salePrice >= 0 &&
-                !isNaN(quantity) && quantity >= 0
-            ) {
-                if (salePrice > variantPrice) {
-                    document.getElementById('variantsError').textContent = 'Sale price cannot exceed variant price';
-                    isValid = false;
-                    break;
-                }
-
-                if (selectedSizes.has(size)) {
-                    document.getElementById('variantsError').textContent = 'Duplicate sizes are not allowed';
-                    isValid = false;
-                    break;
-                }
-
-                selectedSizes.add(size);
-                validVariants = true;
+        function updateRemoveButtons(containerClass, buttonClass) {
+            const containers = document.getElementsByClassName(containerClass);
+            const buttons = document.getElementsByClassName(buttonClass);
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].style.display = containers.length > 1 ? 'inline-block' : 'none';
+                buttons[i].onclick = function () {
+                    this.parentElement.remove();
+                    updateRemoveButtons(containerClass, buttonClass);
+                };
             }
         }
 
-        if (!validVariants) {
-            document.getElementById('variantsError').textContent = 'At least one valid variant is required';
-            isValid = false;
-        }
+        // Form Submission
+        document.getElementById('productForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            let isValid = true;
+            document.querySelectorAll('.error').forEach(error => error.textContent = '');
 
-        if (isValid) {
-            ['image1', 'image2', 'image3'].forEach(id => {
-                const input = document.getElementById(id);
-                if (input) input.removeAttribute('name');
-            });
+            const productName = document.getElementById('productName').value.trim();
+            if (!productName || productName.length === 0) {
+                document.getElementById('productNameError').textContent = 'Product name cannot be empty or only spaces.';
+                isValid = false;
+            } else if (productName.length < 2 || productName.length > 100) {
+                document.getElementById('productNameError').textContent = 'Product name must be 2-100 characters';
+                isValid = false;
+            }
+            const description = document.getElementById('description').value.trim();
+            if (!description || description.length < 10 || description.length > 500) {
+                document.getElementById('descriptionError').textContent = 'Description must be 10-500 characters';
+                isValid = false;
+            }
 
-            const formData = new FormData(this);
-            croppedImages.forEach((blob, id) => {
-                formData.append('images', blob, `image${id.slice(-1)}.jpg`);
-            });
+            const productOffer = document.getElementById('productOffer').value;
+            if (productOffer && (isNaN(productOffer) || productOffer < 0 || productOffer > 100)) {
+                document.getElementById('productOfferError').textContent = 'Offer must be between 0-100';
+                isValid = false;
+            }
 
-            try {
-                const response = await fetch('/admin/addproduct', {
-                    method: 'POST',
-                    body: formData
+            const color = document.getElementById('color').value.trim();
+            if (!/^[A-Za-z, ]{1,50}$/.test(color)) {
+                document.getElementById('colorError').textContent = 'Color must be letters, spaces, or commas (max 50 characters)';
+                isValid = false;
+            }
+
+            const category = document.getElementById('category').value;
+            if (!category) {
+                document.getElementById('categoryError').textContent = 'Please select a category';
+                isValid = false;
+            }
+
+            const status = document.getElementById('status').value;
+            if (!status) {
+                document.getElementById('statusError').textContent = 'Please select a product status';
+                isValid = false;
+            }
+
+            const sizes = document.querySelectorAll('select[name="variants[size][]"]');
+            const regularPrices = document.querySelectorAll('input[name="variants[regularPrice][]"]');
+            const quantities = document.querySelectorAll('input[name="variants[variantQuantity][]"]');
+            let validVariants = false;
+            const selectedSizes = new Set();
+
+            for (let i = 0; i < sizes.length; i++) {
+                const size = sizes[i].value;
+                const regularPrice = parseFloat(regularPrices[i].value);
+                const quantity = parseInt(quantities[i].value);
+
+                if (
+                    size &&
+                    !isNaN(regularPrice) && regularPrice >= 0 &&
+                    !isNaN(quantity) && quantity >= 0
+                ) {
+                    if (selectedSizes.has(size)) {
+                        document.getElementById('variantsError').textContent = 'Duplicate sizes are not allowed';
+                        isValid = false;
+                        break;
+                    }
+
+                    selectedSizes.add(size);
+                    validVariants = true;
+                }
+            }
+
+            if (!validVariants) {
+                document.getElementById('variantsError').textContent = 'At least one valid variant is required';
+                isValid = false;
+            }
+
+            if (isValid) {
+                ['image1', 'image2', 'image3'].forEach(id => {
+                    const input = document.getElementById(id);
+                    if (input) input.removeAttribute('name');
                 });
-                const data = await response.json();
 
-                if (response.ok) {
-                    await Swal.fire({
-                        title: 'Success!',
-                        text: 'Product added successfully',
-                        icon: 'success',
-                        confirmButtonText: 'Great!',
-                        confirmButtonColor: '#10b981',
-                        timer:2000
-                      
+                const formData = new FormData(this);
+                croppedImages.forEach((blob, id) => {
+                    formData.append('images', blob, `image${id.slice(-1)}.jpg`);
+                });
+
+                try {
+                    const response = await fetch('/admin/addproduct', {
+                        method: 'POST',
+                        body: formData
                     });
+                    const data = await response.json();
 
-                    window.location.href = '/admin/products';
-                } else {
+                    if (response.ok) {
+                        await Swal.fire({
+                            title: 'Success!',
+                            text: 'Product added successfully',
+                            icon: 'success',
+                            confirmButtonText: 'Great!',
+                            confirmButtonColor: '#10b981',
+                            timer: 2000
+
+                        });
+
+                        window.location.href = '/admin/products';
+                    } else {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: data.error || 'Something went wrong',
+                            icon: 'error',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#ef4444'
+                        });
+                    }
+                } catch (err) {
                     Swal.fire({
                         title: 'Error!',
-                        text: data.error || 'Something went wrong',
+                        text: err.message || 'Something went wrong',
                         icon: 'error',
                         confirmButtonText: 'OK',
                         confirmButtonColor: '#ef4444'
                     });
                 }
-            } catch (err) {
-                Swal.fire({
-                    title: 'Error!',
-                    text: err.message || 'Something went wrong',
-                    icon: 'error',
-                    confirmButtonText: 'OK',
-                    confirmButtonColor: '#ef4444'
-                });
             }
-        }
-    });
+        });
     </script>
 </body>
+
 </html>

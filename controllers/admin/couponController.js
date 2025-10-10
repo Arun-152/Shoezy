@@ -10,11 +10,59 @@ require("dotenv").config();
 
 const couponPage = async (req, res) => {
     try {
-        const coupons = await Coupon.find()
-        res.render("admincoupenPage", { coupons });
+        const userId = req.session.userId;
+        const user = await User.findById(userId);
+        const search = req.query.search || '';
+        const sort = req.query.sort || 'name_asc'; 
+        const query = {};
+
+        if (search) {
+            query.name = { $regex: search, $options: 'i' };
+        }
+
+        const sortOptions = {};
+        switch (sort) {
+            case 'name_desc':
+                sortOptions.name = -1;
+                break;
+            case 'expiry_asc':
+                sortOptions.expireOn = 1;
+                break;
+            case 'expiry_desc':
+                sortOptions.expireOn = -1;
+                break;
+            default:
+                sortOptions.name = 1;
+                break;
+        }
+
+        const coupons = await Coupon.find(query).sort(sortOptions);
+
+        const currentDate = new Date();
+        currentDate.setHours(0, 0, 0, 0); 
+
+        const couponsWithStatus = coupons.map(coupon => {
+            const couponStartDate = new Date(coupon.startDate);
+            couponStartDate.setHours(0, 0, 0, 0);
+            const couponExpireDate = new Date(coupon.expireOn);
+            couponExpireDate.setHours(0, 0, 0, 0);
+
+            let status;
+            if (currentDate > couponExpireDate) {
+                status = 'Expired';
+            } else if (currentDate >= couponStartDate) {
+                status = 'Active';
+            } else {
+                status = 'Not Started';
+            }
+
+            return { ...coupon.toObject(), status };
+        });
+
+        res.render("admincoupenPage", { coupons: couponsWithStatus, search, sort });
     } catch (error) {
         console.error("Error rendering coupons page:", error.message);
-        res.redirect("/admin500")
+        res.redirect("/admin500");
     }
 };
 const getCreateCoponPage = async (req, res) => {
@@ -31,6 +79,23 @@ const getCreateCoponPage = async (req, res) => {
 
     }
 }
+const getCustomers = async(req,res)=>{
+  try{
+    const couponId = req.params.couponId;
+    const userId = req.session.userId;
+    const user = await User.findById(userId)
+
+    if(!user){
+      return res.status(404).json({success:false,message:"User not found"})
+    }
+   
+    const coupon = await Coupon.findById(couponId)
+  }catch(error){
+    console.error("getCustomers error",error)
+    return res.status(500).json({success:false,message:"Something went wrong"})
+  }
+}
+
 const createCoupon = async (req, res) => {
   try {
     const {
@@ -99,11 +164,20 @@ const createCoupon = async (req, res) => {
     }
 
     const totalUsageLimitNum = totalUsageLimit ? parseInt(totalUsageLimit) : null;
-    if (totalUsageLimit && totalUsageLimitNum < 1) {
-      return res.status(400).json({ success: false, message: "Total usage limit must be at least 1" });
+    
+    if (!totalUsageLimit || totalUsageLimit.trim() === '') {
+      return res.status(400).json({ success: false, message: "Total Usage Limit is required. Please enter a valid number." });
+    }
+    
+    if (isNaN(totalUsageLimitNum) || totalUsageLimitNum === null) {
+      return res.status(400).json({ success: false, message: "Enter a valid Total Usage Limit to proceed." });
+    }
+    
+    if (totalUsageLimitNum < 1) {
+      return res.status(400).json({ success: false, message: "Please provide a valid Total Usage Limit (greater than 0)." });
     }
     if (totalUsageLimitNum && maxUsesPerUserNum > totalUsageLimitNum) {
-      return res.status(400).json({ success: false, message: "Maximum uses per user cannot be greater than total usage limit" });
+      return res.status(400).json({ success: false, message: "Invalid Total Usage Limit. Kindly check and try again." });
     }
     if (parseFloat(minimumPrice) < 0) {
       return res.status(400).json({ success: false, message: "Minimum order amount cannot be negative" });
@@ -113,6 +187,10 @@ const createCoupon = async (req, res) => {
     }
     if (!isAllProducts && (!applicableProducts || applicableProducts.length === 0)) {
       return res.status(400).json({ success: false, message: "Please select at least one product or choose 'Apply to All Products'" });
+    }
+
+    if (!totalUsageLimitNum) {
+      return res.status(400).json({ success: false, message: "Coupon cannot be added without a valid Total Usage Limit." });
     }
 
     const newCoupon = new Coupon({
@@ -134,7 +212,7 @@ const createCoupon = async (req, res) => {
     });
 
     await newCoupon.save();
-    res.json({ success: true, message: "Coupon created successfully", redirect: "/admin/coupons" });
+    res.json({ success: true, message: "Coupon added successfully with Total Usage Limit applied." });
   } catch (error) {
     console.error("Coupon creation error:", error);
     return res.status(500).json({ success: false, message: "Something went wrong" });
@@ -156,17 +234,24 @@ const loadEditCoupon = async(req,res)=>{
             return res.redirect("/admin/coupons");
         }
 
-        res.render("adminEditCoupon", { coupon: coupon })
+        const categories = await Category.find({isDeleted:false,isListed:true});
+        const products = await Product.find({isDeleted:false,isBlocked:false});
+
+        res.render("editCouponPage", { 
+            coupon: coupon,
+            categories: categories,
+            products: products
+        });
 
   }catch(error){
     console.error("loadedit page error",error)
-    return res.render("admin500")
+    return res.redirect("/admin500");
 
   }
 }
 const editCoupon = async(req,res)=>{
   try{
-    const couponId = req.params.id
+    const couponId = req.query.id
     const {
             name,
             offerPrice,
@@ -187,10 +272,10 @@ const editCoupon = async(req,res)=>{
           return res.status(400).json({success:false,message:"All required fields must be filled"})
         }
 
-        const existingCoupon = await Coupon.findOne({name})
+        const existingCoupon = await Coupon.findOne({name, _id: { $ne: couponId }});
 
         if(existingCoupon){
-          return res.status(400).json({success:false,message:"This coupon already exist,Please use diffrent name"})
+          return res.status(400).json({success:false,message:"This coupon already exist,Please use different name"})
         }
 
         const startDateObj = new Date(startDate);
@@ -198,7 +283,7 @@ const editCoupon = async(req,res)=>{
         const currentDate = new Date();
 
         if (startDateObj < currentDate.setHours(0, 0, 0, 0)){
-          return res.status({success:false,message:"Start date cannot be in the past"})
+          return res.status(400).json({success:false,message:"Start date cannot be in the past"})
         }
 
         if(expirationDate <= startDateObj){
@@ -238,16 +323,17 @@ const editCoupon = async(req,res)=>{
           return res.status(400).json({success:false,message:"Maximum uses per user cannot be greater than total usage limit"})
         }
         if(parseFloat(minimumPrice) < 0){
-          return res.status({success:false,message:"Minimum order amount cannot be negative"})
+          return res.status(400).json({success:false,message:"Minimum order amount cannot be negative"})
         }
         if(!isAllCategories && (!applicableCategories || applicableCategories.length === 0)){
-          return res.status(400).json({success:false,message:"Please select at least one category or choose 'Apply to All Categories"})
+          return res.status(400).json({success:false,message:"Please select at least one category or choose 'Apply to All Categories'"})
 
         }
         if (!isAllProducts && (!applicableProducts || applicableProducts.length === 0)){
-          return res.status(400).json({success:false,message:"Please select at least one product or choose 'Apply to All Products"})
+          return res.status(400).json({success:false,message:"Please select at least one product or choose 'Apply to All Products'"})
         }
-        const updateCoupon = await Coupon.findOneAndUpdate(couponId,{
+        
+        const updatedCoupon = await Coupon.findByIdAndUpdate(couponId,{
                 name: name.toUpperCase().trim(),
                 startDate: startDateObj,
                 expireOn: expirationDate,
@@ -266,10 +352,13 @@ const editCoupon = async(req,res)=>{
         );
 
         if (!updatedCoupon) {
-            return res.status(404).json({success:false,message:"Coupon updated successfully"})
+            return res.status(404).json({success:false,message:"Coupon not found"})
         }
+
+        return res.status(200).json({success:true,message:"Coupon updated successfully", redirect: "/admin/coupons"})
+
   }catch(error){
-    console.error("coupon udate error",error)
+    console.error("coupon update error",error)
     return res.status(500).json({success:false,message:"Failed to update coupon. Please try again"})
 
   }
@@ -277,18 +366,46 @@ const editCoupon = async(req,res)=>{
 const deleteCoupon = async(req,res)=>{
   try{
     const couponId = req.params.id
-    const result = await Coupon.findByIdAndUpdate(couponId,{islist:true},{new:true})
+    const result = await Coupon.findByIdAndUpdate(couponId,{islist:false},{new:true})
 
     if(!result){
-      return res.status(400).json({success:false,message:"coupon not found"})
+      return res.status(404).json({success:false,message:"Coupon not found"})
     }
     return res.status(200).json({success:true,message:"Coupon deleted successfully"})
 
   }catch(error){
     console.error("coupon deleted error",error)
-    return res.status(500).json({success:false,message:"something went wrong"})
+    return res.status(500).json({success:false,message:"Something went wrong"})
   }
 }
+const couponToggle = async (req, res) => {
+    try {
+        const { id } = req.body;
+
+        if (!id) {
+            return res.status(400).json({ success: false, message: "Coupon id is required" });
+        }
+
+        const coupon = await Coupon.findById(id);
+        if (!coupon) {
+            return res.status(404).json({ success: false, message: "Coupon not found" });
+        }
+
+        
+        coupon.islist = !coupon.islist;
+        await coupon.save();
+
+        return res.json({
+            success: true,
+            message: `Coupon ${coupon.islist ? "Listed" : "Unlisted"} successfully`,
+            couponId: id,
+            islist: coupon.islist,
+        });
+    } catch (error) {
+        console.error("Error toggling coupon:", error);
+        return res.status(500).json({ success: false, message: "Internal server error" });
+    }
+};
 const getCategories = async(req,res)=>{
   try{
     const category = await Category.find({isListed:true})
@@ -314,14 +431,6 @@ const getProducts = async(req,res)=>{
     return res.status(500).json({success:false,message:"Failed to fetch Products"})
   }
 }
-const getCouponUsage = async(req,res)=>{
-  try{
-
-  }catch(error){
-    console.error("couponusage error",error)
-    return res.status(500).json({success:false,message:"failed to fetch "})
-  }
-}
 module.exports = {
     couponPage,
     createCoupon,
@@ -330,5 +439,7 @@ module.exports = {
     editCoupon,
     deleteCoupon,
     getCategories,
-    getProducts
+    getProducts,
+    couponToggle,
+    getCustomers,
 }

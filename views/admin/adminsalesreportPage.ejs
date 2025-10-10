@@ -1,240 +1,864 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shoezy-Report</title>
+    <title>Sales Report</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="/css/adminsalesreportPage.css">
+    <link rel="stylesheet" href="/css/adminproductsPage.css">
+    <style>
+        /* Sales Summary Cards */
+        .sales-summary {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: transform 0.3s;
+            min-width: 0;
+            /* Prevent card overflow */
+        }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .summary-card i {
+            font-size: 30px;
+            color: white;
+            background-color: #3498db;
+            padding: 15px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            /* Prevent icon shrinking */
+        }
+
+        .summary-card .card-content h3 {
+            font-size: 16px;
+            color: #34495e;
+            margin-bottom: 5px;
+        }
+
+        .summary-card .card-content p {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            white-space: nowrap;
+            /* Prevent text wrapping */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            /* Handle long text */
+        }
+
+        /* Filters & Controls */
+        .filters-controls {
+            background-color: white;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            /* Prevent internal overflow */
+        }
+
+        .filters-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .filters-header h2 {
+            margin: 0;
+            font-size: 18px;
+            color: #2c3e50;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .export-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .export-pdf {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .export-pdf:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+        }
+
+        .export-excel {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .export-excel:hover {
+            background-color: #229954;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .filters-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #34495e;
+            margin-bottom: 4px;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: flex-start;
+            margin-top: 10px;
+        }
+
+        .filter-group select,
+        .filter-group input[type="date"],
+        .filter-group input[type="text"] {
+            padding: 12px 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 14px;
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .filter-group select:focus,
+        .filter-group input[type="date"]:focus,
+        .filter-group input[type="text"]:focus {
+            outline: none;
+            border-color: #3498db;
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .filter-actions button {
+            padding: 12px 24px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .filter-actions button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+
+        .filter-actions button.clear {
+            background-color: #95a5a6;
+        }
+
+        .filter-actions button.clear:hover {
+            background-color: #7f8c8d;
+        }
+
+        /* Sales Table */
+        .sales-table {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            /* Remove horizontal scrolling */
+        }
+
+        .sales-table table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            /* Fixed layout for consistent column widths */
+        }
+
+        .sales-table th {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 8px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            border-right: 1px solid #0f171d;
+        }
+
+        .sales-table td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #161111;
+            font-size: 13px;
+            color: #2c3e50;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            vertical-align: top;
+            border-right: 1px solid #171b1f;
+        }
+
+        .sales-table th:last-child,
+        .sales-table td:last-child {
+            border-right: none;
+        }
+
+        /* Column width definitions */
+        .sales-table th:nth-child(1),
+        .sales-table td:nth-child(1) {
+            width: 10%;
+        }
+
+        .sales-table th:nth-child(2),
+        .sales-table td:nth-child(2) {
+            width: 8%;
+        }
+
+        .sales-table th:nth-child(3),
+        .sales-table td:nth-child(3) {
+            width: 12%;
+        }
+
+        .sales-table th:nth-child(4),
+        .sales-table td:nth-child(4) {
+            width: 14%;
+            /* Product Name */
+        }
+
+        .sales-table th:nth-child(5),
+        .sales-table td:nth-child(5) {
+            width: 6%;
+            /* Qty */
+        }
+
+        .sales-table th:nth-child(6),
+        .sales-table td:nth-child(6) {
+            width: 7%;
+            /* Price */
+        }
+
+        .sales-table th:nth-child(7),
+        .sales-table td:nth-child(7) {
+            width: 8%;
+            /* Coupon Name */
+        }
+
+        .sales-table th:nth-child(8),
+        .sales-table td:nth-child(8) {
+            width: 7%;
+            /* Discount */
+        }
+
+        .sales-table th:nth-child(9),
+        .sales-table td:nth-child(9) {
+            width: 8%;
+            /* Net Price */
+        }
+
+        .sales-table th:nth-child(10),
+        .sales-table td:nth-child(10) {
+            width: 8%;
+            /* Payment Method */
+        }
+
+        .sales-table th:nth-child(11),
+        .sales-table td:nth-child(11) {
+            width: 12%;
+            /* Item Status */
+        }
+
+        .sales-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .sales-table tr:hover {
+            background-color: #f1f4f8;
+        }
+
+        /* Order ID and Customer Name Styling */
+        .order-id-cell {
+            background-color: #7f8c8d;
+            color: white;
+            font-weight: bold;
+            font-size: 11px;
+            padding: 6px 8px;
+            border-radius: 4px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            letter-spacing: 0.3px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            line-height: 1.2;
+        }
+
+        .customer-name-cell {
+            background-color: #7f8c8d;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+            padding: 8px 10px;
+            border-radius: 6px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            letter-spacing: 0.2px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            line-height: 1.2;
+        }
+
+        .filters {
+            background: #ecf0f1;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .filters select,
+        .filters input {
+            padding: 8px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .filters button {
+            padding: 8px 16px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .filters button.clear {
+            background: #e74c3c;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            width: 400px;
+        }
+
+        .modal-content h2 {
+            margin-top: 0;
+        }
+
+        .modal-content button {
+            padding: 8px 16px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: #fff;
+            border-top: 1px solid #f1f1f1;
+        }
+
+        .pagination-info {
+            font-size: 14px;
+            color: #555;
+        }
+
+        .pagination-links {
+            display: flex;
+            gap: 8px;
+        }
+
+        .pagination-links a,
+        .pagination-links span {
+            display: inline-block;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .pagination-links a:hover {
+            background-color: #f5f5f5;
+        }
+
+        .pagination-links .active {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .pagination-links .disabled {
+            color: #aaa;
+            pointer-events: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .sales-summary {
+                grid-template-columns: repeat(2, 1fr);
+                /* 2 cards per row */
+            }
+        }
+
+        @media (max-width: 576px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .sales-table table {
+                table-layout: fixed;
+                width: 100%;
+            }
+
+            .sales-table th,
+            .sales-table td {
+                font-size: 11px;
+                padding: 8px 4px;
+            }
+
+            .order-id-cell {
+                font-size: 9px;
+                padding: 4px 6px;
+            }
+
+            .customer-name-cell {
+                font-size: 10px;
+                padding: 6px 8px;
+            }
+
+        }
+    </style>
 </head>
+
 <body>
+
     <div class="dashboard-container">
         <!-- Sidebar -->
-        <nav class="sidebar">
-           <%- include('../partials/admin/sidebar') %>
-            <div class="sidebar-footer">
-                <a href="/admin/logout" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        <%- include('../partials/admin/sidebar') %>
+            <div class="main-wrapper">
+
+                <!-- Main Content -->
+                <main class="main-content">
+                    <header class="header">
+                        <div class="header-left">
+                            <button class="menu-toggle" id="menuToggle">
+                                <i class="fas fa-bars"></i>
+                            </button>
+                        </div>
+                        <div class="header-right">
+                            <div class="notification">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <div class="admin-profile">
+                                <i class="fas fa-user-circle"></i>
+                                <span>ADMIN</span>
+                            </div>
+                        </div>
+                    </header>
+
+                    <!-- Breadcrumb Navigation -->
+                    <%- include('../partials/admin/breadcrumb', { currentPath: '/admin/salesReport' }) %>
+
+                        <div class="page-content">
+                            <div class="page-header" style="margin-bottom: 30px;">
+                                <h1>Sales Report</h1>
+                            </div>
+
+                            <!-- Sales Summary -->
+                            <div class="sales-summary">
+                                <div class="summary-card">
+                                    <i class="fas fa-rupee-sign"></i>
+                                    <div class="card-content">
+                                        <h3>Total Sales</h3>
+                                        <p>₹<%= summary.totalSales.toFixed(2) %>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="summary-card">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    <div class="card-content">
+                                        <h3>Total Orders</h3>
+                                        <p>
+                                            <%= summary.totalOrders %>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="summary-card">
+                                    <i class="fas fa-box"></i>
+                                    <div class="card-content">
+                                        <h3>Products Sold</h3>
+                                        <p>
+                                            <%= summary.productsSold %>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="summary-card">
+                                    <i class="fas fa-chart-line"></i>
+                                    <div class="card-content">
+                                        <h3>Net Revenue</h3>
+                                        <p>₹<%= summary.netRevenue.toFixed(2) %>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Filters & Controls -->
+                            <div class="filters-controls">
+                                <div class="filters-header">
+                                    <h2>Filter Sales Report</h2>
+                                    <div class="export-buttons">
+                                        <button type="button" id="exportPdfBtn" class="export-btn export-pdf">
+                                            <i class="fas fa-file-pdf"></i> Export PDF
+                                        </button>
+                                        <button type="button" id="exportExcelBtn" class="export-btn export-excel">
+                                            <i class="fas fa-file-excel"></i> Export Excel
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <form id="filterForm" action="/admin/salesreport" method="GET">
+                                    <div class="filters-form">
+                                        <div class="filter-group">
+                                            <label for="timeRangeSelect">Time Range</label>
+                                            <select name="timeRange" id="timeRangeSelect">
+                                                <option value="" <%=filters.timeRange==='' ? 'selected' : '' %>>Select
+                                                    Time
+                                                    Range</option>
+                                                <option value="daily" <%=filters.timeRange==='daily' ? 'selected' : ''
+                                                    %>
+                                                    >Daily</option>
+                                                <option value="weekly" <%=filters.timeRange==='weekly' ? 'selected' : ''
+                                                    %>
+                                                    >Weekly</option>
+                                                <option value="monthly" <%=filters.timeRange==='monthly' ? 'selected'
+                                                    : '' %>>Monthly</option>
+                                                <option value="yearly" <%=filters.timeRange==='yearly' ? 'selected' : ''
+                                                    %>
+                                                    >Yearly</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="filter-group">
+                                            <label for="startDate">Start Date</label>
+                                            <input type="date" name="startDate" id="startDate"
+                                                value="<%= filters.startDate || '' %>">
+                                        </div>
+
+                                        <div class="filter-group">
+                                            <label for="endDate">End Date</label>
+                                            <input type="date" name="endDate" id="endDate"
+                                                value="<%= filters.endDate || '' %>">
+                                        </div>
+
+                                        <div class="filter-group">
+                                            <label for="status">Order Status</label>
+                                            <select name="status" id="status">
+                                                <option value="all" <%=filters.status==='all' ? 'selected' : '' %>>All
+                                                    Status</option>
+                                                <option value="Pending" <%=filters.status==='Pending' ? 'selected' : ''
+                                                    %>
+                                                    >Pending</option>
+                                                <option value="Processing" <%=filters.status==='Processing' ? 'selected'
+                                                    : '' %>>Processing</option>
+                                                <option value="Shipped" <%=filters.status==='Shipped' ? 'selected' : ''
+                                                    %>
+                                                    >Shipped</option>
+                                                <option value="Delivered" <%=filters.status==='Delivered' ? 'selected'
+                                                    : '' %>>Delivered</option>
+                                                <option value="Cancelled" <%=filters.status==='Cancelled' ? 'selected'
+                                                    : '' %>>Cancelled</option>
+                                                <option value="ReturnRequested" <%=filters.status==='ReturnRequested'
+                                                    ? 'selected' : '' %>>Return Requested</option>
+                                                <option value="Returned" <%=filters.status==='Returned' ? 'selected'
+                                                    : '' %>
+                                                    >Returned</option>
+                                                <option value="ReturnApproved" <%=filters.status==='ReturnApproved'
+                                                    ? 'selected' : '' %>>Return Approved</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="filter-group">
+                                            <label for="payment">Payment Method</label>
+                                            <select name="payment" id="payment">
+                                                <option value="all" <%=filters.payment==='all' ? 'selected' : '' %>>All
+                                                    Methods</option>
+                                                <option value="cod" <%=filters.payment==='cod' ? 'selected' : '' %>>COD
+                                                </option>
+                                                <option value="online" <%=filters.payment==='online' ? 'selected' : ''
+                                                    %>
+                                                    >Online</option>
+                                                <option value="wallet" <%=filters.payment==='wallet' ? 'selected' : ''
+                                                    %>
+                                                    >Wallet</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="filter-group">
+                                            <label for="search">Search</label>
+                                            <input type="text" name="search" id="search"
+                                                placeholder="Order ID or Customer Name"
+                                                value="<%= filters.search || '' %>">
+                                        </div>
+
+                                        <div class="filter-group">
+                                            <label for="sort">Sort By</label>
+                                            <select name="sort" id="sort">
+                                                <option value="date-newest" <%=filters.sort==='date-newest' ? 'selected'
+                                                    : '' %>>Date (Newest First)</option>
+                                                <option value="date-oldest" <%=filters.sort==='date-oldest' ? 'selected'
+                                                    : '' %>>Date (Oldest First)</option>
+                                                <option value="amount-low" <%=filters.sort==='amount-low' ? 'selected'
+                                                    : '' %>>Amount (Low to High)</option>
+                                                <option value="amount-high" <%=filters.sort==='amount-high' ? 'selected'
+                                                    : '' %>>Amount (High to Low)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="filter-actions">
+                                        <button type="submit">Apply Filters</button>
+                                        <button type="button" class="clear"
+                                            onclick="window.location.href='/admin/salesreport'">Clear Filters</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Detailed Sales Table -->
+                            <div class="sales-table">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Order ID</th>
+                                            <th>Order Date</th>
+                                            <th>Customer</th>
+                                            <th>Product Name</th>
+                                            <th>Qty</th>
+                                            <th>Price</th>
+                                            <th>Coupon Name</th>
+                                            <th>Discount</th>
+                                            <th>Net Price</th>
+                                            <th>Payment Method</th>
+                                            <th>Item Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% salesData.forEach(item=> { %>
+                                            <tr>
+                                                <td>
+                                                    <div class="order-id-cell">
+                                                        <%= item.id %>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <%= new Date(item.date).toLocaleDateString() %>
+                                                </td>
+                                                <td>
+                                                    <div class="customer-name-cell">
+                                                        <%= item.customerName %>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <%= item.productName %>
+                                                </td>
+                                                <td>
+                                                    <%= item.productQuantity %>
+                                                </td>
+                                                <% if (item.productPrice < 0) { %>
+                                                    <td style="<%= item.productPrice < 0 ? 'color: red;' : '' %>">
+                                                        ₹<%= Math.abs(item.productPrice).toFixed(2) %>
+                                                    </td>
+
+                                                    <% } else { %>
+                                                        <td>₹<%= item.productPrice.toFixed(2) %>
+                                                        </td>
+                                                        <% } %>
+                                                            <td>
+                                                                <%= item.couponUsed %>
+                                                            </td>
+                                                            <td>₹<%= item.productDiscount.toFixed(2) %>
+                                                            </td>
+                                                            <% if (item.productNetPrice < 0) { %>
+                                                                <td
+                                                                    style="<%= item.productNetPrice < 0 ? 'color: red;' : '' %>">
+                                                                    ₹<%= Math.abs(item.productNetPrice).toFixed(2) %>
+                                                                </td>
+
+                                                                <% } else { %>
+                                                                    <td>₹<%= item.productNetPrice.toFixed(2) %>
+                                                                    </td>
+                                                                    <% } %>
+
+                                                                        <td>
+                                                                            <%= item.paymentMethod %>
+                                                                        </td>
+                                                                        <td>
+                                                                            <%= item.itemStatus %>
+                                                                        </td>
+                                            </tr>
+                                            <% }); %>
+                                    </tbody>
+                                </table>
+                                <!-- Pagination -->
+                                <% if (pagination.totalPages> 1) { %>
+                                    <div class="pagination-container">
+                                        <div class="pagination-info">
+                                            Page <%= pagination.currentPage %> of <%= pagination.totalPages %> (<%=
+                                                        pagination.totalCount %> items)
+                                        </div>
+                                        <div class="pagination-links">
+                                            <% const createUrl=(page)=> {
+                                                const params = new URLSearchParams();
+                                                if (filters.timeRange) params.set('timeRange', filters.timeRange);
+                                                if (filters.startDate) params.set('startDate', filters.startDate);
+                                                if (filters.endDate) params.set('endDate', filters.endDate);
+                                                if (filters.status) params.set('status', filters.status);
+                                                if (filters.payment) params.set('payment', filters.payment);
+                                                if (filters.search) params.set('search', filters.search);
+                                                if (filters.sort) params.set('sort', filters.sort);
+                                                params.set('page', page);
+                                                return `/admin/salesreport?${params.toString()}`;
+                                                };
+                                                %>
+
+                                                <% if (pagination.currentPage> 1) { %>
+                                                    <a href="<%= createUrl(1) %>" class="pagination-link">« First</a>
+                                                    <a href="<%= createUrl(pagination.currentPage - 1) %>"
+                                                        class="pagination-link">‹ Previous</a>
+                                                    <% } %>
+
+                                                        <% const maxPagesToShow=5; const startPage=Math.max(1,
+                                                            pagination.currentPage - Math.floor(maxPagesToShow / 2));
+                                                            const endPage=Math.min(pagination.totalPages, startPage +
+                                                            maxPagesToShow - 1); %>
+
+                                                            <% for(let i=startPage; i <=endPage; i++) { %>
+                                                                <a href="<%= createUrl(i) %>"
+                                                                    class="pagination-link <%= i === pagination.currentPage ? 'active' : '' %>">
+                                                                    <%= i %>
+                                                                </a>
+                                                                <% } %>
+
+                                                                    <% if (pagination.currentPage <
+                                                                        pagination.totalPages) { %>
+                                                                        <a href="<%= createUrl(pagination.currentPage + 1) %>"
+                                                                            class="pagination-link">Next ›</a>
+                                                                        <a href="<%= createUrl(pagination.totalPages) %>"
+                                                                            class="pagination-link">Last »</a>
+                                                                        <% } %>
+                                        </div>
+                                    </div>
+                                    <% } %>
+                            </div>
+                        </div>
+                </main>
+                <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                        // Time range filter buttons
+                        document.querySelectorAll('.time-filter-btn').forEach(button => {
+                            button.addEventListener('click', function () {
+                                document.getElementById('timeRangeInput').value = this.dataset.timeRange;
+                                document.getElementById('filterForm').submit();
+                            });
+                        });
+
+                        // Export buttons
+                        document.getElementById('exportPdfBtn').addEventListener('click', () => exportReport('pdf'));
+                        document.getElementById('exportExcelBtn').addEventListener('click', () => exportReport('excel'));
+
+                        function exportReport(format) {
+                            const form = document.getElementById('filterForm');
+                            const formData = new FormData(form);
+                            const params = new URLSearchParams();
+
+                            for (const pair of formData) {
+                                if (pair[1]) { // Only include parameters that have a value
+                                    params.append(pair[0], pair[1]);
+                                }
+                            }
+                            // Ensure startDate and endDate are included if they have values, even if timeRange is set
+                            if (form.elements.startDate.value) {
+                                params.set('startDate', form.elements.startDate.value);
+                            }
+                            if (form.elements.endDate.value) {
+                                params.set('endDate', form.elements.endDate.value);
+                            }
+                            // If a timeRange is active, ensure it's passed
+                            if (form.elements.timeRange.value) {
+                                params.set('timeRange', form.elements.timeRange.value);
+                            }
+
+
+                            window.location.href = `/admin/salesreport/export/${format}?${params.toString()}`;
+                        }
+                    });
+                </script>
             </div>
-        </nav>
-
-        <!-- Main Content -->
-        <main class="main-content">
-            <header class="header">
-                <div class="header-left">
-                    <button class="menu-toggle" id="menuToggle">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                </div>
-                <div class="header-right">
-                    <div class="notification">
-                        <i class="fas fa-bell"></i>
-                    </div>
-                    <div class="admin-profile">
-                        <i class="fas fa-user-circle"></i>
-                        <span>ADMIN</span>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Breadcrumb Navigation -->
-            <%- include('../partials/admin/breadcrumb', { currentPath: '/admin/sales-report' }) %>
-
-            <section class="page-content">
-                <div class="page-header">
-                    <h1>Sales Report</h1>
-                </div>
-
-                <!-- Controls Section -->
-                <div class="controls-section">
-                    <div class="left-controls">
-                        <div class="sort-control">
-                            <label>Sort:</label>
-                            <select class="sort-select">
-                                <option>Product Name</option>
-                                <option>Price</option>
-                                <option>Category</option>
-                            </select>
-                        </div>
-                        <div class="items-control">
-                            <label>by:</label>
-                            <select class="items-select">
-                                <option>10</option>
-                                <option>25</option>
-                                <option>50</option>
-                                <option>100</option>
-                            </select>
-                        </div>
-                        <div class="filter-control">
-                            <label>Date:</label>
-                            <input type="date" class="filter-date">
-                        </div>
-                    </div>
-                    <div class="right-controls">
-                        <button class="btn-primary"><i class="fas fa-file-export"></i> Export</button>
-                    </div>
-                </div>
-
-                <!-- Table Section -->
-                <div class="table-section">
-                    <div class="table-container">
-                        <table class="customers-table">
-                            <thead>
-                                <tr>
-                                    <th class="table-header">Buyer</th>
-                                    <th class="table-header">Product Name</th>
-                                    <th class="table-header">Product ID</th>
-                                    <th class="table-header">Qty</th>
-                                    <th class="table-header">Price</th>
-                                    <th class="table-header">GST</th>
-                                    <th class="table-header">Category</th>
-                                    <th class="table-header">Unit/Type</th>
-                                    <th class="table-header">Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="table-row">
-                                    <td>Rahul</td>
-                                    <td>Nike Air Max</td>
-                                    <td>F20711290</td>
-                                    <td>1</td>
-                                    <td>₹9000</td>
-                                    <td>18%</td>
-                                    <td>Formal</td>
-                                    <td>Nos</td>
-                                    <td>₹10620</td>
-                                </tr>
-                                <tr class="table-row">
-                                    <td>Maria</td>
-                                    <td>PV2 Pants</td>
-                                    <td>F20711291</td>
-                                    <td>1</td>
-                                    <td>₹1000000</td>
-                                    <td>18%</td>
-                                    <td>Casual</td>
-                                    <td>Nos</td>
-                                    <td>₹118000</td>
-                                </tr>
-                                <tr class="table-row">
-                                    <td>Anu</td>
-                                    <td>Ofby Set</td>
-                                    <td>F20711292</td>
-                                    <td>1</td>
-                                    <td>₹5000</td>
-                                    <td>12%</td>
-                                    <td>Boots</td>
-                                    <td>Nos</td>
-                                    <td>₹5600</td>
-                                </tr>
-                                <tr class="table-row">
-                                    <td>Shijaa</td>
-                                    <td>Packet 21</td>
-                                    <td>F20711293</td>
-                                    <td>1</td>
-                                    <td>₹1000000</td>
-                                    <td>18%</td>
-                                    <td>Formal</td>
-                                    <td>Nos</td>
-                                    <td>₹118000</td>
-                                </tr>
-                                <tr class="table-row">
-                                    <td>Maria</td>
-                                    <td>Ofby Set</td>
-                                    <td>F20711292</td>
-                                    <td>1</td>
-                                    <td>₹5000</td>
-                                    <td>12%</td>
-                                    <td>Casual</td>
-                                    <td>Nos</td>
-                                    <td>₹5600</td>
-                                </tr>
-                                <tr class="table-row">
-                                    <td>Devid</td>
-                                    <td>Saleei</td>
-                                    <td>F20711291</td>
-                                    <td>1</td>
-                                    <td>₹1000000</td>
-                                    <td>18%</td>
-                                    <td>Casual</td>
-                                    <td>Nos</td>
-                                    <td>₹118000</td>
-                                </tr>
-                                <tr class="table-row">
-                                    <td>Maria</td>
-                                    <td>ANDRIOD 2.0</td>
-                                    <td>F20711292</td>
-                                    <td>1</td>
-                                    <td>₹5000</td>
-                                    <td>12%</td>
-                                    <td>Formal</td>
-                                    <td>Nos</td>
-                                    <td>₹5600</td>
-                                </tr>
-                                <tr class="table-row">
-                                    <td>Afitaa</td>
-                                    <td>MRC H</td>
-                                    <td>F20711293</td>
-                                    <td>1</td>
-                                    <td>₹1000000</td>
-                                    <td>18%</td>
-                                    <td>Boots</td>
-                                    <td>Nos</td>
-                                    <td>₹118000</td>
-                                </tr>
-                                <tr class="table-row">
-                                    <td>Maria</td>
-                                    <td>MME H</td>
-                                    <td>F20711292</td>
-                                    <td>1</td>
-                                    <td>₹5000</td>
-                                    <td>12%</td>
-                                    <td>Casual</td>
-                                    <td>Nos</td>
-                                    <td>₹5600</td>
-                                </tr>
-                                <tr class="table-row">
-                                    <td>David</td>
-                                    <td>Prime 22</td>
-                                    <td>F20711293</td>
-                                    <td>1</td>
-                                    <td>₹1000000</td>
-                                    <td>18%</td>
-                                    <td>Formal</td>
-                                    <td>Nos</td>
-                                    <td>₹118000</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Pagination Section -->
-                <div class="pagination-section">
-                    <div class="pagination-info">
-                        1 of 3 Pages
-                    </div>
-                    <div class="pagination-controls">
-                        <button class="pagination-btn"><i class="fas fa-chevron-left"></i></button>
-                        <div class="page-numbers">
-                            <button class="page-btn active">1</button>
-                            <button class="page-btn">2</button>
-                            <button class="page-btn">3</button>
-                            <span class="page-dots">...</span>
-                            <button class="page-btn">10</button>
-                        </div>
-                        <button class="pagination-btn"><i class="fas fa-chevron-right"></i></button>
-                    </div>
-                </div>
-            </section>
-        </main>
-    </div>
-
-    <script>
-        // Toggle sidebar
-        const menuToggle = document.querySelector('.menu-toggle');
-        const sidebar = document.querySelector('.sidebar');
-        menuToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('sidebar-open');
-        });
-    </script>
 </body>
+
 </html>

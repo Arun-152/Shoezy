@@ -1,5 +1,5 @@
 const User = require('../../models/userSchema');
-const Wallet = require('../../models/walletSchema'); // make sure spelling matches your file
+const Wallet = require('../../models/walletSchema');
 const mongoose = require("mongoose");
 
 
@@ -23,7 +23,6 @@ const getWalletPage = async (req, res) => {
       await wallet.save();
     }
 
-    // Get filter and sort parameters from query
     const { typeFilter = 'all', sort = 'newest' } = req.query;
 
     // Build transaction query
@@ -112,7 +111,7 @@ const addFunds = async (req, res) => {
 
 
 module.exports = {
-    getWalletPage,
-    addFunds
-    
+  getWalletPage,
+  addFunds
+
 };

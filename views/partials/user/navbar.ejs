@@ -4,20 +4,25 @@
 
 <body>
   <% if (user) { %>
-    <header class="navbar-wrapper">
-      <nav class="navbar">
+  <header class="navbar-wrapper">
+    <nav class="navbar">
+      <div class="nav-left">
+        <div class="hamburger-menu">
+          <i class="fas fa-bars"></i>
+        </div>
         <div class="logo">
           <h1>Shoezy</h1>
         </div>
+      </div>
+      <div class="nav-content">
         <ul class="nav-links">
           <li><a href="/">Home</a></li>
           <li><a href="/shop">Shop</a></li>
-          <li><a href="/#">Contact</a></li>
-          <li><a href="/#">About</a></li>
-          <li><a href="/profile">
-              <%= user.fullName %>
-            </a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="/about">About</a></li>
         </ul>
+      </div>
+      <div class="nav-right">
         <div class="nav-icons">
           <span class="nav-icon wishlist-icon">
             <a href="/wishlist">
@@ -37,44 +42,47 @@
           </span>
           <span class="nav-icon profile-icon">
             <i class="fas fa-user"></i>
-            <span class="profile-name">
-              <%= user.fullname %>
-            </span>
-
+            <span class="profile-name"><%= user.fullname %></span>
             <div class="dropdown-menu">
               <a onclick="window.location.href = '/profile'">My Account</a>
               <a onclick="window.location.href = '/order'">My Orders</a>
               <a onclick="logout()" style="color: #dc3545;">Logout</a>
             </div>
           </span>
-
         </div>
-      </nav>
-    </header>
-    <% } else { %>
-      <header class="navbar-wrapper">
-        <nav class="navbar">
-          <div class="logo">
-            <h1>Shoezy</h1>
-          </div>
-          <ul class="nav-links">
-            <li><a href="/">Home</a></li>
-            <li><a href="/shop">Shop</a></li>
-            <li><a href="/#">Contact</a></li>
-            <li><a href="/#">About</a></li>
-            <li class="nav-icon login-icon">
-              <a href="/login"><i class="fas fa-sign-in-alt"></i></a>
-              <div class="dropdown-menu">
-                <a onclick="logout()">Login</a>
-                <a onclick="signup()">Register</a>
-              </div>
-            </li>
-          </ul>
-          <div class="nav-icons">
-          </div>
-        </nav>
-      </header>
-      <% } %>
+      </div>
+    </nav>
+  </header>
+  <% } else { %>
+  <header class="navbar-wrapper">
+    <nav class="navbar">
+      <div class="nav-left">
+        <div class="hamburger-menu">
+          <i class="fas fa-bars"></i>
+        </div>
+        <div class="logo">
+          <h1>Shoezy</h1>
+        </div>
+      </div>
+      <div class="nav-content">
+        <ul class="nav-links">
+          <li><a href="/">Home</a></li>
+          <li><a href="/shop">Shop</a></li>
+          <li><a href="/#">Contact</a></li>
+          <li><a href="/#">About</a></li>
+          <li class="nav-icon login-icon">
+            <a href="/login"><i class="fas fa-sign-in-alt"></i> Login</a>
+            <div class="dropdown-menu">
+              <a onclick="window.location.href='/login'">Login</a>
+              <a onclick="signup()">Register</a>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div class="nav-icons"></div>
+    </nav>
+  </header>
+  <% } %>
 
         <script>
           function logout() {
@@ -86,7 +94,7 @@
           }
 
           document.addEventListener('DOMContentLoaded', () => {
-            const icons = document.querySelectorAll('.login-icon, .profile-icon');
+            const icons = document.querySelectorAll('.login-icon:not(.mobile-only), .profile-icon');
             icons.forEach(icon => {
               icon.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -98,11 +106,22 @@
               });
             });
 
+            const hamburger = document.querySelector('.hamburger-menu');
+            const navContent = document.querySelector('.nav-content');
+            hamburger.addEventListener('click', () => {
+              navContent.classList.toggle('active');
+              hamburger.classList.toggle('active');
+            });
+
             document.addEventListener('click', (e) => {
               if (!e.target.closest('.login-icon') && !e.target.closest('.profile-icon')) {
                 document.querySelectorAll('.dropdown-menu').forEach(dropdown => {
                   dropdown.classList.remove('show');
                 });
+              }
+              if (!e.target.closest('.navbar') && navContent.classList.contains('active')) {
+                navContent.classList.remove('active');
+                hamburger.classList.remove('active');
               }
             });
           });

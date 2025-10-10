@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shoezy - Create Account</title>
     <link rel="stylesheet" href="/css/signupPage.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -16,104 +15,62 @@
             <div class="signup-form">
                 <h2>Create Account</h2>
 
-                <!-- Backend Flash Messages -->
-                <% if (error_msg && error_msg.length> 0) { %>
-                    <div class="alert alert-danger">
-                        <% error_msg.forEach(function(error) { %>
-                            <p>
-                                <%= error %>
-                            </p>
-                            <% }); %>
+                <div id="form-error-message" class="alert alert-danger" style="display: none;"></div>
+
+                <button class="google-signup" onclick="window.location.href='/auth/google'">
+                    <img src="https://www.google.com/favicon.ico" alt="Google Icon">
+                    Sign up with Google
+                </button>
+
+                <form id="signform" novalidate>
+                    <div class="input-group">
+                        <input type="text" placeholder="Full Name" name="fullname" id="fullname">
+                        <span id="error1" class="error-message"></span>
                     </div>
-                    <% } %>
 
-                        <% if (success_msg && success_msg.length> 0) { %>
-                            <div class="alert alert-success" id="backendSuccessMessage">
-                                <% success_msg.forEach(function(message) { %>
-                                    <p>
-                                        <%= message %>
-                                    </p>
-                                    <% }); %>
-                            </div>
-                            <% } %>
+                    <div class="input-group">
+                        <input type="email" placeholder="Email Address" name="email" id="email">
+                        <span id="error2" class="error-message"></span>
+                    </div>
 
-                                <% if (error && error.length> 0) { %>
-                                    <div class="alert alert-danger">
-                                        <% error.forEach(function(err) { %>
-                                            <p>
-                                                <%= err %>
-                                            </p>
-                                            <% }); %>
-                                    </div>
-                                    <% } %>
+                    <div class="input-group">
+                        <input type="tel" placeholder="Phone Number" name="phone" id="phone">
+                        <span id="error3" class="error-message"></span>
+                    </div>
 
-                                        <button class="google-signup" onclick="window.location.href='/auth/google'">
-                                            <img src="https://www.google.com/favicon.ico" alt="Google Icon">
-                                            Sign up with Google
-                                        </button>
+                    <div class="input-group">
+                        <div class="password-container">
+                            <input type="password" placeholder="Password" name="password" id="password">
+                            <button type="button" class="password-toggle"
+                                onclick="togglePassword('password')">👁️</button>
+                        </div>
+                        <span id="error4" class="error-message"></span>
+                    </div>
 
-                                        <form id="signform" action="/signup" method="post" novalidate>
-                                            <div class="input-group">
-                                                <input type="text" placeholder="Full Name" name="fullname"
-                                                    id="fullname">
-                                                <span id="error1" class="error-message"></span>
-                                            </div>
+                    <div class="input-group">
+                        <div class="password-container">
+                            <input type="password" placeholder="Confirm Password" name="confirmPassword"
+                                id="confirmPassword">
+                            <button type="button" class="password-toggle"
+                                onclick="togglePassword('confirmPassword')">👁️</button>
+                        </div>
+                        <span id="error5" class="error-message"></span>
+                    </div>
 
-                                            <div class="input-group">
-                                                <input type="email" placeholder="Email Address" name="email" id="email">
-                                                <span id="error2" class="error-message"></span>
-  <% if(typeof message !=='undefined' && message) { %>
-                                                    <div style="color:red; margin-bottom: 10px;">
-                                                        <%= message %>
-                                                    </div>
-                                                    <% } %>
+                    <div class="input-group">
+                        <input type="text" placeholder="Referral Code (Optional)" name="referralCode">
+                    </div>
 
-                                                
+                    <button type="submit" class="create-account-btn">Create Account</button>
+                </form>
 
-                                            </div>
-
-                                            <div class="input-group">
-                                                <input type="tel" placeholder="Phone Number" name="phone" id="phone">
-                                                <span id="error3" class="error-message"></span>
-                                            </div>
-
-                                            <div class="input-group">
-                                                <div class="password-container">
-                                                    <input type="password" placeholder="Password" name="password"
-                                                        id="password">
-                                                    <button type="button" class="password-toggle"
-                                                        onclick="togglePassword('password')">👁️</button>
-                                                </div>
-                                                <span id="error4" class="error-message"></span>
-                                            </div>
-
-                                            <div class="input-group">
-                                                <div class="password-container">
-                                                    <input type="password" placeholder="Confirm Password"
-                                                        name="confirmPassword" id="confirmPassword">
-                                                    <button type="button" class="password-toggle"
-                                                        onclick="togglePassword('confirmPassword')">👁️</button>
-                                                </div>
-                                                <span id="error5" class="error-message"></span>
-                                            </div>
-
-                                            <div class="input-group">
-                                                <input type="text" placeholder="Referral Code (Optional)"
-                                                    name="referralCode">
-                                            </div>
-
-                                          
-                                            <button href="/otpVerification" type="submit"
-                                                class="create-account-btn">Create Account</button>
-                                        </form>
-
-                                        <p class="login-link">Already have an account? <a href="/login">Login</a></p>
+                <p class="login-link">Already have an account? <a href="/login">Login</a></p>
             </div>
         </div>
     </main>
 
     <script>
-        // Password toggle functionality (unchanged)
+        // Password toggle functionality
         function togglePassword(inputId) {
             const input = document.getElementById(inputId);
             const toggleBtn = input.nextElementSibling;
@@ -129,7 +86,6 @@
             }
         }
 
-        // Client-side validation
         document.addEventListener('DOMContentLoaded', function () {
             const form = document.getElementById('signform');
             const fullnameInput = document.getElementById('fullname');
@@ -137,20 +93,8 @@
             const phoneInput = document.getElementById('phone');
             const passwordInput = document.getElementById('password');
             const confirmPasswordInput = document.getElementById('confirmPassword');
+            const formErrorMessage = document.getElementById('form-error-message');
 
-            // Check for backend success message and trigger SweetAlert
-            const backendSuccessMessage = document.getElementById('backendSuccessMessage');
-            if (backendSuccessMessage) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: 'User created successfully',
-                    confirmButtonText: 'OK',
-                    confirmButtonColor: '#28a745'
-                });
-            }
-
-            // Helper function for setting individual field errors
             function setError(element, errorId, message) {
                 const errorElement = document.getElementById(errorId);
                 errorElement.textContent = message || '';
@@ -163,7 +107,12 @@
                 }
             }
 
-            // Individual validation functions
+            function setFormError(message) {
+                formErrorMessage.textContent = message;
+                formErrorMessage.style.display = message ? 'block' : 'none';
+            }
+
+            // Validation functions
             function validateFullname() {
                 const fullname = fullnameInput.value.trim();
                 if (!fullname) {
@@ -183,7 +132,7 @@
 
             function validateEmail() {
                 const email = emailInput.value.trim();
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                const emailRegex = /^[^@#$%&'*+/=?^_`{|}~]+@[^@#$%&'*+/=?^_`{|}~]+\.[^@#$%&'*+/=?^_`{|}~]+$/;
                 if (!email) {
                     setError(emailInput, 'error2', 'Email is required');
                     return false;
@@ -216,10 +165,10 @@
                 if (!password) {
                     setError(passwordInput, 'error4', 'Password is required');
                     return false;
-                } else if (password.length < 6) {
-                    setError(passwordInput, 'error4', 'Password must be at least 6 characters');
+                } else if (password.length < 5) {
+                    setError(passwordInput, 'error4', 'Password must be at least 5 characters');
                     return false;
-                } else if  (!/(?=.*[a-z])(?=.*\d)/.test(password)) {
+                } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
                     setError(passwordInput, 'error4', 'Must include uppercase, lowercase, and number');
                     return false;
                 } else {
@@ -243,51 +192,62 @@
                 }
             }
 
-            // Real-time validation on blur
+            // Real-time validation
             fullnameInput.addEventListener('blur', validateFullname);
             emailInput.addEventListener('blur', validateEmail);
             phoneInput.addEventListener('blur', validatePhone);
             passwordInput.addEventListener('blur', validatePassword);
             confirmPasswordInput.addEventListener('blur', validateConfirmPassword);
-
-            // Validate confirm password when password changes
-            passwordInput.addEventListener('input', function () {
-                if (confirmPasswordInput.value) {
-                    validateConfirmPassword();
-                }
+            passwordInput.addEventListener('input', () => {
+                if (confirmPasswordInput.value) validateConfirmPassword();
             });
 
-            // Form submission validation - prevents submission and shows individual errors
-            form.addEventListener('submit', function (e) {
-                e.preventDefault(); // Always prevent default submission first
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                setFormError(''); // Clear previous form errors
 
-                // Run all validations
                 const isFullnameValid = validateFullname();
                 const isEmailValid = validateEmail();
                 const isPhoneValid = validatePhone();
                 const isPasswordValid = validatePassword();
                 const isConfirmPasswordValid = validateConfirmPassword();
 
-                // Check if all fields are valid
-                const allValid = isFullnameValid && isEmailValid && isPhoneValid && isPasswordValid && isConfirmPasswordValid;
-
-                if (allValid) {
-                    // All validation passed - submit form
-                    form.submit();
-                } else {
-                    // Focus on first error field
+                if (!isFullnameValid || !isEmailValid || !isPhoneValid || !isPasswordValid || !isConfirmPasswordValid) {
                     const firstErrorField = document.querySelector('.form-error');
                     if (firstErrorField) {
                         firstErrorField.focus();
                     }
+                    return;
+                }
+
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData.entries());
+
+                try {
+                    const response = await fetch('/signup', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data),
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok && result.success) {
+                        window.location.href = result.redirect;
+                    } else {
+                        setFormError(result.message || 'An unknown error occurred.');
+                    }
+                } catch (error) {
+                    setFormError('A network error occurred. Please try again.');
                 }
             });
 
-            // Clear errors when user starts typing
+            // Clear errors on input
             [fullnameInput, emailInput, phoneInput, passwordInput, confirmPasswordInput].forEach(input => {
                 input.addEventListener('input', function () {
                     this.classList.remove('form-error');
-                    // Find and hide corresponding error message
                     const inputGroup = this.closest('.input-group');
                     if (inputGroup) {
                         const errorSpan = inputGroup.querySelector('.error-message');
@@ -296,6 +256,7 @@
                             errorSpan.textContent = '';
                         }
                     }
+                    setFormError(''); // Also clear general form error
                 });
             });
         });

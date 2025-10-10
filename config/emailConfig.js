@@ -50,27 +50,26 @@ function createEmailTransporter() {
     const validation = validateEmailConfig();
     
     if (!validation.isValid) {
-        return null;
+        console.error(validation.message);
+        return validation.message;
     }
-    
+
     try {
         const transporter = nodemailer.createTransport({
-            service: "gmail",
-            port: 587,
-            secure: false,
-            requireTLS: true,
+            service: "gmail",   // ✅ easier & recommended
             auth: {
                 user: process.env.NODEMAILER_EMAIL,
-                pass: process.env.NODEMAILER_PASSWORD,
+                pass: process.env.NODEMAILER_PASSWORD, // 16-char app password (no spaces)
             },
         });
 
         return transporter;
     } catch (error) {
-        console.error(" Error creating email transporter:", error.message);
+        console.error("❌ Error creating email transporter:", error.message);
         return null;
     }
 }
+
 
 // Send email with error handling
 async function sendEmail(transporter, mailOptions) {
@@ -88,7 +87,7 @@ async function sendEmail(transporter, mailOptions) {
 
         // Provide specific error messages
         if (error.code === 'EAUTH') {
-            throw new Error("Gmail authentication failed. Please check your email and app password.");
+            throw new Error("Gmail authentication failed. Please check your email and app password in your .env file.");
         } else if (error.code === 'ENOTFOUND') {
             throw new Error("Network error. Please check your internet connection.");
         } else if (error.code === 'ETIMEDOUT') {

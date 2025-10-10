@@ -53,8 +53,16 @@
                             <div class="wishlist-grid" id="wishlistGrid">
                                 <% for(let product of wishlist) { %>
                                     <div class="product-card" data-product-id="<%= product._id %>">
+                                        <% 
+                                            const totalStock = product.variants.reduce((sum, variant) => sum + variant.variantQuantity, 0);
+                                        %>
                                         <div class="product-image">
                                             <img src="<%= product.images && product.images.length > 0 ? product.images[0] : 'https://via.placeholder.com/200x200/f8f9fa/dee2e6?text=No+Image' %>" alt="<%= product.productName %>">
+                                            <% if (totalStock > 0) { %>
+                                                <div class="stock-badge in-stock">Available</div>
+                                            <% } else { %>
+                                                <div class="stock-badge out-of-stock">Out of Stock</div>
+                                            <% } %>
                                             <button class="remove-btn" onclick="removeFromWishlist('<%= product._id %>')">
                                                 <span class="material-icons">close</span>
                                             </button>
@@ -141,7 +149,7 @@
                     Swal.fire({
                         title: 'Size Required!',
                         text: 'Please select a size before adding to cart.',
-                        icon: 'warning',
+                        icon: 'error',
                         confirmButtonText: 'OK'
                     });
                     return;

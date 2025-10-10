@@ -3,24 +3,20 @@ body {
     background-color: #f0f2f5;
     margin: 0;
     padding: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
 }
 
 .container {
     background: #fff;
     border-radius: 16px;
     padding: 30px;
-    width: 100%;
-    max-width: 600px;
+    max-width: 1200px;
+    margin: 0 auto;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     border: 1px solid #e0e0e0;
 }
 
 h1 {
-    background-color: #28a745;
+    background-color: #4e83e6;
     color: #ffffff;
     text-align: center;
     padding: 15px;
@@ -135,7 +131,7 @@ textarea {
 #add-size,
 .submit-btn {
     padding: 10px 20px;
-    background-color: #28a745;
+    background-color:#365fd1;
     color: #fff;
     border: none;
     border-radius: 8px;
@@ -146,7 +142,7 @@ textarea {
 #add-color:hover,
 #add-size:hover,
 .submit-btn:hover {
-    background-color: #218838;
+    background-color: #365fd1;
 }
 
 .remove-color,
@@ -408,7 +404,7 @@ textarea {
 .variant-field-group select:focus,
 .variant-field-group input:focus {
     outline: none;
-    border-color: #28a745;
+    border-color: #365fd1;
     box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.2);
 }
 
@@ -441,7 +437,7 @@ textarea {
 
 #add-variant {
     padding: 10px 20px;
-    background-color: #28a745;
+    background-color: #365fd1;
     color: #fff;
     border: none;
     border-radius: 8px;

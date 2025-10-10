@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shoezy - Referral</title>
+</head>
+<body>
+    
+</body>
+</html>
+
+
+<%- include('../partials/user/navbar') %>
+
+    <div class="page-container">
+        <div class="page-layout">
+            <aside class="sidebar">
+                <%- include('../partials/user/profileSidebar') %>
+            </aside>
+
+            <main class="main-content">
+                <div class="container">
+                    <link rel="stylesheet" href="/css/wallet.css">
+                    <link rel="stylesheet" href="/css/referralPage.css">
+                    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+                    <div class="page-header">
+                        <div class="header-icon">
+                            <span class="material-icons">card_giftcard</span>
+                        </div>
+                        <div class="header-text">
+                            <h1>Referral Program</h1>
+                            <p>Invite friends and earn rewards together</p>
+                        </div>
+                    </div>
+
+                    <!-- Main Referral Card -->
+                    <div class="main-card">
+                        <h2>Refer Friends & Earn Wallet Money!</h2>
+                        <p>Share your referral link and earn ₹100 on every successful sign up. Your friends also get ₹50
+                            signup bonus!</p>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Your Referral Link</label>
+                                <input type="text" class="form-control" id="referralLink" value="<%= referralLink %>"
+                                    readonly>
+                            </div>
+                            <button class="btn" onclick="copyReferralLink()">Copy Link</button>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Your Referral Code</label>
+                                <input type="text" class="form-control" id="referralCode" value="<%= referralCode %>"
+                                    readonly>
+                            </div>
+                            <button class="btn" onclick="shareReferral()">Share Code</button>
+                        </div>
+                    </div>
+
+                    <!-- Statistics -->
+                    <div class="stats-container">
+                        <div class="stat-box">
+                            <div class="stat-icon">U</div>
+                            <div class="stat-value" data-count="<%= totalReferrals %>">0</div>
+                            <div class="stat-label">Total Referrals</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-icon">₹</div>
+                            <div class="stat-value" data-count="<%= totalEarned %>">0</div>
+                            <div class="stat-label">Total Earned</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-icon">W</div>
+                            <div class="stat-value">
+                                <%= walletBalance %>
+                            </div>
+                            <div class="stat-label">Wallet Balance</div>
+                        </div>
+
+                    </div>
+
+                    <!-- Referral Benefits -->
+                    <div class="content-section">
+                        <h3 class="section-header">Referral Benefits</h3>
+
+                        <div class="benefit-item" onclick="showBenefitDetails('you')">
+                            <div class="benefit-icon">U</div>
+                            <div class="benefit-content">
+                                <h4>For You</h4>
+                                <p>Earn ₹100 in your wallet for each successful referral</p>
+                            </div>
+                        </div>
+
+                        <div class="benefit-item" onclick="showBenefitDetails('friend')">
+                            <div class="benefit-icon">F</div>
+                            <div class="benefit-content">
+                                <h4>For Your Friend</h4>
+                                <p>Your friend gets ₹50 signup bonus in their wallet</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Referrals -->
+                  
+                    <!-- How Referrals Work -->
+                    <div class="content-section">
+                        <h3 class="section-header">How Referrals Work</h3>
+                        <div class="steps-grid">
+                            <div class="step-item">
+                                <div class="step-number">1</div>
+                                <div class="step-title">Copy Your Link</div>
+                                <div class="step-description">Share your unique referral link with friends and family
+                                </div>
+                            </div>
+                            <div class="step-item">
+                                <div class="step-number">2</div>
+                                <div class="step-title">Friend Signs Up</div>
+                                <div class="step-description">Your friend creates an account using your referral link
+                                </div>
+                            </div>
+                            <div class="step-item">
+                                <div class="step-number">3</div>
+                                <div class="step-title">Both Get Rewards</div>
+                                <div class="step-description">You earn ₹100 in wallet, friend gets ₹50 signup bonus
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <%- include('../partials/user/userfooter') %>
+
+        <div id="notification" class="notification">
+            <span id="notificationText"></span>
+        </div>
+
+        <div id="modal" class="modal">
+            <div class="modal-dialog">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="modalTitle"></h4>
+                    <button class="modal-close" onclick="closeModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p id="modalText"></p>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Counter animation
+            function animateCounter(element, target, duration = 1500) {
+                let start = 0;
+                const increment = target / (duration / 16);
+
+                function updateCounter() {
+                    start += increment;
+                    if (start < target) {
+                        element.textContent = Math.floor(start).toLocaleString();
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        element.textContent = target.toLocaleString();
+                    }
+                }
+                updateCounter();
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                setTimeout(() => {
+                    document.querySelectorAll('.stat-value').forEach(element => {
+                        let target = element.getAttribute('data-count');
+                        target = parseFloat(target); // ✅ handle decimals
+                        if (!isNaN(target)) {
+                            animateCounter(element, target);
+                        } else {
+                            element.textContent = "0"; // fallback
+                        }
+                    });
+                }, 300);
+            });
+
+            // Copy referral link
+            function copyReferralLink() {
+                const referralLink = document.getElementById('referralLink');
+                referralLink.select();
+                referralLink.setSelectionRange(0, 99999);
+
+                try {
+                    document.execCommand('copy');
+                    showNotification('Referral link copied to clipboard!');
+                } catch (err) {
+                    navigator.clipboard.writeText(referralLink.value).then(() => {
+                        showNotification('Referral link copied to clipboard!');
+                    });
+                }
+            }
+
+            // Share referral
+            function shareReferral() {
+                const referralLink = document.getElementById('referralLink').value;
+                const referralCode = document.getElementById('referralCode').value;
+
+                const shareText = `Join me on YourDeal and get ₹50 signup bonus! Use my referral code: ${referralCode} or click: ${referralLink}`;
+
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'Join YourDeal - Get ₹50 Bonus!',
+                        text: shareText,
+                        url: referralLink
+                    }).then(() => {
+                        showNotification('Shared successfully!');
+                    }).catch(() => {
+                        fallbackShare(shareText);
+                    });
+                } else {
+                    fallbackShare(shareText);
+                }
+            }
+
+            function fallbackShare(text) {
+                try {
+                    navigator.clipboard.writeText(text);
+                    showNotification('Share text copied to clipboard!');
+                } catch (err) {
+                    showNotification('Share feature available');
+                }
+            }
+
+            // Show notification
+            function showNotification(message) {
+                const notification = document.getElementById('notification');
+                const notificationText = document.getElementById('notificationText');
+
+                notificationText.textContent = message;
+                notification.classList.add('show');
+
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+
+            // Show benefit details
+            function showBenefitDetails(type) {
+                const modal = document.getElementById('modal');
+                const modalTitle = document.getElementById('modalTitle');
+                const modalText = document.getElementById('modalText');
+
+                if (type === 'you') {
+                    modalTitle.textContent = 'Your Benefits';
+                    modalText.textContent = 'For each successful referral, you earn ₹100 directly in your wallet. The money is credited instantly when your friend completes their first purchase or meets the referral criteria. You can withdraw or use this money anytime!';
+                } else {
+                    modalTitle.textContent = 'Friend Benefits';
+                    modalText.textContent = 'Your friends get ₹50 signup bonus in their wallet immediately after creating an account using your referral link. This bonus can be used for their first purchase or saved for later. It\'s our way of welcoming new users!';
+                }
+
+                modal.style.display = 'block';
+            }
+
+            // Close modal
+            function closeModal() {
+                document.getElementById('modal').style.display = 'none';
+            }
+
+            // Close modal when clicking outside
+            window.onclick = function (event) {
+                const modal = document.getElementById('modal');
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            }
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function (e) {
+                if (e.ctrlKey && e.key === 'c' && window.getSelection().toString() === '') {
+                    copyReferralLink();
+                }
+                if (e.key === 'Escape') {
+                    closeModal();
+                }
+            });

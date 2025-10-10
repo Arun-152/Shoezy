@@ -4,6 +4,8 @@ const bcrypt = require("bcrypt")
 const env = require("dotenv").config()
 const session = require("express-session")
 const { validateEmailConfig, createEmailTransporter, sendEmail } = require("../../config/emailConfig");
+const Wallet = require("../../models/walletSchema");
+
 
 const showUser = async (req, res) => {
     try {
@@ -12,12 +14,15 @@ const showUser = async (req, res) => {
         const userData = await User.findById(userId);
         if (!userData) {
             return res.redirect("/login");
-           
         }
-         
+
+        // Fetch wallet balance
+        const wallet = await Wallet.findOne({ userId: userId });
+        const walletBalance = wallet ? wallet.balance : 0;
 
         res.render("myaccount", {
             user: userData,
+            walletBalance,   // pass it to EJS
             isLandingPage: false,
         });
     } catch (error) {
@@ -336,17 +341,29 @@ const changePassword = async (req, res) => {
             return res.status(401).json({ success: false, message: "User not authenticated" });
         }
 
+        const errors = [];
+
         // Validation
-        if (!currentPassword || !newPassword || !confirmPassword) {
-            return res.status(400).json({ success: false, message: "All password fields are required" });
+        if (!currentPassword || currentPassword.trim() === "") {
+            errors.push("Current password is required");
         }
 
-        if (newPassword.length < 8) {
-            return res.status(400).json({ success: false, message: "New password must be at least 8 characters long" });
+        if (!newPassword || newPassword.trim() === "") {
+            errors.push("New password is required");
+        } else if (newPassword.length < 5) {
+            errors.push("New password must be at least 5 characters long");
+        } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/.test(newPassword)) {
+            errors.push("New password must contain at least one uppercase letter, one lowercase letter, and one number");
         }
 
-        if (newPassword !== confirmPassword) {
-            return res.status(400).json({ success: false, message: "New password and confirm password do not match" });
+        if (!confirmPassword || confirmPassword.trim() === "") {
+            errors.push("Please confirm your new password");
+        } else if (newPassword !== confirmPassword) {
+            errors.push("New password and confirm password do not match");
+        }
+
+        if (errors.length > 0) {
+            return res.status(400).json({ success: false, message: errors.join(". ") });
         }
 
         // Get user from database
@@ -446,6 +463,8 @@ const postAdd = async(req,res)=>{
             errors.fullName = "Full name is required";
         } else if (fullName.trim().length < 2) {
             errors.fullName = "Full name must be at least 2 characters";
+        } else if (/\d/.test(fullName)) {
+            errors.fullName = "Full name cannot contain numbers";
         }
         
         if (!mobileNumber || mobileNumber.trim() === '') {
@@ -458,12 +477,16 @@ const postAdd = async(req,res)=>{
             errors.address = "Address is required";
         } else if (address.trim().length < 5) {
             errors.address = "Address must be at least 5 characters";
+        } else if (address.trim().split(/\s+/).length > 50) {
+            errors.address = "Address cannot exceed 50 words";
         }
         
         if (!city || city.trim() === '') {
             errors.city = "City is required";
         } else if (city.trim().length < 2) {
             errors.city = "City must be at least 2 characters";
+        } else if (/\d/.test(city)) {
+            errors.city = "City cannot contain numbers";
         }
         
         if (!district || district.trim() === '') {
@@ -489,10 +512,12 @@ const postAdd = async(req,res)=>{
         } else if (!['home', 'office', 'other'].includes(addressType.toLowerCase())) {
             errors.addressType = "Please select a valid address type";
         }
-            if (!landmark || landmark.trim() === '') {
+        if (!landmark || landmark.trim() === '') {
             errors.landmark = "landmark is required";
         } else if (landmark.trim().length < 4) {
             errors.landmark = "Landmark must be at least 4 characters";
+        } else if (/^\d+$/.test(landmark.trim())) {
+            errors.landmark = "Landmark cannot be only numbers";
         }
 
         const returnURL = req.body.returnUrl ||  '/profile/address'
@@ -593,6 +618,8 @@ const updateAddress = async(req, res) => {
             errors.fullName = 'Full name is required';
         } else if (fullName.trim().length < 2) {
             errors.fullName = 'Full name must be at least 2 characters';
+        } else if (/\d/.test(fullName)) {
+            errors.fullName = "Full name cannot contain numbers";
         }
         
         if (!mobileNumber || mobileNumber.trim() === '') {
@@ -607,12 +634,16 @@ const updateAddress = async(req, res) => {
             errors.address = 'Address is required';
         } else if (address.trim().length < 5) {
             errors.address = 'Address must be at least 5 characters';
+        } else if (address.trim().split(/\s+/).length > 50) {
+            errors.address = "Address cannot exceed 50 words";
         }
         
         if (!city || city.trim() === '') {
             errors.city = 'City is required';
         } else if (city.trim().length < 2) {
             errors.city = 'City must be at least 2 characters';
+        } else if (/\d/.test(city)) {
+            errors.city = "City cannot contain numbers";
         }
         
         if (!district || district.trim() === '') {
@@ -643,6 +674,8 @@ const updateAddress = async(req, res) => {
             errors.landmark = 'Landmark is required';
         } else if (landmark.trim().length < 4) {
             errors.landmark = 'Landmark must be at least 4 characters';
+        } else if (/^\d+$/.test(landmark.trim())) {
+            errors.landmark = "Landmark cannot be only numbers";
         }
 
         // If there are validation errors, return them

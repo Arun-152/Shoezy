@@ -14,8 +14,14 @@ const categorySchema = new mongoose.Schema({
     default: ""
   },
   categoryImage: {
-    type: String, // or [String] if multiple images are allowed
+    type: String, 
     required: false
+  },
+  categoryOffer: {
+    type: Number,
+    required: false,
+    min: 0,
+    max: 100 
   },
   isListed: {
     type: Boolean,
