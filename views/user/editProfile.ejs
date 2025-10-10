@@ -46,7 +46,7 @@
                             
                             <div class="profile-pic-container">
                                 <div class="profile-pic" onclick="triggerFileUpload()"
-                                     style="background-image: url('<%= user.profilePicture ? '/uploads' + user.profilePicture + '?t=' + Date.now() : '' %>');">
+                                     style="background-image: url('<%= user.profilePicture ? user.profilePicture + '?t=' + Date.now() : '' %>');">
                                     <% if (!user.profilePicture) { %>
                                         <%= user.fullname.charAt(0).toUpperCase() %>
                                     <% } %>
