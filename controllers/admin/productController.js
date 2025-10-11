@@ -84,8 +84,9 @@ const addProduct = async (req, res) => {
             return res.status(400).json({ error: 'Description must be 10-500 characters' });
 
         let parsedProductOffer = productOffer ? parseFloat(productOffer) : 0;
-        if (productOffer && (isNaN(parsedProductOffer) || parsedProductOffer < 0 || parsedProductOffer > 100))
-            return res.status(400).json({ error: 'Product offer must be between 0-100' });
+        if (productOffer && (isNaN(parsedProductOffer) || parsedProductOffer < 0 || parsedProductOffer > 100)) {
+            return res.status(400).json({ error: 'Offer must be between 0 and 100' });
+        }
 
         if (!color || !/^[A-Za-z, ]{1,50}$/.test(color.trim()))
             return res.status(400).json({ error: 'Color must be letters, spaces, or commas (max 50 chars)' });

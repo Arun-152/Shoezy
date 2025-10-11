@@ -118,9 +118,9 @@ const createCoupon = async (req, res) => {
 
     if (!name) errors.couponCode = "Coupon Code is required";
     if (!offerPrice) errors.offerPrice = "Discount Amount is required";
-    if (!minimumPrice && minimumPrice !== 0) errors.minimumPrice = "Minimum Order Amount is required";
+    if (minimumPrice === '' || minimumPrice == null) errors.minimumPrice = "Minimum Order Amount is required";
     if (!startDate) errors.startDate = "Start Date is required";
-    if (!expireOn) errors.expirationDate = "Expiration Date is required";
+    if (!expireOn) errors.expireOn = "Expiration Date is required";
     if (!discountType) errors.discountType = "Discount Type is required";
 
     if (Object.keys(errors).length > 0) {
@@ -143,7 +143,7 @@ const createCoupon = async (req, res) => {
     if (startDateObj < currentDate.setHours(0, 0, 0, 0)) {
       return res.status(400).json({ success: false, message: "Start date cannot be in the past" });
     }
-    if (expirationDate <= startDateObj) {
+    if (expirationDate < startDateObj) {
       return res.status(400).json({ success: false, message: "Expiration date must be after start date" });
     }
     if (!["flat", "percentage"].includes(discountType)) {
@@ -152,10 +152,20 @@ const createCoupon = async (req, res) => {
 
     const offerPriceNum = parseFloat(offerPrice);
     if (offerPriceNum <= 0) {
-      return res.status(400).json({ success: false, message: "The offer price must be greater than 0" });
+      return res.status(400).json({
+        success: false,
+        message: "The offer price must be greater than 0",
+        fieldErrors: { offerPrice: "The offer price must be greater than 0" }
+      });
     }
     if (discountType === "percentage" && offerPriceNum > 100) {
-      return res.status(400).json({ success: false, message: "Percentage discount cannot exceed 100%" });
+      return res.status(400).json({
+        success: false,
+        message: "Percentage discount cannot exceed 100%",
+        fieldErrors: {
+          offerPrice: "Percentage discount cannot exceed 100%"
+        }
+      });
     }
 
     const maxUsesPerUserNum = parseInt(maxUsesPerUser) || 1;
@@ -166,16 +176,21 @@ const createCoupon = async (req, res) => {
     const totalUsageLimitNum = totalUsageLimit ? parseInt(totalUsageLimit) : null;
     
     if (!totalUsageLimit || totalUsageLimit.trim() === '') {
-      return res.status(400).json({ success: false, message: "Total Usage Limit is required. Please enter a valid number." });
+      errors.totalUsageLimit = "Total Usage Limit is required.";
+    } else if (isNaN(totalUsageLimitNum) || totalUsageLimitNum === null) {
+      errors.totalUsageLimit = "Enter a valid Total Usage Limit to proceed.";
+    } else if (totalUsageLimitNum < 1) {
+      errors.totalUsageLimit = "Please provide a valid Total Usage Limit (greater than 0).";
     }
     
-    if (isNaN(totalUsageLimitNum) || totalUsageLimitNum === null) {
-      return res.status(400).json({ success: false, message: "Enter a valid Total Usage Limit to proceed." });
+    if (Object.keys(errors).length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Please correct the errors below.",
+        fieldErrors: errors
+      });
     }
-    
-    if (totalUsageLimitNum < 1) {
-      return res.status(400).json({ success: false, message: "Please provide a valid Total Usage Limit (greater than 0)." });
-    }
+
     if (totalUsageLimitNum && maxUsesPerUserNum > totalUsageLimitNum) {
       return res.status(400).json({ success: false, message: "Invalid Total Usage Limit. Kindly check and try again." });
     }
@@ -278,18 +293,23 @@ const editCoupon = async(req,res)=>{
           return res.status(400).json({success:false,message:"This coupon already exist,Please use different name"})
         }
 
+        const currentCoupon = await Coupon.findById(couponId);
+        if (!currentCoupon){
+          return res.status(404).json({success:false,message:"Coupon not found"})
+        }
+
         const startDateObj = new Date(startDate);
         const expirationDate = new Date(expireOn);
         const currentDate = new Date();
+        const originalStartDate = new Date(currentCoupon.startDate);
 
-        if (startDateObj < currentDate.setHours(0, 0, 0, 0)){
+        if (startDateObj.getTime() !== originalStartDate.getTime() && startDateObj < currentDate.setHours(0, 0, 0, 0)) {
           return res.status(400).json({success:false,message:"Start date cannot be in the past"})
         }
 
-        if(expirationDate <= startDateObj){
+        if(expirationDate < startDateObj){
           return res.status(400).json({success:false,message:"Expiration date must be after start date"})
         }
-        
         if(!['flat', 'percentage'].includes(discountType)){
           return res.status(400).json({success:false,message:"Invalid discount type"})
         }
@@ -297,10 +317,20 @@ const editCoupon = async(req,res)=>{
         const offerPriceNum = parseFloat(offerPrice)
 
         if (offerPriceNum <= 0){
-          return res.status(400).json({success:false,message:"Discount amount must be greater than 0"})
+          return res.status(400).json({
+            success: false,
+            message: "Discount amount must be greater than 0",
+            fieldErrors: { offerPrice: "Discount amount must be greater than 0" }
+          });
         }
         if( (discountType === 'percentage' && offerPriceNum > 100)){
-          return res.status(400).json({success:false,message:"Percentage discount cannot exceed 100%"})
+          return res.status(400).json({
+            success: false,
+            message: "Percentage discount cannot exceed 100%",
+            fieldErrors: {
+              offerPrice: "Percentage discount cannot exceed 100%"
+            }
+          });
         }
        const maxUsesPerUserNum = parseInt(maxUsesPerUser) || 1 ;
         if(maxUsesPerUserNum < 1){
@@ -309,11 +339,6 @@ const editCoupon = async(req,res)=>{
         const totalUsageLimitNum = totalUsageLimit ? parseInt(totalUsageLimit) : null;
         if(totalUsageLimitNum && totalUsageLimitNum < 1){
           return res.status(400).json({success:false,message:"Total usage limit must be at least 1"})
-        }
-
-        const currentCoupon = await Coupon.findById(couponId);
-        if (!currentCoupon){
-          return res.status(400).json({success:false,message:"Coupon not found"})
         }
 
         if(totalUsageLimitNum && totalUsageLimitNum < (currentCoupon.currentUsageCount || 0)){

@@ -30,6 +30,7 @@
       overflow: hidden;
       position: relative;
     }
+
     .input-error {
       color: #e53e3e;
       font-size: 14px;
@@ -62,14 +63,21 @@
       left: -50%;
       width: 200%;
       height: 200%;
-      background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
       background-size: 30px 30px;
       animation: float 20s ease-in-out infinite;
     }
 
     @keyframes float {
-      0%, 100% { transform: translate(0, 0) rotate(0deg); }
-      50% { transform: translate(-20px, -20px) rotate(180deg); }
+
+      0%,
+      100% {
+        transform: translate(0, 0) rotate(0deg);
+      }
+
+      50% {
+        transform: translate(-20px, -20px) rotate(180deg);
+      }
     }
 
     .form-header h1 {
@@ -219,7 +227,7 @@
       transition: left 0.5s ease;
     }
 
-    .radio-input:checked + .radio-label {
+    .radio-input:checked+.radio-label {
       background: linear-gradient(135deg, #667eea, #764ba2);
       border-color: #667eea;
       color: white;
@@ -227,7 +235,7 @@
       box-shadow: 0 8px 25px -8px rgba(102, 126, 234, 0.5);
     }
 
-    .radio-input:checked + .radio-label::before {
+    .radio-input:checked+.radio-label::before {
       left: 100%;
     }
 
@@ -298,7 +306,7 @@
       transition: color 0.3s ease;
     }
 
-    .checkbox-input:checked + .checkbox-label {
+    .checkbox-input:checked+.checkbox-label {
       color: #667eea;
       font-weight: 600;
     }
@@ -451,8 +459,13 @@
     }
 
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
     }
 
     .success-message {
@@ -476,6 +489,7 @@
         transform: translateX(100%);
         opacity: 0;
       }
+
       to {
         transform: translateX(0);
         opacity: 1;
@@ -551,255 +565,271 @@
     <!-- Sidebar -->
     <%- include('../partials/admin/sidebar') %>
 
-    <!-- Main Content -->
-    <main class="main-content">
-      <header class="header">
-        <div class="header-left">
-          <button class="menu-toggle" id="menuToggle">
-            <i class="fas fa-bars"></i>
-          </button>
-        </div>
-        <div class="header-right">
-          <div class="notification">
-            <i class="fas fa-bell"></i>
+      <!-- Main Content -->
+      <main class="main-content">
+        <header class="header">
+          <div class="header-left">
+            <button class="menu-toggle" id="menuToggle">
+              <i class="fas fa-bars"></i>
+            </button>
           </div>
-          <div class="admin-profile">
-            <i class="fas fa-user-circle"></i>
-            <span>ADMIN</span>
+          <div class="header-right">
+            <div class="notification">
+              <i class="fas fa-bell"></i>
+            </div>
+            <div class="admin-profile">
+              <i class="fas fa-user-circle"></i>
+              <span>ADMIN</span>
+            </div>
+          </div>
+        </header>
+
+        <!-- Breadcrumb Navigation -->
+        <div class="breadcrumb">
+          <div class="breadcrumb-nav">
+            <a href="/admin/dashboard">
+              <i class="fas fa-home"></i> Dashboard
+            </a>
+            <span class="separator">/</span>
+            <a href="/admin/coupons">Coupons</a>
+            <span class="separator">/</span>
+            <span class="current">Edit Coupon</span>
           </div>
         </div>
-      </header>
 
-      <!-- Breadcrumb Navigation -->
-      <div class="breadcrumb">
-        <div class="breadcrumb-nav">
-          <a href="/admin/dashboard">
-            <i class="fas fa-home"></i> Dashboard
-          </a>
-          <span class="separator">/</span>
-          <a href="/admin/coupons">Coupons</a>
-          <span class="separator">/</span>
-          <span class="current">Edit Coupon</span>
-        </div>
-      </div>
+        <section class="page-content">
+          <div class="coupon-form-container">
+            <!-- Form Header -->
+            <div class="form-header">
+              <h1><i class="fas fa-edit"></i> Edit Coupon</h1>
+              <p>Update coupon details and settings</p>
+            </div>
 
-      <section class="page-content">
-        <div class="coupon-form-container">
-          <!-- Form Header -->
-          <div class="form-header">
-            <h1><i class="fas fa-edit"></i> Edit Coupon</h1>
-            <p>Update coupon details and settings</p>
-          </div>
+            <!-- Form Content -->
+            <div class="form-content">
+              <div class="input-error" id="formGeneralError"></div>
+              <form id="couponForm">
+                <!-- Basic Information Section -->
+                <div class="form-section">
+                  <div class="section-title">
+                    <i class="fas fa-info-circle"></i> Basic Information
+                  </div>
 
-          <!-- Form Content -->
-          <div class="form-content">
-            <div class="input-error" id="formGeneralError"></div>
-            <form id="couponForm">
-              <!-- Basic Information Section -->
-              <div class="form-section">
-                <div class="section-title">
-                  <i class="fas fa-info-circle"></i> Basic Information
-                </div>
+                  <div class="form-group">
+                    <label class="form-label" for="couponCode">
+                      <i class="fas fa-ticket-alt label-icon"></i> Coupon Code *
+                    </label>
+                    <input type="text" id="couponCode" name="couponCode" class="form-input"
+                      placeholder="e.g., WELCOME20, SAVE50" maxlength="20" />
+                    <div class="input-error" id="couponCodeError"></div>
+                  </div>
 
-                <div class="form-group">
-                  <label class="form-label" for="couponCode">
-                    <i class="fas fa-ticket-alt label-icon"></i> Coupon Code *
-                  </label>
-                  <input type="text" id="couponCode" name="couponCode" class="form-input" placeholder="e.g., WELCOME20, SAVE50" maxlength="20"  />
-                  <div class="input-error" id="couponCodeError"></div>
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label">
-                    <i class="fas fa-tags label-icon"></i> Discount Type *
-                  </label>
-                  <div class="discount-type-container">
-                    <div class="radio-option">
-                      <input type="radio" id="flat" name="discountType" value="flat" class="radio-input" checked />
-                      <label for="flat" class="radio-label">
-                        <i class="fas fa-rupee-sign"></i> Flat Amount (₹)
-                      </label>
+                  <div class="form-group">
+                    <label class="form-label">
+                      <i class="fas fa-tags label-icon"></i> Discount Type *
+                    </label>
+                    <div class="discount-type-container">
+                      <div class="radio-option">
+                        <input type="radio" id="flat" name="discountType" value="flat" class="radio-input" checked />
+                        <label for="flat" class="radio-label">
+                          <i class="fas fa-rupee-sign"></i> Flat Amount (₹)
+                        </label>
+                      </div>
+                      <div class="radio-option">
+                        <input type="radio" id="percentage" name="discountType" value="percentage"
+                          class="radio-input" />
+                        <label for="percentage" class="radio-label">
+                          <i class="fas fa-percentage"></i> Percentage (%)
+                        </label>
+                      </div>
                     </div>
-                    <div class="radio-option">
-                      <input type="radio" id="percentage" name="discountType" value="percentage" class="radio-input" />
-                      <label for="percentage" class="radio-label">
-                        <i class="fas fa-percentage"></i> Percentage (%)
-                      </label>
+                    <div class="input-error" id="discountTypeError"></div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="discountAmount">
+                      <i class="fas fa-calculator label-icon"></i> Discount Amount *
+                      <span class="tooltip" data-tooltip="Enter the discount value based on selected type">
+                        <i class="fas fa-question-circle" style="color: #a0aec0; font-size: 12px;"></i>
+                      </span>
+                    </label>
+                    <div class="amount-input-container">
+                      <span class="currency-symbol" id="currencySymbol">₹</span>
+                      <input type="number" id="discountAmount" name="discountAmount" class="form-input amount-input"
+                        placeholder="Enter discount amount" step="0.01" />
                     </div>
+                    <div class="input-error" id="discountAmountError"></div>
                   </div>
-                  <div class="input-error" id="discountTypeError"></div>
-                </div>
 
-                <div class="form-group">
-                  <label class="form-label" for="discountAmount">
-                    <i class="fas fa-calculator label-icon"></i> Discount Amount *
-                    <span class="tooltip" data-tooltip="Enter the discount value based on selected type">
-                      <i class="fas fa-question-circle" style="color: #a0aec0; font-size: 12px;"></i>
-                    </span>
-                  </label>
-                  <div class="amount-input-container">
-                    <span class="currency-symbol" id="currencySymbol">₹</span>
-                    <input type="number" id="discountAmount" name="discountAmount" class="form-input amount-input" placeholder="Enter discount amount" min="1" step="0.01"  />
+                  <div class="form-group">
+                    <label class="form-label" for="minOrderAmount">
+                      <i class="fas fa-shopping-cart label-icon"></i> Minimum Order Amount *
+                    </label>
+                    <input type="number" id="minOrderAmount" name="minOrderAmount" class="form-input"
+                      placeholder="₹0 for no minimum" step="0.01" />
+                    <div class="input-error" id="minOrderAmountError"></div>
                   </div>
-                  <div class="input-error" id="discountAmountError"></div>
                 </div>
 
-                <div class="form-group">
-                  <label class="form-label" for="minOrderAmount">
-                    <i class="fas fa-shopping-cart label-icon"></i> Minimum Order Amount *
-                  </label>
-                  <input type="number" id="minOrderAmount" name="minOrderAmount" class="form-input" placeholder="₹0 for no minimum" min="0" step="0.01"  />
-                  <div class="input-error" id="minOrderAmountError"></div>
-                </div>
-              </div>
+                <!-- Date Settings Section -->
+                <div class="form-section">
+                  <div class="section-title">
+                    <i class="fas fa-calendar-alt"></i> Validity Period
+                  </div>
 
-              <!-- Date Settings Section -->
-              <div class="form-section">
-                <div class="section-title">
-                  <i class="fas fa-calendar-alt"></i> Validity Period
-                </div>
+                  <div class="form-group">
+                    <label class="form-label" for="startDate">
+                      <i class="fas fa-calendar-plus label-icon"></i> Start Date *
+                    </label>
+                    <input type="date" id="startDate" name="startDate" class="form-input date-input" />
+                    <div class="input-error" id="startDateError"></div>
+                  </div>
 
-                <div class="form-group">
-                  <label class="form-label" for="startDate">
-                    <i class="fas fa-calendar-plus label-icon"></i> Start Date *
-                  </label>
-                  <input type="date" id="startDate" name="startDate" class="form-input date-input"  />
-                  <div class="input-error" id="startDateError"></div>
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label" for="expirationDate">
-                    <i class="fas fa-calendar-minus label-icon"></i> Expiration Date *
-                  </label>
-                  <input type="date" id="expirationDate" name="expirationDate" class="form-input date-input"  />
-                  <div class="input-error" id="expirationDateError"></div>
-                </div>
-              </div>
-
-              <!-- Applicability Section -->
-              <div class="form-section">
-                <div class="section-title">
-                  <i class="fas fa-bullseye"></i> Applicability Settings
+                  <div class="form-group">
+                    <label class="form-label" for="expirationDate">
+                      <i class="fas fa-calendar-minus label-icon"></i> Expiration Date *
+                    </label>
+                    <input type="date" id="expirationDate" name="expirationDate" class="form-input date-input" />
+                    <div class="input-error" id="expirationDateError"></div>
+                  </div>
                 </div>
 
-                <div class="form-group">
-                  <label class="form-label">
-                    <i class="fas fa-list label-icon"></i> Applicable Categories *
-                  </label>
-                  <div class="checkbox-group">
-                    <div class="checkbox-item">
-                      <input type="checkbox" id="allCategories" name="allCategories" class="checkbox-input" checked />
-                      <label for="allCategories" class="checkbox-label">
-                        <i class="fas fa-globe"></i> Apply to All Categories
-                      </label>
+                <!-- Applicability Section -->
+                <div class="form-section">
+                  <div class="section-title">
+                    <i class="fas fa-bullseye"></i> Applicability Settings
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">
+                      <i class="fas fa-list label-icon"></i> Applicable Categories *
+                    </label>
+                    <div class="checkbox-group">
+                      <div class="checkbox-item">
+                        <input type="checkbox" id="allCategories" name="allCategories" class="checkbox-input" checked />
+                        <label for="allCategories" class="checkbox-label">
+                          <i class="fas fa-globe"></i> Apply to All Categories
+                        </label>
+                      </div>
                     </div>
-                  </div>
-                  <div id="categoryList" style="display: none; margin-top: 16px; padding: 12px; background: #f7fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
-                    <% if (categories && categories.length > 0) { %>
-                      <% categories.forEach(function(category) { %>
-                        <div class="checkbox-item">
-                          <input type="checkbox" id="cat_<%= category._id %>" name="applicableCategories" value="<%= category._id %>" class="checkbox-input" />
-                          <label for="cat_<%= category._id %>" class="checkbox-label"><%= category.name %></label>
-                        </div>
-                      <% }); %>
-                    <% } else { %>
-                      <p>No categories available.</p>
-                    <% } %>
-                  </div>
-                  <div class="input-error" id="applicableCategoriesError"></div>
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label">
-                    <i class="fas fa-box label-icon"></i> Applicable Products *
-                  </label>
-                  <div class="checkbox-group">
-                    <div class="checkbox-item">
-                      <input type="checkbox" id="allProducts" name="allProducts" class="checkbox-input" checked />
-                      <label for="allProducts" class="checkbox-label">
-                        <i class="fas fa-globe"></i> Apply to All Products
-                      </label>
-                    </div>
-                  </div>
-                  <div id="productListContainer" style="display: none; margin-top: 16px; padding: 12px; background: #f7fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
-                    <input type="text" id="productSearch" class="form-input" placeholder="Search products..." style="margin-bottom: 12px;" />
-                    <div id="productList">
-                      <% if (products && products.length > 0) { %>
-                        <% products.forEach(function(product) { %>
+                    <div id="categoryList"
+                      style="display: none; margin-top: 16px; padding: 12px; background: #f7fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                      <% if (categories && categories.length> 0) { %>
+                        <% categories.forEach(function(category) { %>
                           <div class="checkbox-item">
-                            <input type="checkbox" id="prod_<%= product._id %>" name="applicableProducts" value="<%= product._id %>" class="checkbox-input" />
-                            <label for="prod_<%= product._id %>" class="checkbox-label"><%= product.productName %></label>
+                            <input type="checkbox" id="cat_<%= category._id %>" name="applicableCategories"
+                              value="<%= category._id %>" class="checkbox-input" />
+                            <label for="cat_<%= category._id %>" class="checkbox-label">
+                              <%= category.name %>
+                            </label>
                           </div>
-                        <% }); %>
-                      <% } else { %>
-                        <p>No products available.</p>
-                      <% } %>
+                          <% }); %>
+                            <% } else { %>
+                              <p>No categories available.</p>
+                              <% } %>
+                    </div>
+                    <div class="input-error" id="applicableCategoriesError"></div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">
+                      <i class="fas fa-box label-icon"></i> Applicable Products *
+                    </label>
+                    <div class="checkbox-group">
+                      <div class="checkbox-item">
+                        <input type="checkbox" id="allProducts" name="allProducts" class="checkbox-input" checked />
+                        <label for="allProducts" class="checkbox-label">
+                          <i class="fas fa-globe"></i> Apply to All Products
+                        </label>
+                      </div>
+                    </div>
+                    <div id="productListContainer"
+                      style="display: none; margin-top: 16px; padding: 12px; background: #f7fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                      <input type="text" id="productSearch" class="form-input" placeholder="Search products..."
+                        style="margin-bottom: 12px;" />
+                      <div id="productList">
+                        <% if (products && products.length> 0) { %>
+                          <% products.forEach(function(product) { %>
+                            <div class="checkbox-item">
+                              <input type="checkbox" id="prod_<%= product._id %>" name="applicableProducts"
+                                value="<%= product._id %>" class="checkbox-input" />
+                              <label for="prod_<%= product._id %>" class="checkbox-label">
+                                <%= product.productName %>
+                              </label>
+                            </div>
+                            <% }); %>
+                              <% } else { %>
+                                <p>No products available.</p>
+                                <% } %>
+                      </div>
+                    </div>
+                    <div class="input-error" id="applicableProductsError"></div>
+                  </div>
+                </div>
+
+                <!-- Usage Limits Section -->
+                <div class="usage-limits">
+                  <div class="usage-limits-header">
+                    <i class="fas fa-chart-bar"></i> Usage Limits & Restrictions
+                  </div>
+                  <div class="usage-row">
+                    <div class="usage-col">
+                      <label for="maxUsesPerUser" class="form-label">
+                        <i class="fas fa-user label-icon"></i> Max Uses Per User
+                      </label>
+                      <input type="number" id="maxUsesPerUser" name="maxUsesPerUser" class="form-input" value="1"
+                        min="1" />
+                      <div class="input-error" id="maxUsesPerUserError"></div>
+                      <div class="help-text">
+                        <i class="fas fa-info-circle"></i> How many times a single user can use this coupon (minimum: 1)
+                      </div>
+                    </div>
+                    <div class="usage-col">
+                      <label for="totalUsageLimit" class="form-label">
+                        <i class="fas fa-users label-icon"></i> Total Usage Limit *
+                      </label>
+                      <input type="number" id="totalUsageLimit" name="totalUsageLimit" class="form-input"
+                        placeholder="Enter total usage limit" min="1" />
+                      <div class="input-error" id="totalUsageLimitError"></div>
+                      <div class="help-text">
+                        <i class="fas fa-info-circle"></i> Maximum total uses across all users (required field)
+                      </div>
                     </div>
                   </div>
-                  <div class="input-error" id="applicableProductsError"></div>
                 </div>
-              </div>
 
-              <!-- Usage Limits Section -->
-              <div class="usage-limits">
-                <div class="usage-limits-header">
-                  <i class="fas fa-chart-bar"></i> Usage Limits & Restrictions
-                </div>
-                <div class="usage-row">
-                  <div class="usage-col">
-                    <label for="maxUsesPerUser" class="form-label">
-                      <i class="fas fa-user label-icon"></i> Max Uses Per User
-                    </label>
-                    <input type="number" id="maxUsesPerUser" name="maxUsesPerUser" class="form-input" value="1" min="1" max="100" />
-                    <div class="input-error" id="maxUsesPerUserError"></div>
-                    <div class="help-text">
-                      <i class="fas fa-info-circle"></i> How many times a single user can use this coupon (minimum: 1)
+                <!-- Status Section -->
+                <div class="form-section">
+                  <div class="section-title">
+                    <i class="fas fa-toggle-on"></i> Status Settings
+                  </div>
+
+                  <div class="form-group">
+                    <div class="checkbox-item">
+                      <input type="checkbox" id="activeStatus" name="activeStatus" class="checkbox-input" checked />
+                      <label for="activeStatus" class="checkbox-label">
+                        <i class="fas fa-check-circle"></i> Active Status (Coupon will be immediately available)
+                      </label>
                     </div>
-                  </div>
-                  <div class="usage-col">
-                    <label for="totalUsageLimit" class="form-label">
-                      <i class="fas fa-users label-icon"></i> Total Usage Limit *
-                    </label>
-                    <input type="number" id="totalUsageLimit" name="totalUsageLimit" class="form-input" placeholder="Enter total usage limit" min="1" />
-                    <div class="input-error" id="totalUsageLimitError"></div>
-                    <div class="help-text">
-                      <i class="fas fa-info-circle"></i> Maximum total uses across all users (required field)
-                    </div>
+                    <div class="input-error" id="activeStatusError"></div>
                   </div>
                 </div>
-              </div>
 
-              <!-- Status Section -->
-              <div class="form-section">
-                <div class="section-title">
-                  <i class="fas fa-toggle-on"></i> Status Settings
+                <!-- Form Actions -->
+                <div class="form-actions">
+                  <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Update Coupon
+                  </button>
+                  <button type="button" class="btn btn-secondary" onclick="window.location='/admin/coupons'">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                  </button>
+
                 </div>
-
-                <div class="form-group">
-                  <div class="checkbox-item">
-                    <input type="checkbox" id="activeStatus" name="activeStatus" class="checkbox-input" checked />
-                    <label for="activeStatus" class="checkbox-label">
-                      <i class="fas fa-check-circle"></i> Active Status (Coupon will be immediately available)
-                    </label>
-                  </div>
-                  <div class="input-error" id="activeStatusError"></div>
-                </div>
-              </div>
-
-              <!-- Form Actions -->
-              <div class="form-actions">
-                <button type="submit" class="btn btn-primary">
-                  <i class="fas fa-save"></i> Update Coupon
-                </button>
-                <button type="button" class="btn btn-secondary" onclick="goBack()">
-                  <i class="fas fa-arrow-left"></i> Back to List
-                </button>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
-        </div>
-      </section>
-    </main>
+        </section>
+      </main>
   </div>
 
   <!-- Loading Overlay -->
@@ -815,39 +845,37 @@
 
   <script>
     // Coupon data from server
-    const couponData = <%- JSON.stringify(coupon) %>;
+    const couponData = <% - JSON.stringify(coupon) %>;
     let originalFormData = {};
-    
+
     document.addEventListener('DOMContentLoaded', function () {
       // Populate form with existing coupon data
       populateForm();
-      
+
       // Store original form data for comparison
       setTimeout(() => {
         originalFormData = getCurrentFormData();
       }, 100);
-      
+
       function populateForm() {
         if (!couponData) return;
-        
+
         // Basic Information
         document.getElementById('couponCode').value = couponData.name || '';
         document.getElementById('discountAmount').value = couponData.offerPrice || '';
         document.getElementById('minOrderAmount').value = couponData.minimumPrice || '';
-        
+
         // Discount Type
         if (couponData.discountType === 'percentage') {
           document.getElementById('percentage').checked = true;
           document.getElementById('currencySymbol').textContent = '%';
           document.getElementById('discountAmount').placeholder = 'Enter percentage (1-100)';
-          document.getElementById('discountAmount').max = '100';
         } else {
           document.getElementById('flat').checked = true;
           document.getElementById('currencySymbol').textContent = '₹';
           document.getElementById('discountAmount').placeholder = 'Enter amount in rupees';
-          document.getElementById('discountAmount').max = '';
         }
-        
+
         // Dates
         if (couponData.startDate) {
           const startDate = new Date(couponData.startDate).toISOString().split('T')[0];
@@ -857,7 +885,7 @@
           const expireDate = new Date(couponData.expireOn).toISOString().split('T')[0];
           document.getElementById('expirationDate').value = expireDate;
         }
-        
+
         // Categories
         if (couponData.isAllCategories) {
           document.getElementById('allCategories').checked = true;
@@ -865,7 +893,7 @@
         } else {
           document.getElementById('allCategories').checked = false;
           document.getElementById('categoryList').style.display = 'block';
-          
+
           // Check applicable categories
           if (couponData.applicableCategories && couponData.applicableCategories.length > 0) {
             couponData.applicableCategories.forEach(category => {
@@ -875,15 +903,15 @@
             });
           }
         }
-        
-        
+
+
         if (couponData.isAllProducts) {
           document.getElementById('allProducts').checked = true;
           document.getElementById('productListContainer').style.display = 'none';
         } else {
           document.getElementById('allProducts').checked = false;
           document.getElementById('productListContainer').style.display = 'block';
-          
+
           // Check applicable products
           if (couponData.applicableProducts && couponData.applicableProducts.length > 0) {
             couponData.applicableProducts.forEach(product => {
@@ -893,11 +921,11 @@
             });
           }
         }
-        
+
         // Usage Limits
         document.getElementById('maxUsesPerUser').value = couponData.maxUsesPerUser || 1;
         document.getElementById('totalUsageLimit').value = couponData.totalUsageLimit || '';
-        
+
         // Status
         document.getElementById('activeStatus').checked = couponData.islist !== false;
       }
@@ -927,11 +955,9 @@
           if (this.value === 'flat') {
             currencySymbol.textContent = '₹';
             discountAmount.placeholder = 'Enter amount in rupees';
-            discountAmount.max = '';
           } else {
             currencySymbol.textContent = '%';
             discountAmount.placeholder = 'Enter percentage (1-100)';
-            discountAmount.max = '100';
           }
 
           currencySymbol.style.transform = 'scale(1.2)';
@@ -946,23 +972,15 @@
         this.value = this.value.toUpperCase().replace(/\s/g, '');
       });
 
-      // Number input restrictions for percentage max 100
-      document.getElementById('discountAmount').addEventListener('input', function () {
-        const discountType = document.querySelector('input[name="discountType"]:checked').value;
-        if (discountType === 'percentage' && parseFloat(this.value) > 100) {
-          this.value = '100';
-        }
-      });
-
       // Total Usage Limit validation - must be greater than 0 if provided
       document.getElementById('totalUsageLimit').addEventListener('input', function () {
         const value = parseFloat(this.value);
         const errorElement = document.getElementById('totalUsageLimitError');
-        
+
         // Clear previous error
         errorElement.textContent = '';
         this.style.borderColor = '#e2e8f0';
-        
+
         // If value is provided, validate it
         if (this.value.trim() !== '') {
           if (isNaN(value) || value <= 0) {
@@ -970,7 +988,7 @@
             this.style.borderColor = '#e53e3e';
             return;
           }
-          
+
           // Ensure it's a whole number
           if (value !== Math.floor(value)) {
             this.value = Math.floor(value);
@@ -982,7 +1000,7 @@
       document.getElementById('totalUsageLimit').addEventListener('blur', function () {
         const value = parseFloat(this.value);
         const errorElement = document.getElementById('totalUsageLimitError');
-        
+
         if (this.value.trim() !== '' && (isNaN(value) || value <= 0)) {
           errorElement.textContent = 'Total Usage Limit must be a number greater than 0';
           this.style.borderColor = '#e53e3e';
@@ -993,21 +1011,21 @@
       // Toggle category list
       const allCategoriesCheckbox = document.getElementById('allCategories');
       const categoryList = document.getElementById('categoryList');
-      allCategoriesCheckbox.addEventListener('change', function() {
+      allCategoriesCheckbox.addEventListener('change', function () {
         categoryList.style.display = this.checked ? 'none' : 'block';
       });
 
       // Toggle product list
       const allProductsCheckbox = document.getElementById('allProducts');
       const productListContainer = document.getElementById('productListContainer');
-      allProductsCheckbox.addEventListener('change', function() {
+      allProductsCheckbox.addEventListener('change', function () {
         productListContainer.style.display = this.checked ? 'none' : 'block';
       });
 
       // Product search
       const productSearch = document.getElementById('productSearch');
       if (productSearch) {
-        productSearch.addEventListener('input', function() {
+        productSearch.addEventListener('input', function () {
           const filter = this.value.toLowerCase();
           const items = document.querySelectorAll('#productList .checkbox-item');
           items.forEach(item => {
@@ -1039,7 +1057,7 @@
       // Function to compare form data
       function hasFormChanged() {
         const currentData = getCurrentFormData();
-        
+
         // Compare all fields
         for (const key in originalFormData) {
           if (Array.isArray(originalFormData[key])) {
@@ -1111,7 +1129,7 @@
             confirmButtonText: 'OK',
             confirmButtonColor: '#667eea'
           });
-          
+
           // Also show field-specific errors
           validationErrors.forEach(error => {
             if (error.includes('Coupon Code')) setErrorOnField('couponCodeError', 'Coupon Code is required');
@@ -1124,7 +1142,7 @@
             if (error.includes('category')) setErrorOnField('applicableCategoriesError', 'Please select at least one category');
             if (error.includes('product')) setErrorOnField('applicableProductsError', 'Please select at least one product');
           });
-          
+
           return;
         }
 
@@ -1161,7 +1179,7 @@
           }
 
           hideLoading();
-          
+
           // Show success message using SweetAlert
           await Swal.fire({
             icon: 'success',
@@ -1228,10 +1246,10 @@
         // Fallback to message-based error handling
         const message = data.message || '';
         if (message === "All required fields must be filled") {
-          setErrorOnField('formGeneralError', message);
+          setErrorOnField('formGeneralError', message, true);
           scrollToErrorField('couponCode');
         } else if (message.toLowerCase().includes('coupon already exist')) {
-          setErrorOnField('couponCodeError', message);
+          setErrorOnField('couponCodeError', message, true);
           scrollToErrorField('couponCode');
         } else if (message.toLowerCase().includes('start date')) {
           setErrorOnField('startDateError', message);
@@ -1242,7 +1260,10 @@
         } else if (message.toLowerCase().includes('invalid discount type')) {
           setErrorOnField('discountTypeError', message);
         } else if (message.toLowerCase().includes('offer price must be greater')) {
-          setErrorOnField('discountAmountError', message);
+          setErrorOnField('discountAmountError', message, true);
+          scrollToErrorField('discountAmount');
+        } else if (message.toLowerCase().includes('percentage discount cannot exceed 100%')) {
+          setErrorOnField('discountAmountError', message, true);
           scrollToErrorField('discountAmount');
         } else if (message.toLowerCase().includes('maximum uses per user')) {
           setErrorOnField('maxUsesPerUserError', message);
@@ -1258,13 +1279,22 @@
           setErrorOnField('minOrderAmountError', message);
           scrollToErrorField('minOrderAmount');
         } else {
-          setErrorOnField('formGeneralError', message);
+          setErrorOnField('formGeneralError', message, true);
         }
       }
 
-      function setErrorOnField(fieldId, msg) {
+      function setErrorOnField(fieldId, msg, useSwal = false) {
         const el = document.getElementById(fieldId);
-        if (el) el.textContent = msg;
+        if (el) {
+          el.textContent = msg;
+          if (useSwal) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Validation Error',
+              text: msg
+            });
+          }
+        }
       }
 
       function scrollToErrorField(fieldId) {

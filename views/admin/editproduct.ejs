@@ -92,7 +92,7 @@
 
       <div class="form-group">
         <label for="productOffer">Product Offer (%)</label>
-        <input type="number" id="productOffer" name="productOffer" value="<%= products.productOffer %>" min="0" max="100">
+        <input type="number" id="productOffer" name="productOffer" value="<%= products.productOffer %>">
         <span class="error" id="productOfferError"></span>
       </div>
 
@@ -276,7 +276,7 @@
 
       // Validate product offer
       const productOffer = document.getElementById("productOffer").value;
-      if (productOffer && (isNaN(productOffer) || productOffer < 0 || productOffer > 100)) {
+      if (productOffer && (isNaN(productOffer)||productOffer < 0|| productOffer > 100)) {
         document.getElementById('productOfferError').textContent = 'Offer must be between 0-100';
         isValid = false;
       }
