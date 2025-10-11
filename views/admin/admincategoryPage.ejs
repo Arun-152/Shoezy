@@ -138,7 +138,7 @@
           <div class="pagination-info">Page <%= currentPage %> of <%= totalPages %> Pages</div>
           <div class="pagination-controls">
             <button class="pagination-btn" <%= currentPage <= 1 ? "disabled" : "" %> onclick="window.location.href='/admin/category?page=<%= currentPage - 1 %>'">
-              <i class="fas fa-chevron-left"></i>
+              <i class="fas fa-chevron-left"></i>Previous
             </button>
 
             <div class="page-numbers">
@@ -150,7 +150,7 @@
             </div>
 
             <button class="pagination-btn" <%= currentPage >= totalPages ? "disabled" : "" %> onclick="window.location.href='/admin/category?page=<%= currentPage + 1 %>'">
-              <i class="fas fa-chevron-right"></i>
+              Next<i class="fas fa-chevron-right"></i>
             </button>
           </div>
         </div>

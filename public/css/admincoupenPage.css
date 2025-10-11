@@ -568,16 +568,19 @@ body {
 }
 
 .pagination-btn {
-    width: 36px;
-    height: 36px;
-    border: 1px solid #ddd;
-    background: white;
-    border-radius: 4px;
     cursor: pointer;
+    font-size: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
+    padding: 8px 12px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: rgb(221, 221, 221);
+    border-image: initial;
+    background: white;
+    border-radius: 6px;
+    transition: 0.3s;
 }
 
 .pagination-btn:hover:not(:disabled) {

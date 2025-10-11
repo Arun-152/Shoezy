@@ -131,7 +131,7 @@
                             <button class="pagination-btn"
                                 onclick="window.location.href='/admin/customers?page=<%= currentPage - 1 %>&search=<%= encodeURIComponent(search) %>'"
                                 <%=currentPage <=1 ? "disabled" : "" %>>
-                                <i class="fas fa-chevron-left"></i>
+                                <i class="fas fa-chevron-left"></i>Previous
                             </button>
 
 
@@ -147,7 +147,7 @@
                             <button class="pagination-btn" <%=currentPage>= totalPages ? "disabled" : "" %>
                                 onclick="window.location.href='/admin/customers?page=<%= currentPage + 1 %>&search=<%=
                                         encodeURIComponent(search) %>'">
-                                        <i class="fas fa-chevron-right"></i>
+                                        Next<i class="fas fa-chevron-right"></i>
                             </button>
 
                         </div>

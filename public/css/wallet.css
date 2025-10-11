@@ -206,7 +206,7 @@ body {
 }
 
 .header-text p {
-    color: #ffffff;
+    color: #1d1010;
     font-size: 0.9rem;
 }
 
@@ -235,6 +235,7 @@ body {
     color: white;
     position: relative;
     overflow: hidden;
+    width: auto;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
