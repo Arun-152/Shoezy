@@ -282,6 +282,7 @@ const editCoupon = async(req,res)=>{
             totalUsageLimit,
             islist
         } = req.body;
+    
 
         if(!name||!offerPrice||!minimumPrice||!startDate||!expireOn||!discountType){
           return res.status(400).json({success:false,message:"All required fields must be filled"})
