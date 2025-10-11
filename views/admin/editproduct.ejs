@@ -362,15 +362,6 @@
         });
 
         try {
-          Swal.fire({
-            title: 'Updating Product...',
-            text: 'Please wait...',
-            icon: 'info',
-            allowOutsideClick: false,
-            showConfirmButton: false,
-            didOpen: () => Swal.showLoading()
-          });
-
           const response = await fetch(`/admin/editProducts/${productId}`, {
             method: "POST",
             body: formData,

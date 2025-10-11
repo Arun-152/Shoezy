@@ -109,12 +109,7 @@
                                                     </td>
             
                                                     <td>
-                                                        <% // Determine the max offer between product and category const
-                                                            productOffer=products[i].productOffer || 0; const
-                                                            categoryOffer=products[i].category &&
-                                                            products[i].category.offer ? products[i].category.offer : 0;
-                                                            const maxOffer=Math.max(productOffer, categoryOffer); %>
-                                                            <%= maxOffer %>%
+                                                        <%= products[i].bestOffer || 0 %>%
                                                     </td>
 
                                                     <td>
@@ -355,10 +350,9 @@
                 cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Proceed with the block action
                     window.location.href = `/admin/blockedProduct?id=${productId}`;
                 }
-                // If canceled, do nothing (stay on the page)
+                
             });
         }
 

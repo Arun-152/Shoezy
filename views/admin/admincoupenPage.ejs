@@ -1067,11 +1067,11 @@
                         timer: 1500
                     });
 
-                    const btn = document.querySelector(
-                        `button[onclick="toggleCoupon('${couponId}', ${isCurrentlyListed})"]`
-                    );
+                    // Find the link that contains the button to get the row context
+                    const toggleLink = document.querySelector(`a[data-coupon-id='${couponId}']`);
+                    const btn = toggleLink ? toggleLink.querySelector('button') : null;
 
-                    if (btn) {
+                    if (toggleLink && btn) {
                         if (isCurrentlyListed) {
                             btn.outerHTML = `
                                 <button class="action-btn unlist-btn" title="List Coupon"
@@ -1092,7 +1092,7 @@
                     couponsData[couponId].islist = !isCurrentlyListed;
 
                     // Update status display
-                    const row = btn ? btn.closest('tr') : null;
+                    const row = toggleLink ? toggleLink.closest('tr') : null;
                     if (row) {
                         const statusCell = row.querySelector('td:nth-child(7)');
                         const isMaxUsageReached = couponsData[couponId].totalUsageLimit !== 'Unlimited' &&

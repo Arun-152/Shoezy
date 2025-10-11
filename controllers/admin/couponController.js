@@ -14,7 +14,7 @@ const couponPage = async (req, res) => {
         const user = await User.findById(userId);
         const search = req.query.search || '';
         const sort = req.query.sort || 'name_asc'; 
-        const query = {};
+        const query = {isDeleted:false};
 
         if (search) {
             query.name = { $regex: search, $options: 'i' };
@@ -32,7 +32,7 @@ const couponPage = async (req, res) => {
                 sortOptions.expireOn = -1;
                 break;
             default:
-                sortOptions.name = 1;
+                sortOptions.createdOn = -1;
                 break;
         }
 
@@ -289,6 +289,7 @@ const editCoupon = async(req,res)=>{
         }
 
         const existingCoupon = await Coupon.findOne({name, _id: { $ne: couponId }});
+       
 
         if(existingCoupon){
           return res.status(400).json({success:false,message:"This coupon already exist,Please use different name"})
@@ -392,7 +393,7 @@ const editCoupon = async(req,res)=>{
 const deleteCoupon = async(req,res)=>{
   try{
     const couponId = req.params.id
-    const result = await Coupon.findByIdAndUpdate(couponId,{islist:false},{new:true})
+    const result = await Coupon.findByIdAndUpdate({_id:couponId},{isDeleted:true })
 
     if(!result){
       return res.status(404).json({success:false,message:"Coupon not found"})

@@ -76,6 +76,10 @@ const couponSchema = new Schema({
     type: Boolean,
     default: true
   },
+  isDeleted:{
+    type:Boolean,
+    default:false
+  },
   userUsage:[
     {
       userId:{

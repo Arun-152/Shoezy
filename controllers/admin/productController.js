@@ -19,7 +19,7 @@ const productsPage = async (req, res) => {
         const productsData = await Products.find({ ...searchFilter, isDeleted: false })
             .sort({ createdAt: -1 })
             .skip(skip)
-            .populate("category")
+            .populate("category", "name categoryOffer")
             .limit(limit);
         const totalProducts = await Products.countDocuments({ ...searchFilter, isDeleted: false });
         const totalPages = Math.ceil(totalProducts / limit)

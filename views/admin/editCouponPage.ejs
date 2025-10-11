@@ -633,15 +633,13 @@
                       <div class="radio-option">
                         <input type="radio" id="flat" name="discountType" value="flat" class="radio-input"
                           <%= coupon.discountType === 'flat' ? 'checked' : '' %> />
-                        <label for="flat" class="radio-label">
-                          <i class="fas fa-rupee-sign"></i> Flat Amount (₹)
+                        <label for="flat" class="radio-label">Flat Amount (₹)
                         </label>
                       </div>
                       <div class="radio-option">
                         <input type="radio" id="percentage" name="discountType" value="percentage"
                           class="radio-input" <%= coupon.discountType === 'percentage' ? 'checked' : '' %> />
-                        <label for="percentage" class="radio-label">
-                          <i class="fas fa-percentage"></i> Percentage (%)
+                        <label for="percentage" class="radio-label">Percentage (%)
                         </label>
                       </div>
                     </div>
@@ -858,7 +856,7 @@
 
   <script>
     // Coupon data from server
-    const couponData = <% - JSON.stringify(coupon) %>;
+    const couponData = <%- JSON.stringify(coupon) %>;
     let originalFormData = {};
 
     document.addEventListener('DOMContentLoaded', function () {
@@ -1141,15 +1139,6 @@
         // Validate form
         const validationErrors = validateForm();
         if (validationErrors.length > 0) {
-          // Show validation errors using SweetAlert
-          await Swal.fire({
-            icon: 'error',
-            title: 'Validation Error',
-            html: validationErrors.map(error => `• ${error}`).join('<br>'),
-            confirmButtonText: 'OK',
-            confirmButtonColor: '#667eea'
-          });
-
           // Also show field-specific errors
           validationErrors.forEach(error => {
             if (error.includes('Coupon Code')) setErrorOnField('couponCodeError', 'Coupon Code is required');
