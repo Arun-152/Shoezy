@@ -38,7 +38,7 @@ const transactionSchema = new Schema({
   },
   source: {
     type: String,
-    enum: ["order_payment", "refund", "order_cancellation", "return_refund", "admin_credit", "admin_debit", "cashback", "bonus"],
+    enum: ["order_payment", "refund", "order_cancellation", "return_refund", "admin_credit", "admin_debit", "cashback", "bonus", "referral_credit"],
     required: true
   },
   metadata: {
