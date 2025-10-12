@@ -21,68 +21,6 @@ body {
 }
 
 /* Enhanced Hero Section */
-.hero {
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
-    padding: 140px 0 100px;
-    min-height: 100vh;
-    position: relative;
-    overflow: hidden;
-}
-
-.hero::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 50%;
-    height: 100%;
-    background: radial-gradient(circle at center, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
-    z-index: 1;
-}
-
-.hero-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 24px;
-    position: relative;
-    z-index: 2;
-}
-
-.hero-content {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    align-items: center;
-    gap: 80px;
-    min-height: 600px;
-}
-
-.hero-text {
-    max-width: 600px;
-}
-
-.hero-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-    color: white;
-    padding: 10px 20px;
-    border-radius: 50px;
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 24px;
-    animation: fadeInUp 0.8s ease 0.2s both;
-    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-}
-
-.hero-text h1 {
-    font-size: clamp(3rem, 5vw, 5.5rem);
-    font-weight: 800;
-    line-height: 1.1;
-    margin-bottom: 24px;
-    color: #0f172a;
-    animation: fadeInUp 0.8s ease 0.4s both;
-}
 
 .gradient-text {
     background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ef4444);

@@ -11,87 +11,71 @@
         rel="stylesheet">
 </head>
 
+
 <body>
+    <style>
+        /* Hero Section */
+        .hero {
+            width: 100%;
+            height: calc(100vh - 80px);
+            /* subtract header height (adjust if needed) */
+            margin-top: 80px;
+            /* push below header if header is fixed */
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Hero Image */
+        .hero-sneaker {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* fills area properly */
+            object-position: center;
+            /* centers image focus */
+            display: block;
+            transform: none !important;
+            border-radius: 0;
+            /* remove any rounding */
+        }
+
+        .featured-categories {
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .air-jordan-banner {
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .air-jordan-banner img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+        }
+    </style>
+
     <!-- Header -->
-    <%-include('../partials/user/navbar')%>
+    <%-include('.. /partials/user/navbar')%>
 
         <!-- Enhanced Hero Section -->
         <section class="hero">
-            <div class="hero-container">
-                <div class="hero-content">
-                    <div class="hero-text">
-                        <span class="hero-badge">
-                            <i class="fas fa-star"></i>
-                            New Collection 2024
-                        </span>
-                        <h1>Step Into <span class="gradient-text">Excellence</span></h1>
-                        <p class="hero-description">Discover our premium collection of modern sneakers designed for
-                            style, comfort, and performance. Elevate your footwear game with Shoezy.</p>
-
-                        <div class="hero-buttons">
-                            <button class="btn-primary shop-btn">
-                                <span>Shop Collection</span>
-                                <i class="fas fa-arrow-right"></i>
-                            </button>
-                            <button class="btn-secondary">
-                                <i class="fas fa-play"></i>
-                                <span>Watch Story</span>
-                            </button>
-                        </div>
-
-                        <div class="hero-stats">
-                            <div class="stat">
-                                <span class="stat-number">50K+</span>
-                                <span class="stat-label">Happy Customers</span>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-number">500+</span>
-                                <span class="stat-label">Premium Styles</span>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-number">4.9★</span>
-                                <span class="stat-label">Customer Rating</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="hero-visual">
-                        <div class="hero-image-container">
-                            <div class="hero-image-bg"></div>
-                            <img src="/images/aijo1rehiogpabr_photo1.png" alt="Featured Sneaker" class="hero-sneaker">
-
-                            <!-- Floating Elements -->
-                            <div class="floating-elements">
-                                <div class="floating-card price-card">
-                                    <span class="price">₹8,999</span>
-                                    <span class="price-label">Starting from</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <img src="/images/Move+ Desktop Banner.jpg" alt="Featured Sneaker" class="hero-sneaker">
         </section>
+
 
         <!-- Featured Categories - FULL WIDTH AIR JORDAN SECTION -->
         <section class="featured-categories">
-            <!-- Full-width Air Jordan section - no container wrapper -->
-            <div class="full-width-air-jordan">
-                <div class="category-card large air-jordan-card">
-                    <div class="category-content">
-                        <h3>AIR JORDAN</h3>
-                        <p>Iconic basketball sneakers with legendary performance and style</p>
-                        <button class="category-btn shop-btn">
-                            <span>Explore Collection</span>
-                            <i class="fas fa-arrow-right"></i>
-                        </button>
-                    </div>
-                    <div class="category-image">
-                        <img src="/images/Speedcat-OG-Sneakers.avif" alt="Air Jordan">
-                    </div>
-                </div>
+            <div class="air-jordan-banner">
+                <img src="/images/1920x800_skyhand_OG.webp" alt="Air Jordan">
             </div>
         </section>
+
 
         <!-- New Arrivals Section -->
         <section class="products-section new-arrivals">
@@ -147,23 +131,23 @@
 
                                             <!-- Quick Actions -->
                                             <div class="quick-actions">
-                                                <% 
-                                                    const totalStockNew = product.variants.reduce((sum, v) => sum + v.variantQuantity, 0);
-                                                %>
-                                                <% if (totalStockNew > 0) { %>
-                                                    <button class="quick-action-btn"
-                                                        onclick="event.stopPropagation(); addToCart('<%= product._id %>')"
-                                                        title="Add to Cart" >
-                                                        <i class="fas fa-shopping-cart"></i>
-                                                    </button>
-                                                <% } %>
-                                                <% if (typeof user !=='undefined' && user) { %>
-                                                    <button class="quick-action-btn"
-                                                        onclick="event.stopPropagation(); window.location.href='/product/<%= product._id %>'"
-                                                        title="Quick View">
-                                                        <i class="fas fa-eye"></i>
-                                                    </button>
-                                                    <% } %>
+                                                <% const totalStockNew=product.variants.reduce((sum, v)=> sum +
+                                                    v.variantQuantity, 0);
+                                                    %>
+                                                    <% if (totalStockNew> 0) { %>
+                                                        <button class="quick-action-btn"
+                                                            onclick="event.stopPropagation(); addToCart('<%= product._id %>')"
+                                                            title="Add to Cart">
+                                                            <i class="fas fa-shopping-cart"></i>
+                                                        </button>
+                                                        <% } %>
+                                                            <% if (typeof user !=='undefined' && user) { %>
+                                                                <button class="quick-action-btn"
+                                                                    onclick="event.stopPropagation(); window.location.href='/product/<%= product._id %>'"
+                                                                    title="Quick View">
+                                                                    <i class="fas fa-eye"></i>
+                                                                </button>
+                                                                <% } %>
                                             </div>
                                 </div>
 
@@ -175,33 +159,34 @@
                                         <%= product.category ? product.category.name : 'Uncategorized' %>
                                     </p>
 
-                                    
+
 
 
                                     <div class="product-price">
                                         <% if (product.variants && product.variants.length> 0) { %>
-                                            <% 
-                                                const sortedVariants = [...product.variants].sort((a, b) => Number(a.size) - Number(b.size));
-                                                const firstAvailableVariant = sortedVariants.find(v => v.variantQuantity > 0);
+                                            <% const sortedVariants=[...product.variants].sort((a, b)=> Number(a.size) -
+                                                Number(b.size));
+                                                const firstAvailableVariant = sortedVariants.find(v => v.variantQuantity
+                                                > 0);
                                                 const variantToShow = firstAvailableVariant || sortedVariants[0];
-                                                
+
                                                 if (variantToShow) {
-                                                    const salePrice = variantToShow.salePrice;
-                                                    const originalPrice = variantToShow.regularPrice;
-                                                    const hasDiscount = salePrice < originalPrice;
-                                            %>
-                                                    <span class="current-price">₹<%=
-                                                            salePrice.toLocaleString('en-IN') %></span>
+                                                const salePrice = variantToShow.salePrice;
+                                                const originalPrice = variantToShow.regularPrice;
+                                                const hasDiscount = salePrice < originalPrice; %>
+                                                    <span class="current-price">₹<%= salePrice.toLocaleString('en-IN')
+                                                            %></span>
                                                     <% if (hasDiscount) { %>
                                                         <span class="original-price"
                                                             style="text-decoration: line-through; font-weight: 400; font-size: larger; color: #db2525; margin-left: 5px;">₹
-                                                            <%= originalPrice.toLocaleString('en-IN') %></span>
+                                                            <%= originalPrice.toLocaleString('en-IN') %>
+                                                        </span>
                                                         <% } %>
                                                             <% } else { %>
                                                                 <span class="current-price">Price not available</span>
                                                                 <% } %>
                                     </div>
-                                        <% } %>
+                                    <% } %>
                                 </div>
                             </div>
                             <% }) %>
@@ -270,23 +255,23 @@
                                                 </div>
 
                                                 <div class="quick-actions">
-                                                    <% 
-                                                        const totalStockTrending = product.variants.reduce((sum, v) => sum + v.variantQuantity, 0);
-                                                    %>
-                                                    <% if (totalStockTrending > 0) { %>
-                                                        <button class="quick-action-btn"
-                                                            onclick="event.stopPropagation(); addToCart('<%= product._id %>')"
-                                                            title="Add to Cart" >
-                                                            <i class="fas fa-shopping-cart"></i>
-                                                        </button>
-                                                    <% } %>
-                                                    <% if (typeof user !=='undefined' && user) { %>
-                                                        <button class="quick-action-btn"
-                                                            onclick="event.stopPropagation(); window.location.href='/product/<%= product._id %>'"
-                                                            title="Quick View">
-                                                            <i class="fas fa-eye"></i>
-                                                        </button>
-                                                        <% } %>
+                                                    <% const totalStockTrending=product.variants.reduce((sum, v)=> sum +
+                                                        v.variantQuantity, 0);
+                                                        %>
+                                                        <% if (totalStockTrending> 0) { %>
+                                                            <button class="quick-action-btn"
+                                                                onclick="event.stopPropagation(); addToCart('<%= product._id %>')"
+                                                                title="Add to Cart">
+                                                                <i class="fas fa-shopping-cart"></i>
+                                                            </button>
+                                                            <% } %>
+                                                                <% if (typeof user !=='undefined' && user) { %>
+                                                                    <button class="quick-action-btn"
+                                                                        onclick="event.stopPropagation(); window.location.href='/product/<%= product._id %>'"
+                                                                        title="Quick View">
+                                                                        <i class="fas fa-eye"></i>
+                                                                    </button>
+                                                                    <% } %>
                                                 </div>
                                     </div>
 
@@ -298,33 +283,35 @@
                                             <%= product.category ? product.category.name : 'Uncategorized' %>
                                         </p>
 
-                                      
+
 
 
                                         <div class="product-price">
                                             <% if (product.variants && product.variants.length> 0) { %>
-                                                <% 
-                                                    const sortedVariants = [...product.variants].sort((a, b) => Number(a.size) - Number(b.size));
-                                                    const firstAvailableVariant = sortedVariants.find(v => v.variantQuantity > 0);
+                                                <% const sortedVariants=[...product.variants].sort((a, b)=>
+                                                    Number(a.size) - Number(b.size));
+                                                    const firstAvailableVariant = sortedVariants.find(v =>
+                                                    v.variantQuantity > 0);
                                                     const variantToShow = firstAvailableVariant || sortedVariants[0];
-                                                    
+
                                                     if (variantToShow) {
-                                                        const salePrice = variantToShow.salePrice;
-                                                        const originalPrice = variantToShow.regularPrice;
-                                                        const hasDiscount = salePrice < originalPrice;
-                                                %>
+                                                    const salePrice = variantToShow.salePrice;
+                                                    const originalPrice = variantToShow.regularPrice;
+                                                    const hasDiscount = salePrice < originalPrice; %>
                                                         <span class="current-price">₹<%=
                                                                 salePrice.toLocaleString('en-IN') %></span>
                                                         <% if (hasDiscount) { %>
                                                             <span class="original-price"
                                                                 style="text-decoration: line-through; font-weight: 400; font-size: larger; color: #db2525; margin-left: 5px;">₹
-                                                                <%= originalPrice.toLocaleString('en-IN') %></span>
+                                                                <%= originalPrice.toLocaleString('en-IN') %>
+                                                            </span>
                                                             <% } %>
                                                                 <% } else { %>
                                                                     <span class="current-price">Price not
                                                                         available</span>
                                                                     <% } %>
-                                        </div> <% } %>
+                                        </div>
+                                        <% } %>
                                     </div>
                                 </div>
                                 <% }) %>
@@ -398,23 +385,23 @@
                                                 </div>
 
                                                 <div class="quick-actions">
-                                                    <% 
-                                                        const totalStockPremium = product.variants.reduce((sum, v) => sum + v.variantQuantity, 0);
-                                                    %>
-                                                    <% if (totalStockPremium > 0) { %>
-                                                        <button class="quick-action-btn"
-                                                            onclick="event.stopPropagation(); addToCart('<%= product._id %>')"
-                                                            title="Add to Cart" >
-                                                            <i class="fas fa-shopping-cart"></i>
-                                                        </button>
-                                                    <% } %>
-                                                    <% if (typeof user !=='undefined' && user) { %>
-                                                        <button class="quick-action-btn"
-                                                            onclick="event.stopPropagation(); window.location.href='/product/<%= product._id %>'"
-                                                            title="Quick View">
-                                                            <i class="fas fa-eye"></i>
-                                                        </button>
-                                                        <% } %>
+                                                    <% const totalStockPremium=product.variants.reduce((sum, v)=> sum +
+                                                        v.variantQuantity, 0);
+                                                        %>
+                                                        <% if (totalStockPremium> 0) { %>
+                                                            <button class="quick-action-btn"
+                                                                onclick="event.stopPropagation(); addToCart('<%= product._id %>')"
+                                                                title="Add to Cart">
+                                                                <i class="fas fa-shopping-cart"></i>
+                                                            </button>
+                                                            <% } %>
+                                                                <% if (typeof user !=='undefined' && user) { %>
+                                                                    <button class="quick-action-btn"
+                                                                        onclick="event.stopPropagation(); window.location.href='/product/<%= product._id %>'"
+                                                                        title="Quick View">
+                                                                        <i class="fas fa-eye"></i>
+                                                                    </button>
+                                                                    <% } %>
                                                 </div>
                                     </div>
 
@@ -426,32 +413,34 @@
                                             <%= product.category ? product.category.name : 'Uncategorized' %>
                                         </p>
 
-                                     
+
 
                                         <div class="product-price">
                                             <% if (product.variants && product.variants.length> 0) { %>
-                                                <% 
-                                                    const sortedVariants = [...product.variants].sort((a, b) => Number(a.size) - Number(b.size));
-                                                    const firstAvailableVariant = sortedVariants.find(v => v.variantQuantity > 0);
+                                                <% const sortedVariants=[...product.variants].sort((a, b)=>
+                                                    Number(a.size) - Number(b.size));
+                                                    const firstAvailableVariant = sortedVariants.find(v =>
+                                                    v.variantQuantity > 0);
                                                     const variantToShow = firstAvailableVariant || sortedVariants[0];
-                                                    
+
                                                     if (variantToShow) {
-                                                        const salePrice = variantToShow.salePrice;
-                                                        const originalPrice = variantToShow.regularPrice;
-                                                        const hasDiscount = salePrice < originalPrice;
-                                                %>
+                                                    const salePrice = variantToShow.salePrice;
+                                                    const originalPrice = variantToShow.regularPrice;
+                                                    const hasDiscount = salePrice < originalPrice; %>
                                                         <span class="current-price">₹<%=
                                                                 salePrice.toLocaleString('en-IN') %></span>
                                                         <% if (hasDiscount) { %>
                                                             <span class="original-price"
                                                                 style="text-decoration: line-through; font-weight: 400; font-size: larger; color: #db2525; margin-left: 5px;">₹
-                                                                <%= originalPrice.toLocaleString('en-IN') %></span>
+                                                                <%= originalPrice.toLocaleString('en-IN') %>
+                                                            </span>
                                                             <% } %>
                                                                 <% } else { %>
                                                                     <span class="current-price">Price not
                                                                         available</span>
                                                                     <% } %>
-                                        </div><% } %>
+                                        </div>
+                                        <% } %>
                                     </div>
                                 </div>
                                 <% }) %>
@@ -471,7 +460,7 @@
         </section>
 
         <!-- Footer -->
-        <%-include("../partials/user/userfooter")%>
+        <%-include(".. /partials/user/userfooter")%>
 
             <script>
                 // Enhanced Add to Cart functionality

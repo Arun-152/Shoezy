@@ -807,7 +807,7 @@ body {
 }
 
 .add-address-btn {
-    background: #6c63ff;
+    background: #007bff;
     color: white;
     border: none;
     border-radius: 6px;
@@ -818,7 +818,7 @@ body {
 }
 
 .add-address-btn:hover {
-    background: #5a52d5;
+    background: #178f35;
 }
 
 /* Payment Option Styles */
@@ -863,7 +863,7 @@ body {
 
 .payment-note {
     font-size: 0.85rem;
-    color: #ffc107;
+    color: #01a70f;
 }
 
 .payment-balance {
@@ -987,7 +987,7 @@ body {
 .final-total {
     font-size: 1.1rem;
     font-weight: 700;
-    color: #dc3545;
+    color: #05a374;
     border-top: 1px solid #e9ecef;
     padding-top: 0.75rem;
     margin-top: 0.75rem;
@@ -995,7 +995,7 @@ body {
 
 .place-order-btn {
     width: 100%;
-    background: linear-gradient(135deg, #6c63ff, #5a52d5);
+    background:#007bff;
     color: white;
     border: none;
     border-radius: 8px;
@@ -1009,7 +1009,7 @@ body {
 }
 
 .place-order-btn:hover {
-    background: linear-gradient(135deg, #5a52d5, #4c44c4);
+    background: linear-gradient(135deg, #298a36, #17a369);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(108, 99, 255, 0.4);
 }
