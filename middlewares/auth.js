@@ -1,3 +1,4 @@
+const { application } = require("express");
 const User = require("../models/userSchema");
 
 const userAuth = async (req, res, next) => {
@@ -5,6 +6,9 @@ const userAuth = async (req, res, next) => {
     const userId = req.session.userId;
 
     if (!userId) {
+      if(req.headers.accept?.includes("application/json")){
+        return res.json({success:false,message:"Please login to continue"})
+      }
       return res.redirect('/login');
     }
 

@@ -84,7 +84,7 @@ const orderSchema = new Schema({
       "ReturnApproved",
       "Failed",
         ],
-    default: "Paid",
+    default: "Processing",
     },
     paymentStatus: {
         type: String,

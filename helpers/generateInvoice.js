@@ -10,7 +10,7 @@ function generateInvoice(order, res) {
 
   // --- Helper Functions ---
   const drawLine = (y) => doc.strokeColor("#dddddd").lineWidth(1).moveTo(50, y).lineTo(550, y).stroke();
-  const formatCurrency = (amount) => `₹${amount.toFixed(2)}`;
+  const formatCurrency = (amount) => `${amount.toFixed(2)}`;
 
   // --- Header ---
   doc.fontSize(20).font('Helvetica-Bold').text("Shoezy", 50, 50);
@@ -39,8 +39,8 @@ function generateInvoice(order, res) {
   drawLine(doc.y + 5);
   doc.moveDown();
 
-  const tableHeaders = ["Product", "Size", "Qty", "Price", "Total"];
-  const columnWidths = [200, 60, 50, 90, 90];
+  const tableHeaders = ["Product", "Size", "Qty", "Status", "Price", "Total"];
+  const columnWidths = [180, 50, 40, 70, 80, 80];
   let currentY = doc.y;
   let currentX = 50;
 
@@ -65,6 +65,7 @@ function generateInvoice(order, res) {
       item.productId.productName,
       item.size,
       item.quantity.toString(),
+      item.status,
       formatCurrency(item.price),
       formatCurrency(itemSubtotal)
     ];

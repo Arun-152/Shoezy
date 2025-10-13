@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shoezy - Referral</title>
 </head>
+
 <body>
-    
+
 </body>
+
 </html>
 
 
@@ -42,13 +45,13 @@
                             signup bonus!</p>
 
                         <div class="form-row">
-                            <div class="form-group">
-                                <label>Your Referral Link</label>
-                                <input type="text" class="form-control" id="referralLink" value="<%= referralLink %>"
-                                    readonly>
-                            </div>
-                            <button class="btn" onclick="copyReferralLink()">Copy Link</button>
-                        </div>
+    <div class="form-group">
+        <label>Your Referral Link</label>
+        <input type="text" class="form-control" id="referralLink" value="<%= referralLink %>" readonly>
+    </div>
+    <button class="btn" id="copyLinkButton">Copy Link</button>
+</div>
+
 
                         <div class="form-row">
                             <div class="form-group">
@@ -56,7 +59,7 @@
                                 <input type="text" class="form-control" id="referralCode" value="<%= referralCode %>"
                                     readonly>
                             </div>
-                            <button class="btn" onclick="shareReferral()">Share Code</button>
+                            <button class="btn" id="copyButton">Copy Code</button>
                         </div>
                     </div>
 
@@ -64,12 +67,16 @@
                     <div class="stats-container">
                         <div class="stat-box">
                             <div class="stat-icon">U</div>
-                            <div class="stat-value" data-count="<%= totalReferrals %>"><%= totalReferrals %></div>
+                            <div class="stat-value" data-count="<%= totalReferrals %>">
+                                <%= totalReferrals %>
+                            </div>
                             <div class="stat-label">Total Referrals</div>
                         </div>
                         <div class="stat-box">
                             <div class="stat-icon">₹</div>
-                            <div class="stat-value" data-count="<%= totalEarned %>"><%= totalEarned %></div>
+                            <div class="stat-value" data-count="<%= totalEarned %>">
+                                <%= totalEarned %>
+                            </div>
                             <div class="stat-label">Total Earned</div>
                         </div>
                         <div class="stat-box">
@@ -104,7 +111,7 @@
                     </div>
 
                     <!-- Recent Referrals -->
-                  
+
                     <!-- How Referrals Work -->
                     <div class="content-section">
                         <h3 class="section-header">How Referrals Work</h3>
@@ -151,135 +158,85 @@
                 </div>
             </div>
         </div>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
         <script>
-            // Counter animation
-            function animateCounter(element, target, duration = 1500) {
-                let start = 0;
-                const increment = target / (duration / 16);
+            document.addEventListener('DOMContentLoaded', () => {
+                const copyButton = document.getElementById('copyButton');
+                const referralInput = document.getElementById('referralCode');
 
-                function updateCounter() {
-                    start += increment;
-                    if (start < target) {
-                        element.textContent = Math.floor(start).toLocaleString();
-                        requestAnimationFrame(updateCounter);
-                    } else {
-                        element.textContent = target.toLocaleString();
+                copyButton.addEventListener('click', async () => {
+                    try {
+                        await navigator.clipboard.writeText(referralInput.value);
+
+                        // SweetAlert small toast
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',   // top-right corner
+                            icon: 'success',
+                            title: 'Referral code copied!',
+                            showConfirmButton: false,
+                            timer: 2000,
+                            timerProgressBar: true
+                        });
+
+                    } catch (err) {
+                        console.error('Failed to copy referral code:', err);
+
+                        // Fallback for older browsers
+                        referralInput.select();
+                        referralInput.setSelectionRange(0, 99999);
+                        document.execCommand('copy');
+
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'Referral code copied!',
+                            showConfirmButton: false,
+                            timer: 2000,
+                            timerProgressBar: true
+                        });
                     }
-                }
-                updateCounter();
-            }
+                });
+            });
+            document.addEventListener('DOMContentLoaded', () => {
+    const copyButton = document.getElementById('copyLinkButton');
+    const referralInput = document.getElementById('referralLink');
 
-            document.addEventListener('DOMContentLoaded', function () {
-                setTimeout(() => {
-                    document.querySelectorAll('.stat-value').forEach(element => {
-                        let target = element.getAttribute('data-count');
-                        target = parseFloat(target); // ✅ handle decimals
-                        if (!isNaN(target)) {
-                            animateCounter(element, target);
-                        } else {
-                            element.textContent = "0"; // fallback
-                        }
-                    });
-                }, 300);
+    copyButton.addEventListener('click', async () => {
+        try {
+            await navigator.clipboard.writeText(referralInput.value);
+
+            // Small toast message
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: 'Referral link copied!',
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true
             });
 
-            // Copy referral link
-            function copyReferralLink() {
-                const referralLink = document.getElementById('referralLink');
-                referralLink.select();
-                referralLink.setSelectionRange(0, 99999);
+        } catch (err) {
+            console.error('Failed to copy referral link:', err);
 
-                try {
-                    document.execCommand('copy');
-                    showNotification('Referral link copied to clipboard!');
-                } catch (err) {
-                    navigator.clipboard.writeText(referralLink.value).then(() => {
-                        showNotification('Referral link copied to clipboard!');
-                    });
-                }
-            }
+            // Fallback for older browsers
+            referralInput.select();
+            referralInput.setSelectionRange(0, 99999);
+            document.execCommand('copy');
 
-            // Share referral
-            function shareReferral() {
-                const referralLink = document.getElementById('referralLink').value;
-                const referralCode = document.getElementById('referralCode').value;
-
-                const shareText = `Join me on YourDeal and get ₹50 signup bonus! Use my referral code: ${referralCode} or click: ${referralLink}`;
-
-                if (navigator.share) {
-                    navigator.share({
-                        title: 'Join YourDeal - Get ₹50 Bonus!',
-                        text: shareText,
-                        url: referralLink
-                    }).then(() => {
-                        showNotification('Shared successfully!');
-                    }).catch(() => {
-                        fallbackShare(shareText);
-                    });
-                } else {
-                    fallbackShare(shareText);
-                }
-            }
-
-            function fallbackShare(text) {
-                try {
-                    navigator.clipboard.writeText(text);
-                    showNotification('Share text copied to clipboard!');
-                } catch (err) {
-                    showNotification('Share feature available');
-                }
-            }
-
-            // Show notification
-            function showNotification(message) {
-                const notification = document.getElementById('notification');
-                const notificationText = document.getElementById('notificationText');
-
-                notificationText.textContent = message;
-                notification.classList.add('show');
-
-                setTimeout(() => {
-                    notification.classList.remove('show');
-                }, 3000);
-            }
-
-            // Show benefit details
-            function showBenefitDetails(type) {
-                const modal = document.getElementById('modal');
-                const modalTitle = document.getElementById('modalTitle');
-                const modalText = document.getElementById('modalText');
-
-                if (type === 'you') {
-                    modalTitle.textContent = 'Your Benefits';
-                    modalText.textContent = 'For each successful referral, you earn ₹100 directly in your wallet. The money is credited instantly when your friend completes their first purchase or meets the referral criteria. You can withdraw or use this money anytime!';
-                } else {
-                    modalTitle.textContent = 'Friend Benefits';
-                    modalText.textContent = 'Your friends get ₹50 signup bonus in their wallet immediately after creating an account using your referral link. This bonus can be used for their first purchase or saved for later. It\'s our way of welcoming new users!';
-                }
-
-                modal.style.display = 'block';
-            }
-
-            // Close modal
-            function closeModal() {
-                document.getElementById('modal').style.display = 'none';
-            }
-
-            // Close modal when clicking outside
-            window.onclick = function (event) {
-                const modal = document.getElementById('modal');
-                if (event.target === modal) {
-                    modal.style.display = 'none';
-                }
-            }
-
-            // Keyboard shortcuts
-            document.addEventListener('keydown', function (e) {
-                if (e.ctrlKey && e.key === 'c' && window.getSelection().toString() === '') {
-                    copyReferralLink();
-                }
-                if (e.key === 'Escape') {
-                    closeModal();
-                }
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: 'Referral link copied!',
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true
             });
+        }
+    });
+});
+        </script>

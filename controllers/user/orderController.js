@@ -203,7 +203,6 @@ const cancelOrder = async (req, res) => {
         if (order.couponId && order.userId) {
           try {
             await resetCouponUsage(order.couponId, order.userId, order._id);
-            console.log(`Coupon usage reset for user-cancelled order ${order._id}`);
           } catch (error) {
             console.error("Error resetting coupon usage for user-cancelled order:", error);
           }
@@ -276,7 +275,6 @@ const cancelOrder = async (req, res) => {
           if (order.couponId && order.userId) {
             try {
               await resetCouponUsage(order.couponId, order.userId, order._id);
-              console.log(`Coupon usage reset for user-cancelled order ${order._id}`);
             } catch (error) {
               console.error("Error resetting coupon usage for user-cancelled order:", error);
             }
@@ -295,19 +293,28 @@ const cancelOrder = async (req, res) => {
     // Credit wallet when Online or Wallet payment methods are used
     if (['Online', 'Wallet'].includes(order.paymentMethod) && refundAmount > 0) {
       let wallet = await Wallet.findOne({ userId });
-      if (!wallet) {
-        wallet = new Wallet({ userId, balance: 0, transactions: [] });
-      }
-      wallet.balance += refundAmount;
-      wallet.transactions.push({
-        type: 'credit',
-        amount: refundAmount,
-        description: `Refund for order cancellation #${order.orderNumber}`,
-        balanceAfter: wallet.balance,
-        source: 'order_cancellation',
-        orderId: order._id,
-      });
-      await wallet.save();
+   if (!wallet) {
+  wallet = new Wallet({
+    userId,
+    balance: 0,
+    transactions: [],
+  });
+}
+
+// Ensure balance is a number
+wallet.balance = Number(wallet.balance) || 0;
+wallet.balance += refundAmount;
+
+wallet.transactions.push({
+  type: 'credit',
+  amount: refundAmount,
+  description: `Refund for order cancellation #${order.orderNumber}`,
+  balance: wallet.balance,
+  orderId: order._id,
+});
+
+await wallet.save();
+
     }
 
     await order.save();
@@ -721,9 +728,8 @@ const placeOrderWithWallet = async (req, res) => {
       type: "debit",
       amount: totalAmount,
       description: `Payment for order ${newOrder.orderNumber}`,
-      balanceAfter: wallet.balance,
+      balance:wallet.balance,
       orderId: newOrder._id,
-      source: "order_payment",
       metadata: {
         orderNumber: newOrder.orderNumber,
         paymentMethod: "Wallet"

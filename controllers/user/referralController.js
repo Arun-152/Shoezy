@@ -17,13 +17,9 @@ const getReferralPage = async (req, res) => {
 
         // Referral code & link
         const referralCode = user.referralCode;
-        const referralLink = `${req.protocol}://${req.headers.host}/signup?ref=${referralCode}`;
+        const referralLink = `https://sho-ezy.shop/signup?ref=${referralCode}`;
 
         const wallet = await Wallet.findOne({ userId });
-        if (!wallet) {
-            return res.status(404).json({ success: false, message: "Wallet not found" });
-        }
-
         const walletBalance = wallet.balance ? wallet.balance: 0;
 
 

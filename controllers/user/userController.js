@@ -265,25 +265,59 @@ const verifyOTP = async (req, res) => {
         });
         await newUser.save();
 
-        const wallet = new Wallet({
-            userId: newUser._id,
-            balance: 0
-        });
+      const wallet = new Wallet({
+  userId: newUser._id,
+  balance: 0,
+  transactions: []
+});
+await wallet.save();
 
-        await wallet.save();
-        if (referralCode) {
-            const referrer = await User.findOne({ referralCode });
-            if (referrer) {
-                await Wallet.findOneAndUpdate(
-                    { userId: referrer._id },
-                    { $inc: { balance: 100 } }
-                );
-                await Wallet.findOneAndUpdate(
-                    { userId: newUser._id },
-                    { $inc: { balance: 50 } }
-                );
-            }
+// --- Referral Bonus Logic ---
+if (referralCode) {
+  const referrer = await User.findOne({ referralCode });
+
+  if (referrer) {
+    // --- 1️⃣ Update Referrer Wallet ---
+    const referrerWallet = await Wallet.findOneAndUpdate(
+      { userId: referrer._id },
+      { $inc: { balance: 100 } },
+      { new: true }
+    );
+
+    if (referrerWallet) {
+      referrerWallet.transactions.push({
+        type: "credit",
+        amount: 100,
+        description: `Referral bonus for inviting ${newUser.name || "a new user"}`,
+        status: "completed",
+        metadata: {
+          referredUserId: newUser._id
         }
+      });
+      await referrerWallet.save();
+    }
+
+    // --- 2️⃣ Update New User Wallet ---
+    const newUserWallet = await Wallet.findOneAndUpdate(
+      { userId: newUser._id },
+      { $inc: { balance: 50 } },
+      { new: true }
+    );
+
+    if (newUserWallet) {
+      newUserWallet.transactions.push({
+        type: "credit",
+        amount: 50,
+        description: "Referral join bonus credited to your wallet",
+        status: "completed",
+        metadata: {
+          referrerId: referrer._id
+        }
+      });
+      await newUserWallet.save();
+    }
+  }
+}
 
         req.session.userOtp = null;
         req.session.user = null;

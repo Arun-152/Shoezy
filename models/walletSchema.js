@@ -21,11 +21,6 @@ const transactionSchema = new Schema({
     type: String,
     required: true
   },
-  balanceAfter: {
-    type: Number,
-    required: true,
-    min: 0
-  },
   orderId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Order",
@@ -33,13 +28,8 @@ const transactionSchema = new Schema({
   },
   status: {
     type: String,
-    enum: ["pending", "completed", "failed", "cancelled"],
+    enum: ["pending","Processing","completed", "failed", "cancelled"],
     default: "completed"
-  },
-  source: {
-    type: String,
-    enum: ["order_payment", "refund", "order_cancellation", "return_refund", "admin_credit", "admin_debit", "cashback", "bonus", "referral_credit"],
-    required: true
   },
   metadata: {
     orderNumber: String,

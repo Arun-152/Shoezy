@@ -13,7 +13,7 @@
 
 
 <body>
-    <style>        
+    <style>
         .featured-categories {
             width: 100%;
             margin: 0;
@@ -45,7 +45,9 @@
         <!-- Featured Categories - FULL WIDTH AIR JORDAN SECTION -->
         <section class="featured-categories">
             <div class="air-jordan-banner">
-                <img src="/images/1920x800_skyhand_OG.webp" alt="Air Jordan">
+                <a href="/product/68eb586d6d69eea1b10888b9">
+                    <img src="/images/1920x800_skyhand_OG.webp" alt="Air Jordan">
+                </a>
             </div>
         </section>
 
@@ -443,6 +445,7 @@
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
+                                "Accept": "application/json"
                             },
                             body: JSON.stringify({
                                 productId: productId,
@@ -457,7 +460,7 @@
                             updateCartCount(data.cartCount)
                             showNotification('Product added to cart successfully!');
                         } else {
-                            if (data.message === "User not authenticated") {
+                            if (data.message === "Please login to continue") {
                                 window.location.href = '/login'
                             }
                             showNotification(data.message || 'Error adding product to cart');
@@ -497,6 +500,7 @@
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
+                                "Accept": "application/json"
                             },
                             body: JSON.stringify({ productId: productId })
                         });
@@ -518,7 +522,7 @@
                                 showNotification('Removed from wishlist!');
                             }
                         } else {
-                            if (data.message === "User not authenticated") {
+                            if (data.message === "Please login to continue") {
                                 window.location.href = '/login'
                             }
                             showNotification(data.message || 'Error updating wishlist');

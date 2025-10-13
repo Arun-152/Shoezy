@@ -86,7 +86,7 @@ const addToCart = async(req,res)=>{
             return res.status(400).json({success: false, message: "Product ID is required"})
         }
 
-        // Check if product exists and is available
+        
         const product = await Product.findById(productId).populate("category")
         if (!product || product.isDeleted || product.isBlocked) {
             return res.status(400).json({success: false, message: "This product is unavailable"})
@@ -96,37 +96,33 @@ const addToCart = async(req,res)=>{
             return res.status(400).json({success: false, message: "This product category is unavailable"})
         }
 
-        // Set default values if not provided (for shop page quick add)
         if (!quantity) quantity = 1;
         if (!price && product.variants && product.variants.length > 0) {
-            // Use the minimum sale price if price not provided
+
             const prices = product.variants.map(v => v.salePrice);
             price = Math.min(...prices);
         }
         if (!size && product.variants && product.variants.length > 0) {
-            // Use the first available size if size not provided
+          
             const availableVariant = product.variants.find(v => v.variantQuantity > 0);
             if (availableVariant) {
                 size = availableVariant.size;
-                price = availableVariant.salePrice; // Use the correct price for this size
+                price = availableVariant.salePrice; 
             } else {
                 return res.status(400).json({success: false, message: "No available sizes for this product"})
             }
         }
 
-        // Final validation after setting defaults
         if (!size || !price) {
             return res.status(400).json({success: false, message: "Missing required product information"})
         }
 
-        // Validate requested quantity bounds (client may send any number)
         quantity = parseInt(quantity)
         if (isNaN(quantity) || quantity <= 0) quantity = 1
         if (quantity > 10) {
             return res.status(400).json({success: false, message: "You can only add up to 10 units per product"})
         }
 
-        // Find variant stock for the selected size
         let variantStock = Infinity
         if (product.variants && product.variants.length > 0) {
             const variant = product.variants.find(v => (v.size || "Default") === (size || "Default"))
@@ -139,7 +135,6 @@ const addToCart = async(req,res)=>{
             }
         }
 
-        // Find or create user's cart
         let userCart = await Cart.findOne({userId})
         if (!userCart) {
             userCart = new Cart({userId, items: []})
@@ -153,23 +148,18 @@ const addToCart = async(req,res)=>{
             const currentQty = parseInt(userCart.items[existingItemIndex].quantity) || 0
             const desiredQty = currentQty + quantity
 
-            // Enforce per-item maximum of 10
             if (desiredQty > 10) {
                 return res.status(400).json({success: false, message: "You can only add up to 10 units of this product in your cart"})
             }
 
-            // Enforce stock
             if (desiredQty > variantStock) {
                 return res.status(400).json({success: false, message: `Only ${variantStock} stock left`})
             }
 
             userCart.items[existingItemIndex].quantity = desiredQty
             userCart.items[existingItemIndex].totalPrice = userCart.items[existingItemIndex].price * userCart.items[existingItemIndex].quantity
-            // Ensure the size field is set for existing items
             userCart.items[existingItemIndex].size = size;
         } else {
-            // Add new item to cart only if it doesn't exist
-            // Enforce stock for new item
             if (quantity > variantStock) {
                 return res.status(400).json({success: false, message: `Only ${variantStock} stock left`})
             }
@@ -184,11 +174,7 @@ const addToCart = async(req,res)=>{
 
         await userCart.save()
         const cartCount = userCart.items.length
-
-        // Calculate total quantity for cart count (sum of all item quantities)
         const totalQuantity = userCart.items.reduce((total, item) => total + item.quantity, 0);
-
-        // Check if this is an AJAX request
         const isAjax = req.headers['x-requested-with'] === 'XMLHttpRequest' || 
                       req.headers['accept'] && req.headers['accept'].includes('application/json') ||
                       req.headers['content-type'] && req.headers['content-type'].includes('application/json');
@@ -202,13 +188,11 @@ const addToCart = async(req,res)=>{
             })
         }
 
-        // Otherwise redirect to cart page
         return res.redirect("/cart")
 
     } catch (error) {
         console.error('Error adding to cart:', error)
         
-        // Check if this is an AJAX request for error handling too
         const isAjax = req.headers['x-requested-with'] === 'XMLHttpRequest' || 
                       req.headers['accept'] && req.headers['accept'].includes('application/json') ||
                       req.headers['content-type'] && req.headers['content-type'].includes('application/json');
@@ -238,7 +222,6 @@ const updateQuantity = async (req, res) => {
             return res.status(404).json({ success: false, message: "Cart not found" });
         }
 
-        // Find the cart item
         const item = cart.items.find(
             i => i.productId.toString() === productId && (i.size || "Default") === (size || "Default")
         );
@@ -247,7 +230,6 @@ const updateQuantity = async (req, res) => {
             return res.status(404).json({ success: false, message: "Item not found in cart" });
         }
 
-        // Find product variant
         const product = await Product.aggregate([
             { $unwind: "$variants" },
             { $match: { _id: new mongoose.Types.ObjectId(productId), "variants.size": size } }
@@ -267,16 +249,13 @@ const updateQuantity = async (req, res) => {
             return res.status(400).json({ success: false, message: `Only ${variant.variantQuantity} units in stock.` });
         }
 
-        // Update quantity
         item.quantity = newQuantity;
 
-        // Save updated cart
         await cart.save();
 
-        // After saving, re-fetch and populate the cart to calculate fresh totals
         const updatedCart = await Cart.findOne({ userId }).populate({
             path: "items.productId",
-            select: "variants" // Only need variants for price calculation
+            select: "variants" 
         });
 
         let newSubtotal = 0;

@@ -730,6 +730,7 @@
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
+                                "Accept": "application/json"
                             },
                             body: JSON.stringify({
                                 productId: productId,
@@ -746,7 +747,7 @@
                                 updateCartCount(data.cartCount);
                             }
                         } else {
-                            if (data.message === "User not authenticated") {
+                            if (data.message === "Please login to continue") {
                                 window.location.href = "/login";
                                 return;
                             }
@@ -780,6 +781,7 @@
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
+                                "Accept": "application/json"
                             },
                             body: JSON.stringify({ productId: productId })
                         });
@@ -803,7 +805,7 @@
                                 showNotification('Removed from wishlist!');
                             }
                         } else {
-                            if (data.message === "User not authenticated") {
+                            if (data.message === "Please login to continue") {
                                 window.location.href = "/login";
                                 return;
                             }

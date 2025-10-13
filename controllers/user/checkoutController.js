@@ -393,12 +393,18 @@ const placeOrder = async (req, res) => {
       orderStatus = "Pending"; // For online, payment is pending
     }
 
-    // Update the order with the final payment method and status after wallet deduction
     newOrder.paymentMethod = orderPaymentMethod;
-    newOrder.paymentStatus = orderStatus;
-    newOrder.finalAmount = finalOrderAmount;
-    newOrder.walletDeduction = walletDeduction;
-    await newOrder.save();
+newOrder.paymentStatus = orderStatus;
+newOrder.finalAmount = finalOrderAmount;
+newOrder.walletDeduction = walletDeduction;
+await newOrder.save();
+
+// Update item + order status if fully paid
+if (orderStatus === "Paid") {
+  newOrder.items.forEach(item => (item.status = "Processing"));
+  newOrder.orderStatus = "Processing";
+  await newOrder.save();
+}
 
     // Update coupon usage if a coupon was applied
     if (couponData.applied) {
