@@ -7,7 +7,7 @@ const calculateBestOffer = (regularPrice, productOffer = 0, categoryOffer = 0) =
             source: 'product',
             type: 'percentage',
             value: productOffer,
-            discountAmount: regularPrice * (productOffer / 100)
+            discountAmount: regularPrice * (productOffer/ 100)
         });
     }
 
@@ -16,7 +16,7 @@ const calculateBestOffer = (regularPrice, productOffer = 0, categoryOffer = 0) =
             source: 'category',
             type: 'percentage',
             value: categoryOffer,
-            discountAmount: regularPrice * (categoryOffer / 100)
+            discountAmount: regularPrice * (categoryOffer/ 100)
         });
     }
 
