@@ -295,18 +295,23 @@
     }
 
     /* Order Content Grid */
-    .order-content {
+    .order-content-grid {
         display: grid;
         grid-template-columns: 2fr 1fr;
         gap: 30px;
         align-items: start;
     }
 
-    /* Section Styles */
-    .order-items-section,
-    .order-summary-section,
-    .delivery-address-section,
-    .order-timeline-section,
+    /* Section Card Styles */
+    .order-section {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+    }
+
+    .order-items-section, .order-summary-section, .delivery-address-section, .order-timeline-section,
     .order-actions-section {
         background: white;
         border-radius: 12px;
@@ -316,33 +321,43 @@
     }
 
     .order-items-section {
+        margin-bottom: 30px;
+    }
+
+    .order-details-left-column {
         grid-column: 1 / 2;
     }
 
     .order-details-right-column {
         grid-column: 2 / 3;
-        display: flex;
-        flex-direction: column;
-        gap: 30px;
         position: sticky;
         top: 90px;
     }
 
-    .order-details-right-column .order-summary-section,
-    .order-details-right-column .delivery-address-section {
-        margin-bottom: 0;
+    .order-details-right-column .order-summary-section {
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
     }
 
-    .order-items-section h2,
-    .order-summary-section h2,
-    .delivery-address-section h2,
-    .order-timeline-section h2 {
+    .order-section h2 {
         color: #1e293b;
         margin-bottom: 20px;
         padding-bottom: 10px;
         border-bottom: 2px solid #f3f4f6;
         font-size: 1.5rem;
         font-weight: 600;
+    }
+
+    .order-summary-section {
+        margin-bottom: 0; /* No bottom margin when in right column */
+    }
+
+    .delivery-address-section {
+        margin-bottom: 30px;
+    }
+    .order-timeline-section {
+        margin-bottom: 30px;
     }
 
     /* Item Card */
@@ -919,15 +934,12 @@
             overflow-y: visible;
         }
 
-        .order-content {
+        .order-content-grid {
             grid-template-columns: 1fr;
         }
 
-        .order-items-section,
-        .order-summary-section,
-        .delivery-address-section,
-        .order-timeline-section,
-        .order-actions-section {
+        .order-details-left-column,
+        .order-details-right-column {
             grid-column: 1 / -1;
         }
 
@@ -935,6 +947,11 @@
             flex-direction: column;
             align-items: flex-start;
             gap: 15px;
+        }
+
+        .order-details-right-column {
+            position: static; /* Remove sticky positioning on mobile */
+            order: -1; /* Move the summary to the top */
         }
 
         .item-card {
@@ -1029,10 +1046,12 @@
                             </div>
                         </div>
 
-                        <div class="order-content">
-                            <!-- Order Items -->
-                            <div class="order-items-section">
-                                <h2>Order Items</h2>
+                        <div class="order-content-grid">
+                            <!-- Left Column -->
+                            <div class="order-details-left-column">
+                                <!-- Order Items -->
+                                <div class="order-items-section">
+                                    <h2>Order Items</h2>
                                 <div class="items-list">
                                     <% order.items.forEach(item=> { %>
                                         <div class="item-card">
@@ -1047,9 +1066,6 @@
                                                 <h3>
                                                     <%= item.productId.productName %>
                                                 </h3>
-                                                <p class="item-description">
-                                                    <%= item.productId.description || 'No description available' %>
-                                                </p>
                                                 <div class="item-specs">
                                                     <span class="spec">Quantity: <%= item.quantity %></span>
                                                     <span class="spec">Price: ₹<%= item.price.toLocaleString() %></span>
@@ -1095,6 +1111,7 @@
                                             </div>
                                         </div>
                                         <% }); %>
+                                </div>
                                 </div>
 
                                 <!-- Delivery Address -->
@@ -1249,11 +1266,12 @@
                                 </div>
                             </div>
 
+                            <!-- Right Column -->
                             <div class="order-details-right-column">
                                 <!-- Order Summary -->
                                 <div class="order-summary-section">
                                     <h2>Order Summary</h2>
-                                    <div class="summary-card">
+                                     <div class="summary-card">
                                         <div class="summary-details">
                                             <!-- Subtotal -->
                                             <div class="summary-row">
@@ -1262,11 +1280,11 @@
                                             </div>
 
                                             <!-- Coupon Discount -->
-                                            <% if (order.couponDiscount > 0) { %>
+                                            <% if (order.couponDiscount> 0) { %>
                                             <div class="summary-row">
                                                 <span class="summary-label">Coupon Discount</span>
-                                                <span class="summary-value discount">- ₹<%= order.couponDiscount.toLocaleString() %></span>
-                                            </div>
+                                                <span class="summary-value discount">- ₹<%= order.couponDiscount.toLocaleString() %></span> 
+                                            </div> 
                                             <% } %>
 
                                             <!-- Shipping -->
@@ -1279,7 +1297,7 @@
                                         <!-- Total -->
                                         <div class="summary-total">
                                             <span class="total-label">Total</span>
-                                            <span class="total-amount">₹<%= order.finalAmount.toLocaleString() %></span>
+                                            <span class="total-amount">₹<%= order.finalAmount.toLocaleString() %></span> 
                                         </div>
 
                                         <!-- Payment Method -->

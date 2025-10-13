@@ -301,6 +301,13 @@ body {
     letter-spacing: 1px;
 }
 
+.hero-cta-btn i {
+    transition: transform 0.3s ease;
+}
+.hero-cta-btn:hover i {
+    transform: rotate(-10deg) scale(1.1);
+}
+
 .hero-cta-btn:hover {
     background: white;
     color: #667eea;
@@ -617,6 +624,27 @@ body {
     font-weight: 700;
     color: #1a1a1a;
 }
+
+.mobile-filter-toggle {
+    display: none; /* Hidden by default */
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    color: #374151;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.mobile-filter-toggle:hover {
+    background: #e5e7eb;
+    color: #1f2937;
+}
+
 
 .view-options {
     display: flex;
@@ -1185,13 +1213,24 @@ body {
     }
 
     .shop-container {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr; /* Stack sidebar and content */
         gap: 2rem;
     }
 
     .filters-sidebar {
-        position: static;
-        order: 2;
+        position: fixed; /* Changed from static */
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 300px;
+        z-index: 1001; /* Above navbar */
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+        max-height: 100vh; /* Full height */
+        overflow-y: auto;
+    }
+    .filters-sidebar.open {
+        transform: translateX(0);
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         gap: 1rem;
@@ -1204,6 +1243,7 @@ body {
 
     .hero-text h1 {
         font-size: 3rem;
+        margin-bottom: 1rem;
     }
 
     .products-grid {
@@ -1218,11 +1258,17 @@ body {
 
 @media (max-width: 768px) {
     .navbar-menu {
-        display: none;
+        display: none; /* Assuming mobile menu handles navigation */
     }
 
     .mobile-only {
         display: block;
+    }
+
+    .mobile-filter-toggle {
+        display: inline-flex; /* Show the mobile filter button */
+        order: -1; /* Move it to the left of the header title */
+        margin-right: auto;
     }
 
     .navbar-actions {
@@ -1248,12 +1294,18 @@ body {
         padding: 0 1rem;
     }
 
+    .hero-section {
+        height: 60vh;
+        min-height: 450px;
+    }
+
     .hero-text h1 {
         font-size: 2.5rem;
     }
 
     .hero-text p {
         font-size: 1.1rem;
+        margin-bottom: 2rem;
     }
 
     .shop-container {
@@ -1267,6 +1319,7 @@ body {
 
     .filters-sidebar {
         grid-template-columns: 1fr;
+        width: 280px; /* Slightly smaller for smaller screens */
     }
 
     .product-image-container {
@@ -1348,6 +1401,11 @@ body {
     }
 
     .hero-text p {
+        font-size: 1rem;
+    }
+
+    .hero-cta-btn {
+        padding: 1rem 2rem;
         font-size: 1rem;
     }
 

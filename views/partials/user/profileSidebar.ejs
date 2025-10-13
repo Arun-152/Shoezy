@@ -7,54 +7,45 @@
     <title>User Profile Sidebar</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        /* Base styles for all elements */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            height: fit-content;
         }
 
+        /* Set font and background for the body, and make it a flex container for desktop */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f5f5f5;
             display: flex;
-
+            min-height: 100vh;
         }
 
-        .profile-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #ddd;
+        /* Main application wrapper */
+        .app-container {
             display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            font-size: 18px;
-            color: #333;
-            overflow: hidden;
-        }
-
-        .profile-avatar img {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
         }
 
+        /* --- Desktop Sidebar Styles (Default) --- */
 
         .sidebar {
+            border-radius: 18px;
             width: 280px;
             background-color: #2c3e50;
             color: white;
-            height: 110vh;
             padding: 0;
             box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-
+            position: sticky; 
+            top: 0; 
+            height: 100vh;
+            overflow-y: auto;
         }
 
         .profile-header {
             background-color: #34495e;
-            padding: 10px;
+            padding: 20px 10px;
             text-align: center;
             border-bottom: 1px solid #3d4f63;
         }
@@ -71,6 +62,13 @@
             font-size: 24px;
             font-weight: bold;
             color: #2c3e50;
+            overflow: hidden;
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .profile-name {
@@ -129,12 +127,80 @@
             background-color: #f5f5f5;
         }
 
-        /* Responsive design */
+        /* --- Mobile Responsive Styles --- */
+
         @media (max-width: 768px) {
+            body {
+                display: block;
+            }
+
+            .app-container {
+                display: block;
+            }
+
             .sidebar {
                 width: 100%;
                 height: auto;
-                position: relative;
+                background-color: white;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                position: sticky;
+                top: 70px;
+                height: auto;
+                overflow-y: visible;
+                padding: 10px 0;
+                z-index: 1000;;
+            }
+
+            .profile-header {
+                display: none;
+            }
+
+            .menu-list {
+                display: flex;
+                justify-content: space-around;
+                white-space: nowrap;
+                border-bottom: none;
+                flex-wrap: nowrap;
+            }
+
+            .menu-item {
+                border-bottom: none;
+                flex: 0 0 auto;
+                margin: 0 2px;
+            }
+
+            .menu-link {
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 5px 4px;
+                color: #555;
+                font-size: 10px;
+                border-radius: 8px;
+            }
+
+            .menu-link:hover {
+                background-color: #f0f0f0;
+            }
+
+            .menu-link span {
+                display: none;
+            }
+
+            .menu-icon {
+                margin-right: 0;
+                margin-bottom: 2px;
+                width: auto;
+                font-size: 16px; /* Reduced from 24px to 16px */
+            }
+
+            .menu-link.logout {
+                color: #555;
+            }
+
+            .menu-link.logout:hover {
+                background-color: #f0f0f0;
+                color: #e74c3c;
             }
 
             .main-content {
@@ -145,88 +211,75 @@
 </head>
 
 <body>
-    <div class="sidebar">
-        <div class="profile-header">
-            <div class="profile-avatar">
-                <% if (user && user.profilePicture && user.profilePicture.trim() !=='' ) { %>
-                    <!-- Profile Image -->
-                    <img src="<%= user.profilePicture %>" alt="Profile Image" class="profile-image"
-                        onerror="this.style.display='none'; this.parentElement.innerHTML='<span><%= user.name ? user.fullname.charAt(0).toUpperCase() : 'U' %></span>';">
-                    <% } else { %>
-                        <!-- Default First Letter -->
-                        <span>
-                            <%= user && user.fullname ? user.fullname.charAt(0).toUpperCase() : 'U' %>
-                        </span>
-                        <% } %>
-            </div>
-            <div class="profile-name">
-                <%= user && user.fullname ? user.fullname : 'Guest' %>
+    <div class="app-container">
+        <div class="sidebar">
+            <div class="profile-header">
+               
             </div>
 
+            <ul class="menu-list">
+                <li class="menu-item">
+                    <a href="/profile" class="menu-link">
+                        <i class="fas fa-user menu-icon"></i>
+                        <span>My Profile</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="/profile/address" class="menu-link">
+                        <i class="fas fa-map-marker-alt menu-icon"></i>
+                        <span>My Address</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="/order" class="menu-link">
+                        <i class="fas fa-shopping-bag menu-icon"></i>
+                        <span>My Orders</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="/wishlist" class="menu-link">
+                        <i class="fas fa-heart menu-icon"></i>
+                        <span>Wishlist</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="/coupon" class="menu-link">
+                        <i class="fas fa-ticket-alt menu-icon"></i>
+                        <span>My Coupon</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="/referral" class="menu-link">
+                        <i class="fas fa-gift menu-icon"></i>
+                        <span>Refer & Earn</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="/wallet" class="menu-link">
+                        <i class="fas fa-wallet menu-icon"></i>
+                        <span>My Wallet</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="/profile/changePassword" class="menu-link">
+                        <i class="fas fa-lock menu-icon"></i>
+                        <span>Change Password</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="/home" class="menu-link">
+                        <i class="fas fa-home menu-icon"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a href="/logout" class="menu-link logout">
+                        <i class="fas fa-sign-out-alt menu-icon"></i>
+                        <span>Log Out</span>
+                    </a>
+                </li>
+            </ul>
         </div>
-
-        <ul class="menu-list">
-            <li class="menu-item">
-                <a href="/profile" class="menu-link">
-                    <i class="fas fa-user menu-icon"></i>
-                    My Profile
-                </a>
-            </li>
-            <li class="menu-item">
-                <a href="/profile/address" class="menu-link">
-                    <i class="fas fa-map-marker-alt menu-icon"></i>
-                    My Address
-                </a>
-            </li>
-            <li class="menu-item">
-                <a href="/order" class="menu-link">
-                    <i class="fas fa-shopping-bag menu-icon"></i>
-                    My Orders
-                </a>
-            </li>
-            <li class="menu-item">
-                <a href="/wallet" class="menu-link">
-                    <i class="fas fa-wallet menu-icon"></i>
-                    My Wallet
-                </a>
-            </li>
-            <li class="menu-item">
-                <a href="/profile/changePassword" class="menu-link">
-                    <i class="fas fa-lock menu-icon"></i>
-                    Change Password
-                </a>
-            </li>
-            <li class="menu-item">
-                <a href="/wishlist" class="menu-link">
-                    <i class="fas fa-heart menu-icon"></i>
-                    Wishlist
-                </a>
-            </li>
-            <li class="menu-item">
-                <a href="/coupon" class="menu-link">
-                    <i class="fas fa-ticket-alt menu-icon"></i>
-                    My Coupon
-                </a>
-            </li>
-            <li class="menu-item">
-                <a href="/referral" class="menu-link">
-                    <i class="fas fa-gift menu-icon"></i>
-                    Refer & Earn
-                </a>
-            </li>
-            <li class="menu-item">
-                <a href="/home" class="menu-link">
-                    <i class="fas fa-home menu-icon"></i>
-                    Home
-                </a>
-            </li>
-            <li class="menu-item">
-                <a href="/logout" class="menu-link logout">
-                    <i class="fas fa-sign-out-alt menu-icon"></i>
-                    Log Out
-                </a>
-            </li>
-        </ul>
     </div>
 </body>
 

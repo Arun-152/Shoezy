@@ -13,34 +13,7 @@
 
 
 <body>
-    <style>
-        /* Hero Section */
-        .hero {
-            width: 100%;
-            height: calc(100vh - 80px);
-            /* subtract header height (adjust if needed) */
-            margin-top: 80px;
-            /* push below header if header is fixed */
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Hero Image */
-        .hero-sneaker {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            /* fills area properly */
-            object-position: center;
-            /* centers image focus */
-            display: block;
-            transform: none !important;
-            border-radius: 0;
-            /* remove any rounding */
-        }
-
+    <style>        
         .featured-categories {
             width: 100%;
             margin: 0;
@@ -64,8 +37,8 @@
     <%-include('../partials/user/navbar')%>
 
         <!-- Enhanced Hero Section -->
-        <section class="hero">
-            <img src="/images/Move+ Desktop Banner.jpg" alt="Featured Sneaker" class="hero-sneaker">
+        <section class="hero-section">
+            <img src="/images/Move+ Desktop Banner.jpg" alt="Featured Sneaker" class="hero-image">
         </section>
 
 

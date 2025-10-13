@@ -357,6 +357,12 @@
                 <!-- Main Content Area -->
                 <main class="products-main">
                     <div class="products-header">
+                        <!-- Mobile Filter Toggle -->
+                        <button class="mobile-filter-toggle" onclick="toggleFilters()">
+                            <i class="fas fa-filter"></i>
+                            <span>Filters</span>
+                        </button>
+
                         <h2>Our Collections</h2>
                     </div>
 
@@ -836,6 +842,17 @@
                         input.addEventListener('change', filterAndSort);
                     }
                 });
+
+                // Mobile filter sidebar toggle
+                function toggleFilters() {
+                    const sidebar = document.querySelector('.filters-sidebar');
+                    const mainContent = document.querySelector('.products-main');
+                    sidebar.classList.toggle('open');
+                    mainContent.classList.toggle('sidebar-open');
+                    // Optional: Add an overlay to close sidebar when clicking outside
+                    // This would require a bit more structure, but is a good UX improvement.
+                }
+
 
                 function clearFilters() {
                     window.location.href = '/shop';

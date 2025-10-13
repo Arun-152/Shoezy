@@ -29,6 +29,30 @@ body {
     background-clip: text;
 }
 
+/* Hero Section - Moved from EJS */
+.hero-section {
+    width: 100%;
+    height: calc(100vh - 80px);
+    /* subtract header height (adjust if needed) */
+    margin-top: 80px;
+    /* push below header if header is fixed */
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Hero Image - Moved from EJS */
+.hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* fills area properly */
+    object-position: center;
+    /* centers image focus */
+    display: block;
+}
+
 .hero-description {
     font-size: 1.25rem;
     color: #64748b;
@@ -1096,13 +1120,19 @@ body {
         gap: 16px;
     }
 
-    .hero-image-container {
-        width: 400px;
-        height: 400px;
+    
+    .hero-section {
+        height: 50vh; /* Adjust hero height for tablets */
+        margin-top: 70px;
     }
 
-    .hero-sneaker {
-        width: 350px;
+    /* Make quick actions always visible on touch devices */
+    .product-card.modern .quick-actions {
+        opacity: 1;
+        transform: translateY(0);
+        background: rgba(255, 255, 255, 0.7);
+        padding: 5px;
+        border-radius: 10px;
     }
 
     .floating-card {
@@ -1138,6 +1168,11 @@ body {
 
     .hero-description {
         font-size: 1.1rem;
+    }
+
+    .hero-section {
+        height: 40vh; /* Further reduce hero height for phones */
+        margin-top: 60px;
     }
 
     .hero-stats {
