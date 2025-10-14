@@ -183,10 +183,11 @@ const sendEmailOTP = async (req, res) => {
         }
 
         // Email format validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(newEmail.trim())) {
-            return res.status(400).json({ success: false, message: "Please enter a valid email address" });
-        }
+      const emailRegex = /^[a-zA-Z][a-zA-Z0-9._%+-]{2,}@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    if (!newEmail || !emailRegex.test(newEmail.trim())) {
+      return res.status(400).json({ success: false, message: "Please enter a valid email address" });
+    }
 
         // Check if email already exists
         const existingUser = await User.findOne({ email: newEmail.trim().toLowerCase() });

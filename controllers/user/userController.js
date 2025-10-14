@@ -144,7 +144,7 @@ const postSignup = async (req, res) => {
         if (!email || email.trim() === "") {
             errors.push("Email is required");
         } else {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const emailRegex = /^[a-zA-Z][a-zA-Z0-9._%+-]{2,}@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
             if (!emailRegex.test(email.trim())) {
                 errors.push("Please enter a valid email address");
             }
@@ -361,7 +361,7 @@ const userPostLogin = async (req, res) => {
         const { email, password } = req.body;
 
         const isAjax = req.headers['content-type'] === 'application/json' || req.headers['x-requested-with'] === 'XMLHttpRequest';
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const emailRegex = /^[a-zA-Z][a-zA-Z0-9._%+-]{2,}@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         if (!email || !emailRegex.test(email.trim())) {
             if (isAjax) {
                 return res.status(400).json({

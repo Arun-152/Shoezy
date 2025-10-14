@@ -132,7 +132,7 @@
 
             function validateEmail() {
                 const email = emailInput.value.trim();
-                const emailRegex = /^[^@#$%&'*+/=?^_`{|}~]+@[^@#$%&'*+/=?^_`{|}~]+\.[^@#$%&'*+/=?^_`{|}~]+$/;
+                const emailRegex = /^[a-zA-Z][a-zA-Z0-9._%+-]{2,}@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
                 if (!email) {
                     setError(emailInput, 'error2', 'Email is required');
                     return false;
