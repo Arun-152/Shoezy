@@ -16,13 +16,13 @@ const showUser = async (req, res) => {
             return res.redirect("/login");
         }
 
-        // Fetch wallet balance
+        // wallet balance
         const wallet = await Wallet.findOne({ userId: userId });
         const walletBalance = wallet ? wallet.balance : 0;
 
         res.render("myaccount", {
             user: userData,
-            walletBalance,   // pass it to EJS
+            walletBalance,   
             isLandingPage: false,
         });
     } catch (error) {
@@ -182,27 +182,24 @@ const sendEmailOTP = async (req, res) => {
             return res.status(400).json({ success: false, message: "Please enter a new email address" });
         }
 
-        // Email format validation
+        //  validation
       const emailRegex = /^[a-zA-Z][a-zA-Z0-9._%+-]{2,}@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
     if (!newEmail || !emailRegex.test(newEmail.trim())) {
       return res.status(400).json({ success: false, message: "Please enter a valid email address" });
     }
 
-        // Check if email already exists
         const existingUser = await User.findOne({ email: newEmail.trim().toLowerCase() });
         if (existingUser) {
             return res.status(400).json({ success: false, message: "This email is already registered with another account" });
         }
 
-        // Generate OTP
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-        // Store OTP in session
         req.session.emailChangeOTP = {
             code: otp,
             newEmail: newEmail.trim().toLowerCase(),
-            expiresAt: Date.now() + 5 * 60 * 1000, // 5 minutes
+            expiresAt: Date.now() + 5 * 60 * 1000, 
         };
 
         try {
@@ -214,7 +211,7 @@ const sendEmailOTP = async (req, res) => {
                 });
             }
 
-            console.log("Email Change OTP:", otp); // For testing
+            console.log("Email Change OTP:", otp); 
             res.json({ success: true, message: "OTP has been sent to your new email address" });
 
         } catch (emailError) {
@@ -261,10 +258,10 @@ const resendEmailOTP = async (req, res) => {
             req.session.emailChangeOTP = {
                 code: newOtp,
                 newEmail: sessionOTP.newEmail,
-                expiresAt: Date.now() + 5 * 60 * 1000, // 5 minutes
+                expiresAt: Date.now() + 5 * 60 * 1000, 
             };
 
-            console.log("Resend Email Change OTP:", newOtp); // For testing
+            console.log("Resend Email Change OTP:", newOtp); 
             res.json({ success: true, message: "New OTP has been sent to your email address" });
 
         } catch (emailError) {
@@ -281,7 +278,6 @@ const resendEmailOTP = async (req, res) => {
     }
 };
 
-// Verify OTP and update email
 const verifyEmailOTP = async (req, res) => {
     try {
         const { otp } = req.body;
@@ -311,17 +307,14 @@ const verifyEmailOTP = async (req, res) => {
             return res.status(400).json({ success: false, message: "Invalid OTP. Please try again." });
         }
 
-        // Check if email is still available
         const existingUser = await User.findOne({ email: sessionOTP.newEmail });
         if (existingUser) {
             delete req.session.emailChangeOTP;
             return res.status(400).json({ success: false, message: "This email is no longer available" });
         }
 
-        // Update user email
         await User.findByIdAndUpdate(userId, { email: sessionOTP.newEmail });
 
-        // Clear session
         delete req.session.emailChangeOTP;
 
         res.json({ success: true, message: "Email successfully updated!" });
@@ -332,7 +325,6 @@ const verifyEmailOTP = async (req, res) => {
     }
 };
 
-// Change Password functionality
 const changePassword = async (req, res) => {
     try {
         const { currentPassword, newPassword, confirmPassword } = req.body;
@@ -367,29 +359,24 @@ const changePassword = async (req, res) => {
             return res.status(400).json({ success: false, message: errors.join(". ") });
         }
 
-        // Get user from database
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
-        // Check if current password is correct
         const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
         if (!isCurrentPasswordValid) {
             return res.status(400).json({ success: false, message: "Current password is incorrect" });
         }
 
-        // Check if new password is same as current password
         const isSamePassword = await bcrypt.compare(newPassword, user.password);
         if (isSamePassword) {
             return res.status(400).json({ success: false, message: "New password cannot be the same as current password" });
         }
 
-        // Hash new password
         const saltRounds = 10;
         const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
 
-        // Update password in database
         await User.findByIdAndUpdate(userId, { password: hashedNewPassword });
 
         res.json({ success: true, message: "Password updated successfully!" });
@@ -400,7 +387,6 @@ const changePassword = async (req, res) => {
     }
 };
 
-// Legacy function - keeping for compatibility
 const chnageEmailValid = async(req,res)=>{
     try{
         const {email}= req.body
@@ -420,10 +406,9 @@ const loadAddress = async(req,res)=>{
             return res.redirect("/login")
         }
 
-        // Fetch user's addresses with proper sorting: default first, then by creation date (newest first)
         const addresses = await Address.find({ userId: userId }).sort({ 
-            isDefault: -1,  // Default addresses first (true = 1, false = 0, so -1 puts true first)
-            createdAt: -1   // Then by creation date (newest first)
+            isDefault: -1,  
+            createdAt: -1   
         });
         const returnURL = req.query.returnUrl ||  '/profile/address'
         
@@ -457,7 +442,6 @@ const postAdd = async(req,res)=>{
             addressType
         } = req.body;
 
-        // Validation - Check all required fields are non-empty
         const errors = {};
         
         if (!fullName || fullName.trim() === '') {
@@ -523,8 +507,6 @@ const postAdd = async(req,res)=>{
 
         const returnURL = req.body.returnUrl ||  '/profile/address'
        
-        
-        // If there are validation errors, do not save and render the page with errors
         if (Object.keys(errors).length > 0) {
             const userData = await User.findById(userId);
             const addresses = await Address.find({ userId: userId }).sort({ 
@@ -542,7 +524,6 @@ const postAdd = async(req,res)=>{
             });
         }
 
-        // Check if address already exists for the same user
         const existingAddress = await Address.findOne({
             userId: userId,
             address: address.trim(),
@@ -568,9 +549,6 @@ const postAdd = async(req,res)=>{
             });
         }
         
-
-        
-        // Create new address only if validation passes and address doesn't exist
         const newAddress = new Address({
             userId: userId,
             fullName: fullName.trim(),
@@ -587,7 +565,6 @@ const postAdd = async(req,res)=>{
 
         await newAddress.save();
         
-        // Redirect to addressPage with success flag for SweetAlert
        res.redirect(`${returnURL}?success=true`);
         
     }catch(error){
@@ -612,7 +589,7 @@ const updateAddress = async(req, res) => {
             addressType
         } = req.body;
 
-        // Validation - Check all required fields are non-empty
+        // Validation 
         const errors = {};
         
         if (!fullName || fullName.trim() === '') {
@@ -679,7 +656,6 @@ const updateAddress = async(req, res) => {
             errors.landmark = "Landmark cannot be only numbers";
         }
 
-        // If there are validation errors, return them
         if (Object.keys(errors).length > 0) {
             return res.status(400).json({
                 success: false,
@@ -687,7 +663,6 @@ const updateAddress = async(req, res) => {
             });
         }
 
-        // Check if the address exists and belongs to the user
         const existingAddress = await Address.findOne({ _id: addressId, userId: userId });
         if (!existingAddress) {
             return res.status(404).json({
@@ -696,10 +671,9 @@ const updateAddress = async(req, res) => {
             });
         }
 
-        // Check if another address with the same details already exists (excluding current address)
         const duplicateAddress = await Address.findOne({
             userId: userId,
-            _id: { $ne: addressId }, // Exclude current address
+            _id: { $ne: addressId }, 
             address: address.trim(),
             city: city.trim(),
             district: district.trim(),
@@ -715,7 +689,6 @@ const updateAddress = async(req, res) => {
             });
         }
 
-        // Update the address
         const updatedAddress = await Address.findByIdAndUpdate(
             addressId,
             {
@@ -759,7 +732,6 @@ const setDefaultAddress = async(req, res) => {
             });
         }
 
-        // Check if the address exists and belongs to the user
         const address = await Address.findOne({ _id: addressId, userId: userId });
         if (!address) {
             return res.status(404).json({
@@ -768,13 +740,11 @@ const setDefaultAddress = async(req, res) => {
             });
         }
 
-        // First, unset all default addresses for this user
         await Address.updateMany(
             { userId: userId },
             { $set: { isDefault: false } }
         );
 
-        // Then set the selected address as default
         await Address.findByIdAndUpdate(
             addressId,
             { $set: { isDefault: true } }
@@ -806,7 +776,6 @@ const deleteAddress = async(req, res) => {
             });
         }
 
-        // Check if the address exists and belongs to the user
         const address = await Address.findOne({ _id: addressId, userId: userId });
         if (!address) {
             return res.status(404).json({
@@ -815,19 +784,14 @@ const deleteAddress = async(req, res) => {
             });
         }
 
-        // Check if this is a default address
         const isDefaultAddress = address.isDefault;
 
-        // Delete the address
         await Address.findByIdAndDelete(addressId);
 
-        // If the deleted address was the default, set the next oldest remaining address as default
         if (isDefaultAddress) {
-            // Find the oldest remaining address for this user (sorted by createdAt ascending)
             const oldestAddress = await Address.findOne({ userId: userId }).sort({ createdAt: 1 });
             
             if (oldestAddress) {
-                // Set the oldest address as the new default
                 await Address.findByIdAndUpdate(
                     oldestAddress._id,
                     { $set: { isDefault: true } }

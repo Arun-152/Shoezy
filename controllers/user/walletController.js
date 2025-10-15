@@ -15,32 +15,28 @@ const getWalletPage = async (req, res) => {
     if (!user) {
       return res.status(404).render("pageNotFound", { message: "User not found" });
     }
-
+  
+    // Create a new wallet 
     let wallet = await Wallet.findOne({ userId });
     if (!wallet) {
-      // Create a new wallet if it doesn't exist
       wallet = new Wallet({ userId, balance: 0, transactions: [] });
       await wallet.save();
     }
 
     const { typeFilter = 'all', sort = 'newest' } = req.query;
 
-    // Build transaction query
     let transactions = wallet.transactions;
 
-    // Apply type filter
     if (typeFilter !== 'all') {
       transactions = transactions.filter(txn => txn.type.toLowerCase() === typeFilter.toLowerCase());
     }
 
-    // Apply sort
     transactions.sort((a, b) => {
       const dateA = new Date(a.createdAt);
       const dateB = new Date(b.createdAt);
       return sort === 'newest' ? dateB - dateA : dateA - dateB;
     });
 
-    // Pagination
     const page = parseInt(req.query.page) || 1;
     const limit = 5;
     const startIndex = (page - 1) * limit;

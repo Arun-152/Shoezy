@@ -16,13 +16,11 @@ const calculateOrderTotals = (order) => {
 
   if (order.discountAmount && order.discountAmount > 0 && order.couponId) {
     if (order.couponId.discountType === 'flat') {
-      // Split flat discount across active items
       const couponSharePerItem = order.discountAmount / originalItemsCount;
       couponDiscount = couponSharePerItem * activeItemsCount;
     } else if (order.couponId.discountType === 'percentage') {
       const activeItems = order.items.filter(item => item.status !== 'Returned' && item.status !== 'Cancelled');
       const subtotal = activeItems.reduce((sum, item) => sum + item.totalPrice, 0);
-      // Percentage discount applied per item
       couponDiscount = activeItems.reduce((total, item) => {
         const itemDiscount = (item.totalPrice * order.couponId.offerPrice) / 100;
         return total + itemDiscount;
@@ -52,10 +50,10 @@ const orderPage = async (req, res) => {
       .populate({
         path: 'items.productId',
         populate: {
-          path: 'category' // Also populate the category for each product
+          path: 'category' 
         }
       })
-      .populate('couponId') // Populate coupon details
+      .populate('couponId') 
       .sort({ createdAt: -1 });
 
     const ordersWithTotals = orders.map(order => {
@@ -132,11 +130,8 @@ const cancelOrder = async (req, res) => {
       return res.render("user404");
     }
 
-    // Track refund and determine scope
     let refundAmount = 0;
-    // Consider active items only (not already cancelled)
     const activeItems = order.items.filter(it => it.status !== 'Cancelled');
-    // Full cancellation if no itemsId provided OR provided list equals all active item ids
     const providedIds = itemsId
       ? Array.isArray(itemsId)
         ? itemsId.map(String)
@@ -146,7 +141,6 @@ const cancelOrder = async (req, res) => {
     const isProvidedFull = providedIds.length > 0 && providedIds.length === activeIds.length && providedIds.every(id => activeIds.includes(id));
     const fullCancellationRequested = !itemsId || isProvidedFull;
 
-    // Compute proportional discount once
     const originalSubtotal = order.items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
     let isFlatCoupon = false;
     let flatDiscountPerItem = 0;
@@ -170,7 +164,6 @@ const cancelOrder = async (req, res) => {
     if (fullCancellationRequested) {
       refundAmount = order.totalAmount;
 
-      // Cancel only active items
       for (const item of activeItems) {
         item.status = 'Cancelled';
         const product = await Product.findById(item.productId);
@@ -199,7 +192,6 @@ const cancelOrder = async (req, res) => {
           description: `Order cancelled. Reason: ${reason}`
         });
         order.totalAmount = 0;
-        // Reset coupon usage if order had a coupon
         if (order.couponId && order.userId) {
           try {
             await resetCouponUsage(order.couponId, order.userId, order._id);
@@ -218,7 +210,6 @@ const cancelOrder = async (req, res) => {
     } else {
       const itemToCancel = order.items.id(itemsId);
       if (itemToCancel && ['Pending', 'Processing', 'Shipped', 'Delivered'].includes(itemToCancel.status)) {
-        // --- Start: Coupon Minimum Purchase Validation on Partial Cancellation ---
         if (order.couponId && ['Online', 'Wallet'].includes(order.paymentMethod.split(' + ')[0])) {
           const coupon = await Coupon.findById(order.couponId);
           if (coupon && coupon.minimumPrice > 0) {
@@ -242,7 +233,6 @@ const cancelOrder = async (req, res) => {
           return res.status(400).json({ success: false, message: 'A reason for cancellation is required.' });
         }
 
-        // Calculate refund amount
         if (isFlatCoupon) {
           refundAmount = itemToCancel.totalPrice - flatDiscountPerItem;
         } else {
@@ -290,7 +280,6 @@ const cancelOrder = async (req, res) => {
       }
     }
 
-    // Credit wallet when Online or Wallet payment methods are used
     if (['Online', 'Wallet'].includes(order.paymentMethod) && refundAmount > 0) {
       let wallet = await Wallet.findOne({ userId });
    if (!wallet) {
@@ -301,7 +290,7 @@ const cancelOrder = async (req, res) => {
   });
 }
 
-// Ensure balance is a number
+// refund
 wallet.balance = Number(wallet.balance) || 0;
 wallet.balance += refundAmount;
 
@@ -419,7 +408,7 @@ const getInvoice = async (req, res) => {
     const { orderId } = req.params;
     const order = await Order.findById(orderId)
       .populate("items.productId")
-      .populate("userId", "email"); // Populate user to get email
+      .populate("userId", "email"); 
     if (!order) {
       return res.status(404).json({ success: false, message: "Order not found" });
     }
@@ -506,28 +495,26 @@ const returnSingleOrder = async (req, res) => {
       });
     }
 
-    // --- Start: Coupon Minimum Purchase Validation on Partial Return ---
+    //minimum purchase in coupon
     if (order.couponId && ['Online', 'Wallet'].includes(order.paymentMethod.split(' + ')[0])) {
       const coupon = await Coupon.findById(order.couponId);
       if (coupon && coupon.minimumPrice > 0) {
-        // Calculate the subtotal of items that would remain in the order (not cancelled or returned)
         const remainingItems = order.items.filter(i =>
-          i._id.toString() !== item._id.toString() && // Exclude the item being returned
-          !['Cancelled', 'Returned', 'ReturnRequested'].includes(i.status) // Exclude other non-active items
+          i._id.toString() !== item._id.toString() && 
+          !['Cancelled', 'Returned', 'ReturnRequested'].includes(i.status) 
         );
         const remainingSubtotal = remainingItems.reduce((sum, item) => sum + item.totalPrice, 0);
 
-        // If remaining subtotal is less than coupon's minimum, block return.
         if (remainingSubtotal < coupon.minimumPrice) {
           return res.status(400).json({
             success: false,
-            showModalError: true, // Flag for frontend to show error on top of the modal
+            showModalError: true, 
             message: `Cannot return this item. The remaining order value would be below the coupon's minimum purchase amount of ₹${coupon.minimumPrice.toLocaleString('en-IN')}.`
           });
         }
       }
     }
-    // --- End: Coupon Minimum Purchase Validation ---
+    
 
     order.items[itemIndex].status = 'ReturnRequested';
 
@@ -644,8 +631,7 @@ const returnSingleOrder = async (req, res) => {
         description: statusDescription
       });
     }
-    // Coupon usage is not reset when an order item is returned.
-    // The coupon remains marked as 'Used' for the user.
+    //order saved
     await order.save();
     res.json({
       success: true,
@@ -671,16 +657,13 @@ const placeOrderWithWallet = async (req, res) => {
       return res.status(401).json({ success: false, message: "Not authenticated" });
     }
 
-    // This function is designed for full payment using only the wallet.
-    // Combination payments (e.g., Wallet + COD, Wallet + Online) are not supported here.
 
-    // Step 1: Calculate total
+    //  Calculate total
     let totalAmount = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
     let discountAmount = 0;
     let appliedCoupon = null;
 
-    // Step 2: Apply coupon if available
     if (couponCode) {
       appliedCoupon = await Coupon.findOne({ name: couponCode.toUpperCase(), status: "Available" });
 
@@ -700,7 +683,7 @@ const placeOrderWithWallet = async (req, res) => {
       return res.status(400).json({ success: false, message: "Insufficient wallet balance" });
     }
 
-    // Step 4: Create Order
+    // Create Order
     const newOrder = new Order({
       orderNumber: "ORD" + Date.now(),
       userId,
@@ -722,7 +705,6 @@ const placeOrderWithWallet = async (req, res) => {
 
     await newOrder.save();
 
-    // Step 5: Deduct Wallet Balance
     wallet.balance -= totalAmount;
     wallet.transactions.push({
       type: "debit",
@@ -737,11 +719,10 @@ const placeOrderWithWallet = async (req, res) => {
     });
     await wallet.save();
 
-    // Step 6: Update coupon usage if applied
     if (appliedCoupon) {
       appliedCoupon.currentUsageCount += 1;
       appliedCoupon.userUsage.push({ userId, orderId: newOrder._id });
-      appliedCoupon.status = "Used"; // Optional, if coupon is single-use
+      appliedCoupon.status = "Used"; 
       await appliedCoupon.save();
     }
 

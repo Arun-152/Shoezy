@@ -74,6 +74,7 @@ const loadCoupons = async (req, res) => {
 
 const applyCoupon = async (req, res) => {
   try {
+    //validation
     const { couponCode, cartTotal } = req.body;
     const userId = req.session.userId
     if (!userId) {
@@ -165,6 +166,7 @@ const removeCoupon = async (req, res) => {
 }
 const validateCouponForCheckout = async (couponData, userId, req) => {
   try {
+    //validation
     if (!couponData || !couponData.couponId) {
       return { valid: false, message: "No Coupon applied" }
     }

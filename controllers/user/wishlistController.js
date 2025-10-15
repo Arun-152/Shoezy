@@ -69,14 +69,12 @@ const addToWishlist = async(req,res)=>{
             return res.status(404).json({success: false, message: "Product not found"})
         }
 
-        // Find or create user's wishlist
         let userWishlist = await Wishlist.findOne({ userId })
         
         if (!userWishlist) {
             userWishlist = new Wishlist({ userId, products: [] })
         }
 
-        // Check if product already exists in wishlist
         const existingProduct = userWishlist.products.find(
             item => item.productId.toString() === productId
         )
@@ -85,7 +83,6 @@ const addToWishlist = async(req,res)=>{
             return res.status(200).json({success: false, message: "Product already in wishlist"})
         }
 
-        // Add product to wishlist
         userWishlist.products.push({ productId })
         await userWishlist.save()
 
@@ -105,21 +102,18 @@ const removeWishlist = async(req,res)=>{
             return res.status(401).json({success: false, message: "User not authenticated"})
         }
 
-        // Find user's wishlist
         const userWishlist = await Wishlist.findOne({ userId })
         
         if (!userWishlist) {
             return res.status(404).json({success: false, message: "Wishlist not found"})
         }
 
-        // Remove product from wishlist
         userWishlist.products = userWishlist.products.filter(
             item => item.productId.toString() !== productId
         )
 
         await userWishlist.save()
 
-        // Check if this is an AJAX request
         const isAjax = req.headers['x-requested-with'] === 'XMLHttpRequest' || 
                       req.headers['accept'] && req.headers['accept'].includes('application/json') ||
                       req.headers['content-type'] && req.headers['content-type'].includes('application/json');
@@ -133,7 +127,6 @@ const removeWishlist = async(req,res)=>{
     } catch (error) {
         console.error(error)
         
-        // Check if this is an AJAX request for error handling too
         const isAjax = req.headers['x-requested-with'] === 'XMLHttpRequest' || 
                       req.headers['accept'] && req.headers['accept'].includes('application/json') ||
                       req.headers['content-type'] && req.headers['content-type'].includes('application/json');
@@ -145,7 +138,6 @@ const removeWishlist = async(req,res)=>{
     }
 }
 
-// Toggle wishlist - Add if not present, remove if present
 const toggleWishlist = async(req,res)=>{
     try {
         const { productId } = req.body
@@ -157,21 +149,18 @@ const toggleWishlist = async(req,res)=>{
             return res.status(401).json({success: false, message: "User not authenticated"})
         }
 
-        // Check if product exists
         const product = await Product.findById(productId)
         if (!product) {
           
             return res.status(404).json({success: false, message: "Product not found"})
         }
 
-        // Find or create wishlist
         let userWishlist = await Wishlist.findOne({ userId })
         if (!userWishlist) {
           
             userWishlist = new Wishlist({ userId, products: [] })
         }
 
-        // Check if product already in wishlist
         const existingProductIndex = userWishlist.products.findIndex(item => 
             item.productId.toString() === productId
         )
@@ -180,13 +169,11 @@ const toggleWishlist = async(req,res)=>{
         let message = '';
 
         if (existingProductIndex > -1) {
-            // Product exists, remove it
             userWishlist.products.splice(existingProductIndex, 1)
             action = 'removed';
             message = 'Product removed from wishlist';
           
         } else {
-            // Product doesn't exist, add it
             userWishlist.products.push({ productId })
             action = 'added';
             message = 'Product added to wishlist';
@@ -209,7 +196,6 @@ const toggleWishlist = async(req,res)=>{
     }
 }
 
-// Clear entire wishlist
 const clearWishlist = async(req,res)=>{
     try {
         const userId = req.session.userId
@@ -218,18 +204,15 @@ const clearWishlist = async(req,res)=>{
             return res.status(401).json({success: false, message: "User not authenticated"})
         }
 
-        // Find user's wishlist
         const userWishlist = await Wishlist.findOne({ userId })
         
         if (!userWishlist) {
             return res.status(404).json({success: false, message: "Wishlist not found"})
         }
 
-        // Clear all products from wishlist
         userWishlist.products = []
         await userWishlist.save()
 
-        // Check if this is an AJAX request
         const isAjax = req.headers['x-requested-with'] === 'XMLHttpRequest' || 
                       req.headers['accept'] && req.headers['accept'].includes('application/json') ||
                       req.headers['content-type'] && req.headers['content-type'].includes('application/json');
@@ -238,12 +221,9 @@ const clearWishlist = async(req,res)=>{
             return res.status(200).json({success: true, message: "Wishlist cleared successfully"})
         }
 
-        // Otherwise redirect to wishlist page
         return res.redirect("/wishlist")
     } catch (error) {
         console.error(error)
-        
-        // Check if this is an AJAX request for error handling too
         const isAjax = req.headers['x-requested-with'] === 'XMLHttpRequest' || 
                       req.headers['accept'] && req.headers['accept'].includes('application/json') ||
                       req.headers['content-type'] && req.headers['content-type'].includes('application/json');
@@ -269,7 +249,6 @@ const addToCartFromWishlist = async(req,res)=>{
             return res.status(400).json({success: false, message: "Product ID and size are required"})
         }
 
-        // Check if product exists and is available
         const product = await Product.findById(productId).populate("category")
         if (!product || product.isDeleted || product.isBlocked) {
             return res.status(400).json({success: false, message: "This product is unavailable"})
@@ -284,12 +263,11 @@ const addToCartFromWishlist = async(req,res)=>{
             return res.status(400).json({success: false, message: "Selected size not available"})
         }
 
-        // Check if the selected variant is out of stock
+        // Check  variant is out of stock
         if (selectedVariant.variantQuantity <= 0) {
             return res.status(400).json({success: false, message: "Out of Stock", isOutOfStock: true})
         }
 
-        // Check overall product stock status
         const totalStock = product.variants.reduce((sum, variant) => sum + variant.variantQuantity, 0);
         if (totalStock <= 0) {
             return res.status(400).json({success: false, message: "Out of Stock", isOutOfStock: true})
@@ -302,15 +280,26 @@ const addToCartFromWishlist = async(req,res)=>{
             userCart = new Cart({userId, items: []})
         }
 
-        // Check if product with same size already exists in cart
         const existingItemIndex = userCart.items.findIndex(item => 
             item.productId.toString() === productId && (item.size || "Default") === size
         )
 
         if (existingItemIndex > -1) {
-            // Update existing item quantity
-            userCart.items[existingItemIndex].quantity += 1
-            userCart.items[existingItemIndex].totalPrice = userCart.items[existingItemIndex].price * userCart.items[existingItemIndex].quantity
+            const existingItem = userCart.items[existingItemIndex];
+            const maxQuantity = 10; 
+
+            if (existingItem.quantity >= maxQuantity) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Limit reached — you already have ${maxQuantity} units of this product in your cart.`
+                });
+            }
+            if (existingItem.quantity + 1 > selectedVariant.variantQuantity) {
+                return res.status(400).json({ success: false, message: `Only ${selectedVariant.variantQuantity} units in stock.` });
+            }
+            // Update  quantity
+            existingItem.quantity += 1;
+            existingItem.totalPrice = existingItem.price * existingItem.quantity;
         } else {
             // Add new item to cart
             userCart.items.push({
@@ -339,7 +328,6 @@ const addToCartFromWishlist = async(req,res)=>{
                 cartCount = updatedCart.items.length
         }
 
-        // Remove from wishlist
         const userWishlist = await Wishlist.findOne({ userId })
         if (userWishlist) {
             userWishlist.products = userWishlist.products.filter(

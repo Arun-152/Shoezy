@@ -150,8 +150,9 @@
             </button>
         </form>
 
-        <div class="resend-link">
-            <a href="#" id="resendOtpLink">Resend OTP</a>
+        <div class="resend-link" id="resendContainer">
+            <span id="timerText" style="color: #666;">Resend OTP in <span id="timer">60</span>s</span>
+            <a href="#" id="resendOtpLink" style="display: none;">Resend OTP</a>
         </div>
     </div>
 
@@ -164,6 +165,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const verifyBtnText = document.getElementById('verifyBtnText');
     const verifyBtnLoading = document.getElementById('verifyBtnLoading');
     const resendOtpLink = document.getElementById('resendOtpLink');
+    const timerText = document.getElementById('timerText');
+    const timerSpan = document.getElementById('timer');
 
     otpForm.addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -210,24 +213,38 @@ document.addEventListener('DOMContentLoaded', function() {
 
     resendOtpLink.addEventListener('click', async function(e) {
         e.preventDefault();
-        showError('Sending new OTP...'); // Give user feedback
+        // Give user feedback
+        resendOtpLink.style.pointerEvents = 'none';
+        resendOtpLink.textContent = 'Sending...';
         try {
             const response = await fetch('/resendResetOtp', { method: 'POST' });
             const data = await response.json();
             if (data.success) {
-                showError(data.message); // Show success message in the error field
+                showSuccess(data.message); // Show success message
+                startTimer(); // Restart timer on successful resend
             } else {
-                showError(data.message || 'Failed to resend OTP.');
+                showError(data.message || 'Failed to resend OTP.', true);
             }
         } catch (error) {
             showError('Network error. Could not resend OTP.');
         }
     });
 
-    function showError(message) {
+    function showError(message, isResendError = false) {
         otpError.textContent = message;
+        otpError.style.color = '#e74c3c'; // Ensure error color is red
         otpError.classList.add('show');
         otpInput.style.borderColor = '#e74c3c';
+        if (isResendError) {
+            resendOtpLink.style.pointerEvents = 'auto';
+            resendOtpLink.textContent = 'Resend OTP';
+        }
+    }
+
+    function showSuccess(message) {
+        otpError.textContent = message;
+        otpError.style.color = '#28a745'; // Success color
+        otpError.classList.add('show');
     }
 
     function setLoadingState(loading) {
@@ -248,6 +265,53 @@ document.addEventListener('DOMContentLoaded', function() {
             otpInput.style.borderColor = '#e1e5e9';
         }
     });
+
+    let timerInterval;
+    const TIMER_KEY = 'otpExpiryTime';
+
+    function startTimer() {
+        const expiryTime = Date.now() + 60 * 1000;
+        sessionStorage.setItem(TIMER_KEY, expiryTime);
+        runTimer(60);
+    }
+
+    function runTimer(initialTime) {
+        clearInterval(timerInterval); // Clear any existing timer
+
+        let timeLeft = initialTime;
+
+        resendOtpLink.style.display = 'none';
+        timerText.style.display = 'inline';
+        resendOtpLink.textContent = 'Resend OTP';
+        resendOtpLink.style.pointerEvents = 'auto';
+
+        timerSpan.textContent = Math.ceil(timeLeft);
+
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            timerSpan.textContent = Math.ceil(timeLeft);
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                timerText.style.display = 'none';
+                resendOtpLink.style.display = 'inline';
+                sessionStorage.removeItem(TIMER_KEY);
+            }
+        }, 1000);
+    }
+
+    // Check for an existing timer on page load
+    const savedExpiry = sessionStorage.getItem(TIMER_KEY);
+    if (savedExpiry) {
+        const remainingTime = (savedExpiry - Date.now()) / 1000;
+        if (remainingTime > 0) {
+            runTimer(remainingTime);
+        } else {
+            startTimer(); // Or just show the resend button immediately
+        }
+    } else {
+        startTimer(); // Start a new timer if none is saved
+    }
+
 });
 </script>
 

@@ -18,7 +18,6 @@ const UserSchema = new Schema(
         phone: {
             type: String,
             required: function () {
-                // Phone is not required for Google OAuth users
                 return !this.googleId;
             },
             trim: true,

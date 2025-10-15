@@ -20,7 +20,6 @@ function validateEmailConfig() {
         };
     }
     
-    // Check for common placeholder values
     const placeholderEmails = [
         'your-email@gmail.com',
         'your-actual-email@gmail.com',
@@ -45,7 +44,6 @@ function validateEmailConfig() {
     return { isValid: true };
 }
 
-// Create and configure the email transporter
 function createEmailTransporter() {
     const validation = validateEmailConfig();
     
@@ -56,10 +54,10 @@ function createEmailTransporter() {
 
     try {
         const transporter = nodemailer.createTransport({
-            service: "gmail",   // ✅ easier & recommended
+            service: "gmail",   
             auth: {
                 user: process.env.NODEMAILER_EMAIL,
-                pass: process.env.NODEMAILER_PASSWORD, // 16-char app password (no spaces)
+                pass: process.env.NODEMAILER_PASSWORD, 
             },
         });
 
@@ -71,7 +69,6 @@ function createEmailTransporter() {
 }
 
 
-// Send email with error handling
 async function sendEmail(transporter, mailOptions) {
     if (!transporter) {
         throw new Error("Email transporter not configured");
@@ -85,7 +82,7 @@ async function sendEmail(transporter, mailOptions) {
         console.error("Error code:", error.code);
         console.error("Error details:", error);
 
-        // Provide specific error messages
+       
         if (error.code === 'EAUTH') {
             throw new Error("Gmail authentication failed. Please check your email and app password in your .env file.");
         } else if (error.code === 'ENOTFOUND') {

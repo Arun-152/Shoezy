@@ -8,10 +8,9 @@ const shopPage = async (req, res) => {
     try {
         const userData = req.session.userId;
         const page = parseInt(req.query.page) || 1;
-        const limit = 9; // Number of products per page
+        const limit = 9; 
         const skip = (page - 1) * limit;
 
-        // Build the filter object
         const filter = { isDeleted: false, isBlocked: false };
         if (req.query.category) {
             filter.category = req.query.category;
@@ -20,13 +19,12 @@ const shopPage = async (req, res) => {
             filter.productName = { $regex: req.query.search, $options: "i" };
         }
         
-        // Build the sort object
         const sort = {};
         let sortByPrice = null;
         if (req.query.sortBy) {
             const [sortField, sortOrder] = req.query.sortBy.split('-');
             if (sortField === 'price') {
-                sortByPrice = sortOrder; // 'asc' or 'desc'
+                sortByPrice = sortOrder; 
             } else if (sortField === 'name') {
                 sort['productName'] = sortOrder === 'asc' ? 1 : -1;
             } else {
@@ -42,11 +40,10 @@ const shopPage = async (req, res) => {
                 match: { isListed: true, isDeleted: false }
             })
             .sort(sort)
-            .collation({ locale: 'en', strength: 2 }); // strength: 2 for case-insensitivity
+            .collation({ locale: 'en', strength: 2 }); 
 
         const allProducts = await productsQuery;
         
-        // Manual price filtering because of variants
         let filteredProducts = allProducts.filter(p => p.category !== null);
         if (req.query.minPrice || req.query.maxPrice) {
             const minPrice = parseFloat(req.query.minPrice) || 0;
@@ -60,7 +57,6 @@ const shopPage = async (req, res) => {
             });
         }
 
-        // Manual price sorting after all filters are applied
         if (sortByPrice) {
             filteredProducts.sort((a, b) => {
                 const getMinPrice = (product) => {
@@ -75,7 +71,7 @@ const shopPage = async (req, res) => {
 
                 if (sortByPrice === 'asc') {
                     return (priceA ?? Infinity) - (priceB ?? Infinity);
-                } else { // 'desc'
+                } else { 
                     return (priceB ?? -Infinity) - (priceA ?? -Infinity);
                 }
             });
@@ -103,7 +99,7 @@ const shopPage = async (req, res) => {
             categories: categories,
             user: user,
             wishlistItems: wishlistItems,
-            cartItems: [], // cartItems was not used in the template for any logic, so sending empty array
+            cartItems: [], 
             isLandingPage: false,
             currentPage: page,
             totalPages: totalPages,

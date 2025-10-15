@@ -16,10 +16,8 @@ const loadAddToCart = async (req, res) => {
 
     const userCart = await Cart.findOne({ userId }).populate({
       path: "items.productId",
-      match: { isDeleted: false, isBlocked: false },
       populate: {
         path: "category",
-        match: { isListed: true, isDeleted: false },
       },
     });
 
@@ -28,7 +26,6 @@ const loadAddToCart = async (req, res) => {
 
     if (userCart && userCart.items.length > 0) {
       cartItems = userCart.items
-        .filter(item => item.productId && item.productId.category)
         .map(item => {
           const variant = item.productId.variants.find(v => v.size === item.size);
           if (!variant) {
@@ -45,7 +42,7 @@ const loadAddToCart = async (req, res) => {
             itemTotal,
           };
         })
-        .filter(item => item !== null); 
+        .filter(item => item !== null);
     }
 
     const userWishlist = await Wishlist.findOne({ userId }).populate({
@@ -77,6 +74,8 @@ const addToCart = async(req,res)=>{
     try {
         const userId = req.session.userId
         let {productId, size, price, quantity} = req.body
+
+        // validation
 
         if (!userId) {
             return res.status(401).json({success: false, message: "User not authenticated"})
@@ -207,6 +206,7 @@ const updateQuantity = async (req, res) => {
     try {
         const userId = req.session.userId;
         const { productId, size, quantity } = req.body;
+        // validation
 
         if (!userId) {
             return res.status(401).json({ success: false, message: "User not authenticated" });
@@ -245,10 +245,14 @@ const updateQuantity = async (req, res) => {
             return res.status(404).json({ success: false, message: "Product variant not found" });
         }
 
-        if (variant.variantQuantity < newQuantity) {
+        const currentQuantity = item.quantity;
+        const isIncrement = newQuantity > currentQuantity;
+
+        if (isIncrement && variant.variantQuantity < newQuantity) {
             return res.status(400).json({ success: false, message: `Only ${variant.variantQuantity} units in stock.` });
         }
 
+        // update quantity and save cart
         item.quantity = newQuantity;
 
         await cart.save();
@@ -270,7 +274,6 @@ const updateQuantity = async (req, res) => {
                     const currentItemTotal = itemPrice * cartItem.quantity;
                     newSubtotal += currentItemTotal;
 
-                    // Find the total for the specific item that was just updated
                     if (cartItem.productId._id.toString() === productId && cartItem.size === size) {
                         newItemTotal = currentItemTotal;
                     }
@@ -283,7 +286,6 @@ const updateQuantity = async (req, res) => {
         const total = newSubtotal + shipping;
         const cartCount = updatedCart.items.length;
 
-        // ✅ Send success response
         return res.status(200).json({
             success: true,
             message: "Quantity updated successfully",
@@ -318,10 +320,10 @@ const removeCart = async(req,res)=>{
         )
         await cart.save()
  
-        // After removing, re-fetch and populate to calculate fresh totals
+        // After removing
         const updatedCart = await Cart.findOne({ userId }).populate({
             path: "items.productId",
-            select: "variants" // Only need variants for price calculation
+            select: "variants" 
         });
  
         let newSubtotal = 0;
@@ -407,14 +409,13 @@ const validateCheckout = async (req, res) => {
         for (const item of userCart.items) {
             const product = item.productId;
             
-            // Check if product is deleted, blocked, or category is unavailable
+           
             if (!product || product.isDeleted || product.isBlocked || 
                 !product.category || !product.category.isListed || product.category.isDeleted) {
                 unavailableProducts.push(product ? product.productName : 'Unknown Product');
                 continue;
             }
 
-            // Check stock availability for the specific size
             const variant = product.variants.find(v => v.size === item.size);
             if (!variant || variant.variantQuantity < item.quantity) {
                 unavailableProducts.push(`${product.productName} (Size: ${item.size})`);

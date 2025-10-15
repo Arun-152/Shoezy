@@ -595,17 +595,22 @@
                             })
                                 .then(res => res.json())
                                 .then(orderData => {
-                                    if (!orderData.success) {
-                                        // Handle stock error specifically
-                                        if (orderData.stockError) {
+                                    if (!orderData.success) { 
+                                        // Check for specific server-side alerts (like blocked products)
+                                        if (orderData.showAlert) {
                                             Swal.fire({
-                                                icon: 'error',
-                                                title: 'Order Failed: Product Out of Stock',
-                                                text: orderData.message,
+                                                icon: orderData.alertType || 'error',
+                                                title: orderData.title || 'Error',
+                                                text: orderData.alertMessage,
                                                 confirmButtonColor: '#007bff'
+                                            }).then(() => {
+                                                if (orderData.redirectUrl) {
+                                                    window.location.href = orderData.redirectUrl;
+                                                }
                                             });
-                                            return;
-                                        }
+                                            return; 
+                                        } 
+                                        // Fallback for other generic errors
                                         Swal.fire({
                                             icon: 'error',
                                             title: orderData.title || 'Error',

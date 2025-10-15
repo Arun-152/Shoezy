@@ -61,7 +61,7 @@
 
           <div class="timer-container">
             <i class="fas fa-clock"></i>
-            <div class="timer">5:00</div>
+            <div class="timer">01:00</div>
           </div>
 
           <div class="otp-inputs-container">
@@ -105,7 +105,14 @@
   const timerElement = document.querySelector('.timer');
   const otpError = document.getElementById('otpError');
   const otpErrorMessage = document.getElementById('otpErrorMessage');
-  let timeLeft = 60; // 60 seconds OTP validity
+  
+  // --- Timer Persistence Logic ---
+  const otpExpiry = Number('<%= locals.otpExpiry || 0 %>');
+  let timeLeft;
+  let timerInterval;
+
+  // --- End Timer Persistence Logic ---
+
 
   // Auto-focus handling with validation
   otpInputs.forEach((input, index) => {
@@ -194,19 +201,31 @@
 
   // Timer function
   function updateTimer() {
+    if (otpExpiry > 0) {
+        const now = Date.now();
+        timeLeft = Math.round((otpExpiry - now) / 1000);
+    } else {
+        timeLeft = 0;
+    }
+
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      timerElement.style.color = '#dc3545';
+      timerElement.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Expired';
+      
+      // --- Enable Resend Button when timer expires ---
+      const resendBtn = document.getElementById('resendOtpBtn');
+      const resendCooldown = document.getElementById('resendCooldown');
+      resendBtn.style.display = 'flex';
+      resendBtn.disabled = false;
+      resendCooldown.style.display = 'none';
+      return;
+    }
+
     const minutes = Math.floor(timeLeft / 60);
     const seconds = timeLeft % 60;
     timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-    
-    if (timeLeft <= 0) {
-      timerElement.style.color = '#dc3545';
-      timerElement.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Expired';
-    } else {
-      timeLeft--;
-      setTimeout(updateTimer, 1000);
-    }
   }
-  updateTimer();
 
   // Form submission with error handling
   form.addEventListener('submit', async (e) => {
@@ -267,43 +286,23 @@
   });
 
   // Resend OTP functionality
-  let resendCooldownActive = true;
-  let resendCooldownTime = 60;
-  let resendCooldownInterval;
-
-  function startResendCooldown() {
-    resendCooldownActive = true;
-    resendCooldownTime = 60;
-
+  function initializeTimers() {
     const resendBtn = document.getElementById('resendOtpBtn');
     const resendCooldown = document.getElementById('resendCooldown');
     const cooldownTimer = document.getElementById('cooldownTimer');
 
+    // Initially, hide the button and show the cooldown message
     resendBtn.style.display = 'none';
+    resendBtn.disabled = true;
     resendCooldown.style.display = 'flex';
 
-    resendCooldownInterval = setInterval(() => {
-      cooldownTimer.textContent = resendCooldownTime;
-      resendCooldownTime--;
-
-      if (resendCooldownTime < 0) {
-        clearInterval(resendCooldownInterval);
-        resendCooldownActive = false;
-
-        resendBtn.style.display = 'flex';
-        resendBtn.disabled = false;
-        resendCooldown.style.display = 'none';
-      }
-    }, 1000);
+    // The main timer will handle showing/hiding the resend button
+    updateTimer();
+    timerInterval = setInterval(updateTimer, 1000);
   }
+  initializeTimers();
 
-  startResendCooldown();
-
-  document.getElementById('resendOtpBtn').addEventListener('click', async function() {
-    if (resendCooldownActive) {
-      return;
-    }
-
+  document.getElementById('resendOtpBtn').addEventListener('click', async function(e) {
     const resendBtn = this;
     const originalContent = resendBtn.innerHTML;
     
@@ -333,9 +332,11 @@
         otpInputs[0].focus();
         clearOtpError();
 
-        timeLeft = 60;
-        updateTimer();
-        startResendCooldown();
+        // The page will reload and re-initialize the timer from the new expiry time
+        // sent from the server. For a smoother UX without a page reload, you would
+        // update the otpExpiry variable here from the server response and re-initialize the timer.
+        // For now, a reload is simplest.
+        window.location.reload();
 
       } else {
         Swal.fire({
@@ -353,12 +354,11 @@
         confirmButtonText: 'OK'
       });
     } finally {
-      if (!resendCooldownActive) {
-        resendBtn.disabled = false;
-        resendBtn.innerHTML = originalContent;
-      }
+      resendBtn.disabled = false;
+      resendBtn.innerHTML = originalContent;
     }
   });
+
 </script>
 
 </body>

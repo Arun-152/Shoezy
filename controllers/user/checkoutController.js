@@ -5,7 +5,7 @@ const Product = require("../../models/productSchema");
 const Order = require("../../models/orderSchema");
 const Coupon = require("../../models/CouponSchema");
 const Wallet = require("../../models/walletSchema");
-const { validateCouponForCheckout, markCouponUsed } = require('./couponController'); // Import markCouponUsed
+const { validateCouponForCheckout, markCouponUsed } = require('./couponController'); 
 const bcrypt = require("bcrypt");
 const env = require("dotenv").config();
 
@@ -17,67 +17,54 @@ const loadCheckout = async (req, res) => {
     const user = await User.findById(userId);
     if (!user) return res.redirect('/login');
 
-    const cartItems = await Cart.find({ userId }).populate('items.productId');
+    const cart = await Cart.findOne({ userId }).populate({
+      path: 'items.productId',
+      populate: { path: 'category' }
+    });
+
+    if (!cart || cart.items.length === 0) {
+      req.flash('error', 'Your cart is empty.');
+      return res.redirect('/cart');
+    }
 
     const defaultAddress = await Address.findOne({ userId, isDefault: true });
     const allAddresses = await Address.find({ userId });
     let subtotal = 0;
     let totalItems = 0;
     let allItems = [];
-    let blockedOrDeletedProducts = [];
-    cartItems.forEach(cart => {
-      const filteredItems = cart.items.filter(item => {
-        const product = item.productId;
-        if (product && (product.isBlocked || product.isDeleted)) {
-          blockedOrDeletedProducts.push(product.name);
-        }
-        return product && !product.isBlocked && !product.isDeleted;
-      });
 
-      cart.items = filteredItems;
+    for (const item of cart.items) {
+      const product = item.productId;
+      const isAvailable = product && !product.isDeleted && !product.isBlocked && product.category && !product.category.isDeleted && product.category.isListed;
 
-      filteredItems.forEach(item => {
-        const product = item.productId;
-        const variant = product.variants.find(v => v.size === item.size);
+      if (!product || product.isDeleted || product.isBlocked || !product.category || product.category.isDeleted || !product.category.isListed) {
+        allItems.push({ ...item.toObject(), isAvailable: false, price: 0, totalPrice: 0 });
+        continue;
+      }
 
-        if (variant) {
-          const price = variant.salePrice || variant.regularPrice;
-          const totalPrice = price * item.quantity;
-
-          const itemWithPrice = {
-            ...item.toObject(),
-            price: price,
-            totalPrice: totalPrice
-          };
-
-          subtotal += totalPrice;
-          totalItems += item.quantity;
-          allItems.push(itemWithPrice);
-        } else {
-          // Handle cases where the variant is not found, though this should ideally not happen if cart is managed well
-          console.warn(`Variant not found for product ${product._id} with size ${item.size}`);
-        }
-      });
-    });
+      const variant = product.variants.find(v => v.size === item.size);
+      const price = variant ? (variant.salePrice || variant.regularPrice) : 0;
+      const totalPrice = price * item.quantity;
+      subtotal += totalPrice;
+      totalItems += item.quantity;
+      allItems.push({ ...item.toObject(), isAvailable: true, price, totalPrice });
+    }
     const shipping = 0;
 
-    // --- Start: Corrected Coupon Filtering Logic ---
     const appliedCouponInSession = req.session.appliedCoupon || null;
     const currentDate = new Date();
 
     const allCoupons = await Coupon.find({
       islist: true,
-      startDate: { $lte: currentDate }, // Only active coupons
-      expireOn: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) }   // Only non-expired coupons
+      startDate: { $lte: currentDate }, 
+      expireOn: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) }   
     }).sort({ expireOn: 1 });
 
     const availableCouponsForPage = [];
     for (const couponItem of allCoupons) {
-      // Check global usage limit
       if (couponItem.totalUsageLimit && couponItem.currentUsageCount >= couponItem.totalUsageLimit) {
         continue;
       }
-      // Check if cart subtotal meets minimum purchase requirement
       if (couponItem.minimumPrice > subtotal) {
         continue;
       }
@@ -116,21 +103,11 @@ const loadCheckout = async (req, res) => {
       }
     }
     
-    if (blockedOrDeletedProducts.length > 0) {
-      req.flash('error', `These products are blocked or deleted: ${blockedOrDeletedProducts.join(', ')}`);
-      return res.redirect("/cart");
-    }
-
-    if (allItems.length === 0) {
-      req.flash('error', 'Your cart is empty or contains unavailable products.');
-      return res.redirect('/cart');
-    }
-
     const userWallet = await Wallet.findOne({ userId });
 
     res.render('checkoutPage', {
       user,
-      cartItems,
+      cartItems: cart.items,
       allItems,
       subtotal,
       totalItems,
@@ -138,9 +115,9 @@ const loadCheckout = async (req, res) => {
       totalAmount: finalTotal,
       defaultAddress,
       allAddresses,
-      coupon: availableCouponsForPage, // Pass the correctly filtered coupons
-      appliedCoupon, // Pass the applied coupon data
-      couponDiscount, // Pass the coupon discount amount
+      coupon: availableCouponsForPage,
+      appliedCoupon, 
+      couponDiscount, 
       cart: { total: finalTotal },
       walletBalance: userWallet ? userWallet.balance : 0
     });
@@ -169,58 +146,38 @@ const placeOrder = async (req, res) => {
       });
     }
 
-    const cart = await Cart.findOne({ userId }).populate('items.productId');
+    const cart = await Cart.findOne({ userId }).populate({
+      path: 'items.productId',
+      populate: { path: 'category' }
+    });
     if (!cart || !cart.items || cart.items.length === 0) {
       return res.status(400).json({ success: false, message: "Cart is empty" });
     }
 
-    const blockedProducts = [];
-    const unavailableProducts = [];
+    // Final validation before placing the order
+    const hasUnavailableItem = cart.items.some(item => {
+      const product = item.productId;
+      return !product || product.isDeleted || product.isBlocked || !product.category || product.category.isDeleted || !product.category.isListed;
+    });
 
+    if (hasUnavailableItem) {
+      return res.status(400).json({
+        success: false, showAlert: true, alertType: "error",
+        alertMessage: "Some products in your cart are unavailable or blocked. Please review your cart before checkout."
+      });
+    }
     for (const item of cart.items) {
       const product = item.productId;
-
-      if (!product) {
-        unavailableProducts.push("Unknown Product");
-        continue;
-      }
-
-      if (product.isBlocked) {
-        blockedProducts.push(product.productName);
-        continue;
-      }
-
-      if (product.isDeleted) {
-        unavailableProducts.push(product.productName);
-        continue;
-      }
-
-      if (product.variants) {
-        const variant = product.variants.find(v => v.size === item.size);
-        if (!variant || variant.variantQuantity < item.quantity) {
-          unavailableProducts.push(`${product.productName} (Size: ${item.size})`);
-        }
+      if (!product || product.isDeleted || product.isBlocked || !product.category || product.category.isDeleted || !product.category.isListed) {
+        return res.status(400).json({
+          success: false,
+          showAlert: true,
+          alertType: "error",
+          alertMessage: "Some products in your cart are unavailable or blocked. Please review your cart before checkout."
+        });
       }
     }
-
-    if (blockedProducts.length > 0) {
-      return res.status(400).json({
-        success: false,
-        showAlert: true,
-        alertType: "error",
-        alertMessage: `The following product(s) are currently blocked and unavailable: ${blockedProducts.join(", ")}. Please remove them from your cart and try again.`
-      });
-    }
-
-    if (unavailableProducts.length > 0) {
-      return res.status(400).json({
-        success: false,
-        showAlert: true,
-        alertType: "error",
-        alertMessage: `The following product(s) are currently unavailable: ${unavailableProducts.join(", ")}. Please remove them from your cart and try again.`
-      });
-    }
-
+  // order calculation
     const orderItems = [];
     let totalAmount = 0;
 
@@ -279,7 +236,7 @@ const placeOrder = async (req, res) => {
         } else {
           discountAmount = Math.min(coupon.offerPrice, totalAmount);
         }
-        const originalAmount = totalAmount; // Store original amount before discount
+        const originalAmount = totalAmount; 
         totalAmount = totalAmount - discountAmount;
         couponData = {
           applied: true,
@@ -297,7 +254,7 @@ const placeOrder = async (req, res) => {
       }
     }
 
-    // --- Start: COD Amount Validation ---
+    //  COD Amount Validation
     if (payment === "COD" && totalAmount > 1000) {
       return res.status(400).json({
         success: false,
@@ -306,12 +263,12 @@ const placeOrder = async (req, res) => {
         alertMessage: "Cash on Delivery is not available for orders over ₹1000. Please choose another payment method."
       });
     }
-    // --- End: COD Amount Validation ---
+   
 
     let finalOrderAmount = totalAmount;
     let walletDeduction = 0;
     let orderPaymentMethod = payment;
-    let orderStatus = "Pending"; // Default status
+    let orderStatus = "Pending"; 
 
     const newOrder = new Order({
       orderNumber,
@@ -328,8 +285,8 @@ const placeOrder = async (req, res) => {
         pinCode: address.pinCode,
         addressType: address.addressType
       },
-      totalAmount: totalAmount, // This is the original total amount before wallet deduction
-      finalAmount: finalOrderAmount, // This is the amount remaining to be paid after wallet deduction
+      totalAmount: totalAmount, 
+      finalAmount: finalOrderAmount, 
       paymentMethod: orderPaymentMethod,
       paymentStatus: orderStatus,
       walletDeduction: walletDeduction,
@@ -351,22 +308,14 @@ const placeOrder = async (req, res) => {
           alertMessage: "Wallet not found or invalid balance."
         });
       }
-
+   //wallet payment
       if (finalOrderAmount <= userWallet.balance) {
-        // Full payment from wallet
         walletDeduction = finalOrderAmount;
         finalOrderAmount = 0;
         orderPaymentMethod = "Wallet";
         orderStatus = "Paid";
-      } else if (userWallet.balance > 0) {
-        // Partial payment from wallet
-        walletDeduction = userWallet.balance;
-        finalOrderAmount -= walletDeduction;
-        orderPaymentMethod = `Wallet + ${payment.split('_')[1]}`; // e.g., "Wallet + COD"
-        orderStatus = "Pending"; // Remaining amount needs to be paid
       } else {
-        // Wallet selected but balance is 0, proceed with other payment method
-        orderPaymentMethod = payment.split('_')[1]; // e.g., "COD" or "Online"
+        orderPaymentMethod = payment.split('_')[1]; 
         orderStatus = "Pending";
       }
 
@@ -377,7 +326,7 @@ const placeOrder = async (req, res) => {
           amount: walletDeduction,
           description: `Payment for order ${orderNumber}`,
           balanceAfter: userWallet.balance,
-          orderId: newOrder._id, // Now newOrder._id is available
+          orderId: newOrder._id, 
           status: "completed",
           source: "order_payment",
           metadata: {
@@ -388,9 +337,9 @@ const placeOrder = async (req, res) => {
         await userWallet.save();
       }
     } else if (payment === "COD") {
-      orderStatus = "Pending"; // For COD, order is placed but payment is pending
+      orderStatus = "Pending"; 
     } else if (payment === "Online") {
-      orderStatus = "Pending"; // For online, payment is pending
+      orderStatus = "Pending"; 
     }
 
     newOrder.paymentMethod = orderPaymentMethod;
@@ -399,18 +348,18 @@ newOrder.finalAmount = finalOrderAmount;
 newOrder.walletDeduction = walletDeduction;
 await newOrder.save();
 
-// Update item + order status if fully paid
+// Update item + order status 
 if (orderStatus === "Paid") {
   newOrder.items.forEach(item => (item.status = "Processing"));
   newOrder.orderStatus = "Processing";
   await newOrder.save();
 }
 
-    // Update coupon usage if a coupon was applied
+    // Update coupon usage 
     if (couponData.applied) {
       await markCouponUsed(couponData.couponId, userId);
 
-      // Update userUsage array in Coupon
+      
       await Coupon.findByIdAndUpdate(couponData.couponId, {
         $push: {
           userUsage: {
@@ -442,7 +391,6 @@ if (orderStatus === "Paid") {
 
     await Cart.updateOne({ userId }, { $set: { items: [] } });
 
-    // Clear applied coupon from session after order is placed
     delete req.session.appliedCoupon;
 
     res.status(200).json({

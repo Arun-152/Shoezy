@@ -6,7 +6,7 @@ const nodemailer = require("nodemailer");
 const Wallet = require("../../models/walletSchema")
 const { validateEmailConfig, createEmailTransporter, sendEmail } = require("../../config/emailConfig");
 require("dotenv").config();
-const {generatedReferralCode} = require("../../helpers/generateReferral")
+const { generatedReferralCode } = require("../../helpers/generateReferral")
 const userErrorPage = (req, res) => {
     try {
         return res.render("usererrorPage");
@@ -51,21 +51,16 @@ const loginPage = async (req, res) => {
 };
 
 const logout = (req, res) => {
-    // Check if user session exists
     if (req.session && req.session.userId) {
-        // Destroy only the user session key
         delete req.session.userId;
 
-        // Optionally, clear any other user-specific data
-        delete req.session.userName; // if stored
-        delete req.session.isUserAuthenticated; // if using flag
+        delete req.session.userName;
+        delete req.session.isUserAuthenticated;
 
-        // Clear session cookie if needed
         res.clearCookie('connect.sid');
 
         return res.redirect('/login');
     } else {
-        // If user session doesn't exist, redirect anyway
         return res.redirect('/login');
     }
 };
@@ -76,7 +71,6 @@ function generateOtp() {
 
 async function sendVerificationEmail(email, otp) {
     try {
-        // Validate email configuration first
         const validation = validateEmailConfig();
         if (!validation.isValid) {
             return false;
@@ -220,9 +214,11 @@ const postSignup = async (req, res) => {
 const otpVerification = async (req, res) => {
     try {
         if (req.session.user && req.session.userOtp) {
-            return res.render("otpverification"); // Render the OTP verification page
+            return res.render("otpverification", {
+                otpExpiry: req.session.userOtp.expiresAt
+            });
         }
-        return res.redirect("/signup"); // Redirect to signup if no session data
+        return res.redirect("/signup");
     } catch (error) {
         console.error("Error loading OTP verification page:", error);
         res.status(500).redirect("/usererrorPage");
@@ -239,7 +235,7 @@ const verifyOTP = async (req, res) => {
         }
 
         const sessionOTP = req.session.userOtp;
-        const { fullname, email, phone, hashedPassword, referralCode ,generatedReferralCode} = req.session.user;
+        const { fullname, email, phone, hashedPassword, referralCode, generatedReferralCode } = req.session.user;
 
 
         if (!sessionOTP || Date.now() > sessionOTP.expiresAt) {
@@ -261,63 +257,61 @@ const verifyOTP = async (req, res) => {
             phone,
             password: hashedPassword,
             referralCode: generatedReferralCode,
-            referredBy:  referralCode ? referralCode.trim() : null,
+            referredBy: referralCode ? referralCode.trim() : null,
         });
         await newUser.save();
 
-      const wallet = new Wallet({
-  userId: newUser._id,
-  balance: 0,
-  transactions: []
-});
-await wallet.save();
+        //wallet and welcome bonus
+        const wallet = new Wallet({
+            userId: newUser._id,
+            balance: 0,
+            transactions: []
+        });
+        await wallet.save();
 
-// --- Referral Bonus Logic ---
-if (referralCode) {
-  const referrer = await User.findOne({ referralCode });
+        if (referralCode) {
+            const referrer = await User.findOne({ referralCode });
 
-  if (referrer) {
-    // --- 1️⃣ Update Referrer Wallet ---
-    const referrerWallet = await Wallet.findOneAndUpdate(
-      { userId: referrer._id },
-      { $inc: { balance: 100 } },
-      { new: true }
-    );
+            if (referrer) {
+                const referrerWallet = await Wallet.findOneAndUpdate(
+                    { userId: referrer._id },
+                    { $inc: { balance: 100 } },
+                    { new: true }
+                );
 
-    if (referrerWallet) {
-      referrerWallet.transactions.push({
-        type: "credit",
-        amount: 100,
-        description: `Referral bonus for inviting ${newUser.name || "a new user"}`,
-        status: "completed",
-        metadata: {
-          referredUserId: newUser._id
+                if (referrerWallet) {
+                    referrerWallet.transactions.push({
+                        type: "credit",
+                        amount: 100,
+                        description: `Referral bonus for inviting ${newUser.name || "a new user"}`,
+                        status: "completed",
+                        metadata: {
+                            referredUserId: newUser._id
+                        }
+                    });
+                    await referrerWallet.save();
+                }
+
+                const newUserWallet = await Wallet.findOneAndUpdate(
+                    { userId: newUser._id },
+                    { $inc: { balance: 50 } },
+                    { new: true }
+                );
+
+                if (newUserWallet) {
+                    newUserWallet.transactions.push({
+                        type: "credit",
+                        amount: 50,
+                        description: "Referral join bonus credited to your wallet",
+                        status: "completed",
+                        metadata: {
+                            referrerId: referrer._id
+                        }
+                    });
+                    await newUserWallet.save();
+                }
+            }
         }
-      });
-      await referrerWallet.save();
-    }
-
-    // --- 2️⃣ Update New User Wallet ---
-    const newUserWallet = await Wallet.findOneAndUpdate(
-      { userId: newUser._id },
-      { $inc: { balance: 50 } },
-      { new: true }
-    );
-
-    if (newUserWallet) {
-      newUserWallet.transactions.push({
-        type: "credit",
-        amount: 50,
-        description: "Referral join bonus credited to your wallet",
-        status: "completed",
-        metadata: {
-          referrerId: referrer._id
-        }
-      });
-      await newUserWallet.save();
-    }
-  }
-}
 
         req.session.userOtp = null;
         req.session.user = null;
@@ -346,7 +340,7 @@ const resendOTP = async (req, res) => {
 
         req.session.userOtp = {
             code: newOTP,
-            expiresAt: Date.now() + 5 * 60 * 1000,
+            expiresAt: Date.now() + 60 * 1000, 
         };
         console.log("Resend Signup OTP:", newOTP);
         res.json({ success: true, message: "New OTP has been sent to your email address" });
@@ -377,7 +371,6 @@ const userPostLogin = async (req, res) => {
             });
         }
 
-        // Password validation
         if (!password || password.trim().length === 0) {
             if (isAjax) {
                 return res.status(400).json({
@@ -515,7 +508,6 @@ async function sendPasswordResetOTP(email, otp) {
 
 const forgotPasswordPage = (req, res) => {
     try {
-        // This function correctly renders the page to enter the email.
         res.render("forgotEmail");
     } catch (error) {
         console.error("Forgot password page not loading", error);
@@ -527,31 +519,26 @@ const sendResetLink = async (req, res) => {
     try {
         const { email } = req.body;
 
-        // Check if email is provided
         if (!email) {
             return res.status(400).json({ success: false, message: "Please enter your email" });
         }
 
-        // Basic email format validation
         const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
         if (!isValidEmail) {
             return res.status(400).json({ success: false, message: "Invalid email format" });
         }
 
-        // Check if user exists
         const user = await User.findOne({ email: email.toLowerCase() });
         if (!user) {
             return res.status(404).json({ success: false, message: "No user found with this email" });
         }
 
-        // Check if user is blocked
         if (user.isBlocked) {
             return res.status(403).json({ success: false, message: "Your account is blocked" });
         }
 
         const otp = generateOtp();
 
-        // Store OTP in session first
         req.session.passwordResetOTP = {
             code: otp,
             email: email.toLowerCase(),
@@ -568,7 +555,6 @@ const sendResetLink = async (req, res) => {
             }
 
             console.log("Password Reset OTP:", otp);
-            // Change the redirect to match your GET route
             res.json({ success: true, message: "OTP has been sent to your email address", redirect: "/verifyResetOtp" });
         } catch (emailError) {
             console.error("Email sending error:", emailError);
@@ -615,11 +601,9 @@ const postVerifyOTP = async (req, res) => {
             return res.status(400).json({ success: false, message: "OTP is required" });
         }
 
-        // Convert to string and trim
         const trimmedOTP = String(otp).trim();
 
 
-        // Fixed regex pattern - single backslash
         if (trimmedOTP.length !== 6 || !/^\d{6}$/.test(trimmedOTP)) {
 
             return res.status(400).json({ success: false, message: "OTP must be 6 digits" });
@@ -640,7 +624,6 @@ const postVerifyOTP = async (req, res) => {
             return res.status(400).json({ success: false, message: "OTP has expired. Please click the Resend OTP button." });
         }
 
-        // Convert session OTP to string for comparison
         const sessionOTPCode = String(sessionOTP.code).trim();
 
 
@@ -651,11 +634,8 @@ const postVerifyOTP = async (req, res) => {
         }
 
 
-
-        // Mark OTP as verified
         req.session.passwordResetOTP.verified = true;
 
-        // Save session to ensure the verified flag is persisted
         req.session.save((err) => {
             if (err) {
                 console.error("Session save error:", err);
@@ -840,13 +820,13 @@ module.exports = {
     signupPage,
     loginPage,
     postSignup,
-    otpVerification, 
+    otpVerification,
     verifyOTP,
     logout,
     resendOTP,
     userErrorPage,
     forgotPasswordPage,
-    sendResetLink, 
+    sendResetLink,
     verifyOTPPage,
     postVerifyOTP,
     resendResetOTP,

@@ -10,12 +10,11 @@ const homePage = async (req, res) => {
         const userData = req.session.userId;
         let user = null;
 
-        // Check if user is logged in
+        // Check if user is logged 
         if (userData) {
             user = await User.findById(userData);
         }
 
-        // Fetch products with conditions
         const featuredProducts = await Product.find({ isDeleted: false, isBlocked: false })
             .populate({
                 path: "category",
@@ -24,8 +23,6 @@ const homePage = async (req, res) => {
             .sort({ createdAt: -1 })
             .limit(6);
           
-
-        // Filter products whose category is valid (not null after populate)
         const filteredProducts = featuredProducts.filter(product => product.category !== null);
      
 
@@ -34,7 +31,6 @@ const homePage = async (req, res) => {
         let cartItems = [];
 
         if (userData) {
-            // Fetch wishlist
             const userWishlist = await Wishlist.findOne({ userId: userData }).populate({
                 path: 'products.productId',
                 match: { isDeleted: false, isBlocked: false },
@@ -48,12 +44,10 @@ const homePage = async (req, res) => {
 
             if (userWishlist && userWishlist.products.length > 0) {
                 wishlistItems = userWishlist.products
-                    .filter(item => item.productId && item.productId.category) // Ensure valid product and category
+                    .filter(item => item.productId && item.productId.category) 
                     .map(item => item.productId._id.toString());
             }
-          
-
-            // Fetch cart
+     
             const userCart = await Cart.findOne({ userId: userData }).populate({
                 path: 'items.productId',
                 match: { isDeleted: false, isBlocked: false },

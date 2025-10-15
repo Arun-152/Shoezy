@@ -15,18 +15,15 @@ const productDetailPage = async (req, res) => {
                 return res.redirect("/login");
             }
         } else {
-            // Redirect to login if user is not authenticated
             return res.redirect("/login");
         }
 
         const productId = req.params.id;
 
-        // Validate product ID
         if (!productId || !productId.match(/^[0-9a-fA-F]{24}$/)) {
             return res.status(404).render("usererrorPage");
         }
 
-        // Find the product with populated category
         const product = await Product.findOne({
             _id: productId,
             isDeleted: false,
@@ -37,11 +34,10 @@ const productDetailPage = async (req, res) => {
             return res.render("usererrorPage");
         }
 
-        // Find related products from the same category
         let relatedProducts = [];
         if (product.category) {
             relatedProducts = await Product.find({
-                _id: { $ne: productId }, // Exclude current product
+                _id: { $ne: productId },
                 category: product.category._id,
                 isDeleted: false,
                 isBlocked: false
@@ -50,9 +46,8 @@ const productDetailPage = async (req, res) => {
                 path: "category",
                 match: { isListed: true, isDeleted: false }
             })
-            .limit(4); // Limit to 4 related products
+            .limit(4); 
 
-            // Filter out products with unlisted categories
             relatedProducts = relatedProducts.filter(product => product.category !== null);
         }
         if (relatedProducts.length < 4) {
@@ -67,24 +62,19 @@ const productDetailPage = async (req, res) => {
             })
             .limit(4 - relatedProducts.length);
 
-            // Filter out products with unlisted categories
             const filteredAdditionalProducts = additionalProducts.filter(product => product.category !== null);
             relatedProducts = [...relatedProducts, ...filteredAdditionalProducts];
         }
 
-        // Initialize empty arrays for wishlist and cart items
         let wishlistItems = [];
         let cartItems = [];
 
-        // Fetch user's wishlist and cart data
         if (userData) {
-            // Fetch user's wishlist
             const userWishlist = await Wishlist.findOne({ userId: userData._id }).populate('products.productId');
             if (userWishlist && userWishlist.products) {
                 wishlistItems = userWishlist.products.map(item => item.productId).filter(product => product !== null);
             }
 
-            // Fetch user's cart - Fixed to properly check if product is in cart
             const userCart = await Cart.findOne({ userId: userData._id }).populate('items.productId');
             if (userCart && userCart.items) {
                 cartItems = userCart.items

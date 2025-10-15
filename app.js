@@ -131,7 +131,6 @@ const killProcessOnPort = (port) => {
                 }
             });
         } catch (error) {
-            // Silently fail if no process is found
         }
     }
 };

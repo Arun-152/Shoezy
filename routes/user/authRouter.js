@@ -7,7 +7,7 @@ const router = express.Router();
 router.get('/google',
     passport.authenticate('google', {
         scope: ['profile', 'email'],
-        prompt: 'select_account'  // Force account chooser modal
+        prompt: 'select_account' 
     })
 );
 
@@ -28,7 +28,6 @@ router.get('/google/callback',
             if (req.session) {
                 req.session.userId = req.user._id;
 
-                // Add success flash message
                 req.flash('success_msg', 'Successfully signed in with Google!');
                 res.redirect('/home');
             } else {
@@ -43,14 +42,11 @@ router.get('/google/callback',
     }
 );
 
-// Handle POST request to /auth/google (from the form)
 router.post('/google', (req, res) => {
     res.redirect('/auth/google');
 });
 
-// Logout route (backup - main logout is in userController)
 router.get('/logout', (req, res) => {
-    // Check if session exists before attempting logout
     if (req.session) {
         if (req.logout && typeof req.logout === 'function') {
             req.logout((err) => {
@@ -58,19 +54,16 @@ router.get('/logout', (req, res) => {
                     console.error('Logout error:', err);
                     return res.redirect('/home');
                 }
-                // After passport logout, destroy the session
                 req.session.destroy((err) => {
                     if (err) {
                         console.error('Session destroy error:', err);
                         return res.redirect('/home');
                     }
-                    // Clear the session cookie
                     res.clearCookie('connect.sid');
                     res.redirect('/login');
                 });
             });
         } else {
-            // If no passport logout needed, just destroy session
             req.session.destroy((err) => {
                 if (err) {
                     console.error('Session destroy error:', err);
@@ -81,7 +74,6 @@ router.get('/logout', (req, res) => {
             });
         }
     } else {
-        // No session exists, just redirect
         res.clearCookie('connect.sid');
         res.redirect('/login');
     }
