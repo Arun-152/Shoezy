@@ -115,13 +115,13 @@
     <header class="header">
         <div class="container">
             <h1><i class="fas fa-shopping-cart"></i> Shopping Cart</h1>
-            <p class="header-subtitle">Review your items and proceed to checkout</p>
         </div>
     </header>
 
     <main class="main">
         <div class="container">
             <!-- Cart Summary Bar -->
+            <% if (cartItems && cartItems.length > 0) { %>
             <div class="cart-summary-bar">
                 <div class="cart-info">
                     <span class="cart-items-count" id="cartItemsCount"><%= cartCount %> item<%= cartCount !== 1 ? 's' : '' %></span>
@@ -134,6 +134,7 @@
                     </button>
                 </div>
             </div>
+            <% } %>
 
             <div class="cart-layout">
                 <!-- Cart Items Section -->

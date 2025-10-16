@@ -355,24 +355,18 @@ body {
   }
   
   .login-form-section {
-    order: 2;
-    flex: 1 1 auto; /* Allow form section to grow and shrink */
-    overflow-y: auto; /* Allow scrolling ONLY on mobile if content overflows */
+    flex: 1 1 100%; /* Take full height and width */
+    width: 100%;
+    overflow-y: auto; /* Allow scrolling if content overflows */
     padding: 30px 20px;
   }
   
   .login-form-wrapper {
-    margin: 20px auto; /* Add some vertical margin for better spacing */
+    margin: 20px auto; /* Add vertical margin for better spacing */
   }
 
   .image-section {
-    order: 1;
-    min-height: 300px;
-    flex: none;
-  }
-  
-  .sneaker-image {
-    width: 250px;
+    display: none; /* Hide image section on mobile */
   }
   
   .brand-logo h1 {
@@ -397,14 +391,12 @@ body {
     margin-bottom: 30px;
   }
   
-  .form-buttons, .social-login { gap: 12px; }
+  .form-buttons, .social-login { 
+    gap: 12px; 
+  }
 
   .login-header {
     margin-bottom: 30px;
-  }
-  
-  .sneaker-image {
-    width: 200px;
   }
   
   .floating-dot {

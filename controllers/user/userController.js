@@ -780,11 +780,11 @@ const loadCoupen = async (req, res) => {
 // Render Contact Page
 const getContactPage = async (req, res) => {
     try {
-        const user = await User.findById(req.session.userId);
-        if (!user) {
-            return res.redirect("/login");
-        } 
-        return res.render("contactPage");
+        let user = null;
+        if (req.session.userId) {
+            user = await User.findById(req.session.userId);
+        }
+       return res.render("contactPage", { user });
     } catch (error) {
         console.error("Error rendering Contact page:", error);
         return res.render("user500");
@@ -794,11 +794,11 @@ const getContactPage = async (req, res) => {
 // Render About Page
 const getAboutPage = async (req, res) => {
     try {
-        const user = await User.findById(req.session.userId);
-        if (!user) {
-            return res.redirect("/login");
-        } 
-        return res.render("aboutPage");
+        let user = null;
+        if (req.session.userId) {
+            user = await User.findById(req.session.userId);
+        }
+        return res.render("aboutPage", { user });
     } catch (error) {
         console.error("Error rendering About page:", error);
         return res.render("user500");

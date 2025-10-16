@@ -307,16 +307,14 @@ body {
     }
     
     .login-section {
+        flex: 1;
         order: 1;
-        flex: none;
-        min-height: auto;
+        min-height: 100vh;
         padding: 30px 20px;
     }
     
     .image-section {
-        order: 2;
-        flex: none;
-        min-height: 300px;
+        display: none; /* Hide image section on mobile */
     }
     
     .brand-name {
@@ -333,60 +331,6 @@ body {
     .login-subtitle {
         text-align: center;
         margin-bottom: 30px;
-    }
-    
-    .shoe-image {
-        width: 250px;
-    }
-    
-    .gradient-circle {
-        width: 280px;
-        height: 280px;
-    }
-    
-    .gradient-circle-2 {
-        width: 200px;
-        height: 200px;
-    }
-}
-
-@media (max-width: 480px) {
-    .login-section {
-        padding: 20px 15px;
-    }
-    
-    .login-wrapper {
-        max-width: 100%;
-    }
-    
-    .brand-name {
-        font-size: 1.8rem;
-    }
-    
-    .login-title {
-        font-size: 1.2rem;
-    }
-    
-    .login-subtitle {
-        font-size: 0.85rem;
-    }
-    
-    .image-section {
-        min-height: 250px;
-    }
-    
-    .shoe-image {
-        width: 200px;
-    }
-    
-    .gradient-circle {
-        width: 220px;
-        height: 220px;
-    }
-    
-    .gradient-circle-2 {
-        width: 150px;
-        height: 150px;
     }
     
     .login-form input {
@@ -410,21 +354,42 @@ body {
     }
 }
 
+@media (max-width: 480px) {
+    .login-section {
+        padding: 20px 15px;
+    }
+    
+    .login-wrapper {
+        max-width: 100%;
+    }
+    
+    .brand-name {
+        font-size: 1.8rem;
+    }
+    
+    .login-title {
+        font-size: 1.2rem;
+    }
+    
+    .login-subtitle {
+        font-size: 0.85rem;
+    }
+}
+
 /* Landscape Mobile */
 @media (max-width: 768px) and (orientation: landscape) {
     .login-container {
-        flex-direction: row;
+        flex-direction: column; /* Ensure single column in landscape mobile */
     }
     
     .login-section {
-        order: 1;
         flex: 1;
+        order: 1;
+        min-height: 100vh;
     }
     
     .image-section {
-        order: 2;
-        flex: 1;
-        min-height: 100vh;
+        display: none; /* Hide image section in landscape mobile */
     }
     
     .brand-name {
@@ -446,19 +411,11 @@ body {
     .login-wrapper {
         max-width: 350px;
     }
-    
-    .shoe-image {
-        width: 200px;
-    }
 }
 
 /* Animation for elements */
 .login-wrapper {
     animation: slideInLeft 0.6s ease-out;
-}
-
-.shoe-container {
-    animation: slideInRight 0.8s ease-out;
 }
 
 @keyframes slideInLeft {

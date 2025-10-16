@@ -72,10 +72,10 @@ router.get("/referral",userAuth,referralController.getReferralPage)
 
 
 // Contact page route
-router.get("/contact",userAuth,userController.getContactPage);
+router.get("/contact",userController.getContactPage);
 
 // About page route
-router.get("/about",userAuth,userController.getAboutPage);
+router.get("/about",userController.getAboutPage);
 
 router.use("/auth",authRouter)
 router.use("/cart",cartRouter)

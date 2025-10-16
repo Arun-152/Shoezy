@@ -256,6 +256,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-top: 20px;
     background: #ffffff; /* Changed to solid white */
     padding: 1.5rem 2rem;
     border-radius: 15px;
@@ -328,6 +329,12 @@ body {
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: 2rem;
+}
+
+/* When the cart items section is the only child (i.e., cart is empty),
+   make it span both columns of the grid. */
+.cart-items-section:only-child {
+    grid-column: 1 / -1;
 }
 
 /* Cart Items Section */

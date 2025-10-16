@@ -54,7 +54,7 @@ const loadAddToCart = async (req, res) => {
       },
     });
 
-    const shipping = subtotal > 500 ? 0 : 50;
+    const shipping = 0;
     const total = subtotal + shipping;
 
     return res.render("addToCartPage", {
