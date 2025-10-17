@@ -30,6 +30,9 @@ const UserSchema = new Schema(
         },
         googleId: {
             type: String,
+            required: false,
+            unique: true,
+            trim: true,
             default: null,
         },
         profilePicture: {

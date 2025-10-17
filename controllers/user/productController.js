@@ -7,16 +7,7 @@ const Wishlist = require("../../models/wishlistSchema");
 
 const productDetailPage = async (req, res) => {
     try {
-        // Check if user is logged in
-        let userData = null;
-        if (req.session.userId) {
-            userData = await User.findById(req.session.userId);
-            if (!userData) {
-                return res.redirect("/login");
-            }
-        } else {
-            return res.redirect("/login");
-        }
+        const userData =User.findById(req.session.userId) ||req.session.userId;
 
         const productId = req.params.id;
 

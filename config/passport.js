@@ -1,49 +1,74 @@
-const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const User = require('../models/userSchema');
-const { generatedReferralCode } = require('../helpers/generateReferral');
-require('dotenv').config();
+const passport = require("passport");
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const User = require("../models/userSchema");
+const env = require("dotenv").config();
+const {generatedReferralCode } = require("../helpers/generateReferral")
 
-passport.use(new GoogleStrategy({
-    clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: process.env.GOOGLE_CALLBACK_URL,
-    passReqToCallback: false,
-  },
-  async (accessToken, refreshToken, profile, done) => {
-    try {
-      const existingUser = await User.findOne({ googleId: profile.id });
 
-      if (existingUser) {
-        return done(null, existingUser);
+
+passport.use(
+  new GoogleStrategy(
+    { 
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: process.env.GOOGLE_CALLBACK_URL,
+      passReqToCallback: true,
+    },
+    async (req, accessToken, refreshToken, profile, done) => {
+      try {
+        const fullname = profile.displayName;
+        const email = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
+        const profilePicture = profile.photos && profile.photos[0]? profile.photos[0].value : "";
+
+        const user = await User.findOne({ email });
+        if (user) {
+          if(user.isBlocked){
+            return done(null,false,{message:"Your account has been blocked by admin"})
+          }
+          if(!user.googleId){
+             user.googleId = profile._id
+             if(!user.profilePicture || !user.profilePicture.url){
+               user.profileImage = { public_id: "", url: profilePicture };
+            }
+            await user.save();
+          }
+          return done(null, user);
+        }
+
+        const newUser = {
+          fullname,
+          email,
+          googleId: profile._id,
+          profilePicture:{
+            public_id: "",
+            url: profilePicture
+          },
+          phone:"Registered By Google",
+          referralCode:generatedReferralCode(),
+          
+        }
+        await newUser.save();
+        return done(null, newUser); 
+
+      } catch (error) {
+        return done(error, null);
       }
-
-      
-      const fullName = profile.name?.givenName || "NofullName";
-      const email = profile.emails?.[0]?.value || `nodemail-${profile.id}@google.com`;
-      console.log("name",fullName,email)
-      console.log("referalcode",generatedReferralCode(fullName))
-      const newUser = new User({
-        googleId: profile.id,
-        fullname: fullName,
-        email: email,
-        referralCode:generatedReferralCode(fullName)
-      });
-
-      await newUser.save();
-      done(null, newUser);
-    } catch (err) {
-      done(err);
     }
-  }
-));
+  )
+);
 
 passport.serializeUser((user, done) => {
   done(null, user.id);
 });
-passport.deserializeUser(async (id, done) => {
-  const user = await User.findById(id);
-  done(null, user);
+
+passport.deserializeUser((id, done) => {
+  User.findById(id)
+    .then((user) => {
+      done(null, user);
+    })
+    .catch((err) => {
+      done(err, null);
+    });
 });
 
-module.exports=passport
+module.exports=passport;

@@ -4,7 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Edit Product</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link rel="stylesheet" href="/css/editproduct.css" />
+  <link rel="stylesheet" href="/css/adminOrderDetailsPage.css"/>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" />
   <style>
@@ -70,8 +72,36 @@
   </style>
 </head>
 <body>
+  <%- include('../partials/admin/sidebar') %>
+  <main class="main-content">
+        <header class="header">
+          <div class="header-left">
+            <button class="menu-toggle" id="menuToggle">
+              <i class="fas fa-bars"></i>
+            </button>
+          </div>
+          <div class="header-right">
+            <div class="notification">
+              <i class="fas fa-bell"></i>
+            </div>
+            <div class="admin-profile">
+              <i class="fas fa-user-circle"></i>
+              <span>ADMIN</span>
+            </div>
+          </div>
+        </header>
+         <div class="breadcrumb">
+          <div class="breadcrumb-nav">
+            <a href="/admin/dashboard">
+              <i class="fas fa-home"></i> Dashboard
+            </a>
+            <span class="separator">/</span>
+            <a href="/admin/products">Products</a>
+            <span class="separator">/</span>
+            <span class="current">Edit Products</span>
+          </div>
+        </div>
   <div class="container">
-    <%- include('../partials/admin/breadcrumb', { currentPath: '/admin/products/edit' }) %>
     <h1>Edit Product</h1>
     <p class="subtitle">Update and manage your product inventory</p>
 

@@ -390,7 +390,7 @@
                                         data-status="<%= product.status || 'Available' %>"
                                         data-brand="<%= product.brand || '' %>" data-color="<%= product.color || '' %>"
                                         data-product-offer="<%= product.bestOffer || 0 %>"
-                                        onclick="<%= typeof user !== 'undefined' && user ? `window.location.href='/product/${product._id}'` : 'redirectToLogin()' %>"
+                                        onclick="window.location.href='/product/<%= product._id %>'"
                                         style="cursor: pointer;">
 
                                         <div class="product-image-container">

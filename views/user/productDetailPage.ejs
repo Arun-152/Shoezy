@@ -1383,7 +1383,6 @@
                             headers: {
                                 'Content-Type': 'application/json',
                                 'Accept': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest'
                             },
                             body: JSON.stringify({
                                 productId: '<%= product._id %>',
@@ -1411,6 +1410,10 @@
                                 timerProgressBar: true
                             });
                         } else {
+                            if(data.message ==="Please login to continue"){
+                                window.location.href = "/login";
+                                return;
+                            }
                             Swal.fire({
                                 toast: true,
                                 position: 'top-end',
@@ -1446,6 +1449,7 @@
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
+                                "Accept": "application/json",
                             },
                             body: JSON.stringify({ productId: productId })
                         });
@@ -1485,6 +1489,10 @@
                                 });
                             }
                         } else {
+                            if(data.message ==="Please login to continue"){
+                                window.location.href = "/login";
+                                return;
+                            }
                             Swal.fire({
                                 toast: true,
                                 position: 'top-end',
