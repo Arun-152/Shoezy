@@ -26,7 +26,7 @@ passport.use(
             return done(null,false,{message:"Your account has been blocked by admin"})
           }
           if(!user.googleId){
-             user.googleId = profile._id
+             user.googleId = profile.id
              if(!user.profilePicture || !user.profilePicture.url){
                user.profileImage = { public_id: "", url: profilePicture };
             }
@@ -38,7 +38,7 @@ passport.use(
         const newUser = {
           fullname,
           email,
-          googleId: profile._id,
+          googleId: profile.id,
           profilePicture:{
             public_id: "",
             url: profilePicture
