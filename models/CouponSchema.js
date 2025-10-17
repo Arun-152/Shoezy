@@ -33,6 +33,14 @@ const couponSchema = new Schema({
     type: Number,
     required: true
   },
+  maxAmount: {
+    type: Number,
+    // Max amount is only required for percentage-based coupons
+    required: function() {
+      return this.discountType === 'percentage';
+    },
+    min: [0, "Max amount must be a non-negative number"]
+  },
   minimumPrice: {
     type: Number,
     required: true

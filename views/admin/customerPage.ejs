@@ -76,7 +76,7 @@
                                         <% customers.forEach((customer, index)=> { %>
                                             <tr class="table-row" data-customer-id="<%= customer.id %>">
                                                 <td class="table-cell si-no-cell">
-                                                    <%= index + 1 %>
+                                                    <%= (currentPage - 1) * limit + index + 1 %>
                                                 </td>
                                                 <td class="table-cell">
                                                     <%= customer.fullname %>

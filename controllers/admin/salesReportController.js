@@ -14,7 +14,7 @@ const formatPayment = (pm) => {
 
 const loadSalesReport = async (req, res) => {
   try {
-    const { startDate, endDate, status = 'all', payment = 'all', page = '1', limit = '10', sort = 'date-newest', search = '', timeRange } = req.query;
+    const { startDate, endDate, status = 'all', payment = 'all', page = '1', sort = 'date-newest', search = '', timeRange } = req.query;
 
     let effectiveStartDate = startDate;
     let effectiveEndDate = endDate;
@@ -49,18 +49,14 @@ const loadSalesReport = async (req, res) => {
       }
     }
 
-    const pageNum = Math.max(parseInt(page, 5), 1);
-    const limitNum = Math.max(parseInt(limit, 5), 1);
+    const pageNum = parseInt(page, 10) > 0 ? parseInt(page, 10) : 1;
+    const limitNum = 5; // Enforce a limit of 5 records per page
     const skip = (pageNum - 1) * limitNum;
 
     const match = {
       orderStatus: { $nin: ["Failed", "payment-failed"] },
       paymentStatus: { $ne: "Failed_Stock_Issue" }
     };
-
-    if (status && status !== 'all') {
-      match.orderStatus = new RegExp(`^${status}$`, 'i');
-    }
 
     if (payment && payment !== 'all') {
       const paymentMap = { online: 'Online', cod: 'COD', wallet: 'Wallet' };
@@ -92,28 +88,17 @@ const loadSalesReport = async (req, res) => {
       case 'date-oldest':
         sortOption = { createdAt: 1 };
         break;
-      case 'amount-low':
-        sortOption = { totalAmount: 1 };
-        break;
-      case 'amount-high':
-        sortOption = { totalAmount: -1 };
-        break;
       case 'date-newest':
+        sortOption = { createdAt: -1 };
+        break;
+      // Sorting by amount will be handled after calculations in the pipeline
+      // case 'amount-low':
+      // case 'amount-high':
+      //   break;
       default:
         sortOption = { createdAt: -1 };
         break;
     }
-
-    const totalCount = await Order.countDocuments(match);
-
-    const orders = await Order.find(match)
-      .populate('userId', 'firstName lastName email')
-      .populate('items.productId')
-      .populate('couponId', 'discountType') 
-      .sort(sortOption)
-      .skip(skip)
-      .limit(limitNum)
-      .lean();
 
     const allFilteredOrders = await Order.find(match)
       .populate('couponId', 'discountType')
@@ -149,29 +134,129 @@ const loadSalesReport = async (req, res) => {
     const totalSalesAllPages = allRevenueItems.reduce((acc, item) => acc + item.productPrice, 0);
     const netRevenueAllPages = allRevenueItems.reduce((acc, item) => acc + item.productNetPrice, 0);
 
-    const salesData = orders.flatMap(order => {
-      const orderDiscount = Number(order.discountAmount) || 0;
-      const orderSubtotal = order.items.reduce((sum, item) => sum + (Number(item.totalPrice) || 0), 0);
-      const isFlatCoupon = order.couponId?.discountType === 'flat';
-      const totalItemsInOrder = order.items.length > 0 ? order.items.length : 1;
+    const aggregationPipeline = [
+      { $match: match },
+      {
+        $addFields: {
+          // Store the original item count before unwinding
+          originalItemCount: { $size: '$items' }
+        }
+      },
+      { $unwind: '$items' },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'products',
+          localField: 'items.productId',
+          foreignField: '_id',
+          as: 'items.product'
+        }
+      },
+      { $unwind: { path: '$items.product', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'coupons',
+          localField: 'couponId',
+          foreignField: '_id',
+          as: 'coupon'
+        }
+      },
+      { $unwind: { path: '$coupon', preserveNullAndEmptyArrays: true } }
+    ];
 
-      return order.items.map(item => {
+    // Apply item status filter after unwinding
+    if (status && status !== 'all') {
+      aggregationPipeline.push({
+        $match: { 'items.status': new RegExp(`^${status}$`, 'i') }
+      });
+    }
+
+    const countPipeline = [...aggregationPipeline, { $count: 'totalCount' }];
+    const countResult = await Order.aggregate(countPipeline);
+    const totalCount = countResult.length > 0 ? countResult[0].totalCount : 0;
+
+    const dataPipeline = [
+      ...aggregationPipeline,
+      {
+        $addFields: {
+          'items.productNetPrice': {
+            $let: {
+              vars: {
+                itemPrice: { $ifNull: ['$items.totalPrice', 0] },
+                orderDiscount: { $ifNull: ['$discountAmount', 0] },
+                orderSubtotal: { $ifNull: ['$subtotal', 1] }, // Avoid division by zero
+                totalItemsInOrder: { $ifNull: ['$originalItemCount', 1] },
+                isFlatCoupon: { $eq: ['$coupon.discountType', 'flat'] }
+              },
+              in: {
+                $subtract: [
+                  '$$itemPrice',
+                  {
+                    $cond: {
+                      if: '$$isFlatCoupon',
+                      then: { $divide: ['$$orderDiscount', '$$totalItemsInOrder'] },
+                      else: { $multiply: [{ $divide: ['$$itemPrice', '$$orderSubtotal'] }, '$$orderDiscount'] }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    ];
+
+    const orders = await Order.aggregate(dataPipeline);
+
+    orders.forEach(order => {
+      order.couponId = order.coupon;
+      order.items.productId = order.items.product;
+    });
+
+    if (sort === 'amount-low') {
+      orders.sort((a, b) => (a.items.totalPrice || 0) - (b.items.totalPrice || 0));
+    } else if (sort === 'amount-high') {
+      orders.sort((a, b) => (b.items.totalPrice || 0) - (a.items.totalPrice || 0));
+    } else {
+      // Default sort if not amount-based
+      orders.sort((a, b) => {
+        if (sortOption.createdAt) return (new Date(a.createdAt) - new Date(b.createdAt)) * sortOption.createdAt;
+        return 0;
+      });
+    }
+
+    const paginatedOrders = orders.slice(skip, skip + limitNum);
+
+    const salesData = orders.flatMap(order => {
+        const orderDiscount = Number(order.discountAmount) || 0;
+        const orderSubtotal = Number(order.subtotal) || 0;
+        const isFlatCoupon = order.couponId?.discountType === 'flat';
+        const totalItemsInOrder = order.originalItemCount > 0 ? order.originalItemCount : 1;
+
+        const item = order.items;
         let itemPrice = Number(item.totalPrice) || 0;
         let itemDiscount = 0;
 
         if (isFlatCoupon) {
-          itemDiscount = orderDiscount / totalItemsInOrder;
+            itemDiscount = orderDiscount / totalItemsInOrder;
         } else {
-          itemDiscount = orderSubtotal > 0 ? (itemPrice / orderSubtotal) * orderDiscount : 0;
+            itemDiscount = orderSubtotal > 0 ? (itemPrice / orderSubtotal) * orderDiscount : 0;
         }
         let netItemPrice = itemPrice - itemDiscount;
 
         const isCancelledOrReturned = ['Cancelled', 'Returned'].includes(item.status || order.orderStatus);
         if (isCancelledOrReturned) {
-          itemPrice = -Math.abs(itemPrice);
-          netItemPrice = -Math.abs(netItemPrice);
+            itemPrice = -Math.abs(itemPrice);
+            netItemPrice = -Math.abs(netItemPrice);
         }
-
         return {
           id: order.orderNumber,
           date: order.createdAt,
@@ -182,11 +267,10 @@ const loadSalesReport = async (req, res) => {
           productName: item.productId?.productName || 'Unknown Product',
           productQuantity: Number(item.quantity) || 0,
           productPrice: itemPrice,
-          productDiscount: itemDiscount,
+          productDiscount: order.discountAmount || 0,
           productNetPrice: netItemPrice,
           itemStatus: item.status || order.orderStatus,
         };
-      });
     });
 
 

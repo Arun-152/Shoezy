@@ -14,6 +14,9 @@ const couponPage = async (req, res) => {
         const user = await User.findById(userId);
         const search = req.query.search || '';
         const sort = req.query.sort || 'name_asc'; 
+        const page = parseInt(req.query.page) || 1;
+        const limit = 5;
+        const skip = (page - 1) * limit;
         const query = {isDeleted:false};
 
         if (search) {
@@ -32,11 +35,16 @@ const couponPage = async (req, res) => {
                 sortOptions.expireOn = -1;
                 break;
             default:
-                sortOptions.createdOn = -1;
+                sortOptions.name = 1; // Default to name ascending
                 break;
         }
 
-        const coupons = await Coupon.find(query).sort(sortOptions);
+        const totalCoupons = await Coupon.countDocuments(query);
+        const totalPages = Math.ceil(totalCoupons / limit);
+
+        const coupons = await Coupon.find(query).sort(sortOptions)
+        .skip(skip)
+        .limit(limit);
 
         const currentDate = new Date();
         currentDate.setHours(0, 0, 0, 0); 
@@ -59,7 +67,15 @@ const couponPage = async (req, res) => {
             return { ...coupon.toObject(), status };
         });
 
-        res.render("admincoupenPage", { coupons: couponsWithStatus, search, sort });
+        res.render("admincoupenPage", { 
+            coupons: couponsWithStatus, 
+            search, 
+            sort,
+            currentPage: page,
+            totalPages,
+            limit,
+            skip
+        });
     } catch (error) {
         console.error("Error rendering coupons page:", error.message);
         res.redirect("/admin500");
@@ -101,6 +117,7 @@ const createCoupon = async (req, res) => {
     const {
       couponCode: name,
       offerPrice,
+      maxAmount,
       minimumPrice,
       startDate,
       expireOn,
@@ -123,6 +140,9 @@ const createCoupon = async (req, res) => {
     if (!expireOn) errors.expireOn = "Expiration Date is required";
     if (!discountType) errors.discountType = "Discount Type is required";
 
+    if (discountType === 'percentage' && !maxAmount) {
+      errors.maxAmount = "Max Amount is required for percentage-based coupons";
+    }
     if (Object.keys(errors).length > 0) {
       return res.status(400).json({
         success: false,
@@ -167,29 +187,36 @@ const createCoupon = async (req, res) => {
         }
       });
     }
-
+    
+    let maxAmountNum = null;
+    if (discountType === 'percentage') {
+      maxAmountNum = parseFloat(maxAmount);
+      if (isNaN(maxAmountNum) || maxAmountNum <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Max amount must be a number greater than 0 for percentage coupons",
+          fieldErrors: { maxAmount: "Max amount must be a number greater than 0" }
+        });
+      }
+      const minPriceNum = parseFloat(minimumPrice);
+      if (!isNaN(minPriceNum) && maxAmountNum < minPriceNum) {
+        return res.status(400).json({
+          success: false,
+          message: "Max Amount must be greater than or equal to Min Amount.",
+          fieldErrors: { maxAmount: "Max Amount must be greater than or equal to Min Amount." }
+        });
+      }
+    }
     const maxUsesPerUserNum = parseInt(maxUsesPerUser) || 1;
     if (maxUsesPerUserNum < 1) {
       return res.status(400).json({ success: false, message: "Maximum uses per user must be at least 1" });
     }
 
-    const totalUsageLimitNum = totalUsageLimit ? parseInt(totalUsageLimit) : null;
-    
-    if (!totalUsageLimit || totalUsageLimit.trim() === '') {
-      errors.totalUsageLimit = "Total Usage Limit is required.";
-    } else if (isNaN(totalUsageLimitNum) || totalUsageLimitNum === null) {
-      errors.totalUsageLimit = "Enter a valid Total Usage Limit to proceed.";
-    } else if (totalUsageLimitNum < 1) {
-      errors.totalUsageLimit = "Please provide a valid Total Usage Limit (greater than 0).";
+    let totalUsageLimitNum = totalUsageLimit ? parseInt(totalUsageLimit) : null;
+    if (totalUsageLimit && (isNaN(totalUsageLimitNum) || totalUsageLimitNum < 1)) {
+        return res.status(400).json({ success: false, message: "Total usage limit must be a number greater than 0, or empty for unlimited" });
     }
-    
-    if (Object.keys(errors).length > 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Please correct the errors below.",
-        fieldErrors: errors
-      });
-    }
+    if (totalUsageLimit.trim() === '') totalUsageLimitNum = null;
 
     if (totalUsageLimitNum && maxUsesPerUserNum > totalUsageLimitNum) {
       return res.status(400).json({ success: false, message: "Invalid Total Usage Limit. Kindly check and try again." });
@@ -204,16 +231,13 @@ const createCoupon = async (req, res) => {
       return res.status(400).json({ success: false, message: "Please select at least one product or choose 'Apply to All Products'" });
     }
 
-    if (!totalUsageLimitNum) {
-      return res.status(400).json({ success: false, message: "Coupon cannot be added without a valid Total Usage Limit." });
-    }
-
     const newCoupon = new Coupon({
       name,
       startDate: startDateObj,
       expireOn: expirationDate,
       discountType,
       offerPrice: offerPriceNum,
+      maxAmount: maxAmountNum, // Will be null for 'flat' type
       minimumPrice: parseFloat(minimumPrice),
       applicableCategories: isAllCategories ? [] : (Array.isArray(applicableCategories) ? applicableCategories : [applicableCategories]),
       applicableProducts: isAllProducts ? [] : (Array.isArray(applicableProducts) ? applicableProducts : [applicableProducts]),
@@ -227,7 +251,7 @@ const createCoupon = async (req, res) => {
     });
 
     await newCoupon.save();
-    res.json({ success: true, message: "Coupon added successfully with Total Usage Limit applied." });
+    res.json({ success: true, message: "Coupon added successfully." });
   } catch (error) {
     console.error("Coupon creation error:", error);
     return res.status(500).json({ success: false, message: "Something went wrong" });
@@ -270,6 +294,7 @@ const editCoupon = async(req,res)=>{
     const {
             name,
             offerPrice,
+            maxAmount,
             minimumPrice,
             startDate,
             expireOn,
@@ -283,9 +308,11 @@ const editCoupon = async(req,res)=>{
             islist
         } = req.body;
     
+        const requiredFields = [name, offerPrice, minimumPrice, startDate, expireOn, discountType];
+        if (discountType === 'percentage') requiredFields.push(maxAmount);
 
-        if(!name||!offerPrice||!minimumPrice||!startDate||!expireOn||!discountType){
-          return res.status(400).json({success:false,message:"All required fields must be filled"})
+        if (requiredFields.some(field => !field)) {
+            return res.status(400).json({ success: false, message: "All required fields must be filled" });
         }
 
         const existingCoupon = await Coupon.findOne({name, _id: { $ne: couponId }});
@@ -334,7 +361,35 @@ const editCoupon = async(req,res)=>{
             }
           });
         }
-       const maxUsesPerUserNum = parseInt(maxUsesPerUser) || 1 ;
+
+        const minPriceNum = parseFloat(minimumPrice);
+        if (discountType === 'flat' && !isNaN(offerPriceNum) && !isNaN(minPriceNum) && minPriceNum > 0 && offerPriceNum >= minPriceNum) {
+          return res.status(400).json({
+            success: false,
+            message: "Discount amount must be less than the minimum purchase amount.",
+            fieldErrors: { offerPrice: "Discount amount must be less than the minimum purchase amount." }
+          });
+        }
+
+        let maxAmountNum = null;
+        if (discountType === 'percentage') {
+          maxAmountNum = parseFloat(maxAmount);
+          if (isNaN(maxAmountNum) || maxAmountNum <= 0) {
+            return res.status(400).json({
+              success: false,
+              message: "Max amount must be a number greater than 0 for percentage coupons",
+              fieldErrors: { maxAmount: "Max amount must be a number greater than 0" }
+            });
+          }
+          if (!isNaN(minPriceNum) && maxAmountNum < minPriceNum) {
+            return res.status(400).json({
+              success: false,
+              message: "Max Amount must be greater than or equal to Min Amount.",
+              fieldErrors: { maxAmount: "Max Amount must be greater than or equal to Min Amount." }
+            });
+          }
+        }
+        const maxUsesPerUserNum = parseInt(maxUsesPerUser) || 1 ;
         if(maxUsesPerUserNum < 1){
           return res.status(400).json({success:false,message:"Maximum uses per user must be at least 1"})
         }
@@ -366,6 +421,7 @@ const editCoupon = async(req,res)=>{
                 expireOn: expirationDate,
                 discountType: discountType,
                 offerPrice: offerPriceNum,
+                maxAmount: maxAmountNum, // Will be null for 'flat' type
                 minimumPrice: parseFloat(minimumPrice),
                 applicableCategories: isAllCategories ? [] : (Array.isArray(applicableCategories) ? applicableCategories : [applicableCategories]),
                 applicableProducts: isAllProducts ? [] : (Array.isArray(applicableProducts) ? applicableProducts : [applicableProducts]),

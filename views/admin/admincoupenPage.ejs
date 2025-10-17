@@ -559,11 +559,13 @@
                                 <table class="customers-table">
                                     <thead>
                                         <tr>
+                                            <th class="table-header">SI No</th>
                                             <th class="table-header">Code</th>
                                             <th class="table-header">Discount Value</th>
                                             <th class="table-header">Expiry Date</th>
                                             <th class="table-header">Discount Type</th>
                                             <th class="table-header">Min Order</th>
+                                            <th class="table-header">Max Amount</th>
                                             <th class="table-header">Usage</th>
                                             <th class="table-header">Status</th>
                                             <th class="table-header">Action</th>
@@ -571,13 +573,16 @@
                                     </thead>
                                     <tbody>
                                         <% if (coupons && coupons.length> 0) { %>
-                                            <% coupons.forEach(coupon=> { %>
+                                            <% coupons.forEach((coupon, index)=> { %>
                                                 <% 
                                                     const isExpired = coupon.status === 'Expired' || (coupon.totalUsageLimit && coupon.currentUsageCount >= coupon.totalUsageLimit);
                                                     const isNotStarted = coupon.status === 'Not Started';
                                                     const isActive = coupon.status === 'Active' && coupon.islist;
                                                     %>
                                                     <tr class="table-row <%= isExpired ? 'expired-row' : '' %>">
+                                                        <td>
+                                                            <%= skip + index + 1 %>
+                                                        </td>
                                                         <td>
                                                             <%= coupon.name %>
                                                         </td>
@@ -594,6 +599,9 @@
                                                                 coupon.discountType.slice(1) %>
                                                         </td>
                                                         <td>₹<%= coupon.minimumPrice %>
+                                                        </td>
+                                                        <td>
+                                                            <%= coupon.discountType.toLowerCase() === 'percentage' ? '₹' + coupon.maxAmount : 'N/A' %>
                                                         </td>
                                                         <td>
                                                             <%= coupon.currentUsageCount || 0 %> / <%=
@@ -664,8 +672,8 @@
                                                     </tr>
                                                     <% }); %>
                                                         <% } else { %>
-                                                            <tr>
-                                                                <td colspan="8">No coupons found</td>
+                                                            <tr class="no-coupons-row">
+                                                                <td colspan="9">No coupons found</td>
                                                             </tr>
                                                             <% } %>
                                     </tbody>
@@ -673,20 +681,33 @@
                             </div>
                         </div>
 
+                        <% if (totalPages > 0) { %>
                         <div class="pagination-section">
-                            <div class="pagination-info">1 of 10 Pages</div>
+                            <div class="pagination-info">
+                                Page <%= currentPage %> of <%= totalPages %>
+                            </div>
                             <div class="pagination-controls">
-                                <button class="pagination-btn">
-                                    <i class="fas fa-chevron-left"></i>Previous
+                                <button class="pagination-btn" <%= currentPage <= 1 ? "disabled" : "" %>
+                                    onclick="window.location.href='?page=<%= currentPage - 1 %>&search=<%= search %>&sort=<%= sort %>'">
+                                    <i class="fas fa-chevron-left"></i> Previous
                                 </button>
+ 
                                 <div class="page-numbers">
-                                    <button class="page-btn active">1</button>
+                                    <% for (let i = 1; i <= totalPages; i++) { %>
+                                        <button class="page-btn <%= i === currentPage ? 'active' : '' %>"
+                                            onclick="window.location.href='?page=<%= i %>&search=<%= search %>&sort=<%= sort %>'">
+                                            <%= i %>
+                                        </button>
+                                    <% } %>
                                 </div>
-                                <button class="pagination-btn">
-                                    Next<i class="fas fa-chevron-right"></i>
+ 
+                                <button class="pagination-btn" <%= currentPage >= totalPages ? "disabled" : "" %>
+                                    onclick="window.location.href='?page=<%= currentPage + 1 %>&search=<%= search %>&sort=<%= sort %>'">
+                                    Next <i class="fas fa-chevron-right"></i>
                                 </button>
                             </div>
                         </div>
+                        <% } %>
                     </section>
             </main>
     </div>
@@ -728,6 +749,10 @@
                         <div class="detail-value" id="modalUsageLimit">-</div>
                     </div>
                     <div class="detail-item">
+                        <div class="detail-label">Max Amount</div>
+                        <div class="detail-value" id="modalMaxAmount">-</div>
+                    </div>
+                    <div class="detail-item">
                         <div class="detail-label">Status</div>
                         <div class="detail-value" id="modalStatus">-</div>
                     </div>
@@ -753,6 +778,7 @@
             discountType: '<%= coupon.discountType.charAt(0).toUpperCase() + coupon.discountType.slice(1) %>',
             offerPrice: '<%= coupon.offerPrice || 0 %>', // Changed from discountValue to offerPrice to match EJS
             minimumPrice: '<%= coupon.minimumPrice %>',
+            maxAmount: '<%= coupon.maxAmount %>',
             totalUsageLimit: '<%= coupon.totalUsageLimit || "Unlimited" %>',
             startDate: '<%= new Date(coupon.startDate).toLocaleDateString() %>',
             usageCount: '<%= coupon.currentUsageCount || 0 %>', // Changed from usageCount to currentUsageCount to match EJS
@@ -782,6 +808,7 @@
                 ? `${coupon.offerPrice}%`
                 : `₹${coupon.offerPrice}`;
         document.getElementById('modalMinOrder').textContent = `₹${coupon.minimumPrice || 0}`;
+        document.getElementById('modalMaxAmount').textContent = `₹${coupon.maxAmount || 0}`;
         document.getElementById('modalStartDate').textContent = coupon.startDate || 'N/A';
         document.getElementById('modalExpiryDate').textContent = coupon.expireOn || 'N/A';
         document.getElementById('modalUsageLimit').textContent = coupon.totalUsageLimit || 'Unlimited';
@@ -991,7 +1018,7 @@
                             if (remainingRows.length === 0) {
                                 tbody.innerHTML = `
                                     <tr class="no-coupons-row">
-                                        <td colspan="8" style="text-align: center; padding: 40px; color: #6c757d; font-style: italic;">
+                                        <td colspan="9" style="text-align: center; padding: 40px; color: #6c757d; font-style: italic;">
                                             <i class="fas fa-info-circle" style="margin-right: 8px;"></i>
                                             No coupons found
                                         </td>
@@ -1094,7 +1121,7 @@
                     // Update status display
                     const row = toggleLink ? toggleLink.closest('tr') : null;
                     if (row) {
-                        const statusCell = row.querySelector('td:nth-child(7)');
+                        const statusCell = row.querySelector('td:nth-child(8)');
                         const isMaxUsageReached = couponsData[couponId].totalUsageLimit !== 'Unlimited' &&
                             parseInt(couponsData[couponId].usageCount) >= parseInt(couponsData[couponId].totalUsageLimit);
                         const now = new Date();

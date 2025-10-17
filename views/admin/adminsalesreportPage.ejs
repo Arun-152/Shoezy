@@ -240,7 +240,7 @@
         }
 
         .sales-table td {
-            padding: 12px 8px;
+            padding: 8px;
             border-bottom: 1px solid #161111;
             font-size: 13px;
             color: #2c3e50;
@@ -258,12 +258,17 @@
         /* Column width definitions */
         .sales-table th:nth-child(1),
         .sales-table td:nth-child(1) {
-            width: 10%;
+            width: 5%; /* SI No */
+        }
+
+        .sales-table th:nth-child(1),
+        .sales-table td:nth-child(1) {
+            width: 4%;
         }
 
         .sales-table th:nth-child(2),
         .sales-table td:nth-child(2) {
-            width: 8%;
+            width: 12%;
         }
 
         .sales-table th:nth-child(3),
@@ -271,46 +276,40 @@
             width: 12%;
         }
 
-        .sales-table th:nth-child(4),
-        .sales-table td:nth-child(4) {
-            width: 14%;
-            /* Product Name */
-        }
-
         .sales-table th:nth-child(5),
         .sales-table td:nth-child(5) {
-            width: 6%;
-            /* Qty */
+            width: 13%;
+            /* Product Name */
         }
 
         .sales-table th:nth-child(6),
         .sales-table td:nth-child(6) {
-            width: 7%;
-            /* Price */
+            width: 5%;
+            /* Qty */
         }
 
         .sales-table th:nth-child(7),
         .sales-table td:nth-child(7) {
-            width: 8%;
-            /* Coupon Name */
+            width: 6%;
+            /* Price */
         }
 
         .sales-table th:nth-child(8),
         .sales-table td:nth-child(8) {
-            width: 7%;
-            /* Discount */
+            width: 8%;
+            /* Coupon Name */
         }
 
         .sales-table th:nth-child(9),
         .sales-table td:nth-child(9) {
-            width: 8%;
-            /* Net Price */
+            width: 6%;
+            /* Discount */
         }
 
         .sales-table th:nth-child(10),
         .sales-table td:nth-child(10) {
-            width: 8%;
-            /* Payment Method */
+            width: 7%;
+            /* Net Price */
         }
 
         .sales-table th:nth-child(11),
@@ -318,8 +317,13 @@
             width: 12%;
             /* Item Status */
         }
+        .sales-table th:nth-child(12),
+        .sales-table td:nth-child(12) {
+            width: 8%;
+            /* Payment Method */
+        }
 
-        .sales-table tr:nth-child(even) {
+        .sales-table tr:nth-child(odd) {
             background-color: #f9f9f9;
         }
 
@@ -694,6 +698,7 @@
                                 <table>
                                     <thead>
                                         <tr>
+                                            <th>SI No</th>
                                             <th>Order ID</th>
                                             <th>Order Date</th>
                                             <th>Customer</th>
@@ -708,8 +713,11 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <% salesData.forEach(item=> { %>
+                                        <% salesData.forEach((item, index)=> { %>
                                             <tr>
+                                                <td>
+                                                    <%= (pagination.currentPage - 1) * pagination.limit + index + 1 %>
+                                                </td>
                                                 <td>
                                                     <div class="order-id-cell">
                                                         <%= item.id %>
@@ -741,7 +749,12 @@
                                                             <td>
                                                                 <%= item.couponUsed %>
                                                             </td>
+                                                            <% if (item.productDiscount ) { %>
                                                             <td>₹<%= item.productDiscount.toFixed(2) %>
+                                                                <%}else { %>
+                                                                <td>0
+                                                                </td>
+                                                                <% } %>
                                                             </td>
                                                             <% if (item.productNetPrice < 0) { %>
                                                                 <td
@@ -765,7 +778,7 @@
                                     </tbody>
                                 </table>
                                 <!-- Pagination -->
-                                <% if (pagination.totalPages> 1) { %>
+                                <% if (pagination.totalCount > 0) { %>
                                     <div class="pagination-container">
                                         <div class="pagination-info">
                                             Page <%= pagination.currentPage %> of <%= pagination.totalPages %> (<%=
@@ -786,11 +799,12 @@
                                                 };
                                                 %>
 
-                                                <% if (pagination.currentPage> 1) { %>
-                                                    <a href="<%= createUrl(1) %>" class="pagination-link">« First</a>
-                                                    <a href="<%= createUrl(pagination.currentPage - 1) %>"
-                                                        class="pagination-link">‹ Previous</a>
-                                                    <% } %>
+                                                <% if (pagination.currentPage > 1) { %>
+                                                    <a href="<%= createUrl(pagination.currentPage - 1) %>" class="pagination-link">‹ Previous</a>
+                                                <% } else { %>
+                                                    <span class="pagination-links disabled">‹ Previous</span>
+                                                <% } %>
+
 
                                                         <% const maxPagesToShow=5; const startPage=Math.max(1,
                                                             pagination.currentPage - Math.floor(maxPagesToShow / 2));
@@ -804,13 +818,12 @@
                                                                 </a>
                                                                 <% } %>
 
-                                                                    <% if (pagination.currentPage <
-                                                                        pagination.totalPages) { %>
+                                                                    <% if (pagination.currentPage < pagination.totalPages) { %>
                                                                         <a href="<%= createUrl(pagination.currentPage + 1) %>"
                                                                             class="pagination-link">Next ›</a>
-                                                                        <a href="<%= createUrl(pagination.totalPages) %>"
-                                                                            class="pagination-link">Last »</a>
-                                                                        <% } %>
+                                                                    <% } else { %>
+                                                                        <span class="pagination-links disabled">Next ›</span>
+                                                                    <% } %>
                                         </div>
                                     </div>
                                     <% } %>

@@ -28,7 +28,8 @@ const productsPage = async (req, res) => {
             currentPage: page,
             totalPages: totalPages,
             totalProducts: totalProducts,
-            search: search
+            search: search,
+            limit: limit
         });
     } catch (error) {
         console.error("Error in productsPage:", error);

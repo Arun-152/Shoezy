@@ -32,6 +32,7 @@ const customerPage=async (req,res)=>{
             customers:customerData,
             currentPage:page,
             totalPages:totalPages,
+            limit,
             totalCustomers:totalCustomers,
             search,
         })

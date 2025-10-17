@@ -662,6 +662,16 @@
                     <div class="input-error" id="discountAmountError"></div>
                   </div>
 
+                  <div class="form-group" id="maxAmountContainer" style="display: <%= coupon.discountType === 'percentage' ? 'block' : 'none' %>;">
+                    <label class="form-label" for="maxAmount">
+                      <i class="fas fa-money-bill-wave label-icon"></i> Max Amount *
+                    </label>
+                    <input type="number" id="maxAmount" name="maxAmount" class="form-input"
+                      placeholder="Enter maximum discount amount" step="0.01"
+                      value="<%= coupon.maxAmount %>" />
+                    <div class="input-error" id="maxAmountError"></div>
+                  </div>
+
                   <div class="form-group">
                     <label class="form-label" for="minOrderAmount">
                       <i class="fas fa-shopping-cart label-icon"></i> Minimum Order Amount *
@@ -879,19 +889,10 @@
         // Basic Information
         document.getElementById('couponCode').value = couponData.name || '';
         document.getElementById('discountAmount').value = couponData.offerPrice || '';
+        document.getElementById('maxAmount').value = couponData.maxAmount || '';
         document.getElementById('minOrderAmount').value = couponData.minimumPrice || '';
 
         // Discount Type
-        // This part is now handled by the initial HTML render and the 'change' event trigger
-        if (couponData.discountType === 'percentage') {
-          document.getElementById('percentage').checked = true;
-          document.getElementById('currencySymbol').textContent = '%';
-          document.getElementById('discountAmount').placeholder = 'Enter percentage (1-100)';
-        } else {
-          document.getElementById('flat').checked = true;
-          document.getElementById('currencySymbol').textContent = '₹';
-          document.getElementById('discountAmount').placeholder = 'Enter amount in rupees';
-        }
 
         // Dates
         if (couponData.startDate) {
@@ -968,6 +969,7 @@
       document.querySelectorAll('input[name="discountType"]').forEach(radio => {
         radio.addEventListener('change', function () {
           const currencySymbol = document.getElementById('currencySymbol');
+          const maxAmountContainer = document.getElementById('maxAmountContainer');
           const discountAmount = document.getElementById('discountAmount');
 
           if (this.value === 'flat') {
@@ -976,6 +978,13 @@
           } else {
             currencySymbol.textContent = '%';
             discountAmount.placeholder = 'Enter percentage (1-100)';
+          }
+
+          if (this.value === 'percentage') {
+            maxAmountContainer.style.display = 'block';
+          } else {
+            maxAmountContainer.style.display = 'none';
+            document.getElementById('maxAmount').value = ''; // Clear value when hidden
           }
 
           currencySymbol.style.transform = 'scale(1.2)';
@@ -1053,12 +1062,54 @@
         });
       }
 
+      function validateMinMaxAmount() {
+        const discountType = document.querySelector('input[name="discountType"]:checked').value;
+        const minAmountInput = document.getElementById('minOrderAmount');
+        const maxAmountInput = document.getElementById('maxAmount');
+        const maxAmountError = document.getElementById('maxAmountError');
+
+        if (discountType === 'percentage') {
+          const minAmount = parseFloat(minAmountInput.value);
+          const maxAmount = parseFloat(maxAmountInput.value);
+
+          if (!isNaN(minAmount) && !isNaN(maxAmount) && maxAmount < minAmount) {
+            maxAmountError.textContent = 'Max Amount must be greater than or equal to Min Amount.';
+            return false;
+          }
+        }
+        maxAmountError.textContent = '';
+        return true;
+      }
+
+      function validateFlatDiscount() {
+        const discountType = document.querySelector('input[name="discountType"]:checked').value;
+        const discountAmountInput = document.getElementById('discountAmount');
+        const minAmountInput = document.getElementById('minOrderAmount');
+        const discountError = document.getElementById('discountAmountError');
+
+        if (discountType === 'flat') {
+          const discountAmount = parseFloat(discountAmountInput.value);
+          const minAmount = parseFloat(minAmountInput.value);
+
+          if (!isNaN(discountAmount) && !isNaN(minAmount) && minAmount > 0 && discountAmount >= minAmount) {
+            discountError.textContent = 'Discount amount must be less than the minimum purchase amount.';
+            return false;
+          }
+        }
+        discountError.textContent = '';
+        return true;
+      }
+
+      document.getElementById('minOrderAmount').addEventListener('input', validateMinMaxAmount);
+      document.getElementById('maxAmount').addEventListener('input', validateMinMaxAmount);
+
       // Function to get current form data
       function getCurrentFormData() {
         return {
           name: document.getElementById('couponCode').value.trim(),
           discountType: document.querySelector('input[name="discountType"]:checked').value,
           offerPrice: document.getElementById('discountAmount').value.trim(),
+          maxAmount: document.getElementById('maxAmount').value.trim(),
           minimumPrice: document.getElementById('minOrderAmount').value.trim(),
           startDate: document.getElementById('startDate').value,
           expireOn: document.getElementById('expirationDate').value,
@@ -1099,12 +1150,7 @@
         const errors = [];
 
         // Basic validation
-        if (!formData.name) errors.push('Coupon Code is required');
-        if (!formData.offerPrice) errors.push('Discount Amount is required');
-        if (!formData.minimumPrice && formData.minimumPrice !== '0') errors.push('Minimum Order Amount is required');
-        if (!formData.startDate) errors.push('Start Date is required');
-        if (!formData.expireOn) errors.push('Expiration Date is required');
-        if (!formData.discountType) errors.push('Discount Type is required');
+        if (!formData.name) errors.push('Coupon Code is required'); if (!formData.offerPrice) errors.push('Discount Amount is required'); if (formData.discountType === 'percentage' && !formData.maxAmount) { errors.push('Max Amount is required for percentage discount'); } if (!formData.minimumPrice && formData.minimumPrice !== '0') errors.push('Minimum Order Amount is required'); if (!formData.startDate) errors.push('Start Date is required'); if (!formData.expireOn) errors.push('Expiration Date is required'); if (!formData.discountType) errors.push('Discount Type is required');
 
         // Total Usage Limit validation - now required
         if (!formData.totalUsageLimit || formData.totalUsageLimit.trim() === '') {
@@ -1136,6 +1182,19 @@
         // Clear all previous errors
         document.querySelectorAll('.input-error').forEach(el => el.textContent = '');
 
+        if (!validateFlatDiscount()) {
+          hideLoading();
+          scrollToErrorField('discountAmount');
+          return;
+        }
+
+        if (!validateMinMaxAmount()) {
+          hideLoading();
+          scrollToErrorField('maxAmount');
+          return;
+        }
+
+
         // Validate form
         const validationErrors = validateForm();
         if (validationErrors.length > 0) {
@@ -1143,6 +1202,7 @@
           validationErrors.forEach(error => {
             if (error.includes('Coupon Code')) setErrorOnField('couponCodeError', 'Coupon Code is required');
             if (error.includes('Discount Amount')) setErrorOnField('discountAmountError', 'Discount Amount is required');
+            if (error.includes('Max Amount')) setErrorOnField('maxAmountError', 'Max Amount is required');
             if (error.includes('Minimum Order Amount')) setErrorOnField('minOrderAmountError', 'Minimum Order Amount is required');
             if (error.includes('Start Date')) setErrorOnField('startDateError', 'Start Date is required');
             if (error.includes('Expiration Date')) setErrorOnField('expirationDateError', 'Expiration Date is required');
@@ -1231,6 +1291,7 @@
             const errorFieldMap = {
               couponCode: 'couponCodeError',
               offerPrice: 'discountAmountError',
+              maxAmount: 'maxAmountError',
               minimumPrice: 'minOrderAmountError',
               startDate: 'startDateError',
               expireOn: 'expirationDateError',
@@ -1271,6 +1332,12 @@
         } else if (message.toLowerCase().includes('offer price must be greater')) {
           setErrorOnField('discountAmountError', message, true);
           scrollToErrorField('discountAmount');
+        } else if (message.toLowerCase().includes('discount amount must be less than the minimum purchase amount')) {
+          setErrorOnField('discountAmountError', message, true);
+          scrollToErrorField('discountAmount');
+        } else if (message.toLowerCase().includes('max amount')) {
+          setErrorOnField('maxAmountError', message, true);
+          scrollToErrorField('maxAmount');
         } else if (message.toLowerCase().includes('percentage discount cannot exceed 100%')) {
           setErrorOnField('discountAmountError', message, true);
           scrollToErrorField('discountAmount');

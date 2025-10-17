@@ -5,14 +5,13 @@ const Product = require("../../models/productSchema");
 const Order = require("../../models/orderSchema");
 const Coupon = require("../../models/CouponSchema");
 const Wallet = require("../../models/walletSchema");
-const { validateCouponForCheckout, markCouponUsed } = require('./couponController'); 
+const { validateCouponForCheckout, markCouponUsed, removeCoupon } = require('./couponController'); 
 const bcrypt = require("bcrypt");
 const env = require("dotenv").config();
 
 const loadCheckout = async (req, res) => {
   try {
     const userId = req.session.userId;
-    const coupon = await Coupon.find({ islist: true });
 
     const user = await User.findById(userId);
     if (!user) return res.redirect('/login');
@@ -51,57 +50,30 @@ const loadCheckout = async (req, res) => {
     }
     const shipping = 0;
 
-    const appliedCouponInSession = req.session.appliedCoupon || null;
+    // Clear any previously applied coupon when loading the checkout page
+    if (req.session.appliedCoupon) {
+      delete req.session.appliedCoupon;
+    }
+
     const currentDate = new Date();
 
-    const allCoupons = await Coupon.find({
+    const userUsedCoupons = await Coupon.find({ 'userUsage.userId': userId }).select('_id');
+    const usedCouponIds = userUsedCoupons.map(c => c._id);
+
+    const availableCoupons = await Coupon.find({
+      _id: { $nin: usedCouponIds },
       islist: true,
       startDate: { $lte: currentDate }, 
-      expireOn: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) }   
+      expireOn: { $gte: currentDate },
+      $expr: { $lt: [ "$currentUsageCount", "$totalUsageLimit" ] }
     }).sort({ expireOn: 1 });
 
-    const availableCouponsForPage = [];
-    for (const couponItem of allCoupons) {
-      if (couponItem.totalUsageLimit && couponItem.currentUsageCount >= couponItem.totalUsageLimit) {
-        continue;
-      }
-      if (couponItem.minimumPrice > subtotal) {
-        continue;
-      }
-      
-      const userUsageCount = await Order.countDocuments({
-        userId: userId,
-        couponCode: couponItem.name,
-        orderStatus: { $nin: ['Cancelled', 'Returned'] }
-      });
-      if (userUsageCount >= (couponItem.maxUsesPerUser || 1)) {
-        continue;
-      }
-      availableCouponsForPage.push(couponItem);
-    }
+    const allCoupons = availableCoupons.filter(coupon => {
+        return !coupon.userUsage.some(usage => usage.userId.toString() === userId);
+    });
     
-    const appliedCoupon = req.session.appliedCoupon || null;
     let finalTotal = subtotal + shipping;
     let couponDiscount = 0;
-
-    if (appliedCoupon) {
-      const couponValidation = await validateCouponForCheckout(appliedCoupon, userId, req);
-      if (couponValidation.valid) {
-        const coupon = couponValidation.coupon;
-        const totalBeforeDiscount = subtotal + shipping;
-
-        if (coupon.discountType === "percentage") {
-          couponDiscount = Math.min((totalBeforeDiscount * coupon.offerPrice) / 100, totalBeforeDiscount);
-        } else {
-          couponDiscount = Math.min(coupon.offerPrice, totalBeforeDiscount);
-        }
-
-        finalTotal = totalBeforeDiscount - couponDiscount;
-      } else {
-        delete req.session.appliedCoupon;
-        couponDiscount = 0;
-      }
-    }
     
     const userWallet = await Wallet.findOne({ userId });
 
@@ -115,8 +87,8 @@ const loadCheckout = async (req, res) => {
       totalAmount: finalTotal,
       defaultAddress,
       allAddresses,
-      coupon: availableCouponsForPage,
-      appliedCoupon, 
+      coupon: allCoupons,
+      appliedCoupon: null, 
       couponDiscount, 
       cart: { total: finalTotal },
       walletBalance: userWallet ? userWallet.balance : 0
