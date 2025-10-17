@@ -91,7 +91,9 @@ const loadCheckout = async (req, res) => {
       appliedCoupon: null, 
       couponDiscount, 
       cart: { total: finalTotal },
-      walletBalance: userWallet ? userWallet.balance : 0
+      walletBalance: userWallet ? userWallet.balance : 0,
+      formData: {}, // Add empty formData
+      errors: {}      // Add empty errors
     });
 
   } catch (error) {
@@ -99,7 +101,112 @@ const loadCheckout = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
+const addAddress = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    const {
+      fullName,
+      mobileNumber,
+      address,
+      city,
+      district,
+      state,
+      landmark,
+      pinCode,
+      addressType
+    } = req.body;
 
+    const errors = {};
+
+    if (!fullName || fullName.trim() === '') {
+      errors.fullName = "Full name is required";
+    } else if (fullName.trim().length < 2) {
+      errors.fullName = "Full name must be at least 2 characters";
+    } else if (/\d/.test(fullName)) {
+      errors.fullName = "Full name cannot contain numbers";
+    }
+
+    if (!mobileNumber || mobileNumber.trim() === '') {
+      errors.mobileNumber = "Mobile number is required";
+    } else if (!/^[6789]\d{9}$/.test(mobileNumber.trim())) {
+      errors.mobileNumber = "Please enter a valid 10-digit mobile number starting with 6, 7, 8, or 9";
+    }
+
+    if (!address || address.trim() === '') {
+      errors.address = "Address is required";
+    } else if (address.trim().length < 5) {
+      errors.address = "Address must be at least 5 characters";
+    }
+
+    if (!city || city.trim() === '') {
+      errors.city = "City is required";
+    }
+
+    if (!district || district.trim() === '') {
+      errors.district = "District is required";
+    }
+
+    if (!state || state.trim() === '') {
+      errors.state = "State is required";
+    }
+
+    if (!pinCode || pinCode.trim() === '') {
+      errors.pinCode = "Pin code is required";
+    } else if (!/^\d{6}$/.test(pinCode.trim())) {
+      errors.pinCode = "Please enter a valid 6-digit pin code";
+    }
+
+    if (!addressType || !['home', 'office', 'other'].includes(addressType.toLowerCase())) {
+      errors.addressType = "Please select a valid address type";
+    }
+
+    if (!landmark || landmark.trim() === '') {
+      errors.landmark = "Landmark is required";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      return res.status(400).json({ success: false, errors: errors });
+    }
+
+    const existingAddress = await Address.findOne({
+      userId: userId,
+      address: address.trim(),
+      city: city.trim(),
+      district: district.trim(),
+      state: state.trim(),
+      pinCode: parseInt(pinCode)
+    });
+
+    if (existingAddress) {
+      return res.status(400).json({ success: false, errors: { address: "This address already exists." } });
+    }
+
+    const newAddress = new Address({
+      userId: userId,
+      fullName: fullName.trim(),
+      mobileNumber: mobileNumber.trim(),
+      address: address.trim(),
+      city: city.trim(),
+      district: district.trim(),
+      state: state.trim(),
+      landmark: landmark ? landmark.trim() : "",
+      pinCode: parseInt(pinCode),
+      addressType: addressType.charAt(0).toUpperCase() + addressType.slice(1).toLowerCase(),
+    });
+
+    await newAddress.save();
+
+    return res.status(201).json({
+      success: true,
+      message: 'Address added successfully!',
+      address: newAddress
+    });
+
+  } catch (error) {
+    console.error("Post add address error:", error);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+}
 const placeOrder = async (req, res) => {
   try {
     const userId = req.session.userId;
@@ -405,6 +512,7 @@ const orderSuccess = async (req, res) => {
 
 module.exports = {
   loadCheckout,
+  addAddress,
   placeOrder,
   orderSuccess,
 };

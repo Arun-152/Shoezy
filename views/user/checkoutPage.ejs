@@ -132,7 +132,7 @@
                                                             </div>
                                                         </div>
                                                         <% } %>
-                                                            <a href="/profile/address?returnUrl=/checkout">
+                                                            <a>
                                                                 <button class="add-address-btn">+ Add New
                                                                     Address</button>
                                                             </a>
@@ -172,7 +172,9 @@
                                                 <span class="payment-icon">📱</span>
                                                 <div>
                                                     <div class="payment-title">Wallet Payment</div>
-                                                    <div class="payment-balance">Balance: ₹<%= walletBalance.toLocaleString() %></div>
+                                                    <div class="payment-balance">Balance: ₹<%=
+                                                            walletBalance.toLocaleString() %>
+                                                    </div>
                                                 </div>
                                             </label>
                                         </div>
@@ -180,6 +182,101 @@
 
 
             </div>
+            <div class="modal" id="addressModal">
+                <div class="modal-content">
+                    <span class="modal-close" id="closeModal">&times;</span>
+                    <div class="modal-header">
+                        <h2>Add New Address</h2>
+                    </div>
+                    <form class="address-form" id="addAddressForm">
+                        <div class="form-group">
+                            <label for="fullName">Full Name</label>
+                            <input type="text" id="fullName" name="fullName" placeholder="Enter your full name">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="mobileNumber">Mobile Number</label>
+                            <div class="phone-input-container">
+                                <select id="countryCode" name="countryCode" class="country-code-select">
+                                    <option value="+91" data-flag="🇮🇳">🇮🇳 +91</option>
+                                    <option value="+1" data-flag="🇺🇸">🇺🇸 +1</option>
+                                    <option value="+44" data-flag="🇬🇧">🇬🇧 +44</option>
+                                    <option value="+61" data-flag="🇦🇺">🇦🇺 +61</option>
+                                    <option value="+81" data-flag="🇯🇵">🇯🇵 +81</option>
+                                    <option value="+86" data-flag="🇨🇳">🇨🇳 +86</option>
+                                    <option value="+33" data-flag="🇫🇷">🇫🇷 +33</option>
+                                    <option value="+49" data-flag="🇩🇪">🇩🇪 +49</option>
+                                    <option value="+7" data-flag="🇷🇺">🇷🇺 +7</option>
+                                    <option value="+55" data-flag="🇧🇷">🇧🇷 +55</option>
+                                    <option value="+82" data-flag="🇰🇷">🇰🇷 +82</option>
+                                    <option value="+34" data-flag="🇪🇸">🇪🇸 +34</option>
+                                    <option value="+39" data-flag="🇮🇹">🇮🇹 +39</option>
+                                    <option value="+31" data-flag="🇳🇱">🇳🇱 +31</option>
+                                    <option value="+41" data-flag="🇨🇭">🇨🇭 +41</option>
+                                </select>
+                                <input type="tel" id="mobileNumber" name="mobileNumber"
+                                    placeholder="Enter mobile number" class="phone-number-input">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="address">Address</label>
+                            <textarea id="address" name="address" placeholder="Enter your complete address"
+                                rows="3"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="city">City</label>
+                            <input type="text" id="city" name="city" placeholder="Enter city">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="state">State</label>
+                            <select id="state" name="state">
+                                <option value="" selected disabled>Select State</option>
+                                <option value="Karnataka">Karnataka</option>
+                                <option value="Kerala">Kerala</option>
+                                <option value="Tamil Nadu">Tamil Nadu</option>
+                                <option value="Delhi">Delhi</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="district">District</label>
+                            <select id="district" name="district">
+                                <option value="" selected disabled>Select District</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pinCode">Pin Code</label>
+                            <input type="text" id="pinCode" name="pinCode" placeholder="Enter pin code">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="landmark">Landmark</label>
+                            <input type="text" id="landmark" name="landmark" placeholder="Enter landmark">
+                        </div>
+
+                        <div class="address-type">
+
+                            <h3>Address Type</h3>
+                            <div class="address-options">
+                                <button type="button" class="address-btn active" data-type="home">Home</button>
+                                <button type="button" class="address-btn" data-type="office">Office</button>
+                                <button type="button" class="address-btn" data-type="other">Other</button>
+                            </div>
+                            <input type="hidden" id="addressType" name="addressType" value="home">
+                        </div>
+
+                        <div class="modal-actions">
+                            <button type="button" class="btn btn-secondary" id="cancelModal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save Address</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
 
             <div class="checkout-right">
                 <div class="order-summary coupon-summary-section">
@@ -193,59 +290,62 @@
                             <i class="fas fa-eye"></i> View Available Coupons
                         </button>
                     </div>
-                    <% if (appliedCoupon && couponDiscount > 0) { %>
-                    <div class="applied-coupon-container" id="appliedCouponContainer">
-                        <div class="coupon-success-animation" id="couponSuccessAnimation">
-                            <div class="success-checkmark">
-                                <div class="check-icon">
-                                    <span class="icon-line line-tip"></span>
-                                    <span class="icon-line line-long"></span>
-                                    <div class="icon-circle"></div>
-                                    <div class="icon-fix"></div>
+                    <% if (appliedCoupon && couponDiscount> 0) { %>
+                        <div class="applied-coupon-container" id="appliedCouponContainer">
+                            <div class="coupon-success-animation" id="couponSuccessAnimation">
+                                <div class="success-checkmark">
+                                    <div class="check-icon">
+                                        <span class="icon-line line-tip"></span>
+                                        <span class="icon-line line-long"></span>
+                                        <div class="icon-circle"></div>
+                                        <div class="icon-fix"></div>
+                                    </div>
+                                </div>
+                                <div class="success-text">
+                                    <h3>Coupon Applied!</h3>
+                                    <p>You're saving money!</p>
                                 </div>
                             </div>
-                            <div class="success-text">
-                                <h3>Coupon Applied!</h3>
-                                <p>You're saving money!</p>
+                            <div class="applied-coupon-card">
+                                <div class="coupon-info">
+                                    <span class="coupon-code-display" id="appliedCouponCode">
+                                        <%= appliedCoupon.couponCode %>
+                                    </span>
+                                    <span class="coupon-discount-display" id="appliedCouponDiscount">-₹<%=
+                                            couponDiscount.toLocaleString() %></span>
+                                </div>
+                                <button type="button" class="remove-coupon-btn" onclick="removeCoupon()">
+                                    <i class="fas fa-times"></i> Remove
+                                </button>
                             </div>
                         </div>
-                        <div class="applied-coupon-card">
-                            <div class="coupon-info">
-                                <span class="coupon-code-display" id="appliedCouponCode"><%= appliedCoupon.couponCode %></span>
-                                <span class="coupon-discount-display" id="appliedCouponDiscount">-₹<%= couponDiscount.toLocaleString() %></span>
-                            </div>
-                            <button type="button" class="remove-coupon-btn" onclick="removeCoupon()">
-                                <i class="fas fa-times"></i> Remove
-                            </button>
-                        </div>
-                    </div>
-                    <% } else { %>
-                    <div class="applied-coupon-container" id="appliedCouponContainer" style="display: none;">
-                        <div class="coupon-success-animation" id="couponSuccessAnimation">
-                            <div class="success-checkmark">
-                                <div class="check-icon">
-                                    <span class="icon-line line-tip"></span>
-                                    <span class="icon-line line-long"></span>
-                                    <div class="icon-circle"></div>
-                                    <div class="icon-fix"></div>
+                        <% } else { %>
+                            <div class="applied-coupon-container" id="appliedCouponContainer" style="display: none;">
+                                <div class="coupon-success-animation" id="couponSuccessAnimation">
+                                    <div class="success-checkmark">
+                                        <div class="check-icon">
+                                            <span class="icon-line line-tip"></span>
+                                            <span class="icon-line line-long"></span>
+                                            <div class="icon-circle"></div>
+                                            <div class="icon-fix"></div>
+                                        </div>
+                                    </div>
+                                    <div class="success-text">
+                                        <h3>🎉 Coupon Applied!</h3>
+                                        <p>You're saving money!</p>
+                                    </div>
+                                </div>
+                                <div class="applied-coupon-card">
+                                    <div class="coupon-info">
+                                        <span class="coupon-code-display" id="appliedCouponCode"></span>
+                                        <span class="coupon-discount-display" id="appliedCouponDiscount"></span>
+                                    </div>
+                                    <button type="button" class="remove-coupon-btn" onclick="removeCoupon()">
+                                        <i class="fas fa-times"></i> Remove
+                                    </button>
                                 </div>
                             </div>
-                            <div class="success-text">
-                                <h3>🎉 Coupon Applied!</h3>
-                                <p>You're saving money!</p>
-                            </div>
-                        </div>
-                        <div class="applied-coupon-card">
-                            <div class="coupon-info">
-                                <span class="coupon-code-display" id="appliedCouponCode"></span>
-                                <span class="coupon-discount-display" id="appliedCouponDiscount"></span>
-                            </div>
-                            <button type="button" class="remove-coupon-btn" onclick="removeCoupon()">
-                                <i class="fas fa-times"></i> Remove
-                            </button>
-                        </div>
-                    </div>
-                    <% } %>
+                            <% } %>
                 </div>
 
                 <div class="order-summary">
@@ -284,21 +384,23 @@
                             <span>Shipping</span>
                             <span class="free">FREE</span>
                         </div>
-                        <% if (appliedCoupon && couponDiscount > 0) { %>
-                        <div class="total-row coupon-discount-row" id="couponDiscountRow">
-                            <span>Coupon Discount (<%= appliedCoupon.couponCode %>)</span>
-                            <span class="discount" id="couponDiscountAmount">-₹<%= couponDiscount.toLocaleString() %></span>
-                        </div>
-                        <% } else { %>
-                        <div class="total-row coupon-discount-row" id="couponDiscountRow" style="display: none;">
-                            <span>Coupon Discount</span>
-                            <span class="discount" id="couponDiscountAmount">-₹0</span>
-                        </div>
-                        <% } %>
-                        <div class="total-row final-total">
-                            <span>Final Total</span>
-                            <span id="finalTotalAmount">₹<%= totalAmount.toLocaleString() %></span>
-                        </div>
+                        <% if (appliedCoupon && couponDiscount> 0) { %>
+                            <div class="total-row coupon-discount-row" id="couponDiscountRow">
+                                <span>Coupon Discount (<%= appliedCoupon.couponCode %>)</span>
+                                <span class="discount" id="couponDiscountAmount">-₹<%= couponDiscount.toLocaleString()
+                                        %></span>
+                            </div>
+                            <% } else { %>
+                                <div class="total-row coupon-discount-row" id="couponDiscountRow"
+                                    style="display: none;">
+                                    <span>Coupon Discount</span>
+                                    <span class="discount" id="couponDiscountAmount">-₹0</span>
+                                </div>
+                                <% } %>
+                                    <div class="total-row final-total">
+                                        <span>Final Total</span>
+                                        <span id="finalTotalAmount">₹<%= totalAmount.toLocaleString() %></span>
+                                    </div>
                     </div>
                     <form id="checkoutForm">
                         <input type="hidden" name="selectedAddress" id="selectedAddressInput" />
@@ -356,7 +458,7 @@
             <script>
                 let originalSubtotal = <%= subtotal %>;
                 let originalFinalTotal = <%= totalAmount %>;
-                const availableCoupons = <%- JSON.stringify(coupon || []) %>;
+                const availableCoupons = <% - JSON.stringify(coupon || []) %>;
                 let currentCoupon = null;
                 let currentDiscount = 0;
                 let walletBalance = <%= walletBalance %>;
@@ -506,7 +608,7 @@
                         walletRadio.value = "Wallet";
                         walletRadio.nextElementSibling.querySelector('.payment-balance').innerHTML = `Balance: ₹${walletBalance.toLocaleString()} <span style="color: #27ae60; font-weight: bold;">(Sufficient)</span>`;
                         walletRadio.disabled = false; // Enable wallet option
-                       
+
                     } else {
                         // Wallet has insufficient balance, disable wallet option
                         walletRadio.value = "Wallet"; // Default value
@@ -595,7 +697,7 @@
                             })
                                 .then(res => res.json())
                                 .then(orderData => {
-                                    if (!orderData.success) { 
+                                    if (!orderData.success) {
                                         // Check for specific server-side alerts (like blocked products)
                                         if (orderData.showAlert) {
                                             Swal.fire({
@@ -608,8 +710,8 @@
                                                     window.location.href = orderData.redirectUrl;
                                                 }
                                             });
-                                            return; 
-                                        } 
+                                            return;
+                                        }
                                         // Fallback for other generic errors
                                         Swal.fire({
                                             icon: 'error',
@@ -697,21 +799,21 @@
                                     };
 
                                     const rzp = new Razorpay(options);
-                                  
+
 
                                     rzp.on('payment.failed', function (response) {
                                         // response contains error info
                                         console.error("Payment Failed:", response.error);
 
-                                      
-                                            // Redirect user to your custom failure page
-                                            window.location.href = `/payment/orderFailed/${orderData.orderId}`;
-                                       
+
+                                        // Redirect user to your custom failure page
+                                        window.location.href = `/payment/orderFailed/${orderData.orderId}`;
+
                                     });
 
                                     rzp.open();
 
-                                    
+
                                 })
                                 .catch(err => {
                                     console.error('Order Creation Error:', err);
@@ -778,6 +880,172 @@
                     document.getElementById('couponCode').addEventListener('keypress', e => {
                         if (e.key === 'Enter') applyCoupon();
                     });
+                });
+
+                // --- Add Address Modal Logic ---
+                const addAddressBtn = document.querySelector('.add-address-btn');
+                const addressModal = document.getElementById('addressModal');
+                const closeModalBtn = document.getElementById('closeModal');
+                const cancelModalBtn = document.getElementById('cancelModal');
+                const addAddressForm = document.getElementById('addAddressForm');
+
+                addAddressBtn.addEventListener('click', () => {
+                    addressModal.style.display = 'flex';
+                });
+
+                closeModalBtn.addEventListener('click', () => {
+                    addressModal.style.display = 'none';
+                });
+
+                cancelModalBtn.addEventListener('click', () => {
+                    addressModal.style.display = 'none';
+                });
+
+                window.addEventListener('click', (event) => {
+                    if (event.target === addressModal) {
+                        addressModal.style.display = 'none';
+                    }
+                });
+
+                addAddressForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+
+                    const formData = new FormData(addAddressForm);
+                    const data = Object.fromEntries(formData.entries());
+
+                    // Clear previous errors
+                    document.querySelectorAll('.error-message').forEach(el => el.remove());
+                    document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+
+                    try {
+                        const response = await fetch('/checkout/addAddress', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(data)
+                        });
+
+                        const result = await response.json();
+
+                        if (response.ok) {
+                            addressModal.style.display = 'none';
+                            addAddressForm.reset();
+                            addNewAddressToDOM(result.address);
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                text: result.message,
+                                confirmButtonColor: '#007bff'
+                            });
+                        } else {
+                            // Display validation errors
+                            if (result.errors) {
+                                Object.keys(result.errors).forEach(key => {
+                                    if (key === 'mobileNumber') {
+                                        const countryCodeInput = document.querySelector(`[name="countryCode"]`);
+                                        const numberInput = document.querySelector(`[name="mobileNumber"]`);
+                                        countryCodeInput.classList.add('error');
+                                        numberInput.classList.add('error');
+                                        const errorSpan = document.createElement('span');
+                                        errorSpan.className = 'error-message';
+                                        errorSpan.textContent = result.errors[key];
+                                        numberInput.closest('.phone-input-container').parentElement.appendChild(errorSpan);
+                                    } else {
+                                        const input = document.querySelector(`[name="${key}"]`);
+                                        if (input) {
+                                            input.classList.add('error');
+                                            const errorSpan = document.createElement('span');
+                                            errorSpan.className = 'error-message';
+                                            errorSpan.textContent = result.errors[key];
+                                            input.parentElement.appendChild(errorSpan);
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error adding address:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Server Error',
+                            text: 'Could not add address. Please try again later.',
+                            confirmButtonColor: '#007bff'
+                        });
+                    }
+                });
+
+                function addNewAddressToDOM(address) {
+                    const addressContainer = document.querySelector('.section:has(.address-card)');
+                    const newAddressCard = document.createElement('div');
+                    newAddressCard.className = 'address-card';
+                    newAddressCard.dataset.addressId = address._id;
+                    newAddressCard.onclick = () => selectedAddress(newAddressCard, address._id);
+
+                    newAddressCard.innerHTML = `
+                        <div class="address-label">
+                            <input type="radio" name="selectedAddress" value="${address._id}" style="margin-right: 8px" />
+                            ${address.addressType}
+                            <span class="default-badge" style="display: none;">(Default)</span>
+                        </div>
+                        <div class="address-content">
+                            <p>${address.fullName}</p>
+                            <p>${address.address}, ${address.landmark ? address.landmark + ', ' : ''}${address.city}</p>
+                            <p>${address.district}, ${address.state} - ${address.pinCode}</p>
+                            <p>Phone: ${address.mobileNumber}</p>
+                        </div>
+                    `;
+
+                    // Insert before the "Add New Address" button
+                    const addBtn = document.querySelector('.add-address-btn');
+                    addressContainer.insertBefore(newAddressCard, addBtn.parentElement);
+
+                    // If it's the only address, select it
+                    if (document.querySelectorAll('.address-card').length === 1) {
+                        selectedAddress(newAddressCard, address._id);
+                    }
+                }
+
+                // --- District Population Logic ---
+                const districtsByState = {
+                    "Karnataka": ["Bagalkot", "Ballari", "Belagavi", "Bengaluru Rural", "Bengaluru Urban", "Bidar", "Chamarajanagar", "Chikballapur", "Chikkamagaluru", "Chitradurga", "Dakshina Kannada", "Davanagere", "Dharwad", "Gadag", "Hassan", "Haveri", "Kalaburagi", "Kodagu", "Kolar", "Koppal", "Mandya", "Mysuru", "Raichur", "Ramanagara", "Shivamogga", "Tumakuru", "Udupi", "Uttara Kannada", "Vijayapura", "Yadgir"],
+                    "Kerala": ["Alappuzha", "Ernakulam", "Idukki", "Kannur", "Kasaragod", "Kollam", "Kottayam", "Kozhikode", "Malappuram", "Palakkad", "Pathanamthitta", "Thiruvananthapuram", "Thrissur", "Wayanad"],
+                    "Tamil Nadu": ["Ariyalur", "Chengalpattu", "Chennai", "Coimbatore", "Cuddalore", "Dharmapuri", "Dindigul", "Erode", "Kallakurichi", "Kanchipuram", "Kanyakumari", "Karur", "Krishnagiri", "Madurai", "Mayiladuthurai", "Nagapattinam", "Namakkal", "Nilgiris", "Perambalur", "Pudukkottai", "Ramanathapuram", "Ranipet", "Salem", "Sivaganga", "Tenkasi", "Thanjavur", "Theni", "Thoothukudi", "Tiruchirappalli", "Tirunelveli", "Tirupathur", "Tiruppur", "Tiruvallur", "Tiruvannamalai", "Tiruvarur", "Vellore", "Viluppuram", "Virudhunagar"],
+                    "Delhi": ["Central Delhi", "East Delhi", "New Delhi", "North Delhi", "North East Delhi", "North West Delhi", "Shahdara", "South Delhi", "South East Delhi", "South West Delhi", "West Delhi"]
+                };
+
+                const stateDropdown = document.getElementById('state');
+                const districtDropdown = document.getElementById('district');
+
+                function populateDistricts() {
+                    const selectedState = stateDropdown.value;
+                    const districts = districtsByState[selectedState] || [];
+
+                    // Preserve the "Select District" option
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = "";
+                    defaultOption.textContent = "Select District";
+                    districtDropdown.innerHTML = ''; // Clear existing options
+
+                    if (districts.length > 0) {
+                        districts.forEach(district => {
+                            const option = document.createElement('option');
+                            option.value = district;
+                            option.textContent = district;
+                            districtDropdown.appendChild(option);
+                        });
+                        districtDropdown.insertBefore(defaultOption, districtDropdown.firstChild);
+                        districtDropdown.value = ""; // Ensure it's not pre-selected
+                    } else {
+                        districtDropdown.appendChild(defaultOption);
+                    }
+                }
+
+                // Populate districts when the state changes
+                stateDropdown.addEventListener('change', populateDistricts);
+
+                // Populate districts on initial modal load
+                addAddressBtn.addEventListener('click', () => {
+                    addressModal.style.display = 'flex';
+                    populateDistricts(); // Populate districts when modal is opened
                 });
             </script>
 
