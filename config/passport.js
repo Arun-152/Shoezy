@@ -28,7 +28,7 @@ passport.use(
           if(!user.googleId){
              user.googleId = profile.id
              if(!user.profilePicture || !user.profilePicture.url){
-               user.profileImage = { public_id: "", url: profilePicture };
+               user.profilePicture = { public_id: "", url: profilePicture };
             }
             await user.save();
           }
