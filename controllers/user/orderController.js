@@ -127,7 +127,7 @@ const cancelOrder = async (req, res) => {
     const order = await Order.findById(orderId).populate('items.productId').populate('couponId');
 
     if (!order) {
-      return res.render("user404");
+      return res.render("usererrorPage");
     }
 
     let refundAmount = 0;

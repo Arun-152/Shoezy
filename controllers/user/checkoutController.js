@@ -50,7 +50,6 @@ const loadCheckout = async (req, res) => {
     }
     const shipping = 0;
 
-    // Clear any previously applied coupon when loading the checkout page
     if (req.session.appliedCoupon) {
       delete req.session.appliedCoupon;
     }
@@ -92,8 +91,8 @@ const loadCheckout = async (req, res) => {
       couponDiscount, 
       cart: { total: finalTotal },
       walletBalance: userWallet ? userWallet.balance : 0,
-      formData: {}, // Add empty formData
-      errors: {}      // Add empty errors
+      formData: {}, 
+      errors: {}      
     });
 
   } catch (error) {
@@ -233,7 +232,7 @@ const placeOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: "Cart is empty" });
     }
 
-    // Final validation before placing the order
+    // Final validation 
     const hasUnavailableItem = cart.items.some(item => {
       const product = item.productId;
       return !product || product.isDeleted || product.isBlocked || !product.category || product.category.isDeleted || !product.category.isListed;

@@ -18,7 +18,6 @@ const createOrder = async (req, res) => {
   try {
     const userId = req.session.userId;
 
-    // Add a check for Razorpay credentials
     if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
       console.error("Razorpay credentials are not configured in .env file");
       return res.status(500).json({ success: false, message: "Payment gateway is not configured. Please contact support." });

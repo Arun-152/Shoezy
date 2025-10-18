@@ -64,7 +64,6 @@ const walletSchema = new Schema({
   transactions: [transactionSchema]
 }, { timestamps: true });
 
-// Indexes for performance (removed duplicate userId index)
 walletSchema.index({ "transactions.transactionId": 1 });
 walletSchema.index({ "transactions.orderId": 1 });
 walletSchema.index({ "transactions.createdAt": -1 });

@@ -15,7 +15,6 @@ const getReferralPage = async (req, res) => {
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
-        // Referral code & link
         const referralCode = user.referralCode;
         const referralLink = `https://sho-ezy.shop/signup?ref=${referralCode}`;
 
@@ -28,7 +27,6 @@ const getReferralPage = async (req, res) => {
             .sort({ createdAt: -1 })
             .limit(5);
 
-        // Stats
         const totalReferrals = await User.countDocuments({ referredBy: referralCode });
         const coinsEarned = totalReferrals * 50; 
         const totalEarned = totalReferrals * 100; 

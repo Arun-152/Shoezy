@@ -90,7 +90,6 @@ const updateProfile = async (req, res) => {
     } catch (error) {
         console.error("Update profile error:", error);
         
-        // Handle multer errors
         if (error.code === 'LIMIT_FILE_SIZE') {
             return res.status(400).json({ success: false, message: "File size too large. Maximum 5MB allowed." });
         }

@@ -63,7 +63,7 @@ function createEmailTransporter() {
 
         return transporter;
     } catch (error) {
-        console.error("❌ Error creating email transporter:", error.message);
+        console.error("Error creating email transporter:", error.message);
         return null;
     }
 }

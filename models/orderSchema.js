@@ -143,16 +143,16 @@ const orderSchema = new Schema({
         required: false
     },
     couponCode: {
-        type: String,     // store coupon name/code
+        type: String,   
         default: null
     },
     couponId: {
-        type: Schema.Types.ObjectId, // reference actual Coupon document
+        type: Schema.Types.ObjectId, 
         ref: "Coupon",
         default: null
     },
     discountAmount: {
-        type: Number,     // how much discount was applied
+        type: Number,    
         default: 0
     }
 

@@ -121,10 +121,10 @@ const applyCoupon = async (req, res) => {
       return res.status(400).json({ success: false, message: `You have reached the maximum usage limit (${maxUsesPerUser}) for this coupon` });
     }
 
-    // Cart-based validation for categories and products
+    // Cart-based validation
     const cart = await Cart.findOne({ userId }).populate({
       path: 'items.productId',
-      select: 'category' // Ensure the category is populated for validation
+      select: 'category' 
     });
 
     if (!cart || cart.items.length === 0) {

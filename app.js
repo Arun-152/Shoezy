@@ -67,10 +67,9 @@ app.set("view engine", "ejs")
 app.set("views", [path.join(__dirname, "views/user"), path.join(__dirname, "views/admin"), path.join(__dirname, "views")])
 app.use(express.static(path.join(__dirname, "public")))
 
-// Special-case: if user enters '/home/' (with trailing slash), show 404 page
 app.use((req, res, next) => {
     if (req.path === '/home/') {
-        return res.status(404).render('error/user404', {
+        return res.status(404).render('error/usererrorPage', {
             title: 'Page Not Found',
             message: "The page you are looking for doesn't exist or has been moved."
         })
@@ -79,8 +78,6 @@ app.use((req, res, next) => {
 })
 
 registerRoutes(app)
-
-// 404 handler - must be after all routes
 app.use((req, res, next) => {
     try {
         const isAdminPath = req.originalUrl && req.originalUrl.startsWith('/admin')

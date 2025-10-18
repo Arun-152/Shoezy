@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Retry Payment - Order #<%= order.orderNumber %></title>
+    <title>Retry Payment - Order #<%= order.orderNumber %>
+    </title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -47,8 +49,8 @@
         }
 
         .header {
-            background: var(--primary-color);
-            color: var(--secondary-color);
+            background: rgb(12, 130, 240);
+            color: rgb(255, 255, 255);
             padding: 2rem 2.5rem;
             display: flex;
             align-items: center;
@@ -167,7 +169,7 @@
         .product-price {
             font-size: 1.1rem;
             font-weight: 700;
-            color: var(--primary-color);
+            color: rgb(12, 130, 240);
             text-align: right;
         }
 
@@ -199,7 +201,7 @@
             margin-top: 1rem;
             font-weight: 700;
             font-size: 1.25rem;
-            color: var(--primary-color);
+            color: rgb(12, 130, 240);
         }
 
         .delivery-address {
@@ -248,7 +250,7 @@
         }
 
         .btn-primary {
-            background: var(--primary-color);
+            background: rgb(12, 130, 240);
             color: var(--secondary-color);
         }
 
@@ -261,7 +263,7 @@
         .btn-secondary {
             background: var(--secondary-color);
             color: var(--primary-color);
-            border-color: var(--primary-color);
+            border-color: rgb(12, 130, 240);
         }
 
         .btn-secondary:hover {
@@ -278,7 +280,8 @@
             width: 100%;
             height: 100%;
             background: rgba(255, 255, 255, 0.9);
-            display: none; /* Hidden by default */
+            display: none;
+            /* Hidden by default */
             place-items: center;
             z-index: 9999;
         }
@@ -296,6 +299,7 @@
             0% {
                 transform: rotate(0deg);
             }
+
             100% {
                 transform: rotate(360deg);
             }
@@ -324,6 +328,7 @@
                 grid-template-columns: 1fr;
                 padding: 2rem;
             }
+
             .right-column {
                 grid-row: 1;
             }
@@ -337,9 +342,11 @@
             body {
                 padding: 0;
             }
+
             .payment-container {
                 border-radius: 0;
             }
+
             .content {
                 padding: 1.5rem;
             }
@@ -355,9 +362,11 @@
             .header h1 {
                 font-size: 1.75rem;
             }
+
             .header {
                 padding: 1.5rem;
             }
+
             .section {
                 padding: 1rem;
             }
@@ -380,64 +389,98 @@
         <div class="content">
             <div class="main-content">
                 <!-- Order Information -->
-                <div class="section">
-                    <div class="section-title">Order Information</div>
-                    <div class="order-info">
-                            <div class="info-item">
-                                <span class="info-label">Order ID</span>
-                                <span class="info-value">
-                                    <%= order.orderNumber %>
-                                </span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Order Date</span>
-                                <span class="info-value">
-                                    <%= new Date(order.createdAt).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'}) %>
-                                </span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Created On</span>
-                                <span class="info-value">
-                                    <%= new Date(order.createdAt).toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit'}) %>
-                                </span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Payment Method</span>
-                                <span class="info-value"><i class="fas fa-credit-card"></i> <%= order.paymentMethod %></span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">Payment Status</span>
-                                <span class="info-value failed-status"><i class="fas fa-exclamation-circle"></i> FAILED</span>
-                            </div>
-                    </div>
-                </div>
+
 
                 <!-- Order Items -->
                 <div class="section">
                     <div class="section-title">Order Items (<%= order.items.length %>)</div>
-                    <% order.items.forEach(item => { %>
+                    <% order.items.forEach(item=> { %>
                         <div class="product-card">
                             <div class="product-info">
                                 <div class="product-image">
                                     <% if(item.productId.images) { %>
                                         <img src="<%= item.productId.images[0] %>" alt="<%= item.productId.name %>">
-                                    <% } else { %>
-                                        <i class="fas fa-shoe-prints" style="font-size: 2rem; color: #ccc;"></i>
-                                    <% } %>
+                                        <% } else { %>
+                                            <i class="fas fa-shoe-prints" style="font-size: 2rem; color: #ccc;"></i>
+                                            <% } %>
                                 </div>
+
                                 <div class="product-details">
-                                    <h3><%= item.productId.name %></h3>
-                                    <p>Price: ₹<%= item.price %></p>
-                                    <p>Qty: <%= item.quantity %></p>
+                                    <h3>
+                                        <%= item.productId.name %>
+                                    </h3>
+                                    <p>Price: ₹<%= item.price %>
+                                    </p>
+                                    <p>Qty: <%= item.quantity %>
+                                    </p>
                                 </div>
                             </div>
-                            <div class="product-price">₹<%= item.totalPrice %></div>
+                            <div class="product-price">₹<%= item.totalPrice %>
+                            </div>
                         </div>
-                    <% }) %>
+                        <% }) %>
+                </div>
+                <!-- Delivery Address -->
+                <div class="section">
+                    <div class="section-title">Delivery Address</div>
+                    <div class="address-content">
+                        <div class="address-name"><i class="fas fa-user"></i>
+                            <%= order.address.fullName %>
+                        </div>
+                        <p><i class="fas fa-map-marker-alt"></i>
+                            <%= order.address.address %>, <%= order.address.city %>, <%= order.address.state %> - <%=
+                                            order.address.pinCode %>
+                        </p>
+                        <% if (order.address.landmark) { %>
+                            <p><i class="fas fa-landmark"></i> Landmark: <%= order.address.landmark %>
+                            </p>
+                            <% } %>
+                                <p><i class="fas fa-phone"></i>
+                                    <%= order.address.mobileNumber %>
+                                </p>
+                    </div>
                 </div>
             </div>
 
+
+
             <div class="sidebar">
+                <div class="section">
+                    <div class="section-title">Order Information</div>
+                    <div class="order-info">
+                        <div class="info-item">
+                            <span class="info-label">Order ID</span>
+                            <span class="info-value">
+                                <%= order.orderNumber %>
+                            </span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Order Date</span>
+                            <span class="info-value">
+                                <%= new Date(order.createdAt).toLocaleDateString('en-US', {month: 'short' ,
+                                    day: 'numeric' , year: 'numeric' }) %>
+                            </span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Created On</span>
+                            <span class="info-value">
+                                <%= new Date(order.createdAt).toLocaleTimeString('en-US', {hour: '2-digit' ,
+                                    minute: '2-digit' }) %>
+                            </span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Payment Method</span>
+                            <span class="info-value"><i class="fas fa-credit-card"></i>
+                                <%= order.paymentMethod %>
+                            </span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Payment Status</span>
+                            <span class="info-value failed-status"><i class="fas fa-exclamation-circle"></i>
+                                FAILED</span>
+                        </div>
+                    </div>
+                </div>
                 <!-- Order Summary -->
                 <div class="section">
                     <div class="section-title">Order Summary</div>
@@ -453,31 +496,20 @@
                     </div>
                 </div>
 
-                <!-- Delivery Address -->
-                <div class="section">
-                    <div class="section-title">Delivery Address</div>
-                    <div class="address-content">
-                        <div class="address-name"><i class="fas fa-user"></i> <%= order.address.fullName %></div>
-                        <p><i class="fas fa-map-marker-alt"></i> <%= order.address.address %>, <%= order.address.city %>, <%= order.address.state %> - <%= order.address.pinCode %></p>
-                        <% if (order.address.landmark) { %>
-                            <p><i class="fas fa-landmark"></i> Landmark: <%= order.address.landmark %></p>
-                        <% } %>
-                        <p><i class="fas fa-phone"></i> <%= order.address.mobileNumber %></p>
-                    </div>
-                </div>
+
             </div>
         </div>
-        
+
         <!-- Buttons -->
         <div class="button-group">
-                <button class="btn btn-primary" onclick="retryPayment('<%= order._id %>')">
-                    <i class="fas fa-credit-card"></i> Retry Payment
-                </button>
-                <button class="btn btn-secondary" onclick="backToOrders()">
-                    ← Back to Orders
-                </button>
-            </div>
+            <button class="btn btn-primary" onclick="retryPayment('<%= order._id %>')">
+                <i class="fas fa-credit-card"></i> Retry Payment
+            </button>
+            <button class="btn btn-secondary" onclick="backToOrders()">
+                ← Back to Orders
+            </button>
         </div>
+    </div>
     </div>
 
     <!-- Success Popup -->
@@ -504,7 +536,7 @@
         async function retryPayment(orderId) {
             try {
                 showLoading();
-                
+
                 const res = await fetch(`/payment/retryPayment/${orderId}`, {
                     method: 'POST',
                     headers: {
@@ -550,14 +582,14 @@
                             .then(res => res.json())
                             .then(data => {
                                 if (data.success) {
-                                    window.location.href = '/checkout/orderSuccess?orderId='+ data.orderId;
+                                    window.location.href = '/checkout/orderSuccess?orderId=' + data.orderId;
                                 } else {
                                     window.location.href = `/payment/orderFailed/${orderData.order._id}`;
                                 }
                             });
                     },
-                    modal: { 
-                        ondismiss: function() {
+                    modal: {
+                        ondismiss: function () {
                             hideLoading();
                         }
                     }

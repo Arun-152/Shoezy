@@ -99,8 +99,6 @@ function generateInvoice(order, res) {
     doc.fillColor('black'); // Reset color
   }
 
-  // You can add shipping here if it's ever non-zero
-  // drawTotalRow("Shipping:", formatCurrency(0));
 
   doc.strokeColor("#333333").lineWidth(1).moveTo(totalsX, totalsY).lineTo(550, totalsY).stroke();
   totalsY += 10;

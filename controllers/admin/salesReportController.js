@@ -50,7 +50,7 @@ const loadSalesReport = async (req, res) => {
     }
 
     const pageNum = parseInt(page, 10) > 0 ? parseInt(page, 10) : 1;
-    const limitNum = 5; // Enforce a limit of 5 records per page
+    const limitNum = 5; 
     const skip = (pageNum - 1) * limitNum;
 
     const match = {
@@ -91,10 +91,6 @@ const loadSalesReport = async (req, res) => {
       case 'date-newest':
         sortOption = { createdAt: -1 };
         break;
-      // Sorting by amount will be handled after calculations in the pipeline
-      // case 'amount-low':
-      // case 'amount-high':
-      //   break;
       default:
         sortOption = { createdAt: -1 };
         break;
@@ -138,7 +134,6 @@ const loadSalesReport = async (req, res) => {
       { $match: match },
       {
         $addFields: {
-          // Store the original item count before unwinding
           originalItemCount: { $size: '$items' }
         }
       },
@@ -172,7 +167,6 @@ const loadSalesReport = async (req, res) => {
       { $unwind: { path: '$coupon', preserveNullAndEmptyArrays: true } }
     ];
 
-    // Apply item status filter after unwinding
     if (status && status !== 'all') {
       aggregationPipeline.push({
         $match: { 'items.status': new RegExp(`^${status}$`, 'i') }
@@ -192,7 +186,7 @@ const loadSalesReport = async (req, res) => {
               vars: {
                 itemPrice: { $ifNull: ['$items.totalPrice', 0] },
                 orderDiscount: { $ifNull: ['$discountAmount', 0] },
-                orderSubtotal: { $ifNull: ['$subtotal', 1] }, // Avoid division by zero
+                orderSubtotal: { $ifNull: ['$subtotal', 1] }, 
                 totalItemsInOrder: { $ifNull: ['$originalItemCount', 1] },
                 isFlatCoupon: { $eq: ['$coupon.discountType', 'flat'] }
               },
@@ -226,7 +220,6 @@ const loadSalesReport = async (req, res) => {
     } else if (sort === 'amount-high') {
       orders.sort((a, b) => (b.items.totalPrice || 0) - (a.items.totalPrice || 0));
     } else {
-      // Default sort if not amount-based
       orders.sort((a, b) => {
         if (sortOption.createdAt) return (new Date(a.createdAt) - new Date(b.createdAt)) * sortOption.createdAt;
         return 0;

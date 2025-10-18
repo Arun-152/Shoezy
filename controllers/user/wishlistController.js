@@ -122,7 +122,6 @@ const removeWishlist = async(req,res)=>{
             return res.status(200).json({success: true, message: "Product removed from wishlist"})
         }
 
-        // Otherwise redirect to wishlist page
         return res.redirect("/wishlist")
     } catch (error) {
         console.error(error)

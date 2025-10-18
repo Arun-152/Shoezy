@@ -5,7 +5,7 @@ const handleNotFound = (req, res, next) => {
     if (isAdmin) {
         return res.status(404).render("admin404", { title: "Admin Page Not Found" });
     } else {
-        return res.status(404).render("user404", { title: "Page Not Found" });
+        return res.status(404).render("usererrorPage", { title: "Page Not Found" });
     }
 };
 

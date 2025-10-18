@@ -35,7 +35,6 @@ const couponSchema = new Schema({
   },
   maxAmount: {
     type: Number,
-    // Max amount is only required for percentage-based coupons
     required: function() {
       return this.discountType === 'percentage';
     },
@@ -103,7 +102,6 @@ const couponSchema = new Schema({
   }]
 });
 
-// Pre-save hook to trim and uppercase the name field
 couponSchema.pre('save', function (next) {
   if (this.name) {
     this.name = this.name.trim().toUpperCase();
@@ -111,12 +109,10 @@ couponSchema.pre('save', function (next) {
   next();
 });
 
-// Validate name is not empty
 couponSchema.path('name').validate(function (value) {
   return value && value.trim().length > 0;
 }, 'Coupon name cannot be empty');
 
-// Drop the problematic code_1 index (development only)
 couponSchema.statics.dropCodeIndex = async function () {
   try {
     const indexes = await this.collection.indexes();
@@ -131,7 +127,6 @@ couponSchema.statics.dropCodeIndex = async function () {
 
 const Coupon = mongoose.model("Coupon", couponSchema);
 
-// Run index cleanup on startup (development only)
 Coupon.dropCodeIndex();
 
 module.exports = Coupon;

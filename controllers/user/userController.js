@@ -25,7 +25,7 @@ const signupPage = async (req, res) => {
             error_msg: req.flash("error_msg"),
             success_msg: req.flash("success_msg"),
             error: req.flash("error"),
-            referralCode: referralCode, // Pass referralCode to the view
+            referralCode: referralCode, 
         });
     } catch (error) {
         console.error("Error loading signup page:", error);
@@ -39,7 +39,6 @@ const loginPage = async (req, res) => {
         if (req.session.userId) {
             return res.redirect("/home");
         }
-        // Always render with clean form - no pre-filled values
         return res.render("loginPage", {
             email: "",
             password: "",
@@ -617,7 +616,6 @@ const postVerifyOTP = async (req, res) => {
         }
 
 
-        // Check expiry
         if (Date.now() > sessionOTP.expiresAt || sessionOTP.expired) {
 
             req.session.passwordResetOTP.expired = true;

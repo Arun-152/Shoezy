@@ -35,7 +35,7 @@ const couponPage = async (req, res) => {
                 sortOptions.expireOn = -1;
                 break;
             default:
-                sortOptions.name = 1; // Default to name ascending
+                sortOptions.name = 1; 
                 break;
         }
 
@@ -237,7 +237,7 @@ const createCoupon = async (req, res) => {
       expireOn: expirationDate,
       discountType,
       offerPrice: offerPriceNum,
-      maxAmount: maxAmountNum, // Will be null for 'flat' type
+      maxAmount: maxAmountNum, 
       minimumPrice: parseFloat(minimumPrice),
       applicableCategories: isAllCategories ? [] : (Array.isArray(applicableCategories) ? applicableCategories : [applicableCategories]),
       applicableProducts: isAllProducts ? [] : (Array.isArray(applicableProducts) ? applicableProducts : [applicableProducts]),
@@ -421,7 +421,7 @@ const editCoupon = async(req,res)=>{
                 expireOn: expirationDate,
                 discountType: discountType,
                 offerPrice: offerPriceNum,
-                maxAmount: maxAmountNum, // Will be null for 'flat' type
+                maxAmount: maxAmountNum, 
                 minimumPrice: parseFloat(minimumPrice),
                 applicableCategories: isAllCategories ? [] : (Array.isArray(applicableCategories) ? applicableCategories : [applicableCategories]),
                 applicableProducts: isAllProducts ? [] : (Array.isArray(applicableProducts) ? applicableProducts : [applicableProducts]),

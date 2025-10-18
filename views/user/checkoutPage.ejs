@@ -286,9 +286,9 @@
                             <input type="text" id="couponCode" placeholder="Enter coupon code" class="coupon-input" />
                             <button type="button" class="apply-coupon-btn" onclick="applyCoupon()">Apply</button>
                         </div>
-                        <button type="button" class="view-coupons-btn" onclick="showAvailableCoupons()">
+                        <button type="button" id="viewCouponsBtn" class="view-coupons-btn">
                             <i class="fas fa-eye"></i> View Available Coupons
-                        </button>
+                        </button> 
                     </div>
                     <% if (appliedCoupon && couponDiscount> 0) { %>
                         <div class="applied-coupon-container" id="appliedCouponContainer">
@@ -458,7 +458,7 @@
             <script>
                 let originalSubtotal = <%= subtotal %>;
                 let originalFinalTotal = <%= totalAmount %>;
-                const availableCoupons = <% - JSON.stringify(coupon || []) %>;
+                const availableCoupons = <%- JSON.stringify(coupon || []) %>;
                 let currentCoupon = null;
                 let currentDiscount = 0;
                 let walletBalance = <%= walletBalance %>;
@@ -680,7 +680,11 @@
                             confirmButtonColor: '#007bff',
                             cancelButtonColor: '#6b7280'
                         });
-                        if (confirmPlace.isDenied) return false;
+                        
+                        // If the user did NOT confirm, stop the function here.
+                        if (!confirmPlace.isConfirmed) {
+                            return; 
+                        }
 
                         if (payment === 'Online' || payment === 'Wallet_Online') {
                             // Prepare order on server
@@ -879,6 +883,10 @@
 
                     document.getElementById('couponCode').addEventListener('keypress', e => {
                         if (e.key === 'Enter') applyCoupon();
+                    });
+
+                    document.getElementById('viewCouponsBtn').addEventListener('click', () => {
+                        showAvailableCoupons();
                     });
                 });
 
