@@ -18,7 +18,7 @@ passport.use(
       try {
         const fullname = profile.displayName;
         const email = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
-        const profilePicture = profile.photos && profile.photos[0]? profile.photos[0].value : "";
+        const profilePicture  = profile.photos?.[0]?.value || 'https://via.placeholder.com/150';
 
         const user = await User.findOne({ email });
         if (user) {
@@ -35,7 +35,7 @@ passport.use(
           return done(null, user);
         }
 
-        const newUser = {
+        const newUser = new User({
           fullname,
           email,
           googleId: profile.id,
@@ -46,7 +46,7 @@ passport.use(
           phone:"Registered By Google",
           referralCode:generatedReferralCode(),
           
-        }
+        })
         await newUser.save();
         return done(null, newUser); 
 
