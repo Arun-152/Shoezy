@@ -17,28 +17,22 @@ passport.use(new GoogleStrategy({
       const email = profile.emails?.[0]?.value || `nodemail-${profile.id}@google.com`;
       const profilePicture = profile.photos?.[0]?.value || 'https://via.placeholder.com/150';
 
-      // Check if user already exists by Google ID or email
       let user = await User.findOne({ email });
 
       if (user) {
-        // User exists
         if (user.isBlocked) {
-          // User is blocked, prevent login
           return done(null, false, { message: 'This account has been blocked.' });
         }
         if (!user.googleId) {
-          // This is an existing local account, link it with Google ID
           user.googleId = profile.id;
-          // Optionally update profile image if they don't have one
           if (!user.profilePicture) {
             user.profilePicture = profilePicture;
           }
           await user.save();
         }
-        return done(null, user); // Login existing user
+        return done(null, user); 
       }
 
-      // Create new user
       const newUser = new User({
         googleId: profile.id,
         fullname,

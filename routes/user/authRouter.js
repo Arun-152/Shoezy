@@ -21,10 +21,8 @@ router.get("/google/callback", (req, res, next) => {
           return res.redirect("/login");
         }
 
-        // Manually set the userId in the session
         req.session.userId = user._id;
         
-        // Save the session before redirecting
         req.session.save(() => res.redirect("/"));
       });
     }

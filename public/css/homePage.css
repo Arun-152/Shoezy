@@ -547,7 +547,8 @@ body {
 /* UPDATED PRODUCTS GRID - EXACTLY 4 PRODUCTS PER ROW */
 .products-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    /* Use auto-fit to create a responsive grid. Items will fill the space. */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 24px;
     width: 100%;
 }
@@ -563,6 +564,7 @@ body {
     cursor: pointer;
     position: relative;
     width: 100%;
+    min-width: 280px; /* Prevents cards from becoming too narrow */
 }
 
 .product-card.modern:hover {
