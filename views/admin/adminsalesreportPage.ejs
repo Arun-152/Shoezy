@@ -540,7 +540,7 @@
                                     <i class="fas fa-rupee-sign"></i>
                                     <div class="card-content">
                                         <h3>Total Sales</h3>
-                                        <p>₹<%= summary.totalSales.toFixed(2) %>
+                                        <p>₹<%= summary.totalSales.toFixed(1) %>
                                         </p>
                                     </div>
                                 </div>
@@ -566,7 +566,7 @@
                                     <i class="fas fa-chart-line"></i>
                                     <div class="card-content">
                                         <h3>Net Revenue</h3>
-                                        <p>₹<%= summary.netRevenue.toFixed(2) %>
+                                        <p>₹<%= summary.netRevenue.toFixed(1) %>
                                         </p>
                                     </div>
                                 </div>
@@ -739,31 +739,32 @@
                                                 </td>
                                                 <% if (item.productPrice < 0) { %>
                                                     <td style="<%= item.productPrice < 0 ? 'color: red;' : '' %>">
-                                                        ₹<%= Math.abs(item.productPrice).toFixed(2) %>
+                                                        <%= Math.abs(item.productPrice).toFixed(1) %>
                                                     </td>
 
                                                     <% } else { %>
-                                                        <td>₹<%= item.productPrice.toFixed(2) %>
+                                                        <td><%= item.productPrice.toFixed(1) %>
                                                         </td>
                                                         <% } %>
                                                             <td>
                                                                 <%= item.couponUsed %>
                                                             </td>
                                                             <% if (item.productDiscount ) { %>
-                                                            <td>₹<%= item.productDiscount.toFixed(2) %>
+                                                            <td><%= item.productDiscount.toFixed(1) %>
                                                                 <%}else { %>
                                                                 <td>0
                                                                 </td>
                                                                 <% } %>
                                                             </td>
-                                                            <% if (item.productNetPrice < 0) { %>
-                                                                <td
-                                                                    style="<%= item.productNetPrice < 0 ? 'color: red;' : '' %>">
-                                                                    ₹<%= Math.abs(item.productNetPrice).toFixed(2) %>
+                                                            <% if (item.productPrice-item.productDiscount < 0) { %>
+                                                                <td style="<%= item.productPrice-item.productDiscount < 0 ? 'color: red;' : '' %>">
+                                                            
+                                                                    ₹<%= Math.abs(item.productPrice-item.productDiscount).toFixed(1)   %>
                                                                 </td>
+                                                              
 
                                                                 <% } else { %>
-                                                                    <td>₹<%= item.productNetPrice.toFixed(2) %>
+                                                                    <td><%= (item.productPrice-item.productDiscount).toFixed(1) %>
                                                                     </td>
                                                                     <% } %>
 

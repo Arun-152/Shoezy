@@ -14,12 +14,11 @@ body {
     margin-top: 10px;
     display: flex;
     gap: 10px;
-    margin-right: 400px;
 }
 
 .search-btn,
 .clear-btn {
-    padding: 8px 16px;
+    padding: 9px 16px;
     border: none;
     border-radius: 4px;
     font-weight: 600;
@@ -189,6 +188,7 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
+    flex-wrap: wrap;
        background: white;
        border-radius: 10px;
        height: 80px;
@@ -198,7 +198,7 @@ body {
 
 .search-container {
     position: relative;
-    width: 300px;
+    max-width: 300px;
 }
 
 .search-input {
@@ -281,11 +281,14 @@ body {
 .btn-primary {
   background-color: #357abd;
   color: aliceblue;
-  border-radius: 10px;
   border: white;
-  padding: 5px;
+  border-radius: 8px;
+  padding: 15px 16px;
   transition: background-color 0.3s ease, transform 0.2s ease;
   cursor: pointer;
+  text-align: center;
+  white-space: nowrap; 
+  min-width: 120px;     
 }
 
 .btn-primary:hover {
@@ -333,6 +336,7 @@ body {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     margin-bottom: 20px;
+    width: 100%;
     border-color: rgb(15, 15, 15);
 }
 

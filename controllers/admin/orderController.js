@@ -83,6 +83,8 @@ const ordersPage = async (req, res) => {
     const totalOrders = await Order.countDocuments(query);
     const totalPages = Math.ceil(totalOrders / limit);
 
+    const returnRequestCount = await Order.countDocuments({ "items.status": "ReturnRequested" });
+
     const orders = await Order.find(query)
       .populate("userId", "fullname email")
       .populate("couponId") 
@@ -104,7 +106,8 @@ const ordersPage = async (req, res) => {
       totalPages,
       totalOrders,
       search,
-      sort
+      sort,
+      returnRequestCount
     });
   } catch (error) {
     console.error("Error rendering orders page:", error.message);

@@ -80,31 +80,39 @@ function generateInvoice(order, res) {
   drawLine(currentY);
 
   // --- Totals Section ---
-  let totalsY = currentY + 20;
-  const totalsX = 400;
-  const labelWidth = 80;
+  const totalsX = 380;
+  const labelWidth = 100;
   const valueWidth = 70;
-
-  const drawTotalRow = (label, value) => {
-    doc.font('Helvetica').fontSize(10).text(label, totalsX, totalsY, { width: labelWidth, align: 'right' });
-    doc.text(value, totalsX + labelWidth + 10, totalsY, { width: valueWidth, align: 'right' });
+  let totalsY = currentY + 20;
+  
+  const drawTotalRow = (label, value, options = {}) => {
+    const { font = 'Helvetica', color = 'black', isBold = false } = options;
+    const finalFont = isBold ? font + '-Bold' : font;
+  
+    doc.font(finalFont).fillColor(color).fontSize(10)
+       .text(label, totalsX, totalsY, { width: labelWidth, align: 'right' });
+    doc.font(finalFont).fillColor(color).fontSize(10)
+       .text(value, totalsX + labelWidth + 10, totalsY, { width: valueWidth, align: 'right' });
+  
     totalsY += 15;
   };
-
+  
   drawTotalRow("Subtotal:", formatCurrency(subtotal));
-
+  
   if (order.discountAmount && order.discountAmount > 0) {
-    doc.font('Helvetica-Bold').fillColor('#28a745');
-    drawTotalRow(`Discount (${order.couponCode}):`, `- ${formatCurrency(order.discountAmount)}`);
-    doc.fillColor('black'); // Reset color
+    drawTotalRow(
+      `Discount (${order.couponCode}):`,
+      `- ${formatCurrency(order.discountAmount)}`,
+      { color: '#28a745', isBold: true }
+    );
   }
-
-
+  
+  // Reset font and color for the line and grand total
+  doc.font('Helvetica').fillColor('black');
   doc.strokeColor("#333333").lineWidth(1).moveTo(totalsX, totalsY).lineTo(550, totalsY).stroke();
   totalsY += 10;
-
-  doc.font('Helvetica-Bold').fontSize(12);
-  drawTotalRow("Grand Total:", formatCurrency(order.totalAmount));
+  
+  drawTotalRow("Grand Total:", formatCurrency(order.totalAmount), { font: 'Helvetica', isBold: true });
 
   // --- Footer ---
   const pageHeight = doc.page.height;

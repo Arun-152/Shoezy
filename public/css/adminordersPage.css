@@ -615,12 +615,6 @@ body {
     opacity: 0.5;
     cursor: not-allowed;
 }
-.search-buttons {
-    margin-top: 10px;
-    display: flex;
-    gap: 10px;
-    margin-right: 400px;
-}
 
 .search-btn,
 .clear-btn {
@@ -658,19 +652,19 @@ body {
 .search-section {
     margin-bottom: 20px;
     display: flex;
-    align-items: center;
-    gap: 10px;
+    align-items: center; /* Vertically center all items */
+    gap: 15px;
     background: white;
     border-radius: 10px;
-    height: auto; /* remove fixed height */
     padding: 15px 20px;
-    justify-content: flex-start; /* keep items aligned to the left */
-    flex-wrap: wrap; /* allow wrapping in small screens */
+    flex-wrap: wrap;
+    justify-content: space-between; /* Push items to ends */
     box-sizing: border-box;
 }
 
 /* Style inputs, select, and buttons inside */
 .search-section input[type="text"],
+.search-section input[type="date"],
 .search-section select {
     padding: 8px 12px;
     border: 1px solid #ddd;
@@ -678,18 +672,22 @@ body {
     font-size: 14px;
 }
 
-/* Buttons */
-.search-section button {
-    padding: 8px 16px;
-    border-radius: 6px;
-    border: none;
-    font-size: 14px;
-    cursor: pointer;
+.search-controls-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
 }
 
-.search-section .apply-btn {
+.search-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    justify-content: flex-end;
+
+}
+.search-section .search-btn {
     background-color: #007bff;
-    color: white;
 }
 
 .search-section .clear-btn {
@@ -697,21 +695,14 @@ body {
     color: white;
 }
 
-
-.filter-controls {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
 .search-container {
     position: relative;
-    width: 300px;
+    min-width: 250px;
 }
 
 .search-input {
     width: 100%;
-    padding: 8px 35px 8px 35px;
+    padding: 18px;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 14px;
@@ -762,13 +753,14 @@ body {
 .sort-control {
     display: flex;
     align-items: center;
-    gap: 8px;
+    
 }
 
 .sort-control label {
     font-size: 14px;
     font-weight: 500;
     color: #666;
+    margin-top: 0; /* Removed margin-top for proper alignment */
 }
 
 .sort-select {
@@ -780,8 +772,28 @@ body {
     cursor: pointer;
     outline: none;
     transition: border-color 0.3s ease;
+    margin-right: 150px;
+    margin-bottom: 25px;
 }
 
 .sort-select:focus {
     border-color: #4a90e2;
+}
+
+.view-request-btn {
+    position: relative;
+}
+
+.notification-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: #dc3545;
+    color: white;
+    border-radius: 50%;
+    padding: px 6px;
+    font-size: 12px;
+    font-weight: bold;
+    border: 2px solid white;
+    min-width: 20px;
 }

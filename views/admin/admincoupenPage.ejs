@@ -525,33 +525,32 @@
                         </div>
 
                         <form id="searchForm" class="search-section" method="GET" action="/admin/coupons">
-                            <div class="search-container">
-                                <i class="fas fa-search search-icon"></i>
-                                <input type="text" id="searchInput" name="search" class="search-input" placeholder="Search coupons..." value='<%= search %>'>
-                            </div>
-                            <div class="form-actions">
-                                <div class="sort-container">
-                                    <label for="sortSelect" class="sort-label">
-                                        <i class="fas fa-sort-alpha-down"></i> Sort:
-                                    </label>
-                                    <select id="sortSelect" class="sort-select" name="sort" onchange="this.form.submit()">
-                                        <option value="name_asc" <% if (sort === 'name_asc') { %>selected<% } %>>Coupon Code (A-Z)</option>
-                                        <option value="name_desc" <% if (sort === 'name_desc') { %>selected<% } %>>Coupon Code (Z-A)</option>
-                                        <option value="expiry_asc" <% if (sort === 'expiry_asc') { %>selected<% } %>>Expiry Date (Asc)</option>
-                                        <option value="expiry_desc" <% if (sort === 'expiry_desc') { %>selected<% } %>>Expiry Date (Desc)</option>
-                                    </select>
+                            <div class="left-search-controls">
+                                <div class="search-container">
+                                    <i class="fas fa-search search-icon"></i>
+                                    <input type="text" id="searchInput" name="search" class="search-input" placeholder="Search coupons..." value='<%= search %>'>
                                 </div>
-                                <div class="search-buttons">
-                                    <button type="submit" class="search-btn">Apply</button>
-                                    <a href="/admin/coupons" class="clear-btn">Clear</a>
-                                </div>
-                                <div class="right-controls">
-                                    <button type="button" class="btn btn-primary"
-                                        onclick="window.location.href='/admin/coupons/addCoupon'">
-                                        <i class="fas fa-plus"></i> Add Coupon
-                                    </button>
+                                <div class="form-actions">
+                                    <div class="sort-container">
+                                        <label for="sortSelect" class="sort-label">
+                                            <i class="fas fa-sort-alpha-down"></i> Sort:
+                                        </label>
+                                        <select id="sortSelect" class="sort-select" name="sort" onchange="this.form.submit()">
+                                            <option value="name_asc" <% if (sort === 'name_asc') { %>selected<% } %>>Coupon Code (A-Z)</option>
+                                            <option value="name_desc" <% if (sort === 'name_desc') { %>selected<% } %>>Coupon Code (Z-A)</option>
+                                            <option value="expiry_asc" <% if (sort === 'expiry_asc') { %>selected<% } %>>Expiry Date (Asc)</option>
+                                            <option value="expiry_desc" <% if (sort === 'expiry_desc') { %>selected<% } %>>Expiry Date (Desc)</option>
+                                        </select>
+                                    </div>
+                                    <div class="search-buttons">
+                                        <button type="submit" class="search-btn">Apply</button>
+                                        <a href="/admin/coupons" class="clear-btn">Clear</a>
+                                    </div>
                                 </div>
                             </div>
+                            <button type="button" class="btn btn-primary" onclick="window.location.href='/admin/coupons/addCoupon'">
+                                <i class="fas fa-plus"></i> Add Coupon
+                            </button>
                         </form>
 
                         <div class="table-section">

@@ -15,12 +15,6 @@ body {
     min-height: 100vh;
     height: 100px;
 }
-.search-buttons {
-    margin-top: 10px;
-    display: flex;
-    gap: 10px;
-    margin-right: 400px;
-}
 
 .search-btn,
 .clear-btn {
@@ -203,6 +197,12 @@ body {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
     flex-wrap: wrap;
+}
+
+.search-buttons {
+    display: flex;
+    gap: 10px;
+    /* margin-left: auto; Pushes buttons to the right */
 }
 
 /* Sort container styles */
