@@ -424,7 +424,7 @@ const userPostLogin = async (req, res) => {
 
         // Handle users who signed up via Google (and thus have no password)
         if (!user.password) {
-            const message = "This account was created using Google. Please sign in with Google.";
+            const message = "This account was created using Google. Please sign in with Google or signup";
             if (isAjax) {
                 return res.status(400).json({
                     success: false,

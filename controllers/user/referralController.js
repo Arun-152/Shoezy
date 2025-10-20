@@ -18,8 +18,17 @@ const getReferralPage = async (req, res) => {
         const referralCode = user.referralCode;
         const referralLink = `https://sho-ezy.shop/signup?ref=${referralCode}`;
 
-        const wallet = await Wallet.findOne({ userId });
-        const walletBalance = wallet.balance ? wallet.balance: 0;
+        let wallet = await Wallet.findOne({ userId });
+        // If a wallet doesn't exist for any reason, create one.
+        if (!wallet) {
+            wallet = new Wallet({
+                userId,
+                balance: 0,
+                transactions: [],
+            });
+            await wallet.save();
+        }
+        const walletBalance = wallet.balance;
 
 
         const referrals = await User.find({ referredBy: referralCode })
@@ -45,7 +54,7 @@ const getReferralPage = async (req, res) => {
 
 
     } catch (err) {
-        console.error("Error in getReferralPage:", err);
+        console.error("Error in getReferralPage:", err.message );
         res.status(500).json({ success: false, message: "Server error" });
     }
 };

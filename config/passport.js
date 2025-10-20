@@ -2,6 +2,7 @@ const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const User = require("../models/userSchema");
 const env = require("dotenv").config();
+const Wallet = require("../models/walletSchema");
 const {generatedReferralCode } = require("../helpers/generateReferral")
 
 passport.use(new GoogleStrategy({
@@ -43,6 +44,14 @@ passport.use(new GoogleStrategy({
       });
 
       await newUser.save();
+
+      // Create a wallet for the new user
+      const newWallet = new Wallet({
+        userId: newUser._id,
+        balance: 0,
+        transactions: [],
+      });
+      await newWallet.save();
       return done(null, newUser);
 
     } catch (err) {
