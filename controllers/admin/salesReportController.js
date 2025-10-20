@@ -503,7 +503,7 @@ const exportPdfReport = async (req, res) => {
 
   } catch (error) {
     console.error('Error exporting PDF sales report:', error);
-    res.status(500).send('Error generating PDF report');
+    res.status(500).json({success:false,message:'Error generating PDF report'});
   }
 };
 
@@ -661,7 +661,7 @@ const exportExcelReport = async (req, res) => {
 
   } catch (error) {
     console.error('Error exporting Excel sales report:', error);
-    res.status(500).send('Error generating Excel report');
+    res.status(500).json({success:false,message:'Error generating Excel report'});
   }
 };
 
@@ -783,7 +783,7 @@ const exportCsvReport = async (req, res) => {
 
   } catch (error) {
     console.error('Error exporting CSV sales report:', error);
-    res.status(500).send('Error generating CSV report');
+    res.status(500).json({success:false,message:'Error generating CSV report'});
   }
 };
 

@@ -10,7 +10,7 @@ const loadCoupons = async (req, res) => {
   try {
     const userData = await User.findById(req.session.userId);
     if (!userData) {
-      return res.status(401).send("User not authenticated");
+      return res.status(401).json({success:false, message: "Please login" });
     }
 
     const page = parseInt(req.query.page) || 1;

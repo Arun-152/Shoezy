@@ -45,7 +45,9 @@ const loginPage = async (req, res) => {
             title: "User Login"
         });
     } catch (error) {
-        res.status(500).send("Server error");
+        console.error("Error loading login page:", error)
+        res.status(500).json({success:false, message: "Server error" });
+        
     }
 };
 
@@ -245,9 +247,12 @@ const verifyOTP = async (req, res) => {
         if (otp !== sessionOTP.code) {
             return res.status(400).json({ success: false, message: "Invalid OTP. Please try again." });
         }
-        let existingUser = await User.findOne({ referralCode: generatedReferralCode });
+
+        let referralCodeToSave = generatedReferralCode;
+        let existingUser = await User.findOne({ referralCode: referralCodeToSave });
         while (existingUser) {
-            existingUser = await User.findOne({ referralCode: generatedReferralCode });
+            referralCodeToSave = generatedReferralCode(fullname, true); // Regenerate if not unique
+            existingUser = await User.findOne({ referralCode: referralCodeToSave });
         }
 
         const newUser = new User({
@@ -255,7 +260,7 @@ const verifyOTP = async (req, res) => {
             email,
             phone,
             password: hashedPassword,
-            referralCode: generatedReferralCode,
+            referralCode: referralCodeToSave,
             referredBy: referralCode ? referralCode.trim() : null,
         });
         await newUser.save();
@@ -417,6 +422,22 @@ const userPostLogin = async (req, res) => {
             });
         }
 
+        // Handle users who signed up via Google (and thus have no password)
+        if (!user.password) {
+            const message = "This account was created using Google. Please sign in with Google.";
+            if (isAjax) {
+                return res.status(400).json({
+                    success: false,
+                    message: message,
+                    errorType: "email"
+                });
+            }
+            return res.render("loginPage", {
+                message: message,
+                messageType: "error",
+                errorType: "email"
+            });
+        }
         const passwordMatch = await bcrypt.compare(password, user.password);
 
         if (!passwordMatch) {
