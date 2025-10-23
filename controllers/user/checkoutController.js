@@ -80,6 +80,8 @@ const loadCheckout = async (req, res) => {
       user,
       cartItems: cart.items,
       allItems,
+      fullname: user.fullname,
+      phone: user.phone,
       subtotal,
       totalItems,
       shipping,

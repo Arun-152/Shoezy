@@ -526,12 +526,12 @@
                 // Function to clear form data and errors for fresh form
                 function clearForm() {
                     // Clear all input values
-                    document.getElementById('fullName').value = '';
-                    document.getElementById('mobileNumber').value = '';
+                    document.getElementById('fullName').value = '<%= user.fullname || '' %>';
+                    document.getElementById('mobileNumber').value = '<%= user.phone || '' %>';
                     document.getElementById('address').value = '';
                     document.getElementById('city').value = '';
-                    document.getElementById('district').value = '';
-                    document.getElementById('state').value = '';
+                    // document.getElementById('district').value = ''; // This will be populated by state change
+                    // document.getElementById('state').value = ''; // Let's keep the default or user's last choice
                     document.getElementById('pinCode').value = '';
                     document.getElementById('landmark').value = '';
                     document.getElementById('addressType').value = 'home';
