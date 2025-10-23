@@ -103,10 +103,6 @@ const applyCoupon = async (req, res) => {
     if (cartTotal < coupon.minimumPrice) {
       return res.status(400).json({ success: false, message: `Minimum order amount of ₹${coupon.minimumPrice.toLocaleString('en-IN')} required` });
     }
-    if (coupon.maxAmount && cartTotal > coupon.maxAmount) {
-      return res.status(400).json({ success: false, message: "This coupon cannot be applied. The total amount exceeds the maximum allowed limit." });
-    }
-
     if (coupon.totalUsageLimit && coupon.currentUsageCount >= coupon.totalUsageLimit) {
       return res.status(400).json({ success: false, message: "This coupon has reached its usage limit" });
     }

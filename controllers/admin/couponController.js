@@ -198,14 +198,7 @@ const createCoupon = async (req, res) => {
           fieldErrors: { maxAmount: "Max amount must be a number greater than 0" }
         });
       }
-      const minPriceNum = parseFloat(minimumPrice);
-      if (!isNaN(minPriceNum) && maxAmountNum < minPriceNum) {
-        return res.status(400).json({
-          success: false,
-          message: "Max Amount must be greater than or equal to Min Amount.",
-          fieldErrors: { maxAmount: "Max Amount must be greater than or equal to Min Amount." }
-        });
-      }
+     
     }
     const maxUsesPerUserNum = parseInt(maxUsesPerUser) || 1;
     if (maxUsesPerUserNum < 1) {
@@ -381,13 +374,7 @@ const editCoupon = async(req,res)=>{
               fieldErrors: { maxAmount: "Max amount must be a number greater than 0" }
             });
           }
-          if (!isNaN(minPriceNum) && maxAmountNum < minPriceNum) {
-            return res.status(400).json({
-              success: false,
-              message: "Max Amount must be greater than or equal to Min Amount.",
-              fieldErrors: { maxAmount: "Max Amount must be greater than or equal to Min Amount." }
-            });
-          }
+          
         }
         const maxUsesPerUserNum = parseInt(maxUsesPerUser) || 1 ;
         if(maxUsesPerUserNum < 1){
