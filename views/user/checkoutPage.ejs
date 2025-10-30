@@ -494,12 +494,17 @@
                             currentDiscount = data.discountAmount;
 
                             updateOrderSummaryWithBackend(data);
-                            showAppliedCoupon(currentCoupon, currentDiscount);
+                            showAppliedCoupon(currentCoupon, currentDiscount, data.wasCapped, data.couponCode);
+
+                            let successMessage = `You saved ₹${data.discountAmount.toLocaleString()}!`;
+                            if (data.wasCapped) {
+                                successMessage += `<br><small style="font-weight: normal; display: block; margin-top: 8px;">The discount was capped at the coupon's maximum limit.</small>`;
+                            }
 
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Coupon Applied!',
-                                text: `You saved ₹${data.discountAmount.toLocaleString()}`,
+                                html: successMessage,
                                 confirmButtonColor: '#007bff'
                             });
 
@@ -562,9 +567,13 @@
                     });
                 }
 
-                function showAppliedCoupon(coupon, discount) {
-                    document.getElementById('appliedCouponCode').textContent = coupon.name;
-                    document.getElementById('appliedCouponDiscount').textContent = `Saved ₹${discount.toLocaleString()}`;
+                function showAppliedCoupon(coupon, discount, wasCapped = false, couponCode = '') {
+                    document.getElementById('appliedCouponCode').textContent = couponCode || coupon.name;
+                    let discountText = `Saved ₹${discount.toLocaleString()}`;
+                    if (wasCapped) {
+                        discountText += ' (Max Limit Applied)';
+                    }
+                    document.getElementById('appliedCouponDiscount').textContent = discountText;
                     const container = document.getElementById('appliedCouponContainer');
                     container.style.display = 'block';
                     const animation = document.getElementById('couponSuccessAnimation');
@@ -573,7 +582,7 @@
                     setTimeout(() => {
                         animation.style.display = 'none';
                         animation.classList.remove('animate');
-                    }, 3000);
+                    }, 2500);
                     document.getElementById('appliedCouponInput').value = coupon.name;
                 }
 

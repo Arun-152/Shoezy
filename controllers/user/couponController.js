@@ -150,8 +150,15 @@ const applyCoupon = async (req, res) => {
     }
 
     let discountAmount = 0;
+    let wasCapped = false;
     if (coupon.discountType === "percentage") {
-      discountAmount = Math.round(Math.min((cartTotal * coupon.offerPrice) / 100, coupon.maxAmount || cartTotal));
+      const potentialDiscount = (cartTotal * coupon.offerPrice) / 100;
+      if (coupon.maxAmount && potentialDiscount > coupon.maxAmount) {
+        discountAmount = Math.round(coupon.maxAmount);
+        wasCapped = true;
+      } else {
+        discountAmount = Math.round(potentialDiscount);
+      }
     } else {
       discountAmount = Math.round(Math.min(coupon.offerPrice, cartTotal));
     }
@@ -176,7 +183,8 @@ const applyCoupon = async (req, res) => {
         couponCode: coupon.name,
         discountAmount,
         originalAmount: cartTotal,
-        finalAmount
+        finalAmount,
+        wasCapped
       });
     });
 
