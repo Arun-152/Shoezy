@@ -411,14 +411,14 @@ const loadAddress = async(req,res)=>{
         });
         const returnURL = req.query.returnUrl ||  '/profile/address'
         
-        
-        res.render("addressPage", {
+        return res.render("addressPage", {
             user: userData,
             addresses: addresses,
             errors: {},
             formData: {},
             returnURL,
         })
+        
    
     }catch(error){
         console.error("Load address error:", error)

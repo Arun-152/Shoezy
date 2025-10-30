@@ -1071,11 +1071,6 @@
         if (discountType === 'percentage') {
           const minAmount = parseFloat(minAmountInput.value);
           const maxAmount = parseFloat(maxAmountInput.value);
-
-          if (!isNaN(minAmount) && !isNaN(maxAmount) && maxAmount < minAmount) {
-            maxAmountError.textContent = 'Max Amount must be greater than or equal to Min Amount.';
-            return false;
-          }
         }
         maxAmountError.textContent = '';
         return true;

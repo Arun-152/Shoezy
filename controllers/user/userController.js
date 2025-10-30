@@ -20,7 +20,8 @@ const signupPage = async (req, res) => {
         if (req.session.userId) {
             return res.redirect("/home");
         }
-        const referralCode = req.query.referralCode || null; // Extract referralCode from query
+        const referralCode = req.query.ref || null;
+        console.log(referralCode) 
         return res.render("signupPage", {
             error_msg: req.flash("error_msg"),
             success_msg: req.flash("success_msg"),

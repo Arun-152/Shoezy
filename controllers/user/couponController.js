@@ -103,10 +103,6 @@ const applyCoupon = async (req, res) => {
     if (cartTotal < coupon.minimumPrice) {
       return res.status(400).json({ success: false, message: `Minimum order amount of ₹${coupon.minimumPrice.toLocaleString('en-IN')} required` });
     }
-    if (coupon.maxAmount && cartTotal > coupon.maxAmount) {
-      return res.status(400).json({ success: false, message: "This coupon cannot be applied. The total amount exceeds the maximum allowed limit." });
-    }
-
     if (coupon.totalUsageLimit && coupon.currentUsageCount >= coupon.totalUsageLimit) {
       return res.status(400).json({ success: false, message: "This coupon has reached its usage limit" });
     }
@@ -154,8 +150,15 @@ const applyCoupon = async (req, res) => {
     }
 
     let discountAmount = 0;
+    let wasCapped = false;
     if (coupon.discountType === "percentage") {
-      discountAmount = Math.round(Math.min((cartTotal * coupon.offerPrice) / 100, coupon.maxAmount || cartTotal));
+      const potentialDiscount = (cartTotal * coupon.offerPrice) / 100;
+      if (coupon.maxAmount && potentialDiscount > coupon.maxAmount) {
+        discountAmount = Math.round(coupon.maxAmount);
+        wasCapped = true;
+      } else {
+        discountAmount = Math.round(potentialDiscount);
+      }
     } else {
       discountAmount = Math.round(Math.min(coupon.offerPrice, cartTotal));
     }
@@ -180,7 +183,8 @@ const applyCoupon = async (req, res) => {
         couponCode: coupon.name,
         discountAmount,
         originalAmount: cartTotal,
-        finalAmount
+        finalAmount,
+        wasCapped
       });
     });
 

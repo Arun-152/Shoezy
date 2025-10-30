@@ -191,7 +191,7 @@
                     <form class="address-form" id="addAddressForm">
                         <div class="form-group">
                             <label for="fullName">Full Name</label>
-                            <input type="text" id="fullName" name="fullName" placeholder="Enter your full name">
+                            <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" value="<%=fullname%>">
                         </div>
 
                         <div class="form-group">
@@ -215,7 +215,9 @@
                                     <option value="+41" data-flag="🇨🇭">🇨🇭 +41</option>
                                 </select>
                                 <input type="tel" id="mobileNumber" name="mobileNumber"
-                                    placeholder="Enter mobile number" class="phone-number-input">
+                                    placeholder="Enter mobile number" value="<%=phone%>" class="phone-number-input">
+                                
+
                             </div>
                         </div>
 
@@ -288,7 +290,7 @@
                         </div>
                         <button type="button" id="viewCouponsBtn" class="view-coupons-btn">
                             <i class="fas fa-eye"></i> View Available Coupons
-                        </button> 
+                        </button>
                     </div>
                     <% if (appliedCoupon && couponDiscount> 0) { %>
                         <div class="applied-coupon-container" id="appliedCouponContainer">
@@ -492,12 +494,17 @@
                             currentDiscount = data.discountAmount;
 
                             updateOrderSummaryWithBackend(data);
-                            showAppliedCoupon(currentCoupon, currentDiscount);
+                            showAppliedCoupon(currentCoupon, currentDiscount, data.wasCapped, data.couponCode);
+
+                            let successMessage = `You saved ₹${data.discountAmount.toLocaleString()}!`;
+                            if (data.wasCapped) {
+                                successMessage += `<br><small style="font-weight: normal; display: block; margin-top: 8px;">The discount was capped at the coupon's maximum limit.</small>`;
+                            }
 
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Coupon Applied!',
-                                text: `You saved ₹${data.discountAmount.toLocaleString()}`,
+                                html: successMessage,
                                 confirmButtonColor: '#007bff'
                             });
 
@@ -560,9 +567,13 @@
                     });
                 }
 
-                function showAppliedCoupon(coupon, discount) {
-                    document.getElementById('appliedCouponCode').textContent = coupon.name;
-                    document.getElementById('appliedCouponDiscount').textContent = `Saved ₹${discount.toLocaleString()}`;
+                function showAppliedCoupon(coupon, discount, wasCapped = false, couponCode = '') {
+                    document.getElementById('appliedCouponCode').textContent = couponCode || coupon.name;
+                    let discountText = `Saved ₹${discount.toLocaleString()}`;
+                    if (wasCapped) {
+                        discountText += ' (Max Limit Applied)';
+                    }
+                    document.getElementById('appliedCouponDiscount').textContent = discountText;
                     const container = document.getElementById('appliedCouponContainer');
                     container.style.display = 'block';
                     const animation = document.getElementById('couponSuccessAnimation');
@@ -571,7 +582,7 @@
                     setTimeout(() => {
                         animation.style.display = 'none';
                         animation.classList.remove('animate');
-                    }, 3000);
+                    }, 2500);
                     document.getElementById('appliedCouponInput').value = coupon.name;
                 }
 
@@ -680,10 +691,10 @@
                             confirmButtonColor: '#007bff',
                             cancelButtonColor: '#6b7280'
                         });
-                        
+
                         // If the user did NOT confirm, stop the function here.
                         if (!confirmPlace.isConfirmed) {
-                            return; 
+                            return;
                         }
 
                         if (payment === 'Online' || payment === 'Wallet_Online') {

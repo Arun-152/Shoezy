@@ -148,6 +148,106 @@
                 font-size: 11px;
             }
         }
+
+        /* Size Selection Modal */
+        .size-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10001;
+            transition: opacity 0.3s ease;
+        }
+
+        .size-modal {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 350px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            position: relative;
+            transform: scale(0.95);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .size-modal-overlay.show .size-modal {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .size-modal-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.8rem;
+            color: #9ca3af;
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.2s ease;
+        }
+
+        .size-modal-close:hover {
+            color: #374151;
+        }
+
+        .size-modal h4 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+            font-size: 1.25rem;
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .size-modal .product-name {
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-bottom: 1.5rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .size-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 0.8rem;
+        }
+
+        .size-option {
+            padding: 0.6rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .size-option .size-label {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #374151;
+            display: block;
+        }
+
+        .size-option .size-price {
+            font-size: 0.8rem;
+            color: #6b7280;
+            display: block;
+        }
+
+        .size-option:hover {
+            border-color: #10b981;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
     </style>
 
 
@@ -189,6 +289,7 @@
                             <% newArrivals.forEach(product=> { %>
                                 <div class="product-card modern"
                                     onclick="<%= typeof user !== 'undefined' && user ? `window.location.href='/product/${product._id}'` : 'redirectToLogin()' %>"
+                                    data-variants='<%- JSON.stringify(product.variants) %>'
                                     style="cursor: pointer;">
                                     <div class="product-image-container">
                                         <div class="product-image">
@@ -230,7 +331,7 @@
                                                         %>
                                                         <% if (totalStockNew> 0) { %>
                                                             <button class="quick-action-btn"
-                                                                onclick="event.stopPropagation(); addToCart('<%= product._id %>')"
+                                                                onclick="event.stopPropagation(); openSizeModal(this, '<%= product._id %>')"
                                                                 title="Add to Cart">
                                                                 <i class="fas fa-shopping-cart"></i>
                                                             </button>
@@ -242,7 +343,7 @@
                                                                         <i class="fas fa-eye"></i>
                                                                     </button>
                                                                     <% } %>
-                                                </div>
+                                                </div> -->
                                     </div>
 
                                     <div class="product-info">
@@ -318,6 +419,7 @@
                                 <% trendingProducts.forEach(product=> { %>
                                     <div class="product-card modern"
                                         onclick="<%= typeof user !== 'undefined' && user ? `window.location.href='/product/${product._id}'` : 'redirectToLogin()' %>"
+                                        data-variants='<%- JSON.stringify(product.variants) %>'
                                         style="cursor: pointer;">
                                         <!-- Same product card structure as New Arrivals -->
                                         <div class="product-image-container">
@@ -360,7 +462,7 @@
                                                             %>
                                                             <% if (totalStockTrending> 0) { %>
                                                                 <button class="quick-action-btn"
-                                                                    onclick="event.stopPropagation(); addToCart('<%= product._id %>')"
+                                                                    onclick="event.stopPropagation(); openSizeModal(this, '<%= product._id %>')"
                                                                     title="Add to Cart">
                                                                     <i class="fas fa-shopping-cart"></i>
                                                                 </button>
@@ -452,6 +554,7 @@
                                 <% premiumProducts.forEach(product=> { %>
                                     <div class="product-card modern premium-card"
                                         onclick="<%= typeof user !== 'undefined' && user ? `window.location.href='/product/${product._id}'` : 'redirectToLogin()' %>"
+                                        data-variants='<%- JSON.stringify(product.variants) %>'
                                         style="cursor: pointer;">
                                         <div class="product-image-container">
                                             <div class="product-image">
@@ -495,7 +598,7 @@
                                                             %>
                                                             <% if (totalStockPremium> 0) { %>
                                                                 <button class="quick-action-btn"
-                                                                    onclick="event.stopPropagation(); addToCart('<%= product._id %>')"
+                                                                    onclick="event.stopPropagation(); openSizeModal(this, '<%= product._id %>')"
                                                                     title="Add to Cart">
                                                                     <i class="fas fa-shopping-cart"></i>
                                                                 </button>
@@ -587,9 +690,21 @@
         <!-- Footer -->
         <%-include("../partials/user/userfooter")%>
 
+            <!-- Size Selection Modal -->
+            <div class="size-modal-overlay" id="sizeModalOverlay">
+                <div class="size-modal" id="sizeModal">
+                    <span class="size-modal-close" onclick="closeSizeModal()">&times;</span>
+                    <h4>Select Size</h4>
+                    <p class="product-name" id="modalProductName"></p>
+                    <div class="size-options" id="sizeOptions">
+                        <!-- Size options will be injected here -->
+                    </div>
+                </div>
+            </div>
+
             <script>
                 // Enhanced Add to Cart functionality
-                async function addToCart(productId, size = null) {
+                async function addToCartWithSize(productId, size) {
                     try {
                         const response = await fetch('/cart/add', {
                             method: 'POST',
@@ -599,7 +714,7 @@
                             },
                             body: JSON.stringify({
                                 productId: productId,
-                                size: size,
+                                size: size, // Always pass the selected size
                                 quantity: 1
                             })
                         });
@@ -607,11 +722,12 @@
                         const data = await response.json();
 
                         if (data.success) {
-                            updateCartCount(data.cartCount)
+                            updateCartCount(data.cartCount);
                             showNotification('Product added to cart successfully!');
+                            closeSizeModal();
                         } else {
                             if (data.message === "Please login to continue") {
-                                window.location.href = '/login'
+                                window.location.href = '/login';
                             }
                             showNotification(data.message || 'Error adding product to cart');
                         }
@@ -619,6 +735,56 @@
                         console.error('Error adding to cart:', error);
                         showNotification('Error adding product to cart. Please try again.');
                     }
+                }
+
+                // New functions for size modal
+                function openSizeModal(buttonElement, productId) {
+                    const productCard = buttonElement.closest('.product-card');
+                    const variantsData = productCard.getAttribute('data-variants');
+                    const productName = productCard.querySelector('.product-name').textContent.trim();
+
+                    const variants = JSON.parse(variantsData);
+
+                    const sizeOptionsContainer = document.getElementById('sizeOptions');
+                    sizeOptionsContainer.innerHTML = ''; // Clear previous options
+
+                    const availableVariants = variants.filter(v => v.variantQuantity > 0);
+
+                    if (availableVariants.length === 0) {
+                        showNotification('This product is currently out of stock.', 'error');
+                        return;
+                    }
+
+                    if (availableVariants.length === 1) {
+                        // If only one size is available, add it directly to the cart
+                        addToCartWithSize(productId, availableVariants[0].size);
+                        return;
+                    }
+
+                    document.getElementById('modalProductName').textContent = productName;
+
+                    availableVariants.forEach(variant => {
+                        const sizeEl = document.createElement('div');
+                        sizeEl.className = 'size-option';
+                        sizeEl.innerHTML = `
+                            <span class="size-label">${variant.size}</span>
+                            <span class="size-price">₹${variant.salePrice.toLocaleString('en-IN')}</span>
+                        `;
+                        sizeEl.onclick = () => addToCartWithSize(productId, variant.size);
+                        sizeOptionsContainer.appendChild(sizeEl);
+                    });
+
+                    const overlay = document.getElementById('sizeModalOverlay');
+                    overlay.style.display = 'flex';
+                    setTimeout(() => overlay.classList.add('show'), 10); // For transition
+                }
+
+                function closeSizeModal() {
+                    const overlay = document.getElementById('sizeModalOverlay');
+                    overlay.classList.remove('show');
+                    setTimeout(() => {
+                        overlay.style.display = 'none';
+                    }, 300); // Match transition duration
                 }
 
                 // Update cart count in navbar
@@ -735,6 +901,13 @@
                             colorDots.forEach(d => d.classList.remove('active'));
                             this.classList.add('active');
                         });
+                    });
+
+                    // Close modal when clicking on the overlay
+                    document.getElementById('sizeModalOverlay').addEventListener('click', function(event) {
+                        if (event.target === this) {
+                            closeSizeModal();
+                        }
                     });
                 });
             </script>
