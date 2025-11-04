@@ -782,7 +782,7 @@ body {
 }
 
 .stock-badge.out-of-stock {
-    background: rgba(239, 68, 68, 0.9);
+    background: rgba(194, 1, 1, 0.9);
     color: white;
 }
 
