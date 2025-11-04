@@ -54,7 +54,7 @@ body {
 .brand-name {
     font-size: 1.8rem;
     font-weight: bold;
-    color: #667eea;
+    color: #000000;
 }
 
 .nav-menu {
@@ -93,7 +93,7 @@ body {
 
 .search-input {
     padding: 0.7rem 2.5rem 0.7rem 1rem;
-    border: 2px solid rgba(102, 126, 234, 0.2);
+    border: 2px solid black;
     border-radius: 25px;
     background: #ffffff; /* Changed to solid white */
     font-size: 0.9rem;
@@ -281,7 +281,7 @@ body {
 .cart-total-amount {
     font-size: 1.4rem;
     font-weight: bold;
-    color: #27ae60;
+    color: #000000;
 }
 
 .cart-actions-quick {
@@ -303,7 +303,7 @@ body {
 }
 
 .save-later-btn {
-    background: linear-gradient(45deg, #3498db, #2980b9);
+    background: black;
     color: white;
     box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
 }
@@ -314,7 +314,7 @@ body {
 }
 
 .clear-cart-btn {
-    background: linear-gradient(45deg, #e74c3c, #c0392b);
+    background: black;
     color: white;
     box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
 }
@@ -358,7 +358,7 @@ body {
 }
 
 .section-header h2 {
-    color: #667eea;
+    color: #000000;
     font-size: 1.5rem;
     display: flex;
     align-items: center;
@@ -366,9 +366,9 @@ body {
 }
 
 .continue-shopping-btn {
-    background: rgba(102, 126, 234, 0.1);
-    color: #667eea;
-    border: 2px solid #667eea;
+    background: rgb(253, 254, 255);
+    color: #000000;
+    border: 2px solid #000000;
     padding: 0.8rem 1.5rem;
     border-radius: 25px;
     cursor: pointer;
@@ -380,7 +380,7 @@ body {
 }
 
 .continue-shopping-btn:hover {
-    background: #667eea;
+    background: #050505;
     color: white;
     transform: translateY(-2px);
 }
@@ -476,7 +476,7 @@ body {
 
 .spec {
     background: rgba(102, 126, 234, 0.1);
-    color: #667eea;
+    color: #000000;
     padding: 0.2rem 0.6rem;
     border-radius: 12px;
     font-size: 0.8rem;
@@ -495,7 +495,7 @@ body {
 }
 
 .stars i {
-    color: #f39c12;
+    color: #0e0d0c;
     font-size: 0.9rem;
 }
 
@@ -525,14 +525,14 @@ body {
     height: 35px;
     border: none;
     background: rgba(102, 126, 234, 0.1);
-    color: #667eea;
+    color: #0c0b0b;
     cursor: pointer;
     font-weight: bold;
     transition: all 0.3s ease;
 }
 
 .qty-btn:hover {
-    background: #667eea;
+    background: #000000;
     color: white;
 }
 
@@ -560,7 +560,7 @@ body {
 .current-price {
     font-size: 1.3rem;
     font-weight: bold;
-    color: #27ae60;
+    color: #000000;
 }
 
 .original-price {
@@ -659,7 +659,7 @@ body {
 }
 
 .rec-price {
-    color: #27ae60;
+    color: #030303;
     font-weight: bold;
     font-size: 0.9rem;
 }
@@ -668,7 +668,7 @@ body {
     width: 30px;
     height: 30px;
     border: none;
-    background: #667eea;
+    background: #000000;
     color: white;
     border-radius: 50%;
     cursor: pointer;
@@ -701,7 +701,7 @@ body {
 }
 
 .summary-card h3 {
-    color: #667eea;
+    color: black;
     font-size: 1.4rem;
     margin-bottom: 1.5rem;
     display: flex;
@@ -722,7 +722,7 @@ body {
 }
 
 .free-shipping {
-    color: #27ae60;
+    color: #000000;
     font-weight: bold;
 }
 
@@ -740,11 +740,11 @@ body {
 .total-row {
     font-size: 1.2rem;
     font-weight: bold;
-    color: #2c3e50;
+    color: #000000;
 }
 
 .total-amount {
-    color: #27ae60;
+    color: #000000;
     font-size: 1.4rem;
 }
 
@@ -791,7 +791,7 @@ body {
 .checkout-btn {
     width: 100%;
     padding: 1.2rem;
-    background: linear-gradient(45deg, #27ae60, #2ecc71);
+    background: black;
     color: white;
     border: none;
     border-radius: 25px;
@@ -804,12 +804,12 @@ body {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    box-shadow: 0 8px 25px rgba(46, 204, 113, 0.4);
+    box-shadow: 0 8px 25px rgba(15, 15, 15, 0.4);
 }
 
 .checkout-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 35px rgba(46, 204, 113, 0.6);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
 }
 
 /* Payment Methods */
@@ -856,7 +856,7 @@ body {
 }
 
 .security-item i {
-    color: #27ae60;
+    color: #000000;
     font-size: 1.1rem;
 }
 
@@ -915,7 +915,7 @@ body {
     width: 40px;
     height: 40px;
     background: rgba(102, 126, 234, 0.1);
-    color: #667eea; /* Changed to theme color */
+    color: #ffffff; /* Changed to theme color */
     text-decoration: none;
     border-radius: 50%;
     transition: all 0.3s ease;
@@ -967,7 +967,7 @@ body {
 .newsletter-input:focus {
     outline: none;
     background: #ffffff; /* Keep white */
-    border-color: #667eea;
+    border-color: #000000;
 }
 
 .newsletter-btn {
@@ -1017,7 +1017,7 @@ body {
     position: fixed;
     bottom: 30px;
     right: 30px;
-    background: linear-gradient(45deg, #27ae60, #2ecc71);
+    background: black;
     color: white;
     padding: 1rem 1.5rem;
     border-radius: 25px;

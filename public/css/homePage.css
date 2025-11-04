@@ -619,7 +619,7 @@ body {
     position: absolute;
     top: 16px;
     left: 16px;
-    background: linear-gradient(135deg, #ef4444, #dc2626);
+    background: linear-gradient(135deg, #141313, #221b1b);
     color: white;
     padding: 8px 16px;
     border-radius: 20px;
@@ -662,7 +662,7 @@ body {
 }
 
 .stock-badge.in-stock {
-    background: rgba(34, 197, 94, 0.9);
+    background: rgba(0, 0, 0, 0.9);
     color: white;
 }
 

@@ -81,7 +81,7 @@ body {
     position: absolute;
     top: -8px;
     right: -8px;
-    background-color: #dc3545;
+    background-color: #020202;
     color: white;
     border-radius: 50%;
     width: 18px;
@@ -143,7 +143,7 @@ body {
 }
 
 .product-price {
-    color: #007bff;
+    color: #000000;
     font-weight: 600;
 }
 
@@ -172,7 +172,7 @@ body {
 
 .coupon-summary-section .section-title {
     font-size: 1.1rem;
-    color: #007bff;
+    color: #000000;
     margin-bottom: 1rem;
 }
 
@@ -204,13 +204,13 @@ body {
 
 .coupon-input:focus {
     outline: none;
-    border-color: #007bff;
+    border-color: #000000;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
 .apply-coupon-btn {
     padding: 0.75rem 1.5rem;
-    background: linear-gradient(135deg, #007bff, #0056b3);
+    background: black;
     color: white;
     border: none;
     border-radius: 6px;
@@ -221,16 +221,16 @@ body {
 }
 
 .apply-coupon-btn:hover {
-    background: linear-gradient(135deg, #0056b3, #004494);
+    background: black;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    box-shadow: 0 4px 12px black;
 }
 
 .view-coupons-btn {
     padding: 0.6rem 1rem;
     background: transparent;
-    color: #007bff;
-    border: 2px solid #007bff;
+    color: #000000;
+    border: 2px solid #000000;
     border-radius: 6px;
     font-weight: 500;
     cursor: pointer;
@@ -276,7 +276,7 @@ body {
     border-radius: 50%;
     display: block;
     stroke-width: 2;
-    stroke: #28a745;
+    stroke: #000000;
     stroke-miterlimit: 10;
     margin: 0 auto 1rem;
     position: relative;
@@ -334,7 +334,7 @@ body {
 
 .icon-line {
     height: 5px;
-    background-color: #28a745;
+    background-color: #000000;
     display: block;
     border-radius: 2px;
     position: absolute;
@@ -440,7 +440,7 @@ body {
 }
 
 .success-text {
-    color: #155724;
+    color: #000000;
     margin-top: 1rem;
 }
 
@@ -448,12 +448,12 @@ body {
     font-size: 1.4rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
-    color: #155724;
+    color: #000000;
 }
 
 .success-text p {
     font-size: 1rem;
-    color: #28a745;
+    color: #030303;
     font-weight: 600;
     margin: 0;
 }
@@ -502,8 +502,8 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 1rem;
-    background: linear-gradient(135deg, #d4edda, #c3e6cb);
-    border: 2px solid #28a745;
+    background: rgb(0, 0, 0);
+    border: 2px solid black;
     border-radius: 8px;
     animation: slideDown 0.3s ease;
 }
@@ -528,20 +528,20 @@ body {
 .coupon-code-display {
     font-weight: 700;
     font-size: 1rem;
-    color: #155724;
+    color: #fffafa;
     letter-spacing: 1px;
 }
 
 .coupon-discount-display {
     font-size: 0.9rem;
-    color: #28a745;
+    color: #ffffff;
     font-weight: 600;
 }
 
 .remove-coupon-btn {
     padding: 0.5rem 1rem;
-    background: #dc3545;
-    color: white;
+    background: #ffffff;
+    color: rgb(0, 0, 0);
     border: none;
     border-radius: 6px;
     font-size: 0.85rem;
@@ -666,7 +666,7 @@ body {
 }
 
 .coupon-card.eligible {
-    border-color: #28a745;
+    border-color: #060706;
     background: linear-gradient(135deg, #f8fff9, #fff);
 }
 
@@ -681,7 +681,7 @@ body {
 }
 
 .coupon-card:hover.eligible {
-    border-color: #007bff;
+    border-color: #000000;
     box-shadow: 0 8px 25px rgba(0, 123, 255, 0.15);
     transform: translateY(-2px);
 }
@@ -696,7 +696,7 @@ body {
 .coupon-code {
     font-size: 1.1rem;
     font-weight: 700;
-    color: #007bff;
+    color: #000000;
     letter-spacing: 1px;
     background: #e3f2fd;
     padding: 0.25rem 0.75rem;
@@ -763,17 +763,17 @@ body {
 }
 
 .address-card:hover {
-    border-color: #007bff;
+    border-color: #000000;
 }
 
 .address-card:first-child {
-    border-color: #007bff;
+    border-color: #000000;
     background-color: #f8f9ff;
 }
 
 .address-label {
     font-weight: 600;
-    color: #007bff;
+    color: #000000;
     margin-bottom: 0.5rem;
 }
 
@@ -783,7 +783,7 @@ body {
 }
 
 .add-address-btn {
-    background: #007bff;
+    background: #000000;
     color: white;
     border: none;
     border-radius: 6px;
@@ -794,7 +794,7 @@ body {
 }
 
 .add-address-btn:hover {
-    background: #178f35;
+    background: #3a7bdd;
 }
 
 /* Payment Option Styles */
@@ -807,12 +807,12 @@ body {
 }
 
 .payment-option:hover {
-    border-color: #007bff;
+    border-color: #000000;
 }
 
 .online-payment {
-    border-color: #6c63ff;
-    background-color: #6c63ff;
+    border-color: #000000;
+    background-color: #000000;
     color: white;
 }
 
@@ -839,7 +839,7 @@ body {
 
 .payment-note {
     font-size: 0.85rem;
-    color: #01a70f;
+    color: #000000;
 }
 
 .payment-balance {
@@ -940,13 +940,13 @@ body {
 }
 
 .free {
-    color: #28a745;
+    color: #000000;
     font-weight: 600;
 }
 
 /* Coupon Discount Row Styles */
 .coupon-discount-row {
-    color: #28a745;
+    color: #020202;
     font-weight: 600;
     background: linear-gradient(90deg, transparent, #f8fff9, transparent);
     padding: 0.5rem;
@@ -956,14 +956,14 @@ body {
 }
 
 .discount {
-    color: #28a745;
+    color: #000000;
     font-weight: 700;
 }
 
 .final-total {
     font-size: 1.1rem;
     font-weight: 700;
-    color: #05a374;
+    color: #000000;
     border-top: 1px solid #e9ecef;
     padding-top: 0.75rem;
     margin-top: 0.75rem;
@@ -971,7 +971,7 @@ body {
 
 .place-order-btn {
     width: 100%;
-    background:#007bff;
+    background:#060707;
     color: white;
     border: none;
     border-radius: 8px;
@@ -992,7 +992,7 @@ body {
 
 /* Additional Styles for Better UX */
 .selected-address {
-    border: 2px solid #007bff !important;
+    border: 2px solid #000000 !important;
     background-color: #f8f9fa !important;
 }
 
@@ -1007,12 +1007,12 @@ body {
 }
 
 .address-card:hover {
-    border-color: #007bff;
+    border-color: #000000;
     box-shadow: 0 2px 8px rgba(0,123,255,0.1);
 }
 
 .default-badge {
-    color: #007bff;
+    color: #000000;
     font-weight: bold;
 }
 
@@ -1027,9 +1027,9 @@ body {
 }
 
 .selected-payment {
-    border: 2px solid #007bff !important;
+    border: 2px solid #000000 !important;
     background-color: #f8f9fa !important;
-    box-shadow: 0 2px 8px rgba(0,123,255,0.1);
+    box-shadow: 0 2px 8px black;
 }
 
 .payment-option {
@@ -1042,7 +1042,7 @@ body {
 }
 
 .payment-option:hover:not(.disabled-payment) {
-    border-color: #007bff;
+    border-color: black;
     box-shadow: 0 2px 8px rgba(0,123,255,0.1);
 }
 
@@ -1185,7 +1185,7 @@ body {
 .address-form textarea:focus,
 .address-form select:focus {
     outline: none;
-    border-color: #6366f1;
+    border-color: #000000;
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
@@ -1256,9 +1256,9 @@ body {
 }
 
 .address-btn.active {
-    background: #6366f1;
+    background: #000000;
     color: white;
-    border-color: #6366f1;
+    border-color: #000000;
 }
 
 .modal-actions {

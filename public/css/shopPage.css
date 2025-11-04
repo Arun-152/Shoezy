@@ -734,7 +734,7 @@ body {
     position: absolute;
     top: 16px;
     left: 16px;
-    background: linear-gradient(135deg, #ef4444, #dc2626);
+    background: linear-gradient(135deg, #000000, #0a0909);
     color: white;
     padding: 8px 16px;
     border-radius: 20px;
@@ -777,7 +777,7 @@ body {
 }
 
 .stock-badge.in-stock {
-    background: rgba(34, 197, 94, 0.9);
+    background: rgba(0, 0, 0, 0.9);
     color: white;
 }
 
@@ -966,7 +966,7 @@ body {
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: black;
 }
 
 .feature-card:hover {
@@ -978,7 +978,7 @@ body {
     width: 80px;
     height: 80px;
     margin: 0 auto 2rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: black;
     border-radius: 50%;
     display: flex;
     align-items: center;
