@@ -349,31 +349,6 @@ The project implements several security practices:
 
 ---
 
-## 📸 Screenshots
-
-Add screenshots of your application here.
-
-Example:
-
-```text
-screenshots/
-├── home.png
-├── login.png
-├── shop.png
-├── product-details.png
-├── cart.png
-├── checkout.png
-├── orders.png
-└── admin-dashboard.png
-```
-
-You can then add them to the README:
-
-```markdown
-![Home Page](screenshots/home.png)
-```
-
----
 
 ## 🎯 Learning Outcomes
 
