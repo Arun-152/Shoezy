@@ -1,7 +1,7 @@
 const express = require("express")
 const router = express.Router()
 const {userAuth} = require("../../middlewares/auth")
-const showUserController = require("../../controllers/user/showUserController") 
+const showUserController = require("../../controllers/user/showuserController")
 const { profileUpload } = require("../../helpers/multerConfig")
 const navbarCount = require('../../middlewares/navbarCount')
 
