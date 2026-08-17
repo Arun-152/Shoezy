@@ -398,8 +398,3 @@ This project was developed as part of my journey into full-stack web development
 
 ---
 
-## ⭐ Support
-
-If you find this project useful or interesting, consider giving the repository a ⭐ on GitHub.
-
-**Shoezy – Step into Style. 👟**
