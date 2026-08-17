@@ -32,6 +32,7 @@ const UserSchema = new Schema(
             type: String,
             required: false,
             unique: true,
+            sparse: true,
             trim: true,
             default: null,
         },
